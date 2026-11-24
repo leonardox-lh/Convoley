@@ -6,7 +6,7 @@ Estado al iniciar: rama `feat/sprint-2-mvp-pilot` creada desde `feat/HU-08-manua
 
 Recordatorio (2026-11-24): sin Mercado Pago ni pago automático. El pago es manual o por voucher que revisa el organizador.
 
-## HU-48 · Cuenta del jugador con Google (3 pts)
+## HU-48 · Cuenta del jugador con Google (3 pts) ✅
 Depende de: HU-01 (Auth.js con Google), HU-06
 - [x] Migración: `User.firstName` y `User.lastName` (Google los manda por separado en el perfil)
 - [x] `identity`: `getPlayerProfile` y `savePlayerPhone` (el celular de la cuenta no cambia una vez guardado; si otra cuenta ya lo tiene, se ignora)
