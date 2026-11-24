@@ -15,6 +15,7 @@ import {
   assertEditable,
   eventSharePath,
   newEvent,
+  remainingSpots,
   statusAfterCapacityChange,
   type EventStatus,
   type NewEventProps,
@@ -173,4 +174,19 @@ describe("HU-05: que se puede editar y cancelar", () => {
       expect(() => assertCancellable(status)).not.toThrow();
     },
   );
+});
+
+describe("HU-03: remainingSpots", () => {
+  it("HU-03: resta los confirmados de la capacidad", () => {
+    expect(remainingSpots(18, 5)).toBe(13);
+    expect(remainingSpots(18, 0)).toBe(18);
+  });
+
+  it("HU-03: con todos los cupos tomados quedan 0", () => {
+    expect(remainingSpots(18, 18)).toBe(0);
+  });
+
+  it("HU-03: nunca es negativo si hay más confirmados que la capacidad", () => {
+    expect(remainingSpots(10, 14)).toBe(0);
+  });
 });
