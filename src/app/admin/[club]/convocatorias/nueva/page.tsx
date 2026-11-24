@@ -39,6 +39,13 @@ async function NewEventContent({ params }: { params: Params }) {
       >
         Comunidades
       </Link>
+      {" · "}
+      <Link
+        href={`/admin/${club.slug}/pagos`}
+        className="text-sm text-zinc-500 underline-offset-4 hover:underline"
+      >
+        Cobros
+      </Link>
       <h1 className="mb-6 text-2xl font-semibold tracking-tight">Nueva convocatoria</h1>
       <CreateEventForm
         clubSlug={club.slug}

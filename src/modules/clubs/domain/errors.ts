@@ -93,3 +93,17 @@ export class LastCommunityError extends Error {
     this.name = "LastCommunityError";
   }
 }
+
+export class InvalidPaymentPhoneError extends Error {
+  constructor(readonly raw: string) {
+    super(`Invalid Yape/Plin number: "${raw}"`);
+    this.name = "InvalidPaymentPhoneError";
+  }
+}
+
+export class InvalidPaymentHolderError extends Error {
+  constructor() {
+    super("The account holder name is required (up to 60 characters)");
+    this.name = "InvalidPaymentHolderError";
+  }
+}

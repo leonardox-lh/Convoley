@@ -1,0 +1,69 @@
+"use server";
+
+import { redirect } from "next/navigation";
+import { z } from "zod";
+import {
+  InvalidLogoTypeError,
+  InvalidPaymentHolderError,
+  LogoTooLargeError,
+  updatePaymentSettings,
+} from "@/modules/clubs";
+import { InvalidPhoneNumberError, PhoneNumber } from "@/modules/registrations";
+import { logoFromForm } from "@/app/club/club-form-schema";
+import { PHONE_FORMAT_MESSAGE } from "@/app/player-schema";
+import { NOT_ALLOWED_MESSAGE } from "../convocatorias/event-form-schema";
+import { requireOrganizer } from "../require-organizer";
+
+export type PaymentSettingsState = { status: "idle" } | { status: "error"; message: string };
+
+const settingsSchema = z.object({
+  clubSlug: z.string().min(1),
+  paymentPhone: z.string().trim().min(1, "Escribe tu número de Yape o Plin."),
+  paymentHolderName: z
+    .string()
+    .trim()
+    .min(1, "Escribe el nombre del titular.")
+    .max(60, "Ese nombre es muy largo."),
+});
+
+const ERROR_MESSAGES: [new (...args: never[]) => Error, string][] = [
+  [InvalidPhoneNumberError, PHONE_FORMAT_MESSAGE],
+  [InvalidPaymentHolderError, "Escribe el nombre del titular."],
+  [InvalidLogoTypeError, "El QR debe ser una imagen JPG, PNG o WebP."],
+  [LogoTooLargeError, "La imagen del QR debe pesar hasta 2 MB."],
+];
+
+export async function updatePaymentSettingsAction(
+  _previous: PaymentSettingsState,
+  formData: FormData,
+): Promise<PaymentSettingsState> {
+  const parsed = settingsSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { status: "error", message: parsed.error.issues[0].message };
+  const { clubSlug, paymentHolderName } = parsed.data;
+  // Where the money goes is the admin's call, not a helper's.
+  if ((await requireOrganizer(clubSlug))?.role !== "admin") {
+    return { status: "error", message: NOT_ALLOWED_MESSAGE };
+  }
+
+  try {
+    await updatePaymentSettings({
+      clubSlug,
+      paymentPhone: PhoneNumber.parse(parsed.data.paymentPhone).value,
+      paymentHolderName,
+      // Same field handling as the logo: an empty file input keeps the current QR.
+      qr: await logoFromForm(renameFile(formData, "qr", "logo")),
+    });
+  } catch (error) {
+    const known = ERROR_MESSAGES.find(([type]) => error instanceof type);
+    if (known) return { status: "error", message: known[1] };
+    throw error;
+  }
+  redirect(`/admin/${clubSlug}/pagos?guardado=1`);
+}
+
+function renameFile(formData: FormData, from: string, to: string) {
+  const copy = new FormData();
+  const file = formData.get(from);
+  if (file) copy.set(to, file);
+  return copy;
+}

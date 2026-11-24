@@ -5,8 +5,8 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   experimental: {
-    // Club logos go up to 2 MB through a server action (default limit: 1 MB).
-    serverActions: { bodySizeLimit: "3mb" },
+    // Logos (2 MB) and payment vouchers (5 MB, HU-14) go through server actions (default: 1 MB).
+    serverActions: { bodySizeLimit: "6mb" },
   },
   turbopack: {
     rules: {

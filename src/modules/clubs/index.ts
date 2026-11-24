@@ -6,8 +6,10 @@ import {
   makeRenameCommunity,
 } from "./application/communities";
 import { makeCreateClub } from "./application/create-club";
+import { makeUpdatePaymentSettings } from "./application/update-payment-settings";
 import { makeUpdateClubProfile } from "./application/update-club-profile";
 import { prismaCommunityRepository } from "./infrastructure/prisma-community-repository";
+import { prismaPaymentSettingsRepository } from "./infrastructure/prisma-payment-settings-repository";
 import { prismaClubRepository } from "./infrastructure/prisma-club-repository";
 import { s3LogoStorage } from "./infrastructure/s3-logo-storage";
 
@@ -19,6 +21,8 @@ export {
   CommunityNameTakenError,
   CommunityNotFoundError,
   InvalidCommunityNameError,
+  InvalidPaymentHolderError,
+  InvalidPaymentPhoneError,
   LastCommunityError,
   InvalidClubSlugError,
   InvalidColorError,
@@ -48,6 +52,13 @@ export const createCommunity = makeCreateCommunity({ communities });
 export const renameCommunity = makeRenameCommunity({ communities });
 export const deleteCommunity = makeDeleteCommunity({ communities });
 export { COMMUNITY_NAME_MAX_LENGTH } from "./domain/community";
+const paymentSettings = prismaPaymentSettingsRepository(db);
+export const getPaymentSettings = (clubSlug: string) => paymentSettings.find(clubSlug);
+export const updatePaymentSettings = makeUpdatePaymentSettings({
+  settings: paymentSettings,
+  images: logos,
+});
+export type { ClubPaymentSettings } from "./application/ports";
 export const readClubLogo = (key: string) => logos.read(key);
 
 /** Public path that serves a stored logo (see src/app/logos/[key]/route.ts). */

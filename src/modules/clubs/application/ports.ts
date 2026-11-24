@@ -44,3 +44,15 @@ export interface CommunityRepository {
   /** Throws CommunityInUseError if events belong to it. */
   delete(id: string): Promise<void>;
 }
+
+export interface ClubPaymentSettings {
+  paymentPhone: string | null;
+  paymentHolderName: string | null;
+  paymentQrKey: string | null;
+}
+
+export interface PaymentSettingsRepository {
+  /** Null when the club doesn't exist. */
+  find(clubSlug: string): Promise<ClubPaymentSettings | null>;
+  update(clubSlug: string, changes: Partial<ClubPaymentSettings>): Promise<void>;
+}

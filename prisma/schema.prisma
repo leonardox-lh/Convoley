@@ -156,6 +156,10 @@ model Club {
   secondaryColor String?
   instagramUrl   String?
   tiktokUrl      String?
+  // Where players pay the organizer directly (HU-13): Yape/Plin number, holder and QR image.
+  paymentPhone      String?
+  paymentHolderName String?
+  paymentQrKey      String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 

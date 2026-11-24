@@ -6,6 +6,7 @@ import { fieldClass, FormMessage, submitKeepingValues, TextField } from "@/compo
 import { Button } from "@/components/ui/button";
 import type { PlayerProfile } from "@/modules/identity";
 import { LEVEL_LABELS, POSITION_LABELS } from "../../../player-labels";
+import { PaymentInstructions, type PaymentInfo } from "./payment-instructions";
 import { continueWithGoogleAction, registerAction, type RegisterState } from "./actions";
 
 export function RegistrationForm({
@@ -14,7 +15,9 @@ export function RegistrationForm({
   profile,
   googleEnabled,
   waitlistOnly,
+  paymentInfo,
 }: {
+  paymentInfo: PaymentInfo;
   club: string;
   eventId: string;
   /** The event is full: signing up joins the waitlist (HU-12). */
@@ -68,7 +71,7 @@ export function RegistrationForm({
             Pendiente de pago
           </span>
         </p>
-        <p className="text-sm text-zinc-500">Paga al organizador para asegurar tu cupo.</p>
+        <PaymentInstructions info={paymentInfo} />
         {profile && (
           <Link href="/mis-inscripciones" className="text-sm underline underline-offset-4">
             Ver mis inscripciones

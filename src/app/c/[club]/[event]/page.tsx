@@ -3,10 +3,12 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { formatInLima } from "@/lib/lima-time";
 import { formatSoles } from "@/lib/money";
+import { clubLogoPath, getPaymentSettings } from "@/modules/clubs";
 import { type CancellationOutcome, type EventStatus } from "@/modules/events";
 import { currentUserId, getPlayerProfile, isGoogleSignInEnabled } from "@/modules/identity";
 import { acceptsWaitlist, isOpenForRegistration } from "@/modules/registrations";
 import { loadEventPreview, seatsText, shareDescription } from "./event-preview";
+import type { PaymentInfo } from "./payment-instructions";
 import { RegistrationForm } from "./registration-form";
 
 const STATUS_NOTICES: Partial<Record<EventStatus, string>> = {
@@ -112,6 +114,7 @@ async function PublicEventContent({ params }: { params: Params }) {
       {(isOpenForRegistration(event, now) || waitlistOnly) && (
         <RegistrationForm
           waitlistOnly={waitlistOnly}
+          paymentInfo={await loadPaymentInfo(club, event.priceCents)}
           club={club}
           eventId={event.id}
           profile={profile}
@@ -120,4 +123,14 @@ async function PublicEventContent({ params }: { params: Params }) {
       )}
     </>
   );
+}
+
+async function loadPaymentInfo(clubSlug: string, priceCents: number): Promise<PaymentInfo> {
+  const settings = await getPaymentSettings(clubSlug);
+  return {
+    priceText: formatSoles(priceCents),
+    phone: settings?.paymentPhone?.replace(/^\+51/, "") ?? null,
+    holderName: settings?.paymentHolderName ?? null,
+    qrUrl: settings?.paymentQrKey ? clubLogoPath(settings.paymentQrKey) : null,
+  };
 }
