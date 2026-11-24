@@ -57,7 +57,15 @@ Depende de: HU-02 (almacenamiento de imágenes)
 - [x] El jugador ve monto, número, titular y QR al inscribirse (`PaymentInstructions`)
 - [x] Tests: unitarios de validación y del caso de uso (QR nuevo, conservar QR, formato y peso, club inexistente)
 
-## HU-14 · Subir voucher (3 pts)
+## HU-14 · Subir voucher (3 pts) ✅
+Depende de: HU-13, HU-06
+- [x] `payments`: validación de la captura (JPG/PNG/WebP hasta 5 MB) y del código de Yape (opcional, solo números), almacenamiento privado en el bucket con prefijo `vouchers/`, `recordVoucherPayment` (método `voucher`, estado `in_review`)
+- [x] `registrations`: `submitVoucher` (solo con cupo y pago pendiente; monto y club salen de la convocatoria bloqueada) y la inscripción pasa a `in_review`
+- [x] Página privada `/inscripcion/[id]`: estado, puesto en la espera, cómo pagar y formulario (`accept="image/*"` abre la galería del celular)
+- [x] Confirmación de inscripción con botón "Ya pagué: subir mi captura" y el link privado; "Mis inscripciones" enlaza a cada inscripción
+- [x] Límite de server actions a 6 MB (`next.config.ts`)
+- [x] Tests: unitarios de imagen y código, caso de uso con fakes (estados no permitidos no suben archivo), integración con Postgres + S3Mock
+
 ## HU-15 · Aprobar o rechazar vouchers (2 pts)
 ## HU-16 · Imagen de la lista (5 pts)
 ## HU-17 · Copiar la lista como texto (1 pt)
@@ -72,4 +80,7 @@ Depende de: HU-02 (almacenamiento de imágenes)
 - **HU-12**: quien entra a la espera no paga hasta que pasa a la lista: el organizador no puede marcar "pagado" a alguien en espera. Cuando sube un jugador de la espera no se le avisa (no hay correos ni WhatsApp todavía): lo ve en "Mis inscripciones" o el organizador le escribe.
 - **HU-12**: un invitado ve su puesto solo al inscribirse. Desde HU-14 tiene un link propio de su inscripción donde puede verlo de nuevo.
 - **HU-13**: un solo número para Yape y Plin por club. El QR es público (el jugador lo tiene que ver para escanearlo): se guarda junto a los logos con el mismo límite de 2 MB y formatos JPG/PNG/WebP. El número y el QR se ven al inscribirse y en la página de la inscripción, no en la página pública de la convocatoria.
+- **HU-14**: el invitado no tiene cuenta, así que su inscripción tiene un link privado `/inscripcion/<id>` (el id es aleatorio y no se publica). Se muestra al inscribirse con un aviso para guardarlo. No se pide verificación (regla del producto).
+- **HU-14**: se acepta JPG, PNG o WebP de hasta 5 MB. Las fotos HEIC de iPhone normalmente llegan como JPG desde Safari; si alguna llega como HEIC se rechaza con un mensaje claro. El código de seguridad acepta de 3 a 6 dígitos (Yape usa 3).
+- **HU-14**: si el voucher se sube y luego falla el registro (carrera rara), el archivo queda huérfano en el bucket; se acepta por ahora.
 - **HU-48**: un jugador cuyo correo de Google ya tiene cuenta de organizador con contraseña no puede entrar con Google (se mantiene la regla de HU-01 de no vincular cuentas automáticamente).
