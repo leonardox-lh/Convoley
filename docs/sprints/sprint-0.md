@@ -21,12 +21,12 @@ Depende de: nada
 
 ## HT-02 · Despliegue automático (3 pts)
 Depende de: HT-01
-- [ ] Crear el proyecto en Railway con los servicios app y Postgres, y los entornos `dev` y `production`
-- [ ] Conectar el repo: push a `main` → producción, rama `dev` → entorno dev
-- [ ] Separar las variables de entorno por entorno (`DATABASE_URL`, `AUTH_SECRET`, etc.)
-- [ ] Ejecutar `prisma migrate deploy` en cada despliegue (paso de pre-deploy)
-- [ ] Dominio temporal de Railway con HTTPS (o convoley.pe si ya está comprado)
-- [ ] Verificar: un push a `main` despliega y la home responde por HTTPS
+- [x] Crear el proyecto en Railway con los servicios app y Postgres (un solo entorno `production` para el MVP; dev queda para después)
+- [x] Conectar el repo: push a `main` → producción
+- [x] Separar las variables de entorno: `.env.local` en local; `DATABASE_URL` y `AUTH_SECRET` en Railway
+- [x] Ejecutar `prisma migrate deploy` en cada despliegue (paso de pre-deploy)
+- [x] Dominio temporal de Railway con HTTPS: https://app-production-2fba69d8.up.railway.app
+- [x] Verificar: un push a `main` despliega y la home responde por HTTPS
 
 ## HT-03 · Modelo de datos inicial (5 pts)
 Depende de: HT-01

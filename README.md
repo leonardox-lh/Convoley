@@ -20,6 +20,15 @@ npm run dev        # levanta Postgres (docker compose, puerto 5433) y Next en ht
 
 Otros comandos: `npm run lint` · `npm run format` · `npm run typecheck` · `npm test` · `npm run test:e2e`.
 
+## Despliegue (Railway)
+
+Proyecto `convoley` en Railway, entorno `production`, servicios `app` y `Postgres`. Cada push a `main` despliega solo a https://app-production-2fba69d8.up.railway.app.
+
+- Variables separadas: en local van en `.env.local` (Postgres de docker compose); en Railway (`DATABASE_URL`, `AUTH_SECRET`) se configuran en el servicio, nunca en el repo.
+- Por ahora (MVP) hay un solo entorno en la nube. Si luego hace falta uno de pruebas, se duplica `production` en Railway y se conecta a otra rama.
+- Antes de cada despliegue corre `npx prisma migrate deploy` (pre-deploy en la configuración del servicio).
+- Probar la home desplegada: `PLAYWRIGHT_BASE_URL=https://… npm run test:e2e`.
+
 ## Desarrollo con Claude Code
 
 - `/sprint 1` · prepara el Sprint Backlog del sprint 1

@@ -22,6 +22,7 @@ Como desarrollador, quiero desplegar automáticamente a la nube (entornos dev y 
 - Un push a main despliega a producción
 - Variables de entorno separadas por entorno
 - Dominio (convoley.pe o temporal) con HTTPS
+- Decisión (2026-11-24): para el MVP hay un solo entorno en la nube (`production`, desde `main`); "separadas" = local (`.env.local`) frente a Railway. El entorno dev se agrega cuando haga falta.
 
 ### HT-03 · Fundamentos técnicos · Must · 5 pts
 Como desarrollador, quiero el modelo de datos inicial (clubes, comunidades, convocatorias, inscripciones, pagos, productos, pedidos), para soportar el MVP.
