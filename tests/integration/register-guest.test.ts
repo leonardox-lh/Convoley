@@ -4,7 +4,7 @@ import { config } from "dotenv";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { PrismaClient } from "@/generated/prisma/client";
 import { makeRegisterGuest } from "@/modules/registrations/application/register-guest";
-import { DuplicateRegistrationError, EventFullError } from "@/modules/registrations/domain/errors";
+import { DuplicateRegistrationError } from "@/modules/registrations/domain/errors";
 
 config({ path: ".env.local", quiet: true });
 
@@ -124,22 +124,22 @@ describe("HU-06 (Postgres)", () => {
     );
   });
 
-  it("HU-06: con cupo 1 y dos inscripciones simultáneas, solo una entra y el evento queda full", async () => {
+  it("HU-06: con cupo 1 y dos inscripciones simultáneas, solo una toma el cupo y el evento queda full", async () => {
     const event = await createEvent(1);
 
-    const results = await Promise.allSettled([
+    const results = await Promise.all([
       registerGuest(guest(event.id, "911111111")),
       registerGuest(guest(event.id, "922222222")),
     ]);
 
-    const fulfilled = results.filter((result) => result.status === "fulfilled");
-    const rejected = results.filter(
-      (result): result is PromiseRejectedResult => result.status === "rejected",
-    );
-    expect(fulfilled).toHaveLength(1);
-    expect(rejected).toHaveLength(1);
-    expect(rejected[0]!.reason).toBeInstanceOf(EventFullError);
-    expect(await db.registration.count({ where: { eventId: event.id } })).toBe(1);
+    // Since HU-12 the second one isn't rejected: it goes to the waitlist.
+    expect(results.map((result) => result.status).sort()).toEqual([
+      "pending_payment",
+      "waitlisted",
+    ]);
+    expect(
+      await db.registration.count({ where: { eventId: event.id, status: "pending_payment" } }),
+    ).toBe(1);
     expect((await db.event.findUniqueOrThrow({ where: { id: event.id } })).status).toBe("full");
   });
 });

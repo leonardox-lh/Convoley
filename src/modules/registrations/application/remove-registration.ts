@@ -1,4 +1,5 @@
 import { EventNotOpenError, RegistrationNotFoundError } from "../domain/errors";
+import { holdsSeat } from "../domain/registration";
 import type { EventSeats, RegistrationRepository, TransactionRunner } from "./ports";
 
 export interface RemoveRegistrationInput {
@@ -7,7 +8,8 @@ export interface RemoveRegistrationInput {
 }
 
 /**
- * Cancels a registration, which frees its spot, and reopens the event if it was full.
+ * Cancels a registration. A freed seat goes to the first player in the waitlist (HU-12);
+ * with nobody waiting, a full event reopens.
  * A payment it already had stays as history: the organizer returns the money outside Convoley.
  */
 export function makeRemoveRegistration(deps: {
@@ -25,8 +27,12 @@ export function makeRemoveRegistration(deps: {
       if (!registration) throw new RegistrationNotFoundError(input.registrationId);
       if (registration.status === "cancelled") return;
 
+      const freesSeat = holdsSeat(registration.status);
       await deps.registrations.setStatus(registration.id, "cancelled", tx);
-      if (event.status === "full") await deps.events.reopen(event.id, tx);
+      if (!freesSeat) return;
+
+      const promoted = await deps.registrations.promoteWaitlisted(event.id, 1, tx);
+      if (promoted === 0 && event.status === "full") await deps.events.reopen(event.id, tx);
     });
   };
 }

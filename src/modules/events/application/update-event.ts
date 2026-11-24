@@ -35,8 +35,12 @@ export function makeUpdateEvent(deps: {
       if (!current) throw new EventNotFoundError(eventId);
       assertEditable(current.status);
 
-      const confirmed = await deps.registrations.countConfirmed(eventId, tx);
+      let confirmed = await deps.registrations.countConfirmed(eventId, tx);
       assertCapacityCoversConfirmed(details.capacity, confirmed);
+
+      // New seats go to the waitlist before anyone else can take them (HU-12).
+      const freeSeats = details.capacity - confirmed;
+      confirmed += await deps.registrations.promoteWaitlisted(eventId, freeSeats, tx);
 
       const baseStatus = current.status === "draft" && publish ? "published" : current.status;
       const status = statusAfterCapacityChange(baseStatus, details.capacity, confirmed);

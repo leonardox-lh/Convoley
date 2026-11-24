@@ -29,6 +29,8 @@ enum RegistrationStatus {
   pending_payment
   in_review
   paid
+  // No seat yet (HU-12): first in line moves to pending_payment when a seat frees up.
+  waitlisted
   cancelled
 }
 

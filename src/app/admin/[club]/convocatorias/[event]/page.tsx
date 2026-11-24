@@ -22,11 +22,12 @@ const STATUS_LABELS: Record<RegistrationStatus, string> = {
   pending_payment: "Pendiente",
   in_review: "En revisión",
   paid: "Pagado",
+  waitlisted: "En espera",
   cancelled: "Cancelado",
 };
 
 const statusFilterSchema = z
-  .enum(["pending_payment", "in_review", "paid", "cancelled"])
+  .enum(["pending_payment", "in_review", "paid", "waitlisted", "cancelled"])
   .optional()
   .catch(undefined);
 
@@ -55,7 +56,13 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
   if (!event) notFound();
 
   const status = statusFilterSchema.parse((await searchParams).estado);
-  const registrations = await listEventRegistrations({ eventId: event.id, status });
+  const listed = await listEventRegistrations({ eventId: event.id, status });
+  // Seated players first, then the waitlist in arrival order, numbered separately (HU-12).
+  const registrations = [
+    ...listed.filter((registration) => registration.status !== "waitlisted"),
+    ...listed.filter((registration) => registration.status === "waitlisted"),
+  ];
+  const waitlistStart = registrations.findIndex((r) => r.status === "waitlisted");
   const seats = seatSummary(event.capacity, event.confirmedCount);
   const basePath = `/admin/${clubSlug}/convocatorias/${event.id}`;
   const listEditable = event.status !== "cancelled";
@@ -100,7 +107,9 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
         >
           {registrations.map((registration, index) => (
             <li key={registration.id} className="flex flex-wrap items-center gap-3 py-3">
-              <span className="w-6 text-sm text-zinc-500">{index + 1}</span>
+              <span className="w-6 text-sm text-zinc-500">
+                {registration.status === "waitlisted" ? `E${index - waitlistStart + 1}` : index + 1}
+              </span>
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium">
                   {registration.firstName} {registration.lastName}
@@ -134,7 +143,9 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
                   eventId={event.id}
                   registrationId={registration.id}
                   playerName={registration.firstName}
-                  canMarkPaid={registration.status !== "paid"}
+                  canMarkPaid={
+                    registration.status === "pending_payment" || registration.status === "in_review"
+                  }
                 />
               )}
             </li>

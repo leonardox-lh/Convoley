@@ -25,7 +25,11 @@ function setup(stored: EventDetails | null, options: { markerFails?: boolean } =
         cancelled.push({ id, ...cancellation });
       },
     }),
-    registrations: { countConfirmed: async () => 0, listIds: async () => ["reg-1", "reg-2"] },
+    registrations: {
+      countConfirmed: async () => 0,
+      listIds: async () => ["reg-1", "reg-2"],
+      promoteWaitlisted: async () => 0,
+    },
     payments: {
       markForCancellation: async (marking, tx) => {
         expect(tx).toBe(FAKE_TX);

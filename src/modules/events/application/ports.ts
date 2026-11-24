@@ -58,6 +58,8 @@ export interface EventRepository {
 export interface RegistrationsReader {
   countConfirmed(eventId: string, tx?: TransactionContext): Promise<number>;
   listIds(eventId: string, tx: TransactionContext): Promise<string[]>;
+  /** Gives up to `seats` new seats to the waitlist, first come first served (HU-12). */
+  promoteWaitlisted(eventId: string, seats: number, tx: TransactionContext): Promise<number>;
 }
 
 /** Confirmed counts of many events in one read, keyed by event id (missing = 0). */

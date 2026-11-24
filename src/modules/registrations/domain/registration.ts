@@ -3,7 +3,15 @@ import { EventFullError, EventNotOpenError } from "./errors";
 /** Registrations that take a spot: everyone signed up who has not cancelled, paid or not. */
 export const SEAT_HOLDING_STATUSES = ["pending_payment", "in_review", "paid"] as const;
 
-export type RegistrationStatus = (typeof SEAT_HOLDING_STATUSES)[number] | "cancelled";
+export type RegistrationStatus =
+  (typeof SEAT_HOLDING_STATUSES)[number] | "waitlisted" | "cancelled";
+
+/** Where a new sign-up lands: a seat, or the waitlist when the event is full (HU-12). */
+export type SignUpStatus = "pending_payment" | "waitlisted";
+
+export function holdsSeat(status: RegistrationStatus): boolean {
+  return (SEAT_HOLDING_STATUSES as readonly string[]).includes(status);
+}
 
 /** What registration needs to know about an event; owned by the `events` module. */
 export interface EventSeatInfo {
@@ -27,6 +35,24 @@ export function assertSpotAvailable(event: EventSeatInfo, confirmed: number, now
   if (event.status === "full") throw new EventFullError(event.id);
   if (!isOpenForRegistration(event, now)) throw new EventNotOpenError(event.id);
   if (confirmed >= event.capacity) throw new EventFullError(event.id);
+}
+
+/**
+ * Players join a published or full event that hasn't started; when every seat is taken they
+ * go to the waitlist, in arrival order.
+ */
+export function signUpStatus(event: EventSeatInfo, confirmed: number, now: Date): SignUpStatus {
+  const accepting = event.status === "published" || event.status === "full";
+  if (!accepting || event.startsAt <= now) throw new EventNotOpenError(event.id);
+  return event.status === "full" || confirmed >= event.capacity ? "waitlisted" : "pending_payment";
+}
+
+/** Players can see a full event's form, to join its waitlist. */
+export function acceptsWaitlist(
+  event: Pick<EventSeatInfo, "status" | "startsAt">,
+  now: Date,
+): boolean {
+  return event.status === "full" && event.startsAt > now;
 }
 
 /** Taken and free seats of an event; free never goes below zero. */

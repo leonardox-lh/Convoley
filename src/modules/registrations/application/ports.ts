@@ -3,6 +3,7 @@ import type {
   PlayerLevel,
   PlayerPosition,
   RegistrationStatus,
+  SignUpStatus,
 } from "../domain/registration";
 
 declare const transactionBrand: unique symbol;
@@ -40,9 +41,23 @@ export interface RegistrationRepository {
     phone: string,
     tx: TransactionContext,
   ): Promise<{ id: string; status: RegistrationStatus } | null>;
-  create(eventId: string, player: PlayerDetails, tx: TransactionContext): Promise<{ id: string }>;
-  /** Brings back a cancelled registration as pending payment, with the new details. */
-  reactivate(id: string, player: PlayerDetails, tx: TransactionContext): Promise<void>;
+  create(
+    eventId: string,
+    player: PlayerDetails,
+    status: SignUpStatus,
+    tx: TransactionContext,
+  ): Promise<{ id: string }>;
+  /** Brings back a cancelled registration with the new details, as a fresh sign-up (new time). */
+  reactivate(
+    id: string,
+    player: PlayerDetails,
+    status: SignUpStatus,
+    tx: TransactionContext,
+  ): Promise<void>;
+  /** Moves the first `seats` waitlisted registrations, by arrival, to pending payment. */
+  promoteWaitlisted(eventId: string, seats: number, tx: TransactionContext): Promise<number>;
+  /** 1-based place in the event's waitlist, or null if the registration isn't waiting. */
+  waitlistPosition(id: string, tx: TransactionContext): Promise<number | null>;
   findInEvent(
     id: string,
     eventId: string,
@@ -84,6 +99,8 @@ export interface PlayerRegistration {
   eventId: string;
   status: RegistrationStatus;
   createdAt: Date;
+  /** Only for waitlisted registrations (HU-12). */
+  waitlistPosition: number | null;
 }
 
 /** Registrations of a Google account (HU-48). */

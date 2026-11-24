@@ -64,6 +64,7 @@ export const listPlayerRegistrations = makeListPlayerRegistrations({
 export { PhoneNumber } from "./domain/phone-number";
 export type { RegisterGuestInput } from "./application/register-guest";
 export {
+  acceptsWaitlist,
   isOpenForRegistration,
   PLAYER_LEVELS,
   PLAYER_POSITIONS,
@@ -81,6 +82,7 @@ export {
   RegistrationNotFoundError,
 } from "./domain/errors";
 export {
+  promoteWaitlisted,
   countConfirmedRegistrations,
   countConfirmedRegistrationsByEvent,
   listEventRegistrationIds,

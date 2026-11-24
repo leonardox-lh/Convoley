@@ -27,7 +27,11 @@ export function makeAddPlayerManually(deps: {
 }) {
   return async function addPlayerManually(input: AddPlayerManuallyInput) {
     return deps.transactions.run(async (tx) => {
-      const { id, event } = await registerPlayer(deps, { ...input, userId: null }, tx);
+      const { id, event } = await registerPlayer(
+        deps,
+        { ...input, userId: null, allowWaitlist: false },
+        tx,
+      );
       if (!input.markPaid) return { id, status: "pending_payment" as const };
 
       await recordPaid(

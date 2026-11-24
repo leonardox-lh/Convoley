@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
   DuplicateRegistrationError,
-  EventFullError,
   EventNotOpenError,
   InvalidPhoneNumberError,
 } from "../domain/errors";
@@ -55,7 +54,7 @@ describe("HU-06 criterio 2: invitado con celular, sin cuenta", () => {
 
     const result = await registerGuest(input);
 
-    expect(result).toEqual({ id: "reg-1", status: "pending_payment" });
+    expect(result).toEqual({ id: "reg-1", status: "pending_payment", waitlistPosition: null });
     expect(rows).toEqual([
       {
         id: "reg-1",
@@ -121,19 +120,24 @@ describe("HU-06 criterio 4: queda pendiente de pago", () => {
 });
 
 describe("HU-06: cupos y estado de la convocatoria", () => {
-  it("HU-06: con el cupo lleno lanza EventFullError", async () => {
+  it("HU-12: con el cupo lleno entra a la lista de espera en vez de fallar", async () => {
     const existing = [
       stored({ phone: "+51911111111" }),
       stored({ id: "r2", phone: "+51922222222" }),
     ];
-    const { registerGuest } = setup(seatInfo({ capacity: 2 }), existing);
+    const { registerGuest, markFull } = setup(seatInfo({ capacity: 2 }), existing);
 
-    await expect(registerGuest(input)).rejects.toThrow(EventFullError);
+    expect(await registerGuest(input)).toEqual({
+      id: "reg-3",
+      status: "waitlisted",
+      waitlistPosition: 1,
+    });
+    expect(markFull).toEqual([]);
   });
 
-  it("HU-06: una convocatoria en estado full lanza EventFullError", async () => {
+  it("HU-12: una convocatoria en estado full manda a la lista de espera", async () => {
     const { registerGuest } = setup(seatInfo({ status: "full" }));
-    await expect(registerGuest(input)).rejects.toThrow(EventFullError);
+    expect((await registerGuest(input)).status).toBe("waitlisted");
   });
 
   it.each(["draft", "cancelled"])(

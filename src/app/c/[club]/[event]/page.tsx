@@ -3,10 +3,10 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { formatInLima } from "@/lib/lima-time";
 import { formatSoles } from "@/lib/money";
-import { getPublicEvent, type CancellationOutcome, type EventStatus } from "@/modules/events";
+import { type CancellationOutcome, type EventStatus } from "@/modules/events";
 import { currentUserId, getPlayerProfile, isGoogleSignInEnabled } from "@/modules/identity";
-import { isOpenForRegistration } from "@/modules/registrations";
-import { loadEventPreview, shareDescription } from "./event-preview";
+import { acceptsWaitlist, isOpenForRegistration } from "@/modules/registrations";
+import { loadEventPreview, seatsText, shareDescription } from "./event-preview";
 import { RegistrationForm } from "./registration-form";
 
 const STATUS_NOTICES: Partial<Record<EventStatus, string>> = {
@@ -46,8 +46,10 @@ export default function PublicEventPage({ params }: PageProps<"/c/[club]/[event]
 
 async function PublicEventContent({ params }: { params: Params }) {
   const { club, event: eventId } = await params;
-  const event = await getPublicEvent({ clubSlug: club, eventId });
+  const event = await loadEventPreview(club, eventId);
   if (!event) notFound();
+  const now = new Date();
+  const waitlistOnly = acceptsWaitlist(event, now);
   const userId = await currentUserId();
   const profile = userId ? await getPlayerProfile(userId) : null;
   const notice = STATUS_NOTICES[event.status];
@@ -96,7 +98,9 @@ async function PublicEventContent({ params }: { params: Params }) {
         <dt className="text-zinc-500">Precio</dt>
         <dd>{formatSoles(event.priceCents)}</dd>
         <dt className="text-zinc-500">Cupos</dt>
-        <dd>{event.capacity}</dd>
+        <dd>
+          {event.capacity} · {seatsText(event)}
+        </dd>
         {event.isMixed && (
           <>
             <dt className="text-zinc-500">Tipo</dt>
@@ -105,8 +109,9 @@ async function PublicEventContent({ params }: { params: Params }) {
         )}
       </dl>
       {event.rules && <p className="text-sm whitespace-pre-line">{event.rules}</p>}
-      {isOpenForRegistration(event, new Date()) && (
+      {(isOpenForRegistration(event, now) || waitlistOnly) && (
         <RegistrationForm
+          waitlistOnly={waitlistOnly}
           club={club}
           eventId={event.id}
           profile={profile}

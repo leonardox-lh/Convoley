@@ -13,7 +13,7 @@ import { makeUpdateEvent, type UpdateEventInput } from "./update-event";
 
 const NOW = new Date("2026-12-01T12:00:00.000Z");
 
-function setup(stored: EventDetails | null, confirmed: number) {
+function setup(stored: EventDetails | null, confirmed: number, waiting = 0) {
   const updates: unknown[] = [];
   const updateEvent = makeUpdateEvent({
     clubs: { findBySlug: async (slug) => (slug === CLUB.slug ? CLUB : null) },
@@ -25,7 +25,11 @@ function setup(stored: EventDetails | null, confirmed: number) {
         updates.push({ id, ...changes });
       },
     }),
-    registrations: { countConfirmed: async () => confirmed, listIds: async () => [] },
+    registrations: {
+      countConfirmed: async () => confirmed,
+      listIds: async () => [],
+      promoteWaitlisted: async (_eventId, seats) => Math.min(seats, waiting),
+    },
     transactions: fakeTransactions,
     now: () => NOW,
   });
@@ -124,5 +128,17 @@ describe("HU-05: updateEvent casos borde", () => {
   it("HU-05: club inexistente falla", async () => {
     const { updateEvent } = setup(eventDetails(), 0);
     await expect(updateEvent(input({ clubSlug: "no" }))).rejects.toThrow(ClubNotFoundError);
+  });
+});
+
+describe("HU-12 criterio 2: los cupos nuevos pasan primero a la lista de espera", () => {
+  it("HU-12: subir la capacidad de una convocatoria llena promueve a los que esperan", async () => {
+    const { updateEvent } = setup(eventDetails({ status: "full", capacity: 10 }), 10, 3);
+    expect(await updateEvent(input({ capacity: 12 }))).toEqual({ status: "full" });
+  });
+
+  it("HU-12: si esperan menos que los cupos nuevos, se reabre", async () => {
+    const { updateEvent } = setup(eventDetails({ status: "full", capacity: 10 }), 10, 1);
+    expect(await updateEvent(input({ capacity: 12 }))).toEqual({ status: "published" });
   });
 });

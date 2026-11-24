@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { EventFullError, EventNotOpenError, RegistrationNotFoundError } from "../domain/errors";
+import { EventNotOpenError, RegistrationNotFoundError } from "../domain/errors";
 import type { EventSeatInfo } from "../domain/registration";
 import {
   fakeEventSeats,
@@ -88,16 +88,17 @@ describe("HU-08 criterio 2: quitar a alguien libera su cupo", () => {
     expect(reopened).toHaveLength(1);
   });
 
-  it("HU-08 criterio 2: con el cupo lleno, el lugar liberado lo puede tomar otra persona", async () => {
-    const { removeRegistration, registerGuest, confirmed } = setup(seatInfo({ capacity: 1 }), [
-      stored("reg-1", "+51911111111"),
-    ]);
-    await expect(registerGuest(newcomer)).rejects.toThrow(EventFullError);
+  it("HU-08 criterio 2: con el cupo lleno, el lugar liberado lo toma otra persona", async () => {
+    const { removeRegistration, registerGuest, rows, confirmed } = setup(
+      seatInfo({ capacity: 1 }),
+      [stored("reg-1", "+51911111111")],
+    );
+    expect((await registerGuest(newcomer)).status).toBe("waitlisted");
 
     await removeRegistration(input);
-    await registerGuest(newcomer);
 
     expect(confirmed()).toBe(1);
+    expect(rows.find((row) => row.phone === "+51933333333")?.status).toBe("pending_payment");
   });
 
   it("HU-08 criterio 2: rechaza una inscripción de otra convocatoria o inexistente", async () => {

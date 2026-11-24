@@ -13,9 +13,12 @@ export function RegistrationForm({
   eventId,
   profile,
   googleEnabled,
+  waitlistOnly,
 }: {
   club: string;
   eventId: string;
+  /** The event is full: signing up joins the waitlist (HU-12). */
+  waitlistOnly: boolean;
   /** The Google player's account; null for guests. */
   profile: PlayerProfile | null;
   googleEnabled: boolean;
@@ -24,6 +27,31 @@ export function RegistrationForm({
     status: "idle",
   });
   const [asGuest, setAsGuest] = useState(false);
+  const heading = waitlistOnly ? "Entra a la lista de espera" : "Inscríbete";
+
+  if (state.status === "registered" && state.waitlistPosition !== null) {
+    return (
+      <section
+        aria-labelledby="registered-title"
+        className="flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800"
+      >
+        <h2 id="registered-title" className="text-lg font-semibold">
+          {state.firstName}, estás en la lista de espera.
+        </h2>
+        <p className="text-sm">
+          Tu puesto: <span className="font-semibold">{state.waitlistPosition}</span>
+        </p>
+        <p className="text-sm text-zinc-500">
+          Si se libera un cupo, pasas automáticamente a la lista y te toca pagar.
+        </p>
+        {profile && (
+          <Link href="/mis-inscripciones" className="text-sm underline underline-offset-4">
+            Ver mis inscripciones
+          </Link>
+        )}
+      </section>
+    );
+  }
 
   if (state.status === "registered") {
     return (
@@ -53,7 +81,7 @@ export function RegistrationForm({
   if (!profile && !asGuest) {
     return (
       <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold">Inscríbete</h2>
+        <h2 className="text-lg font-semibold">{heading}</h2>
         <Button size="lg" onClick={() => setAsGuest(true)}>
           Continuar como invitado
         </Button>
@@ -72,7 +100,7 @@ export function RegistrationForm({
 
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="text-lg font-semibold">Inscríbete</h2>
+      <h2 className="text-lg font-semibold">{heading}</h2>
       <form onSubmit={submitKeepingValues(formAction)} className="flex flex-col gap-3">
         <input type="hidden" name="eventId" value={eventId} />
         {profile?.firstName && profile.lastName ? (
@@ -121,7 +149,7 @@ export function RegistrationForm({
         </div>
         {state.status === "error" && <FormMessage tone="error">{state.message}</FormMessage>}
         <Button type="submit" size="lg" disabled={pending}>
-          {pending ? "Inscribiendo…" : "Inscribirme"}
+          {pending ? "Inscribiendo…" : waitlistOnly ? "Anotarme en la espera" : "Inscribirme"}
         </Button>
       </form>
     </section>

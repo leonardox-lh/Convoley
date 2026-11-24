@@ -10,7 +10,11 @@ function setup(stored: EventDetails | null) {
       findInClub: async (clubId, id) =>
         stored && stored.clubId === clubId && stored.id === id ? stored : null,
     }),
-    registrations: { countConfirmed: async () => 7, listIds: async () => [] },
+    registrations: {
+      countConfirmed: async () => 7,
+      listIds: async () => [],
+      promoteWaitlisted: async () => 0,
+    },
   });
 }
 

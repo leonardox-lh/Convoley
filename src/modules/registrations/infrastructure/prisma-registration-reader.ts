@@ -45,11 +45,15 @@ export const prismaRegistrationListReader: RegistrationListReader = {
 };
 
 export const prismaPlayerRegistrations: PlayerRegistrations = {
-  listByUser: (userId) =>
-    db.registration.findMany({
+  async listByUser(userId) {
+    const rows = await db.registration.findMany({
       where: { userId },
       select: { id: true, eventId: true, status: true, createdAt: true },
-    }),
+    });
+    return Promise.all(
+      rows.map(async (row) => ({ ...row, waitlistPosition: await waitlistPosition(row.id) })),
+    );
+  },
   async linkGuestsToUser(phone, userId) {
     const { count } = await db.registration.updateMany({
       where: { phone, userId: null },
@@ -58,3 +62,37 @@ export const prismaPlayerRegistrations: PlayerRegistrations = {
     return count;
   },
 };
+
+/** First `seats` waitlisted registrations of the event, by arrival, move to pending payment. */
+export async function promoteWaitlisted(eventId: string, seats: number, tx: Client = db) {
+  if (seats <= 0) return 0;
+  const next = await tx.registration.findMany({
+    where: { eventId, status: "waitlisted" },
+    orderBy: { createdAt: "asc" },
+    take: seats,
+    select: { id: true },
+  });
+  if (next.length === 0) return 0;
+  const { count } = await tx.registration.updateMany({
+    where: { id: { in: next.map((row) => row.id) }, status: "waitlisted" },
+    data: { status: "pending_payment" },
+  });
+  return count;
+}
+
+/** 1-based place in the waitlist by arrival; null when the registration isn't waiting. */
+export async function waitlistPosition(registrationId: string, tx: Client = db) {
+  const registration = await tx.registration.findUnique({
+    where: { id: registrationId },
+    select: { eventId: true, status: true, createdAt: true },
+  });
+  if (registration?.status !== "waitlisted") return null;
+  const ahead = await tx.registration.count({
+    where: {
+      eventId: registration.eventId,
+      status: "waitlisted",
+      createdAt: { lt: registration.createdAt },
+    },
+  });
+  return ahead + 1;
+}

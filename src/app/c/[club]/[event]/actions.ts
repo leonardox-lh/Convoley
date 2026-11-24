@@ -22,7 +22,12 @@ import { levelField, nameField, PHONE_FORMAT_MESSAGE, positionField } from "../.
 export type RegisterState =
   | { status: "idle" }
   | { status: "error"; message: string }
-  | { status: "registered"; firstName: string };
+  | {
+      status: "registered";
+      firstName: string;
+      /** Set when the event was full and the player joined the waitlist (HU-12). */
+      waitlistPosition: number | null;
+    };
 
 const registerSchema = z.object({
   eventId: z.string().min(1),
@@ -57,15 +62,16 @@ export async function registerAction(
     phone: profile?.phone ?? parsed.data.phone,
   };
 
+  let waitlistPosition: number | null;
   try {
-    await registerGuest({ ...player, userId });
+    ({ waitlistPosition } = await registerGuest({ ...player, userId }));
   } catch (error) {
     const known = ERROR_MESSAGES.find(([type]) => error instanceof type);
     if (known) return { status: "error", message: known[1] };
     throw error;
   }
   if (userId && profile && !profile.phone) await rememberPhone(userId, player.phone);
-  return { status: "registered", firstName: player.firstName };
+  return { status: "registered", firstName: player.firstName, waitlistPosition };
 }
 
 /** First sign-up with Google: keep the phone and bring in the earlier guest sign-ups. */

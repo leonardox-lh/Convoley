@@ -1,12 +1,15 @@
 import { Prisma, type PrismaClient } from "@/generated/prisma/client";
 import type {
-  PlayerDetails,
   RegistrationRepository,
   TransactionContext,
   TransactionRunner,
 } from "../application/ports";
 import { DuplicateRegistrationError } from "../domain/errors";
-import { countConfirmedRegistrations } from "./prisma-registration-reader";
+import {
+  countConfirmedRegistrations,
+  promoteWaitlisted,
+  waitlistPosition,
+} from "./prisma-registration-reader";
 
 const UNIQUE_VIOLATION = "P2002";
 
@@ -28,10 +31,10 @@ export const prismaRegistrationRepository: RegistrationRepository = {
       select: { id: true, status: true },
     }),
 
-  async create(eventId: string, player: PlayerDetails, tx: TransactionContext) {
+  async create(eventId, player, status, tx) {
     try {
       return await toPrismaTx(tx).registration.create({
-        data: { eventId, ...player },
+        data: { eventId, ...player, status },
         select: { id: true },
       });
     } catch (error) {
@@ -46,12 +49,17 @@ export const prismaRegistrationRepository: RegistrationRepository = {
     }
   },
 
-  async reactivate(id: string, player: PlayerDetails, tx: TransactionContext) {
+  async reactivate(id, player, status, tx) {
+    // A new createdAt puts the comeback at the end of the list and of the waitlist.
     await toPrismaTx(tx).registration.update({
       where: { id },
-      data: { ...player, status: "pending_payment" },
+      data: { ...player, status, createdAt: new Date() },
     });
   },
+
+  promoteWaitlisted: (eventId, seats, tx) => promoteWaitlisted(eventId, seats, toPrismaTx(tx)),
+
+  waitlistPosition: (id, tx) => waitlistPosition(id, toPrismaTx(tx)),
 
   findInEvent: (id, eventId, tx) =>
     toPrismaTx(tx).registration.findFirst({

@@ -1,4 +1,4 @@
-import { EventNotOpenError, RegistrationNotFoundError } from "../domain/errors";
+import { EventFullError, EventNotOpenError, RegistrationNotFoundError } from "../domain/errors";
 import type { EventSeatInfo } from "../domain/registration";
 import type {
   EventSeats,
@@ -52,6 +52,8 @@ export function makeMarkPaidManually(
         throw new RegistrationNotFoundError(input.registrationId);
       }
       if (registration.status === "paid") return { alreadyPaid: true };
+      // Paying doesn't buy a seat: a waitlisted player waits for one to free up (HU-12).
+      if (registration.status === "waitlisted") throw new EventFullError(event.id);
 
       await recordPaid(deps, { ...input, event }, tx);
       return { alreadyPaid: false };

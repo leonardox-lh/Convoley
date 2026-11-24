@@ -81,6 +81,8 @@ async function MyRegistrations() {
               )}
             >
               {REGISTRATION_STATUS_LABELS[registration.status]}
+              {registration.waitlistPosition !== null &&
+                ` · puesto ${registration.waitlistPosition}`}
             </span>
           </li>
         );

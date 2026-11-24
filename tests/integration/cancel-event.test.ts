@@ -133,6 +133,7 @@ function buildCancelEvent(payments?: PaymentsMarker) {
       countConfirmed: (eventId, tx) =>
         countConfirmedRegistrations(eventId, tx ? toPrismaTx(tx) : undefined),
       listIds: (eventId, tx) => listEventRegistrationIds(eventId, toPrismaTx(tx)),
+      promoteWaitlisted: async () => 0,
     },
     payments: payments ?? {
       markForCancellation: async (input, tx) => {
@@ -229,6 +230,7 @@ describe("HU-05 criterio 1: cupos y confirmados (Postgres)", () => {
         countConfirmed: (eventId, tx) =>
           countConfirmedRegistrations(eventId, tx ? toPrismaTx(tx) : undefined),
         listIds: (eventId, tx) => listEventRegistrationIds(eventId, toPrismaTx(tx)),
+        promoteWaitlisted: async () => 0,
       },
       transactions: prismaTransactions(db),
       now: () => new Date("2030-12-01T12:00:00.000Z"),
