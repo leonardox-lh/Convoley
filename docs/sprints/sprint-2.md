@@ -31,7 +31,13 @@ Depende de: HU-06
 - [x] Dos selectores opcionales en el formulario de inscripción; la lista del organizador los muestra
 - [x] Tests: unitarios de las listas de posiciones/niveles y del caso de uso (guarda y es opcional)
 
-## HU-11 · Vista previa del link en WhatsApp (2 pts)
+## HU-11 · Vista previa del link en WhatsApp (2 pts) ✅
+Depende de: HU-04, HU-02 (colores del club)
+- [x] `opengraph-image.tsx` en `/c/[club]/[event]` con `next/og` (sin librerías nuevas): club, título, fecha en Lima, lugar, precio y cupos, con los colores del club
+- [x] `generateMetadata`: título "Convocatoria · Club" y descripción con fecha, lugar, precio y cupos libres
+- [x] Tests: unitarios del texto de la descripción y de los cupos
+- [ ] Revisar a mano la vista previa pegando el link en WhatsApp (necesita la app desplegada con `APP_URL`)
+
 ## HU-12 · Lista de espera (3 pts)
 ## HU-13 · QR y número de Yape/Plin (2 pts)
 ## HU-14 · Subir voucher (3 pts)
@@ -45,4 +51,5 @@ Depende de: HU-06
 - **HU-48**: "Mis inscripciones" vive en `/mis-inscripciones` (nombre reservado para clubes, junto con `inscripcion` y `vouchers`). Muestra todas las inscripciones no canceladas, la más reciente primero.
 - **HU-09**: solo el admin del club gestiona comunidades (igual que el perfil). Una comunidad con convocatorias no se puede eliminar (ni siquiera si están canceladas o pasadas): hay que renombrarla. El club siempre conserva al menos una.
 - **HU-10**: la posición y el nivel se piden en cada inscripción (no se guardan en la cuenta de Google). En "Agregar jugador" del organizador no se piden.
+- **HU-11**: la imagen es 1200×630 con el color primario del club de fondo y el secundario en la etiqueta de cupos (negro y amarillo si el club no tiene colores). Sin logo en la imagen para no depender del bucket. WhatsApp guarda la vista previa en caché: los cupos pueden verse desactualizados en un link ya compartido.
 - **HU-48**: un jugador cuyo correo de Google ya tiene cuenta de organizador con contraseña no puede entrar con Google (se mantiene la regla de HU-01 de no vincular cuentas automáticamente).
