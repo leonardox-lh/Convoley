@@ -24,7 +24,13 @@ Depende de: HU-02 (el club nace con "General")
 - [x] Cada convocatoria ya pertenece a una comunidad (`Event.communityId` obligatorio y selector en el formulario de HU-04)
 - [x] Tests: unitarios del nombre y de los casos de uso con fakes; integración del repositorio (nombre repetido, borrar con eventos)
 
-## HU-10 · Posición y nivel al inscribirse (1 pt)
+## HU-10 · Posición y nivel al inscribirse (1 pt) ✅
+Depende de: HU-06
+- [x] Migración: enums `PlayerPosition` y `PlayerLevel`; `Registration.position` y `Registration.level` opcionales
+- [x] `registerGuest` guarda posición y nivel; Zod en la server action (vacío = sin respuesta)
+- [x] Dos selectores opcionales en el formulario de inscripción; la lista del organizador los muestra
+- [x] Tests: unitarios de las listas de posiciones/niveles y del caso de uso (guarda y es opcional)
+
 ## HU-11 · Vista previa del link en WhatsApp (2 pts)
 ## HU-12 · Lista de espera (3 pts)
 ## HU-13 · QR y número de Yape/Plin (2 pts)
@@ -38,4 +44,5 @@ Depende de: HU-02 (el club nace con "General")
 - **HU-48**: el jugador con Google se inscribe con un solo botón; nombre y apellido salen de Google (si Google no manda apellido, se piden). El celular se pide solo la primera vez y queda fijo en la cuenta. Si el celular ya está en otra cuenta, la inscripción igual se hace pero no se vinculan las inscripciones de invitado.
 - **HU-48**: "Mis inscripciones" vive en `/mis-inscripciones` (nombre reservado para clubes, junto con `inscripcion` y `vouchers`). Muestra todas las inscripciones no canceladas, la más reciente primero.
 - **HU-09**: solo el admin del club gestiona comunidades (igual que el perfil). Una comunidad con convocatorias no se puede eliminar (ni siquiera si están canceladas o pasadas): hay que renombrarla. El club siempre conserva al menos una.
+- **HU-10**: la posición y el nivel se piden en cada inscripción (no se guardan en la cuenta de Google). En "Agregar jugador" del organizador no se piden.
 - **HU-48**: un jugador cuyo correo de Google ya tiene cuenta de organizador con contraseña no puede entrar con Google (se mantiene la regla de HU-01 de no vincular cuentas automáticamente).
