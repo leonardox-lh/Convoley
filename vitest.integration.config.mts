@@ -6,5 +6,7 @@ export default defineConfig({
   test: {
     include: ["tests/integration/**/*.test.ts"],
     testTimeout: 120_000,
+    // migrate-and-seed wipes the schema, so files must not run concurrently.
+    fileParallelism: false,
   },
 });
