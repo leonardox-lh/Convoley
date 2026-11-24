@@ -16,5 +16,23 @@ services:
       timeout: 5s
       retries: 15
 
+  # S3-compatible storage for club logos (Railway Bucket in production). Accepts any credentials.
+  bucket:
+    image: adobe/s3mock:3.12.0
+    environment:
+      initialBuckets: convoley-dev
+      root: /data
+      retainFilesOnExit: "true"
+    ports:
+      - "9000:9090"
+    volumes:
+      - bucket-data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9090/favicon.ico"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
 volumes:
   db-data:
+  bucket-data:

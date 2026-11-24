@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { todayInLima } from "@/lib/lima-time";
@@ -25,7 +26,12 @@ async function NewEventContent({ params }: { params: Params }) {
 
   return (
     <>
-      <p className="text-sm text-zinc-500">{club.name}</p>
+      <Link
+        href={`/admin/${club.slug}/perfil`}
+        className="text-sm text-zinc-500 underline-offset-4 hover:underline"
+      >
+        {club.name} · Perfil del club
+      </Link>
       <h1 className="mb-6 text-2xl font-semibold tracking-tight">Nueva convocatoria</h1>
       <CreateEventForm
         clubSlug={club.slug}

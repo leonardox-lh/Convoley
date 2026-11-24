@@ -1,12 +1,16 @@
 import { z } from "zod";
 
-// Without these, production would have no Google login or password-reset emails.
+// Without these, production would have no Google login, password-reset emails or club logos.
 const REQUIRED_IN_PRODUCTION = [
   "APP_URL",
   "AUTH_GOOGLE_ID",
   "AUTH_GOOGLE_SECRET",
   "RESEND_API_KEY",
   "EMAIL_FROM",
+  "BUCKET_NAME",
+  "BUCKET_ENDPOINT",
+  "BUCKET_ACCESS_KEY_ID",
+  "BUCKET_SECRET_ACCESS_KEY",
 ] as const;
 
 const envSchema = z
@@ -23,6 +27,12 @@ const envSchema = z
     RESEND_API_KEY: z.string().optional(),
     // Sender of the emails, e.g. "Convoley <no-responder@convoley.pe>" (verified domain in Resend).
     EMAIL_FROM: z.string().optional(),
+    // S3-compatible bucket for club logos: Railway Bucket in production, S3Mock locally.
+    BUCKET_NAME: z.string().optional(),
+    BUCKET_ENDPOINT: z.url().optional(),
+    BUCKET_REGION: z.string().default("auto"),
+    BUCKET_ACCESS_KEY_ID: z.string().optional(),
+    BUCKET_SECRET_ACCESS_KEY: z.string().optional(),
   })
   .superRefine((env, context) => {
     if (env.NODE_ENV !== "production") return;
