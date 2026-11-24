@@ -9,16 +9,12 @@ import {
   InvalidPhoneNumberError,
   registerGuest,
 } from "@/modules/registrations";
+import { nameField, PHONE_FORMAT_MESSAGE } from "../../../player-schema";
 
 export type RegisterState =
   | { status: "idle" }
   | { status: "error"; message: string }
   | { status: "registered"; firstName: string };
-
-const NAME_MAX_LENGTH = 60;
-
-const nameField = (missing: string) =>
-  z.string().trim().min(1, missing).max(NAME_MAX_LENGTH, "Ese nombre es muy largo.");
 
 const registerSchema = z.object({
   eventId: z.string().min(1),
@@ -28,7 +24,7 @@ const registerSchema = z.object({
 });
 
 const ERROR_MESSAGES: [new (...args: never[]) => Error, string][] = [
-  [InvalidPhoneNumberError, "Escribe un celular peruano de 9 dígitos que empiece con 9."],
+  [InvalidPhoneNumberError, PHONE_FORMAT_MESSAGE],
   [DuplicateRegistrationError, "Ese celular ya está inscrito en esta convocatoria."],
   [EventFullError, "Lo sentimos, ya no quedan cupos."],
   [EventNotOpenError, "Esta convocatoria ya no recibe inscripciones."],

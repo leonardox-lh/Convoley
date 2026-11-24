@@ -1,6 +1,7 @@
 import type { EventSeatInfo, RegistrationStatus } from "../domain/registration";
 import type {
   EventSeats,
+  ManualPayments,
   RegistrationListItem,
   RegistrationListReader,
   PlayerDetails,
@@ -17,8 +18,10 @@ export const fakeTransactions: TransactionRunner = { run: (work) => work(FAKE_TX
 export function seatInfo(overrides: Partial<EventSeatInfo> = {}): EventSeatInfo {
   return {
     id: "evt-1",
+    clubId: "club-1",
     status: "published",
     capacity: 18,
+    priceCents: 1500,
     startsAt: new Date("2026-12-05T00:00:00Z"),
     ...overrides,
   };
@@ -26,13 +29,17 @@ export function seatInfo(overrides: Partial<EventSeatInfo> = {}): EventSeatInfo 
 
 export function fakeEventSeats(event: EventSeatInfo | null) {
   const markFull: string[] = [];
+  const reopened: string[] = [];
   const seats: EventSeats = {
     lock: async () => event,
     markFull: async (eventId) => {
       markFull.push(eventId);
     },
+    reopen: async (eventId) => {
+      reopened.push(eventId);
+    },
   };
-  return { seats, markFull };
+  return { seats, markFull, reopened };
 }
 
 export interface StoredRegistration extends PlayerDetails {
@@ -57,10 +64,25 @@ export function fakeRegistrationRepository(initial: StoredRegistration[] = []) {
       const row = rows.find((candidate) => candidate.id === id)!;
       Object.assign(row, player, { status: "pending_payment" });
     },
+    findInEvent: async (id, eventId) =>
+      rows.find((row) => row.id === id && row.eventId === eventId) ?? null,
+    setStatus: async (id, status) => {
+      rows.find((row) => row.id === id)!.status = status;
+    },
   };
   return { repository, rows };
 }
 
 export function fakeRegistrationListReader(items: RegistrationListItem[]): RegistrationListReader {
   return { listByEvent: async () => [...items] };
+}
+
+export function fakeManualPayments() {
+  const recorded: Parameters<ManualPayments["record"]>[0][] = [];
+  const payments: ManualPayments = {
+    record: async (payment) => {
+      recorded.push(payment);
+    },
+  };
+  return { payments, recorded };
 }

@@ -8,10 +8,25 @@ export async function lockEventForRegistration(eventId: string, tx: Prisma.Trans
   await tx.$queryRaw`SELECT id FROM "Event" WHERE id = ${eventId} FOR UPDATE`;
   return tx.event.findUnique({
     where: { id: eventId },
-    select: { id: true, status: true, capacity: true, startsAt: true },
+    select: {
+      id: true,
+      clubId: true,
+      status: true,
+      capacity: true,
+      priceCents: true,
+      startsAt: true,
+    },
   });
 }
 
 export async function markEventFull(eventId: string, tx: Prisma.TransactionClient) {
   await tx.event.update({ where: { id: eventId }, data: { status: "full" } });
+}
+
+/** Back to published after a spot frees up; only touches events that are still full. */
+export async function reopenEvent(eventId: string, tx: Prisma.TransactionClient) {
+  await tx.event.updateMany({
+    where: { id: eventId, status: "full" },
+    data: { status: "published" },
+  });
 }

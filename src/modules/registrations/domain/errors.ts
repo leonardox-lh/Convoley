@@ -25,3 +25,10 @@ export class DuplicateRegistrationError extends Error {
     this.name = "DuplicateRegistrationError";
   }
 }
+
+export class RegistrationNotFoundError extends Error {
+  constructor(readonly registrationId: string) {
+    super(`Registration ${registrationId} not found in this event`);
+    this.name = "RegistrationNotFoundError";
+  }
+}

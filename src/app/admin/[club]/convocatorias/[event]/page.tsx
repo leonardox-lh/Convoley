@@ -10,7 +10,9 @@ import {
   type RegistrationStatus,
 } from "@/modules/registrations";
 import { requireOrganizer } from "../../require-organizer";
+import { AddPlayerForm } from "./add-player-form";
 import { AutoRefresh } from "./auto-refresh";
+import { RegistrationActions } from "./registration-actions";
 
 type Props = PageProps<"/admin/[club]/convocatorias/[event]">;
 
@@ -61,6 +63,7 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
   const registrations = await listEventRegistrations({ eventId: event.id, status });
   const seats = seatSummary(event.capacity, event.confirmedCount);
   const basePath = `/admin/${clubSlug}/convocatorias/${event.id}`;
+  const listEditable = event.status !== "cancelled";
 
   return (
     <div className="flex flex-col gap-6">
@@ -76,6 +79,8 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
       <p role="status" aria-label="Cupos" className="text-lg font-medium">
         {seats.taken} ocupados · {seats.free} libres
       </p>
+
+      {event.status === "published" && <AddPlayerForm clubSlug={clubSlug} eventId={event.id} />}
 
       <nav aria-label="Filtrar por estado de pago" className="flex flex-wrap gap-2">
         <FilterLink href={basePath} active={!status} label="Todos" />
@@ -99,7 +104,7 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
           className="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-800"
         >
           {registrations.map((registration, index) => (
-            <li key={registration.id} className="flex items-center gap-3 py-3">
+            <li key={registration.id} className="flex flex-wrap items-center gap-3 py-3">
               <span className="w-6 text-sm text-zinc-500">{index + 1}</span>
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium">
@@ -118,6 +123,15 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
               >
                 {STATUS_LABELS[registration.status]}
               </span>
+              {listEditable && registration.status !== "cancelled" && (
+                <RegistrationActions
+                  clubSlug={clubSlug}
+                  eventId={event.id}
+                  registrationId={registration.id}
+                  playerName={registration.firstName}
+                  canMarkPaid={registration.status !== "paid"}
+                />
+              )}
             </li>
           ))}
         </ol>

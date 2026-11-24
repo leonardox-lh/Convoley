@@ -13,6 +13,8 @@ export interface EventSeats {
   /** Reads the event and locks its row until the transaction ends, so seats can't be oversold. */
   lock(eventId: string, tx: TransactionContext): Promise<EventSeatInfo | null>;
   markFull(eventId: string, tx: TransactionContext): Promise<void>;
+  /** Full → published once a spot frees up. */
+  reopen(eventId: string, tx: TransactionContext): Promise<void>;
 }
 
 export interface PlayerDetails {
@@ -33,6 +35,25 @@ export interface RegistrationRepository {
   create(eventId: string, player: PlayerDetails, tx: TransactionContext): Promise<{ id: string }>;
   /** Brings back a cancelled registration as pending payment, with the new details. */
   reactivate(id: string, player: PlayerDetails, tx: TransactionContext): Promise<void>;
+  findInEvent(
+    id: string,
+    eventId: string,
+    tx: TransactionContext,
+  ): Promise<{ id: string; status: RegistrationStatus } | null>;
+  setStatus(id: string, status: RegistrationStatus, tx: TransactionContext): Promise<void>;
+}
+
+/** Payments owned by the `payments` module. */
+export interface ManualPayments {
+  record(
+    payment: {
+      clubId: string;
+      registrationId: string;
+      amountCents: number;
+      reviewedByUserId: string;
+    },
+    tx: TransactionContext,
+  ): Promise<void>;
 }
 
 export interface RegistrationListItem {

@@ -8,8 +8,10 @@ export type RegistrationStatus = (typeof SEAT_HOLDING_STATUSES)[number] | "cance
 /** What registration needs to know about an event; owned by the `events` module. */
 export interface EventSeatInfo {
   id: string;
+  clubId: string;
   status: string;
   capacity: number;
+  priceCents: number;
   startsAt: Date;
 }
 

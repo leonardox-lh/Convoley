@@ -13,4 +13,8 @@ export const eventsAdapter: EventSeats = {
     const { markEventFull } = await loadEvents();
     await markEventFull(eventId, toPrismaTx(tx));
   },
+  async reopen(eventId, tx) {
+    const { reopenEvent } = await loadEvents();
+    await reopenEvent(eventId, toPrismaTx(tx));
+  },
 };

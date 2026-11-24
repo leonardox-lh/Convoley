@@ -4,3 +4,7 @@ export {
   type CancellationOutcome,
 } from "./domain/payment";
 export { markPaymentsForCancellation } from "./infrastructure/prisma-payment-marker";
+export {
+  recordManualPayment,
+  type ManualPaymentInput,
+} from "./infrastructure/prisma-manual-payment";

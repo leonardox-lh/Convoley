@@ -52,4 +52,14 @@ export const prismaRegistrationRepository: RegistrationRepository = {
       data: { ...player, status: "pending_payment" },
     });
   },
+
+  findInEvent: (id, eventId, tx) =>
+    toPrismaTx(tx).registration.findFirst({
+      where: { id, eventId },
+      select: { id: true, status: true },
+    }),
+
+  async setStatus(id, status, tx) {
+    await toPrismaTx(tx).registration.update({ where: { id }, data: { status } });
+  },
 };
