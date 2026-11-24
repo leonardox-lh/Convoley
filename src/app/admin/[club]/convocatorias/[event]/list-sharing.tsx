@@ -9,8 +9,8 @@ const FORMATS = [
   { value: "historia", label: "Historia (9:16)" },
 ] as const;
 
-/** Download or share the list image (HU-16). */
-export function ListSharing(props: { imagePath: string; fileName: string }) {
+/** Download or share the list image (HU-16) and copy the list as text (HU-17). */
+export function ListSharing(props: { imagePath: string; fileName: string; listText: string }) {
   const [message, setMessage] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
 
   async function share(format: string) {
@@ -39,6 +39,15 @@ export function ListSharing(props: { imagePath: string; fileName: string }) {
     }
   }
 
+  async function copyText() {
+    try {
+      await navigator.clipboard.writeText(props.listText);
+      setMessage({ tone: "ok", text: "Lista copiada. Pégala en WhatsApp." });
+    } catch {
+      setMessage({ tone: "error", text: "No pudimos copiar la lista." });
+    }
+  }
+
   return (
     <section aria-labelledby="share-title" className="flex flex-col gap-3">
       <h2 id="share-title" className="text-lg font-semibold">
@@ -59,6 +68,9 @@ export function ListSharing(props: { imagePath: string; fileName: string }) {
           </Button>
         </div>
       ))}
+      <Button type="button" variant="outline" className="h-10" onClick={copyText}>
+        Copiar lista como texto
+      </Button>
       {message && <FormMessage tone={message.tone}>{message.text}</FormMessage>}
     </section>
   );

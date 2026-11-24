@@ -2,12 +2,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { z } from "zod";
+import { formatInLima } from "@/lib/lima-time";
 import { cn } from "@/lib/utils";
 import { getOrganizerEvent } from "@/modules/events";
 import { listVouchersInReview, signVoucherPath } from "@/modules/payments";
 import {
   buildRoster,
   REJECTION_REASON_MAX_LENGTH,
+  rosterText,
   listEventRegistrations,
   seatSummary,
   type RegistrationStatus,
@@ -102,7 +104,15 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
       {event.status === "published" && <AddPlayerForm clubSlug={clubSlug} eventId={event.id} />}
 
       {!status && registrations.length > 0 && (
-        <ListSharing imagePath={`${basePath}/imagen`} fileName={`lista-${event.id}`} />
+        <ListSharing
+          imagePath={`${basePath}/imagen`}
+          fileName={`lista-${event.id}`}
+          listText={rosterText({
+            title: event.title,
+            when: formatInLima(event.startsAt),
+            roster: buildRoster(registrations),
+          })}
+        />
       )}
 
       <nav aria-label="Filtrar por estado de pago" className="flex flex-wrap gap-2">
