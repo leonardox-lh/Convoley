@@ -30,12 +30,12 @@ Depende de: HT-01
 
 ## HT-03 · Modelo de datos inicial (5 pts)
 Depende de: HT-01
-- [ ] Diseñar el esquema con el agente `planner`: clubes, comunidades, usuarios/organizadores, convocatorias, inscripciones (invitado o con Google), pagos, productos, pedidos
-- [ ] Escribir `schema.prisma`: dinero en `priceCents` (Int), fechas en UTC, celular normalizado (`+519XXXXXXXX`)
-- [ ] Primera migración versionada (`npx prisma migrate dev --name init`)
-- [ ] Seed con datos de prueba: un club, una comunidad, una convocatoria, inscripciones y productos
-- [ ] Documentar el modelo en `docs/MODELO_DATOS.md` (diagrama de entidades y relaciones)
-- [ ] Test de integración: migrar + seed sobre una base vacía sin errores
+- [x] Diseñar el esquema con el agente `planner`: clubes, comunidades, usuarios/organizadores, convocatorias, inscripciones (invitado o con Google), pagos, productos, pedidos
+- [x] Escribir `schema.prisma`: dinero en `priceCents` (Int), fechas en UTC, celular normalizado (`+519XXXXXXXX`)
+- [x] Primera migración versionada (`npx prisma migrate dev --name init`)
+- [x] Seed con datos de prueba: un club, una comunidad, una convocatoria, inscripciones y productos
+- [x] Documentar el modelo en `docs/MODELO_DATOS.md` (diagrama de entidades y relaciones)
+- [x] Test de integración: migrar + seed sobre una base vacía sin errores
 
 ## HT-04 · Almacenamiento de imágenes (2 pts)
 Depende de: HT-01, HT-02 (bucket de Railway)

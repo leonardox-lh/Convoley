@@ -4,5 +4,6 @@ export default defineConfig({
   resolve: { tsconfigPaths: true },
   test: {
     include: ["src/**/*.test.ts", "tests/**/*.test.ts"],
+    exclude: ["tests/integration/**", "**/node_modules/**"],
   },
 });
