@@ -7,12 +7,13 @@ const DEFAULT_COMMUNITY_NAME = "General";
 
 export function prismaClubRepository(db: PrismaClient): ClubRepository {
   return {
-    async createWithAdmin({ slug, profile, adminUserId }) {
+    async createWithAdmin({ slug, profile, logoKey, adminUserId }) {
       try {
         // One nested write: the club never exists without its admin.
         await db.club.create({
           data: {
             slug,
+            logoKey,
             ...profile,
             members: { create: { userId: adminUserId, role: "admin" } },
             communities: { create: { name: DEFAULT_COMMUNITY_NAME } },

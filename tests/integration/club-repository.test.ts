@@ -56,7 +56,12 @@ afterAll(async () => {
 
 describe("HU-02: prismaClubRepository", () => {
   it("HU-02: createWithAdmin crea el club, su admin y la comunidad General", async () => {
-    await prismaClubRepository(db).createWithAdmin({ slug, profile, adminUserId: userId });
+    await prismaClubRepository(db).createWithAdmin({
+      slug,
+      profile,
+      logoKey: null,
+      adminUserId: userId,
+    });
 
     const club = await db.club.findUniqueOrThrow({
       where: { slug },
@@ -69,7 +74,12 @@ describe("HU-02: prismaClubRepository", () => {
 
   it("HU-02: no permite el mismo link dos veces", async () => {
     await expect(
-      prismaClubRepository(db).createWithAdmin({ slug, profile, adminUserId: userId }),
+      prismaClubRepository(db).createWithAdmin({
+        slug,
+        profile,
+        logoKey: null,
+        adminUserId: userId,
+      }),
     ).rejects.toThrow(ClubSlugTakenError);
   });
 

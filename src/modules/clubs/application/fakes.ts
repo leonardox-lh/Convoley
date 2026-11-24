@@ -1,5 +1,6 @@
 import { ClubSlugTakenError } from "../domain/errors";
 import type { ClubProfileProps } from "../domain/club-profile";
+import type { LogoContentType } from "../domain/logo";
 import type { ClubProfile, ClubRepository, LogoStorage } from "./ports";
 
 export const profileProps = (overrides: Partial<ClubProfileProps> = {}): ClubProfileProps => ({
@@ -17,9 +18,9 @@ export function fakeClubRepository(existing: ClubProfile[] = []) {
   const clubs = new Map(existing.map((club) => [club.slug, { ...club }]));
   const admins = new Map<string, string>();
   const repository: ClubRepository = {
-    async createWithAdmin({ slug, profile, adminUserId }) {
+    async createWithAdmin({ slug, profile, logoKey, adminUserId }) {
       if (clubs.has(slug)) throw new ClubSlugTakenError(slug);
-      clubs.set(slug, { slug, logoKey: null, ...profile });
+      clubs.set(slug, { slug, logoKey, ...profile });
       admins.set(slug, adminUserId);
     },
     async findProfile(slug) {
@@ -34,7 +35,7 @@ export function fakeClubRepository(existing: ClubProfile[] = []) {
 }
 
 export function fakeLogoStorage() {
-  const saved = new Map<string, { bytes: Uint8Array; contentType: string }>();
+  const saved = new Map<string, { bytes: Uint8Array; contentType: LogoContentType }>();
   const storage: LogoStorage = {
     async save({ key, bytes, contentType }) {
       saved.set(key, { bytes, contentType });

@@ -11,6 +11,7 @@ export interface ClubRepository {
   createWithAdmin(input: {
     slug: string;
     profile: ClubProfileProps;
+    logoKey: string | null;
     adminUserId: string;
   }): Promise<void>;
   findProfile(slug: string): Promise<ClubProfile | null>;
@@ -24,5 +25,5 @@ export interface ClubRepository {
 export interface LogoStorage {
   save(logo: { key: string; bytes: Uint8Array; contentType: LogoContentType }): Promise<void>;
   /** The stored logo, or null if there is none with that key. */
-  read(key: string): Promise<{ body: ReadableStream; contentType: string } | null>;
+  read(key: string): Promise<{ body: ReadableStream; contentType: LogoContentType } | null>;
 }

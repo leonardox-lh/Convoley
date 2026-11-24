@@ -13,6 +13,8 @@ import {
 const NAME_MAX_LENGTH = 60;
 const DESCRIPTION_MAX_LENGTH = 500;
 const LINK_MAX_LENGTH = 200;
+// "#rrggbb"; the domain checks the format.
+const COLOR_MAX_LENGTH = 7;
 
 /** Empty inputs arrive as "": store them as null. */
 const optionalText = (maxLength: number, tooLongMessage: string) =>
@@ -33,8 +35,8 @@ export const clubProfileSchema = z.object({
     DESCRIPTION_MAX_LENGTH,
     `La descripción puede tener hasta ${DESCRIPTION_MAX_LENGTH} caracteres.`,
   ),
-  primaryColor: optionalText(LINK_MAX_LENGTH, "Elige un color válido."),
-  secondaryColor: optionalText(LINK_MAX_LENGTH, "Elige un color válido."),
+  primaryColor: optionalText(COLOR_MAX_LENGTH, "Elige un color válido."),
+  secondaryColor: optionalText(COLOR_MAX_LENGTH, "Elige un color válido."),
   instagramUrl: optionalText(LINK_MAX_LENGTH, "El link de Instagram es demasiado largo."),
   tiktokUrl: optionalText(LINK_MAX_LENGTH, "El link de TikTok es demasiado largo."),
 });

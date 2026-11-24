@@ -36,14 +36,15 @@ Depende de: HT-03 (tablas de Auth.js ya existen)
 - [x] `requireOrganizer(clubSlug)`: verifica sesión y `ClubMember` del club; reemplaza `isEventManagementEnabled()` en páginas y server actions de convocatorias
 - [x] Tests: unitarios de `Password` y de los casos de uso con fakes, integración del token de recuperación (expira, se usa una vez), e2e de registro e inicio de sesión con correo
 
-## HU-02 · Perfil del club (3 pts)
+## HU-02 · Perfil del club (3 pts) ✅
 Depende de: HU-01, HT-04
-- [ ] Decidir la URL pública: `convoley.pe/<club>` (raíz, choca con rutas propias como `/ingresar`; requiere lista de slugs reservados) o mantener `/c/<club>`
-- [ ] `clubs`, dominio: validación de colores hex y de links de Instagram y TikTok, slugs reservados, errores tipados
-- [ ] `clubs`, casos de uso: `createClub` (slug único, crea el `ClubMember` admin y la comunidad "General") y `updateClubProfile`; puerto `ClubRepository`
-- [ ] Logo de hasta 2 MB (jpg, png, webp) con el `FileStorage` de `media` (HT-04); el logo es público, a diferencia de los vouchers
-- [ ] Páginas `/club/nuevo` y `/admin/[club]/perfil`, protegidas con `requireOrganizer`
-- [ ] Tests: unitarios de slug, colores y redes; casos de uso con fakes (slug repetido); integración de crear el club con su admin
+- [x] URL pública en la raíz: `convoley.pe/<club>`, con lista de slugs reservados en `ClubSlug`. Las convocatorias siguen en `/c/<club>/<event>`
+- [x] `clubs`, dominio: colores hex, links de Instagram y TikTok, slugs reservados, logo (2 MB, jpg/png/webp), errores tipados
+- [x] `clubs`, casos de uso: `createClub` (slug único, crea el `ClubMember` admin y la comunidad "General") y `updateClubProfile`; puertos `ClubRepository` y `LogoStorage`
+- [x] Logo de hasta 2 MB en un bucket S3 (`@aws-sdk/client-s3`), prefijo `logos/`, servido por `/logos/[key]` (el bucket sigue privado). En local, S3Mock en `docker-compose.yml` (las imágenes de MinIO ya no son públicas). Esto cubre lo mínimo de HT-04; el `FileStorage` de vouchers queda para su historia
+- [x] Páginas `/club/nuevo` y `/admin/[club]/perfil` (solo admin) y página pública mínima `/<club>` (HU-03 agrega las convocatorias)
+- [x] Tests: unitarios de slug, colores, redes y logo; casos de uso con fakes; integración del repositorio y del bucket; e2e en 375px
+- [ ] Bucket en Railway y variables `BUCKET_*` (a cargo tuyo)
 
 ## HU-03 · Página pública del club (3 pts)
 Depende de: HU-02 (perfil), HU-04 (convocatorias)

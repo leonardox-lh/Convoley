@@ -1,6 +1,7 @@
 import { GetObjectCommand, NoSuchKey, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { env } from "@/lib/env";
 import type { LogoStorage } from "../application/ports";
+import type { LogoContentType } from "../domain/logo";
 
 // Logos share the bucket with private files (vouchers): the prefix keeps reads limited to logos.
 const LOGO_PREFIX = "logos/";
@@ -30,7 +31,8 @@ export function s3LogoStorage(): LogoStorage {
         if (!object.Body) return null;
         return {
           body: object.Body.transformToWebStream(),
-          contentType: object.ContentType ?? "application/octet-stream",
+          // Only save() writes under the prefix, always with an allowed type.
+          contentType: object.ContentType as LogoContentType,
         };
       } catch (error) {
         if (error instanceof NoSuchKey) return null;
