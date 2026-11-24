@@ -16,7 +16,14 @@ Depende de: HU-01 (Auth.js con Google), HU-06
 - [x] Tests: unitarios de `savePlayerPhone`, vínculo de inscripciones y lista
 - [ ] Probar a mano el login real con Google (necesita `AUTH_GOOGLE_*`)
 
-## HU-09 · Comunidades o niveles (2 pts)
+## HU-09 · Comunidades o niveles (2 pts) ✅
+Depende de: HU-02 (el club nace con "General")
+- [x] `clubs`: `createCommunity`, `renameCommunity`, `deleteCommunity`, `listCommunities`; nombre de 1 a 40 letras, único por club
+- [x] No se elimina una comunidad con convocatorias (lo frena la base: `ON DELETE RESTRICT`) ni la última del club
+- [x] Página `/admin/[club]/comunidades` (solo admin) y link desde "Nueva convocatoria"
+- [x] Cada convocatoria ya pertenece a una comunidad (`Event.communityId` obligatorio y selector en el formulario de HU-04)
+- [x] Tests: unitarios del nombre y de los casos de uso con fakes; integración del repositorio (nombre repetido, borrar con eventos)
+
 ## HU-10 · Posición y nivel al inscribirse (1 pt)
 ## HU-11 · Vista previa del link en WhatsApp (2 pts)
 ## HU-12 · Lista de espera (3 pts)
@@ -30,4 +37,5 @@ Depende de: HU-01 (Auth.js con Google), HU-06
 
 - **HU-48**: el jugador con Google se inscribe con un solo botón; nombre y apellido salen de Google (si Google no manda apellido, se piden). El celular se pide solo la primera vez y queda fijo en la cuenta. Si el celular ya está en otra cuenta, la inscripción igual se hace pero no se vinculan las inscripciones de invitado.
 - **HU-48**: "Mis inscripciones" vive en `/mis-inscripciones` (nombre reservado para clubes, junto con `inscripcion` y `vouchers`). Muestra todas las inscripciones no canceladas, la más reciente primero.
+- **HU-09**: solo el admin del club gestiona comunidades (igual que el perfil). Una comunidad con convocatorias no se puede eliminar (ni siquiera si están canceladas o pasadas): hay que renombrarla. El club siempre conserva al menos una.
 - **HU-48**: un jugador cuyo correo de Google ya tiene cuenta de organizador con contraseña no puede entrar con Google (se mantiene la regla de HU-01 de no vincular cuentas automáticamente).
