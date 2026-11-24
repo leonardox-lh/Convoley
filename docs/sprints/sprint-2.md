@@ -49,7 +49,14 @@ Depende de: HU-06, HU-08
 - [x] UI: formulario "Entra a la lista de espera" en convocatorias llenas, confirmación con el puesto, puesto en "Mis inscripciones", filtro "En espera" y numeración E1, E2… en la lista del organizador
 - [x] Tests: unitarios (orden, promoción, posición, capacidad), integración en Postgres (promoción real y concurrencia)
 
-## HU-13 · QR y número de Yape/Plin (2 pts)
+## HU-13 · QR y número de Yape/Plin (2 pts) ✅
+Depende de: HU-02 (almacenamiento de imágenes)
+- [x] Migración: `Club.paymentPhone`, `Club.paymentHolderName`, `Club.paymentQrKey`
+- [x] `clubs`: `updatePaymentSettings` (número normalizado, titular obligatorio, QR con los mismos límites del logo) y `getPaymentSettings`
+- [x] Página `/admin/[club]/pagos` (solo admin) y link "Cobros" desde "Nueva convocatoria"
+- [x] El jugador ve monto, número, titular y QR al inscribirse (`PaymentInstructions`)
+- [x] Tests: unitarios de validación y del caso de uso (QR nuevo, conservar QR, formato y peso, club inexistente)
+
 ## HU-14 · Subir voucher (3 pts)
 ## HU-15 · Aprobar o rechazar vouchers (2 pts)
 ## HU-16 · Imagen de la lista (5 pts)
@@ -64,4 +71,5 @@ Depende de: HU-06, HU-08
 - **HU-11**: la imagen es 1200×630 con el color primario del club de fondo y el secundario en la etiqueta de cupos (negro y amarillo si el club no tiene colores). Sin logo en la imagen para no depender del bucket. WhatsApp guarda la vista previa en caché: los cupos pueden verse desactualizados en un link ya compartido.
 - **HU-12**: quien entra a la espera no paga hasta que pasa a la lista: el organizador no puede marcar "pagado" a alguien en espera. Cuando sube un jugador de la espera no se le avisa (no hay correos ni WhatsApp todavía): lo ve en "Mis inscripciones" o el organizador le escribe.
 - **HU-12**: un invitado ve su puesto solo al inscribirse. Desde HU-14 tiene un link propio de su inscripción donde puede verlo de nuevo.
+- **HU-13**: un solo número para Yape y Plin por club. El QR es público (el jugador lo tiene que ver para escanearlo): se guarda junto a los logos con el mismo límite de 2 MB y formatos JPG/PNG/WebP. El número y el QR se ven al inscribirse y en la página de la inscripción, no en la página pública de la convocatoria.
 - **HU-48**: un jugador cuyo correo de Google ya tiene cuenta de organizador con contraseña no puede entrar con Google (se mantiene la regla de HU-01 de no vincular cuentas automáticamente).
