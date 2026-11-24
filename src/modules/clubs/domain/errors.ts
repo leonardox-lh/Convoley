@@ -56,3 +56,40 @@ export class InvalidLogoTypeError extends Error {
     this.name = "InvalidLogoTypeError";
   }
 }
+
+export class InvalidCommunityNameError extends Error {
+  constructor(readonly raw: string) {
+    super(`Invalid community name: "${raw}"`);
+    this.name = "InvalidCommunityNameError";
+  }
+}
+
+export class CommunityNameTakenError extends Error {
+  constructor(readonly communityName: string) {
+    super(`Community "${communityName}" already exists in this club`);
+    this.name = "CommunityNameTakenError";
+  }
+}
+
+export class CommunityNotFoundError extends Error {
+  constructor(readonly communityId: string) {
+    super(`Community ${communityId} not found in this club`);
+    this.name = "CommunityNotFoundError";
+  }
+}
+
+/** Events keep their community: one with events can be renamed but not deleted. */
+export class CommunityInUseError extends Error {
+  constructor(readonly communityId: string) {
+    super(`Community ${communityId} has events`);
+    this.name = "CommunityInUseError";
+  }
+}
+
+/** Every event needs a community, so a club always keeps at least one. */
+export class LastCommunityError extends Error {
+  constructor() {
+    super("A club needs at least one community");
+    this.name = "LastCommunityError";
+  }
+}

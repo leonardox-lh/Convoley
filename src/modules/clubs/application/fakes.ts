@@ -1,7 +1,7 @@
-import { ClubSlugTakenError } from "../domain/errors";
+import { ClubSlugTakenError, CommunityInUseError, CommunityNameTakenError } from "../domain/errors";
 import type { ClubProfileProps } from "../domain/club-profile";
 import type { LogoContentType } from "../domain/logo";
-import type { ClubProfile, ClubRepository, LogoStorage } from "./ports";
+import type { ClubProfile, ClubRepository, CommunityRepository, LogoStorage } from "./ports";
 
 export const profileProps = (overrides: Partial<ClubProfileProps> = {}): ClubProfileProps => ({
   name: "Vóley Miraflores",
@@ -50,4 +50,38 @@ export function fakeLogoStorage() {
     },
   };
   return { storage, saved };
+}
+
+/** In-memory communities with the database rules: unique name per club, events block delete. */
+export function fakeCommunityRepository(
+  initial: { id: string; clubId: string; name: string }[],
+  inUse: string[] = [],
+) {
+  const rows = [...initial];
+  const repository: CommunityRepository = {
+    findClubId: async (slug) => (slug === "club-1" ? "club-1" : null),
+    list: async (clubId) =>
+      rows.filter((row) => row.clubId === clubId).map(({ id, name }) => ({ id, name })),
+    async create(clubId, name) {
+      if (rows.some((row) => row.clubId === clubId && row.name === name)) {
+        throw new CommunityNameTakenError(name);
+      }
+      rows.push({ id: `com-${rows.length + 1}`, clubId, name });
+    },
+    async rename(id, name) {
+      const row = rows.find((candidate) => candidate.id === id)!;
+      if (rows.some((other) => other.clubId === row.clubId && other.name === name)) {
+        throw new CommunityNameTakenError(name);
+      }
+      row.name = name;
+    },
+    async delete(id) {
+      if (inUse.includes(id)) throw new CommunityInUseError(id);
+      rows.splice(
+        rows.findIndex((row) => row.id === id),
+        1,
+      );
+    },
+  };
+  return { repository, rows };
 }

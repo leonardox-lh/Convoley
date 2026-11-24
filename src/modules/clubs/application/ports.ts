@@ -27,3 +27,20 @@ export interface LogoStorage {
   /** The stored logo, or null if there is none with that key. */
   read(key: string): Promise<{ body: ReadableStream; contentType: LogoContentType } | null>;
 }
+
+export interface Community {
+  id: string;
+  name: string;
+}
+
+export interface CommunityRepository {
+  findClubId(clubSlug: string): Promise<string | null>;
+  /** Oldest first, so "General" (created with the club) leads. */
+  list(clubId: string): Promise<Community[]>;
+  /** Throws CommunityNameTakenError if the club already has that name. */
+  create(clubId: string, name: string): Promise<void>;
+  /** Throws CommunityNameTakenError if the club already has that name. */
+  rename(id: string, name: string): Promise<void>;
+  /** Throws CommunityInUseError if events belong to it. */
+  delete(id: string): Promise<void>;
+}
