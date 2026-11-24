@@ -82,7 +82,12 @@ Depende de: HU-07, HU-02 (logo y colores), HU-12 (espera)
 - [x] Tests: unitarios del roster y del tamaño/columnas, y render real de los dos formatos a PNG
 - [ ] Probar "Compartir" a mano en un celular (Android Chrome / iOS Safari)
 
-## HU-17 · Copiar la lista como texto (1 pt)
+## HU-17 · Copiar la lista como texto (1 pt) ✅
+Depende de: HU-16 (roster), HU-12
+- [x] `registrations`: `rosterText` → "*Título*", fecha, "1. Juan Pérez ✅" y la sección "*Lista de espera*" (formato de negritas de WhatsApp)
+- [x] Botón "Copiar lista como texto" en la lista del organizador (`navigator.clipboard`)
+- [x] Tests: unitarios del formato, con y sin lista de espera
+
 
 ## Decisiones tomadas sin consultar
 
@@ -100,4 +105,5 @@ Depende de: HU-07, HU-02 (logo y colores), HU-12 (espera)
 - **HU-15**: al rechazar, el jugador no pierde su cupo: vuelve a "pendiente de pago" y ve el motivo para subir otra captura. Si el organizador quiere sacarlo, usa "Quitar" (HU-08).
 - **HU-15**: la firma de las URLs usa `AUTH_SECRET` (no hace falta una variable nueva). `@aws-sdk/s3-request-presigner` no está instalado, así que la imagen pasa por nuestro servidor en vez de una URL firmada del bucket; para el volumen del piloto alcanza.
 - **HU-16**: los nombres van completos (nombre y apellido) para distinguir a dos "Juan"; si no caben, se cortan con "…". Quien pagó lleva una etiqueta verde "PAGÓ" (el ✅ necesita una fuente de emojis que `next/og` no trae sin descargar). Un logo WebP no se dibuja (Satori solo dibuja PNG/JPG). Con muchísimos inscritos (más de ~45 en cuadrado) la letra llega a su mínimo y la lista puede cortarse: para eso está el formato historia.
+- **HU-17**: el texto empieza con el título en negrita y la fecha en Lima; los nombres van completos como en la imagen; la lista de espera va al final con su propia numeración.
 - **HU-48**: un jugador cuyo correo de Google ya tiene cuenta de organizador con contraseña no puede entrar con Google (se mantiene la regla de HU-01 de no vincular cuentas automáticamente).
