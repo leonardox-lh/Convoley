@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { formatInLima } from "@/lib/lima-time";
@@ -5,6 +6,7 @@ import { formatSoles } from "@/lib/money";
 import { getPublicEvent, type CancellationOutcome, type EventStatus } from "@/modules/events";
 import { currentUserId, getPlayerProfile, isGoogleSignInEnabled } from "@/modules/identity";
 import { isOpenForRegistration } from "@/modules/registrations";
+import { loadEventPreview, shareDescription } from "./event-preview";
 import { RegistrationForm } from "./registration-form";
 
 const STATUS_NOTICES: Partial<Record<EventStatus, string>> = {
@@ -19,6 +21,18 @@ const CANCELLATION_NOTES: Record<CancellationOutcome, string> = {
 };
 
 type Params = PageProps<"/c/[club]/[event]">["params"];
+
+// Title and description WhatsApp shows with the link (HU-11); the image is opengraph-image.tsx.
+export async function generateMetadata({
+  params,
+}: PageProps<"/c/[club]/[event]">): Promise<Metadata> {
+  const { club, event: eventId } = await params;
+  const event = await loadEventPreview(club, eventId);
+  if (!event) return {};
+  const title = `${event.title} · ${event.clubName}`;
+  const description = shareDescription(event);
+  return { title, description, openGraph: { title, description, type: "website" } };
+}
 
 export default function PublicEventPage({ params }: PageProps<"/c/[club]/[event]">) {
   return (
