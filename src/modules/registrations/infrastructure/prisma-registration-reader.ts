@@ -11,6 +11,16 @@ export async function countConfirmedRegistrations(eventId: string, tx: Client = 
   });
 }
 
+/** Confirmed registrations of many events in a single query, keyed by event id. */
+export async function countConfirmedRegistrationsByEvent(eventIds: string[]) {
+  const groups = await db.registration.groupBy({
+    by: ["eventId"],
+    where: { eventId: { in: eventIds }, status: { in: [...SEAT_HOLDING_STATUSES] } },
+    _count: { _all: true },
+  });
+  return new Map(groups.map((group) => [group.eventId, group._count._all]));
+}
+
 export async function listEventRegistrationIds(eventId: string, tx: Client = db) {
   const rows = await tx.registration.findMany({ where: { eventId }, select: { id: true } });
   return rows.map((row) => row.id);

@@ -9,6 +9,7 @@ export function fakeEventRepository(overrides: Partial<EventRepository> = {}): E
   return {
     create: async () => ({ id: "evt-1" }),
     findInClub: async () => null,
+    listInClub: async () => [],
     lockInClub: async () => null,
     update: async () => undefined,
     markCancelled: async () => undefined,

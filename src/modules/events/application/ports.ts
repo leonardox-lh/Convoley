@@ -35,6 +35,11 @@ export interface TransactionRunner {
 export interface EventRepository {
   create(event: NewEvent): Promise<{ id: string }>;
   findInClub(clubId: string, eventId: string): Promise<EventDetails | null>;
+  /** Events of the club in these statuses starting at or after `from`, soonest first. */
+  listInClub(
+    clubId: string,
+    filter: { statuses: readonly EventStatus[]; from: Date },
+  ): Promise<EventDetails[]>;
   /** Reads the event and locks its row until the transaction ends. */
   lockInClub(clubId: string, eventId: string, tx: TransactionContext): Promise<EventDetails | null>;
   update(
@@ -53,6 +58,11 @@ export interface EventRepository {
 export interface RegistrationsReader {
   countConfirmed(eventId: string, tx?: TransactionContext): Promise<number>;
   listIds(eventId: string, tx: TransactionContext): Promise<string[]>;
+}
+
+/** Confirmed counts of many events in one read, keyed by event id (missing = 0). */
+export interface ConfirmedCountsReader {
+  countConfirmedByEvent(eventIds: string[]): Promise<Map<string, number>>;
 }
 
 /** Payments owned by the `payments` module. */

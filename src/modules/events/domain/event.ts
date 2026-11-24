@@ -17,6 +17,9 @@ export type InitialEventStatus = Extract<EventStatus, "draft" | "published">;
 const MAPS_ONLY_HOSTS = ["maps.google.com", "maps.app.goo.gl"];
 const SHARED_HOSTS = ["google.com", "www.google.com", "goo.gl"];
 
+/** Statuses shown on the club's public page: players can still sign up or see it is full. */
+export const LISTED_STATUSES: readonly EventStatus[] = ["published", "full"];
+
 /** Statuses whose details the organizer can still change. */
 const EDITABLE_STATUSES: readonly EventStatus[] = ["draft", "published", "full"];
 
@@ -75,6 +78,11 @@ export function assertCancellable(status: EventStatus): void {
 /** Capacity can't drop below the players already holding a spot. */
 export function assertCapacityCoversConfirmed(capacity: number, confirmed: number): void {
   if (capacity < confirmed) throw new CapacityBelowConfirmedError(capacity, confirmed);
+}
+
+/** Spots still free; never negative even if registrations outgrew a reduced capacity. */
+export function remainingSpots(capacity: number, confirmed: number): number {
+  return Math.max(0, capacity - confirmed);
 }
 
 /** An open event becomes full when every spot is taken, and reopens when spots are added. */

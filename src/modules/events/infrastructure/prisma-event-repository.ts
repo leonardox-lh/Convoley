@@ -19,6 +19,18 @@ export class PrismaEventRepository implements EventRepository {
     return findInClub(this.db, clubId, eventId);
   }
 
+  async listInClub(
+    clubId: string,
+    filter: { statuses: readonly EventStatus[]; from: Date },
+  ): Promise<EventDetails[]> {
+    const rows = await this.db.event.findMany({
+      where: { clubId, status: { in: [...filter.statuses] }, startsAt: { gte: filter.from } },
+      include: EVENT_INCLUDE,
+      orderBy: { startsAt: "asc" },
+    });
+    return rows.map(toEventDetails);
+  }
+
   async lockInClub(
     clubId: string,
     eventId: string,
@@ -60,9 +72,16 @@ async function findInClub(
 ): Promise<EventDetails | null> {
   const row = await client.event.findFirst({
     where: { id: eventId, clubId },
-    include: { community: { select: { name: true } } },
+    include: EVENT_INCLUDE,
   });
-  if (!row) return null;
+  return row ? toEventDetails(row) : null;
+}
+
+const EVENT_INCLUDE = { community: { select: { name: true } } } as const;
+
+function toEventDetails(
+  row: Prisma.EventGetPayload<{ include: typeof EVENT_INCLUDE }>,
+): EventDetails {
   return {
     id: row.id,
     clubId: row.clubId,

@@ -3,6 +3,7 @@ import { makeCancelEvent } from "./application/cancel-event";
 import { makeCreateEvent } from "./application/create-event";
 import { makeGetOrganizerEvent } from "./application/get-organizer-event";
 import { makeGetPublicEvent } from "./application/get-public-event";
+import { makeListOpenEvents } from "./application/list-open-events";
 import { makeUpdateEvent } from "./application/update-event";
 import { clubsAdapter } from "./infrastructure/clubs-adapter";
 import { paymentsAdapter } from "./infrastructure/payments-adapter";
@@ -16,6 +17,12 @@ const now = () => new Date();
 
 export const createEvent = makeCreateEvent({ clubs: clubsAdapter, events, now });
 export const getPublicEvent = makeGetPublicEvent({ clubs: clubsAdapter, events });
+export const listOpenEvents = makeListOpenEvents({
+  clubs: clubsAdapter,
+  events,
+  registrations: registrationsAdapter,
+  now,
+});
 export const getOrganizerEvent = makeGetOrganizerEvent({
   clubs: clubsAdapter,
   events,
