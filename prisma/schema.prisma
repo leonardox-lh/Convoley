@@ -169,6 +169,8 @@ model Club {
   payments    Payment[]
   products    Product[]
   orders      Order[]
+
+  mercadoPagoConnection MercadoPagoConnection?
 }
 
 // Single-use link to set a new password (HU-01). Only the sha256 of the token is stored.
@@ -302,6 +304,26 @@ model Payment {
   @@index([registrationId])
   @@index([orderId])
   @@index([clubId, createdAt])
+}
+
+// The organizer's Mercado Pago account, connected by OAuth (HU-18). Players' payments are
+// created with this token, so the money goes straight to the organizer: Convoley holds none.
+model MercadoPagoConnection {
+  id                    String   @id @default(cuid())
+  clubId                String   @unique
+  mpUserId              String   @unique
+  // AES-256-GCM with MP_TOKEN_ENCRYPTION_KEY; never stored in plain text.
+  accessTokenEncrypted  String
+  refreshTokenEncrypted String
+  // Not secret: the browser SDK needs it to tokenize cards and Yape.
+  publicKey             String
+  expiresAt             DateTime
+  liveMode              Boolean
+  connectedByUserId     String
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  club Club @relation(fields: [clubId], references: [id], onDelete: Cascade)
 }
 
 // ─── store ─────────────────────────────────────────────────────────────────

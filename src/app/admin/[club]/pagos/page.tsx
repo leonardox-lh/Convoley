@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { FormMessage } from "@/components/form";
-import { clubLogoPath, getPaymentSettings } from "@/modules/clubs";
+import { clubLogoPath, findClubBySlug, getPaymentSettings } from "@/modules/clubs";
 import { requireOrganizer } from "../require-organizer";
+import { MercadoPagoSection } from "./mercado-pago-section";
 import { PaymentSettingsForm } from "./payment-settings-form";
 
 type Props = PageProps<"/admin/[club]/pagos">;
@@ -20,9 +21,12 @@ export default function PaymentSettingsPage(props: Props) {
 async function PaymentSettingsContent({ params, searchParams }: Props) {
   const clubSlug = (await params).club;
   if ((await requireOrganizer(clubSlug))?.role !== "admin") notFound();
-  const settings = await getPaymentSettings(clubSlug);
-  if (!settings) notFound();
-  const { guardado } = await searchParams;
+  const [settings, club] = await Promise.all([
+    getPaymentSettings(clubSlug),
+    findClubBySlug(clubSlug),
+  ]);
+  if (!settings || !club) notFound();
+  const { guardado, mp } = await searchParams;
 
   return (
     <div className="flex flex-col gap-6">
@@ -32,6 +36,11 @@ async function PaymentSettingsContent({ params, searchParams }: Props) {
           Los jugadores te pagan directo a ti y suben su captura. Convoley nunca toca tu dinero.
         </p>
       </div>
+      <MercadoPagoSection
+        clubSlug={clubSlug}
+        clubId={club.id}
+        result={typeof mp === "string" ? mp : undefined}
+      />
       {guardado && <FormMessage tone="ok">Cambios guardados.</FormMessage>}
       {settings.paymentQrKey && (
         // eslint-disable-next-line @next/next/no-img-element -- served by our own route, already sized

@@ -3,11 +3,13 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import {
+  findClubBySlug,
   InvalidLogoTypeError,
   InvalidPaymentHolderError,
   LogoTooLargeError,
   updatePaymentSettings,
 } from "@/modules/clubs";
+import { disconnectMercadoPago } from "@/modules/payments";
 import { InvalidPhoneNumberError, PhoneNumber } from "@/modules/registrations";
 import { logoFromForm } from "@/app/club/club-form-schema";
 import { PHONE_FORMAT_MESSAGE } from "@/app/player-schema";
@@ -66,4 +68,15 @@ function renameFile(formData: FormData, from: string, to: string) {
   const file = formData.get(from);
   if (file) copy.set(to, file);
   return copy;
+}
+
+const disconnectSchema = z.object({ clubSlug: z.string().min(1) });
+
+/** HU-18: forget the Mercado Pago tokens; players go back to paying by voucher. */
+export async function disconnectMercadoPagoAction(formData: FormData): Promise<void> {
+  const { clubSlug } = disconnectSchema.parse(Object.fromEntries(formData));
+  if ((await requireOrganizer(clubSlug))?.role !== "admin") return;
+  const club = await findClubBySlug(clubSlug);
+  if (club) await disconnectMercadoPago(club.id);
+  redirect(`/admin/${clubSlug}/pagos?mp=desconectado`);
 }

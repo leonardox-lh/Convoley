@@ -18,3 +18,26 @@ export class InvalidSecurityCodeError extends Error {
     this.name = "InvalidSecurityCodeError";
   }
 }
+
+export class MercadoPagoNotConnectedError extends Error {
+  constructor(readonly clubId: string) {
+    super(`Club ${clubId} has no Mercado Pago account connected`);
+    this.name = "MercadoPagoNotConnectedError";
+  }
+}
+
+/** Mercado Pago refused the OAuth code or refresh token (expired, revoked, wrong app). */
+export class MercadoPagoAuthorizationError extends Error {
+  constructor(readonly detail: string) {
+    super(`Mercado Pago authorization failed: ${detail}`);
+    this.name = "MercadoPagoAuthorizationError";
+  }
+}
+
+/** The Mercado Pago account is already connected to another club. */
+export class MercadoPagoAccountInUseError extends Error {
+  constructor() {
+    super("This Mercado Pago account is already connected to another club");
+    this.name = "MercadoPagoAccountInUseError";
+  }
+}
