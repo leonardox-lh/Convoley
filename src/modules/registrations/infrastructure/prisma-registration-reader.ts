@@ -39,6 +39,5 @@ export const prismaRegistrationListReader: RegistrationListReader = {
         status: true,
         createdAt: true,
       },
-      orderBy: { createdAt: "asc" },
     }),
 };

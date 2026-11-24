@@ -90,7 +90,9 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
       </nav>
 
       {registrations.length === 0 ? (
-        <p className="text-sm text-zinc-500">No hay inscritos {status && "con este estado"}.</p>
+        <p className="text-sm text-zinc-500">
+          {status ? "No hay inscritos con este estado." : "Todavía no hay inscritos."}
+        </p>
       ) : (
         <ol
           aria-label="Inscritos"

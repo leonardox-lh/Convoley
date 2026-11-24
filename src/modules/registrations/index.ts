@@ -26,7 +26,6 @@ export {
   seatSummary,
   type RegistrationStatus,
 } from "./domain/registration";
-export type { RegistrationListItem } from "./application/ports";
 export {
   DuplicateRegistrationError,
   EventFullError,
