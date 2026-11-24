@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { getOrganizerEvent } from "@/modules/events";
 import { listVouchersInReview, signVoucherPath } from "@/modules/payments";
 import {
+  buildRoster,
   REJECTION_REASON_MAX_LENGTH,
   listEventRegistrations,
   seatSummary,
@@ -17,6 +18,7 @@ import { requireOrganizer } from "../../require-organizer";
 import { AddPlayerForm } from "./add-player-form";
 import { AutoRefresh } from "./auto-refresh";
 import { RegistrationActions } from "./registration-actions";
+import { ListSharing } from "./list-sharing";
 import { VoucherReview } from "./voucher-review";
 
 type Props = PageProps<"/admin/[club]/convocatorias/[event]">;
@@ -98,6 +100,10 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
       </p>
 
       {event.status === "published" && <AddPlayerForm clubSlug={clubSlug} eventId={event.id} />}
+
+      {!status && registrations.length > 0 && (
+        <ListSharing imagePath={`${basePath}/imagen`} fileName={`lista-${event.id}`} />
+      )}
 
       <nav aria-label="Filtrar por estado de pago" className="flex flex-wrap gap-2">
         <FilterLink href={basePath} active={!status} label="Todos" />

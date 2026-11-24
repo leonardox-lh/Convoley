@@ -85,6 +85,7 @@ export const listPlayerRegistrations = makeListPlayerRegistrations({
 });
 
 export { PhoneNumber } from "./domain/phone-number";
+export { buildRoster, rosterText, type Roster } from "./domain/roster";
 export type { RegisterGuestInput } from "./application/register-guest";
 export {
   acceptsWaitlist,
