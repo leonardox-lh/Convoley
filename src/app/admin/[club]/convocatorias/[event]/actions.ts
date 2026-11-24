@@ -47,7 +47,7 @@ async function authorize(target: z.infer<typeof targetSchema>) {
   const organizer = await requireOrganizer(target.clubSlug);
   if (!organizer) return null;
   const event = await getOrganizerEvent({ clubSlug: target.clubSlug, eventId: target.eventId });
-  return event && organizer.userId;
+  return event ? organizer.userId : null;
 }
 
 async function run(
