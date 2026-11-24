@@ -53,6 +53,7 @@ export interface StoredRegistration extends PlayerDetails {
   id: string;
   eventId: string;
   status: RegistrationStatus;
+  reservedUntil?: Date | null;
 }
 
 export function fakeRegistrationRepository(initial: StoredRegistration[] = []) {
@@ -71,7 +72,7 @@ export function fakeRegistrationRepository(initial: StoredRegistration[] = []) {
     reactivate: async (id, player, status) => {
       const index = rows.findIndex((candidate) => candidate.id === id);
       const [row] = rows.splice(index, 1);
-      rows.push(Object.assign(row!, player, { status }));
+      rows.push(Object.assign(row!, player, { status, reservedUntil: null }));
     },
     promoteWaitlisted: async (eventId, seats) => {
       const waiting = rows.filter((row) => row.eventId === eventId && row.status === "waitlisted");
@@ -88,7 +89,24 @@ export function fakeRegistrationRepository(initial: StoredRegistration[] = []) {
       rows.find((row) => row.id === id && row.eventId === eventId) ?? null,
     findById: async (id) => rows.find((row) => row.id === id) ?? null,
     setStatus: async (id, status) => {
-      rows.find((row) => row.id === id)!.status = status;
+      Object.assign(
+        rows.find((row) => row.id === id)!,
+        { status, reservedUntil: null },
+      );
+    },
+    reserve: async (id, until) => {
+      rows.find((row) => row.id === id)!.reservedUntil = until;
+    },
+    releaseExpired: async (eventId, now) => {
+      const expired = rows.filter(
+        (row) =>
+          row.eventId === eventId &&
+          row.status === "pending_payment" &&
+          row.reservedUntil != null &&
+          row.reservedUntil <= now,
+      );
+      expired.forEach((row) => Object.assign(row, { status: "cancelled", reservedUntil: null }));
+      return expired.length;
     },
   };
   return { repository, rows };

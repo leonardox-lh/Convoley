@@ -2,6 +2,7 @@ import { DuplicateRegistrationError, EventNotOpenError } from "../domain/errors"
 import { PhoneNumber } from "../domain/phone-number";
 import {
   assertSpotAvailable,
+  reservationDeadline,
   signUpStatus,
   type PlayerLevel,
   type PlayerPosition,
@@ -13,6 +14,7 @@ import type {
   TransactionContext,
   TransactionRunner,
 } from "./ports";
+import { releaseExpiredReservations } from "./seats";
 
 export interface RegisterGuestInput {
   eventId: string;
@@ -50,8 +52,9 @@ export async function registerPlayer(
   };
 
   // The lock serializes sign-ups to this event: the count below can't go stale.
-  const event = await deps.events.lock(input.eventId, tx);
-  if (!event) throw new EventNotOpenError(input.eventId);
+  const locked = await deps.events.lock(input.eventId, tx);
+  if (!locked) throw new EventNotOpenError(input.eventId);
+  const event = await releaseExpiredReservations(deps, locked, deps.now(), tx);
 
   const existing = await deps.registrations.findByPhone(event.id, phone, tx);
   if (existing && existing.status !== "cancelled") throw new DuplicateRegistrationError(event.id);
@@ -74,13 +77,28 @@ export async function registerPlayer(
   return { id, event, status };
 }
 
-export function makeRegisterGuest(deps: RegisterPlayerDeps & { transactions: TransactionRunner }) {
+export function makeRegisterGuest(
+  deps: RegisterPlayerDeps & {
+    transactions: TransactionRunner;
+    /** Clubs that charge through Mercado Pago hold the seat only while the player pays. */
+    mercadoPago: { isEnabled(clubId: string): Promise<boolean> };
+  },
+) {
   return async function registerGuest(input: RegisterGuestInput) {
     return deps.transactions.run(async (tx) => {
-      const { id, status } = await registerPlayer(deps, { ...input, allowWaitlist: true }, tx);
+      const { id, event, status } = await registerPlayer(
+        deps,
+        { ...input, allowWaitlist: true },
+        tx,
+      );
       const waitlistPosition =
         status === "waitlisted" ? await deps.registrations.waitlistPosition(id, tx) : null;
-      return { id, status, waitlistPosition };
+      let reservedUntil: Date | null = null;
+      if (status === "pending_payment" && (await deps.mercadoPago.isEnabled(event.clubId))) {
+        reservedUntil = reservationDeadline(deps.now());
+        await deps.registrations.reserve(id, reservedUntil, tx);
+      }
+      return { id, status, waitlistPosition, reservedUntil };
     });
   };
 }

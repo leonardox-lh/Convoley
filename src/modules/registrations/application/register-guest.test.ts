@@ -29,6 +29,7 @@ function setup(event: EventSeatInfo | null, existing: StoredRegistration[] = [])
   const registerGuest = makeRegisterGuest({
     events: seats,
     registrations: repository,
+    mercadoPago: { isEnabled: async () => false },
     transactions: fakeTransactions,
     now: () => NOW,
   });
@@ -54,7 +55,12 @@ describe("HU-06 criterio 2: invitado con celular, sin cuenta", () => {
 
     const result = await registerGuest(input);
 
-    expect(result).toEqual({ id: "reg-1", status: "pending_payment", waitlistPosition: null });
+    expect(result).toEqual({
+      id: "reg-1",
+      status: "pending_payment",
+      waitlistPosition: null,
+      reservedUntil: null,
+    });
     expect(rows).toEqual([
       {
         id: "reg-1",
@@ -131,6 +137,7 @@ describe("HU-06: cupos y estado de la convocatoria", () => {
       id: "reg-3",
       status: "waitlisted",
       waitlistPosition: 1,
+      reservedUntil: null,
     });
     expect(markFull).toEqual([]);
   });

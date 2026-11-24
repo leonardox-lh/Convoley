@@ -41,7 +41,11 @@ beforeAll(async () => {
     registrations: prismaRegistrationRepository,
     transactions: prismaTransactions(db),
   };
-  registerGuest = makeRegisterGuest({ ...deps, now: () => new Date("2030-12-01T12:00:00Z") });
+  registerGuest = makeRegisterGuest({
+    ...deps,
+    mercadoPago: { isEnabled: async () => false },
+    now: () => new Date("2030-12-01T12:00:00Z"),
+  });
   removeRegistration = makeRemoveRegistration(deps);
   const club = await db.club.create({
     data: {
@@ -113,5 +117,40 @@ describe("HU-12: lista de espera en la base de datos", () => {
     const { waitlistPosition } =
       await import("@/modules/registrations/infrastructure/prisma-registration-reader");
     expect(await waitlistPosition(second.id, db)).toBe(1);
+  });
+});
+
+describe("HU-21: reserva de 10 minutos en la base de datos", () => {
+  it("HU-21 criterio 2: una reserva vencida no cuenta y se libera en la siguiente inscripción", async () => {
+    const event = await db.event.create({
+      data: {
+        clubId,
+        communityId,
+        title: "Reserva",
+        startsAt: new Date("2030-12-10T01:00:00Z"),
+        venueName: "Coliseo",
+        priceCents: 1500,
+        capacity: 1,
+        status: "published",
+      },
+    });
+    const { countConfirmedRegistrations } =
+      await import("@/modules/registrations/infrastructure/prisma-registration-reader");
+    const expired = await db.registration.create({
+      data: {
+        ...player(event.id, "+51944444444"),
+        status: "pending_payment",
+        reservedUntil: new Date(Date.now() - 1000),
+      },
+    });
+    await db.event.update({ where: { id: event.id }, data: { status: "full" } });
+
+    expect(await countConfirmedRegistrations(event.id, db)).toBe(0);
+
+    const next = await registerGuest(player(event.id, "955555555"));
+
+    expect(next.status).toBe("pending_payment");
+    const released = await db.registration.findUniqueOrThrow({ where: { id: expired.id } });
+    expect(released).toMatchObject({ status: "cancelled", reservedUntil: null });
   });
 });

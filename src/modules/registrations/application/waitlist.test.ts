@@ -36,7 +36,11 @@ function setup(event: EventSeatInfo, existing: StoredRegistration[]) {
     rows,
     reopened,
     repository,
-    registerGuest: makeRegisterGuest({ ...deps, now: () => NOW }),
+    registerGuest: makeRegisterGuest({
+      ...deps,
+      mercadoPago: { isEnabled: async () => false },
+      now: () => NOW,
+    }),
     removeRegistration: makeRemoveRegistration(deps),
     addPlayerManually: makeAddPlayerManually({
       ...deps,

@@ -38,6 +38,7 @@ const now = () => new Date();
 export const registerGuest = makeRegisterGuest({
   events: eventsAdapter,
   registrations: prismaRegistrationRepository,
+  mercadoPago: mercadoPagoGatewayAdapter,
   transactions,
   now,
 });

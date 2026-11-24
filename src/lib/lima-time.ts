@@ -22,6 +22,16 @@ export function formatInLima(date: Date): string {
   return limaFormatter.format(date);
 }
 
+const limaTimeFormatter = new Intl.DateTimeFormat("es-PE", {
+  timeZone: LIMA_TIME_ZONE,
+  timeStyle: "short",
+});
+
+/** Only the hour in Lima, like "7:10 p. m.", for deadlines within the same day. */
+export function formatTimeInLima(date: Date): string {
+  return limaTimeFormatter.format(date);
+}
+
 const limaPartsFormatter = new Intl.DateTimeFormat("en-CA", {
   timeZone: LIMA_TIME_ZONE,
   year: "numeric",

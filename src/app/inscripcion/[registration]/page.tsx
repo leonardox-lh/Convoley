@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { FormMessage } from "@/components/form";
-import { formatInLima } from "@/lib/lima-time";
+import { formatInLima, formatTimeInLima } from "@/lib/lima-time";
 import { cn } from "@/lib/utils";
 import { listEventSummaries } from "@/modules/events";
 import { findClubBySlug } from "@/modules/clubs";
@@ -48,7 +48,13 @@ async function RegistrationContent({ params, searchParams }: Props) {
   const [event] = await listEventSummaries([registration.eventId]);
   if (!event) notFound();
   const { enviado, pagado } = await searchParams;
-  const awaitingPayment = registration.status === "pending_payment" && event.status !== "cancelled";
+  // HU-21: an ended reservation no longer holds the seat, even before a sign-up releases it.
+  const reservationEnded =
+    registration.status === "pending_payment" &&
+    registration.reservedUntil !== null &&
+    registration.reservedUntil <= new Date();
+  const awaitingPayment =
+    registration.status === "pending_payment" && event.status !== "cancelled" && !reservationEnded;
   const mercadoPago = awaitingPayment ? await mercadoPagoCheckout(event.clubSlug) : null;
 
   return (
@@ -89,12 +95,28 @@ async function RegistrationContent({ params, searchParams }: Props) {
           de la lista de espera. Si se libera un cupo, pasas automáticamente y te toca pagar.
         </p>
       )}
+      {reservationEnded && (
+        <FormMessage tone="error">
+          Se venció tu reserva de 10 minutos y el cupo se liberó.{" "}
+          <Link href={`/c/${event.clubSlug}/${event.id}`} className="underline">
+            Vuelve a inscribirte
+          </Link>{" "}
+          si aún hay cupo.
+        </FormMessage>
+      )}
       {registration.status === "in_review" && (
         <p className="text-sm text-zinc-500">El organizador está revisando tu pago.</p>
       )}
       {awaitingPayment && mercadoPago && (
         <section className="flex flex-col gap-4 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
           <h2 className="text-lg font-semibold">Paga con Yape o tarjeta</h2>
+          {registration.reservedUntil && (
+            <p className="text-sm">
+              Tu cupo está reservado hasta las{" "}
+              <span className="font-semibold">{formatTimeInLima(registration.reservedUntil)}</span>.
+              Si no pagas antes, se libera para otro jugador.
+            </p>
+          )}
           <MercadoPagoCheckout
             registrationId={registration.id}
             publicKey={mercadoPago.publicKey}

@@ -52,7 +52,7 @@ Todo va en `.env.local` (no versionado), nunca en el chat ni en el repo.
 - [x] HU-18 · Conectar Mercado Pago
 - [x] HU-19 · Pagar con Yape o tarjeta
 - [x] HU-20 · Webhook marca pagado
-- [ ] HU-21 · Reserva de 10 minutos
+- [x] HU-21 · Reserva de 10 minutos
 - [ ] HU-22 · Cargo por servicio
 
 ## Decisiones tomadas sin consultar
@@ -60,3 +60,6 @@ Todo va en `.env.local` (no versionado), nunca en el chat ni en el repo.
 - HU-19/HU-20 van en un solo commit: comparten el caso de uso idempotente de liquidación (`settleMercadoPagoPayment`), que usan tanto la respuesta directa del cobro como el webhook.
 - Un pago rechazado deja la inscripción en `pending_payment` para que el jugador reintente; cada intento es un `Payment` nuevo con su propia clave de idempotencia.
 - Se valida club, monto exacto y moneda PEN con los datos que devuelve `GET /v1/payments/{id}`; si no coinciden, no se marca nada ("mismatch").
+- HU-21 sin cron: las reservas vencidas se liberan dentro del candado del evento en la siguiente escritura (inscripción, cobro o liquidación), y los conteos de lectura ya no las cuentan. La página del jugador muestra "se venció tu reserva" aunque la fila aún no se haya liberado.
+- Con la reserva vencida no se puede iniciar un cobro (el cupo puede ser de otro). Si un pago llega tarde, HU-20 decide: toma un cupo libre o se devuelve y pasa a la lista de espera.
+- `docs/MODELO_DATOS.md` se actualizó con `MercadoPagoConnection`, `reservedUntil` y `serviceFeeCents` (lo exige el test de HT-03).

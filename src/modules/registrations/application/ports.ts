@@ -68,7 +68,12 @@ export interface RegistrationRepository {
     id: string,
     tx: TransactionContext,
   ): Promise<{ id: string; eventId: string; status: RegistrationStatus } | null>;
+  /** Any status change also ends a reservation (HU-21). */
   setStatus(id: string, status: RegistrationStatus, tx: TransactionContext): Promise<void>;
+  /** HU-21: holds the seat of a pending payment until `until`. */
+  reserve(id: string, until: Date, tx: TransactionContext): Promise<void>;
+  /** HU-21: cancels pending payments whose reservation ended; returns how many seats it freed. */
+  releaseExpired(eventId: string, now: Date, tx: TransactionContext): Promise<number>;
 }
 
 /** Payments owned by the `payments` module. */

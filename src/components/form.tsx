@@ -4,7 +4,13 @@ import { startTransition, type FormEvent } from "react";
 export const fieldClass =
   "w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-base dark:border-zinc-700 dark:bg-zinc-900";
 
-export function FormMessage({ tone, children }: { tone: "error" | "ok"; children: string }) {
+export function FormMessage({
+  tone,
+  children,
+}: {
+  tone: "error" | "ok";
+  children: React.ReactNode;
+}) {
   const colors =
     tone === "error"
       ? "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"

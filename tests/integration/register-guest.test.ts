@@ -38,6 +38,7 @@ beforeAll(async () => {
   registerGuest = makeRegisterGuest({
     events: eventsAdapter,
     registrations: prismaRegistrationRepository,
+    mercadoPago: { isEnabled: async () => false },
     transactions: prismaTransactions(db),
     now: () => new Date("2030-12-01T12:00:00.000Z"),
   });

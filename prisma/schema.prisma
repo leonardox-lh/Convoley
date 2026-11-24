@@ -252,17 +252,19 @@ model Event {
 
 // A guest registration is simply one with userId = null.
 model Registration {
-  id        String             @id @default(cuid())
-  eventId   String
-  userId    String?
-  firstName String
-  lastName  String
-  phone     String
-  position  PlayerPosition?
-  level     PlayerLevel?
-  status    RegistrationStatus @default(pending_payment)
-  createdAt DateTime           @default(now())
-  updatedAt DateTime           @updatedAt
+  id            String             @id @default(cuid())
+  eventId       String
+  userId        String?
+  firstName     String
+  lastName      String
+  phone         String
+  position      PlayerPosition?
+  level         PlayerLevel?
+  status        RegistrationStatus @default(pending_payment)
+  // HU-21: while paying with Mercado Pago the seat is held only until this moment.
+  reservedUntil DateTime?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
 
   event    Event     @relation(fields: [eventId], references: [id], onDelete: Restrict)
   user     User?     @relation(fields: [userId], references: [id], onDelete: SetNull)

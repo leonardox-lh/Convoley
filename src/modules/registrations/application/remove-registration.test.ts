@@ -37,6 +37,7 @@ function setup(event: EventSeatInfo | null, existing: StoredRegistration[]) {
   const registerGuest = makeRegisterGuest({
     events: seats,
     registrations: repository,
+    mercadoPago: { isEnabled: async () => false },
     transactions: fakeTransactions,
     now: () => NOW,
   });

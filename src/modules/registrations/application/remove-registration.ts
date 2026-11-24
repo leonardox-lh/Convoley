@@ -1,6 +1,7 @@
 import { EventNotOpenError, RegistrationNotFoundError } from "../domain/errors";
 import { holdsSeat } from "../domain/registration";
 import type { EventSeats, RegistrationRepository, TransactionRunner } from "./ports";
+import { fillFreedSeats } from "./seats";
 
 export interface RemoveRegistrationInput {
   eventId: string;
@@ -29,10 +30,7 @@ export function makeRemoveRegistration(deps: {
 
       const freesSeat = holdsSeat(registration.status);
       await deps.registrations.setStatus(registration.id, "cancelled", tx);
-      if (!freesSeat) return;
-
-      const promoted = await deps.registrations.promoteWaitlisted(event.id, 1, tx);
-      if (promoted === 0 && event.status === "full") await deps.events.reopen(event.id, tx);
+      if (freesSeat) await fillFreedSeats(deps, event, 1, tx);
     });
   };
 }

@@ -5,18 +5,22 @@ import type { PlayerRegistrations, RegistrationListReader } from "../application
 
 type Client = Prisma.TransactionClient;
 
+/** Holding a seat; an expired reservation (HU-21) doesn't, even before a write releases it. */
+const holdingSeat = (): Prisma.RegistrationWhereInput => ({
+  status: { in: [...SEAT_HOLDING_STATUSES] },
+  OR: [{ reservedUntil: null }, { reservedUntil: { gt: new Date() } }],
+});
+
 /** Confirmed registrations (the ones holding a spot) of an event. */
 export async function countConfirmedRegistrations(eventId: string, tx: Client = db) {
-  return tx.registration.count({
-    where: { eventId, status: { in: [...SEAT_HOLDING_STATUSES] } },
-  });
+  return tx.registration.count({ where: { eventId, ...holdingSeat() } });
 }
 
 /** Confirmed registrations of many events in a single query, keyed by event id. */
 export async function countConfirmedRegistrationsByEvent(eventIds: string[]) {
   const groups = await db.registration.groupBy({
     by: ["eventId"],
-    where: { eventId: { in: eventIds }, status: { in: [...SEAT_HOLDING_STATUSES] } },
+    where: { eventId: { in: eventIds }, ...holdingSeat() },
     _count: { _all: true },
   });
   return new Map(groups.map((group) => [group.eventId, group._count._all]));
@@ -101,7 +105,14 @@ export async function waitlistPosition(registrationId: string, tx: Client = db) 
 export async function findRegistrationOverview(registrationId: string) {
   const registration = await db.registration.findUnique({
     where: { id: registrationId },
-    select: { id: true, eventId: true, firstName: true, lastName: true, status: true },
+    select: {
+      id: true,
+      eventId: true,
+      firstName: true,
+      lastName: true,
+      status: true,
+      reservedUntil: true,
+    },
   });
   if (!registration) return null;
   return { ...registration, waitlistPosition: await waitlistPosition(registration.id) };

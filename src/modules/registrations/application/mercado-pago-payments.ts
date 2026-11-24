@@ -13,6 +13,7 @@ import type {
   RegistrationRepository,
   TransactionRunner,
 } from "./ports";
+import { releaseExpiredReservations } from "./seats";
 
 const PERUVIAN_SOLES = "PEN";
 const SETTLEMENTS_THAT_REFUND: Settlement[] = ["refund", "refund_to_waitlist", "retry_refund"];
@@ -51,11 +52,15 @@ export function makeSettleMercadoPagoPayment(deps: Deps) {
     const registrationId = payment.registrationId;
 
     const decision = await deps.transactions.run(async (tx) => {
-      const registration = await deps.registrations.findById(registrationId, tx);
-      if (!registration) throw new RegistrationNotFoundError(registrationId);
+      const found = await deps.registrations.findById(registrationId, tx);
+      if (!found) throw new RegistrationNotFoundError(registrationId);
       // The event lock serializes settlements, sign-ups and removals of this event.
-      const event = await deps.events.lock(registration.eventId, tx);
-      if (!event) throw new EventNotOpenError(registration.eventId);
+      const locked = await deps.events.lock(found.eventId, tx);
+      if (!locked) throw new EventNotOpenError(found.eventId);
+      // A payment that lands after its reservation ended finds the seat released (HU-21).
+      const event = await releaseExpiredReservations(deps, locked, deps.now(), tx);
+      const registration = await deps.registrations.findInEvent(registrationId, event.id, tx);
+      if (!registration) throw new RegistrationNotFoundError(registrationId);
       const current = await deps.records.find({ id: payment.id }, tx);
       if (!current) return "ignore" as const;
       const confirmed = await deps.registrations.countConfirmed(event.id, tx);
@@ -163,9 +168,13 @@ export function makeStartMercadoPagoPayment(
     const pending = await deps.transactions.run(async (tx) => {
       const registration = await deps.registrations.findById(input.registrationId, tx);
       if (!registration) throw new RegistrationNotFoundError(input.registrationId);
-      const event = await deps.events.lock(registration.eventId, tx);
-      if (!event || event.status === "cancelled") throw new EventNotOpenError(registration.eventId);
-      if (event.startsAt <= deps.now()) throw new EventNotOpenError(event.id);
+      const locked = await deps.events.lock(registration.eventId, tx);
+      if (!locked || locked.status === "cancelled") {
+        throw new EventNotOpenError(registration.eventId);
+      }
+      if (locked.startsAt <= deps.now()) throw new EventNotOpenError(locked.id);
+      // An expired reservation can't be paid: the seat may belong to someone else now (HU-21).
+      const event = await releaseExpiredReservations(deps, locked, deps.now(), tx);
       const current = await deps.registrations.findInEvent(registration.id, event.id, tx);
       if (!current) throw new RegistrationNotFoundError(registration.id);
       assertAwaitingPayment(current);

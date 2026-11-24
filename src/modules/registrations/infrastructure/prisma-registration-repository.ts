@@ -53,7 +53,7 @@ export const prismaRegistrationRepository: RegistrationRepository = {
     // A new createdAt puts the comeback at the end of the list and of the waitlist.
     await toPrismaTx(tx).registration.update({
       where: { id },
-      data: { ...player, status, createdAt: new Date() },
+      data: { ...player, status, reservedUntil: null, createdAt: new Date() },
     });
   },
 
@@ -74,6 +74,21 @@ export const prismaRegistrationRepository: RegistrationRepository = {
     }),
 
   async setStatus(id, status, tx) {
-    await toPrismaTx(tx).registration.update({ where: { id }, data: { status } });
+    await toPrismaTx(tx).registration.update({
+      where: { id },
+      data: { status, reservedUntil: null },
+    });
+  },
+
+  async reserve(id, until, tx) {
+    await toPrismaTx(tx).registration.update({ where: { id }, data: { reservedUntil: until } });
+  },
+
+  async releaseExpired(eventId, now, tx) {
+    const { count } = await toPrismaTx(tx).registration.updateMany({
+      where: { eventId, status: "pending_payment", reservedUntil: { lte: now } },
+      data: { status: "cancelled", reservedUntil: null },
+    });
+    return count;
   },
 };

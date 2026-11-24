@@ -28,6 +28,14 @@ export interface EventSeatInfo {
   startsAt: Date;
 }
 
+/** HU-21: how long a seat waits for a Mercado Pago payment before it frees up. */
+export const RESERVATION_MINUTES = 10;
+const MS_PER_MINUTE = 60_000;
+
+export function reservationDeadline(now: Date): Date {
+  return new Date(now.getTime() + RESERVATION_MINUTES * MS_PER_MINUTE);
+}
+
 /** Players can sign up only to published events that haven't started. */
 export function isOpenForRegistration(
   event: Pick<EventSeatInfo, "status" | "startsAt">,

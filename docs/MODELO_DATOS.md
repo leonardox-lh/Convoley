@@ -28,6 +28,7 @@ erDiagram
   Registration ||--o{ Payment : "intentos de pago"
   Order ||--o{ Payment : "intentos de pago"
   Club ||--o{ Payment : "cobra"
+  Club ||--o| MercadoPagoConnection : "cobra con"
   User |o--o{ Payment : "revisa voucher"
   Club ||--o{ Product : "vende"
   Product ||--o{ ProductVariant : "tallas"
@@ -75,12 +76,22 @@ erDiagram
     string userId FK "null = invitado"
     string phone "único por evento"
     RegistrationStatus status
+    datetime reservedUntil "HU-21: cupo reservado mientras paga con MP"
+  }
+  MercadoPagoConnection {
+    string clubId FK,UK
+    string mpUserId UK "cuenta del organizador"
+    string accessTokenEncrypted "AES-256-GCM"
+    string refreshTokenEncrypted "AES-256-GCM"
+    string publicKey "para el SDK del navegador"
+    datetime expiresAt
   }
   Payment {
     string id PK
     string registrationId FK "XOR orderId"
     string orderId FK
-    int amountCents
+    int amountCents "precio + cargo por servicio"
+    int serviceFeeCents
     PaymentMethod method
     PaymentStatus status
     string providerPaymentId UK "idempotencia webhook"
@@ -124,7 +135,7 @@ erDiagram
 | `clubs` | `Club`, `ClubMember`, `Community` | HU-01, HU-02, HU-09, HU-33 |
 | `events` | `Event` | HU-03, HU-04, HU-05 |
 | `registrations` | `Registration` | HU-06, HU-07, HU-08, HU-48 |
-| `payments` | `Payment` | HU-08, HU-14, HU-15, HU-19, HU-20 |
+| `payments` | `Payment`, `MercadoPagoConnection` | HU-08, HU-14, HU-15, HU-18, HU-19, HU-20 |
 | `store` | `Product`, `ProductVariant`, `Order`, `OrderItem` | HU-23, HU-24, HU-25 |
 
 Cada módulo solo lee y escribe sus propias tablas (ver `docs/ARQUITECTURA.md`). `Event.clubId` se repite aunque se pueda sacar de la comunidad, para que `events` filtre por club sin consultar tablas de `clubs`.
@@ -135,7 +146,9 @@ Cada módulo solo lee y escribe sus propias tablas (ver `docs/ARQUITECTURA.md`).
 - **Inscripción duplicada**: `@@unique([eventId, phone])` la rechaza en la base incluso si llegan dos a la vez. Si alguien cancela y vuelve, se reactiva la misma fila.
 - **Pagos**: una tabla para inscripciones y pedidos; un `CHECK` exige exactamente uno de `registrationId` u `orderId`. Una fila por intento: un voucher rechazado queda como historial y el siguiente es otra fila.
 - **Recuperar contraseña (HU-01)**: `PasswordResetToken` guarda solo el sha256 del token del link (`tokenHash @unique`), vence en 1 hora y es de un solo uso: `usedAt` se marca con un `UPDATE ... WHERE usedAt IS NULL` en la misma transacción que cambia `passwordHash`. Pedir otro link borra los anteriores sin usar.
-- **Webhook idempotente**: `providerPaymentId @unique`.
+- **Webhook idempotente**: `providerPaymentId @unique`. Un pago en estado final (`approved`, `rejected`, `refunded`) no se vuelve a liquidar; `refund_pending` reintenta la devolución.
+- **Mercado Pago por organizador (HU-18)**: `MercadoPagoConnection` guarda los tokens OAuth cifrados con `MP_TOKEN_ENCRYPTION_KEY`. Una cuenta de MP solo puede estar conectada a un club (`mpUserId @unique`). Desconectar borra la fila y conserva los pagos.
+- **Reserva de cupo (HU-21)**: con MP conectado, una inscripción `pending_payment` guarda `reservedUntil` (10 minutos). Vencida, no cuenta como cupo; la siguiente escritura del evento la pasa a `cancelled` y el cupo va a la lista de espera. Cualquier cambio de estado borra `reservedUntil`.
 - **Convoley no retiene dinero**: no hay saldos ni cuentas internas; `Payment` solo registra lo que pasó en la cuenta de Mercado Pago del organizador.
 - **Cancelar una convocatoria (HU-05)**: el organizador elige `refund` (devolución) o `balance` (saldo a favor). Se guarda en `Event.cancellationOutcome` (lo que ven los inscritos) y en cada `Payment` `approved` o `in_review` aún sin marcar, en la misma transacción. Es solo una marca: la devolución la hace el organizador en Mercado Pago. HU-14 debe marcar igual un pago que se apruebe después de la cancelación.
 - **Confirmados**: las inscripciones que ocupan cupo son las que no están `cancelled` (pagadas o no). Los cupos no pueden bajar de ese número.
@@ -150,8 +163,6 @@ Cada módulo solo lee y escribe sus propias tablas (ver `docs/ARQUITECTURA.md`).
 | Posición y nivel del jugador | HU-10 |
 | Lista de espera (`WaitlistEntry`) | HU-12 |
 | Configuración de Yape / QR | HU-13 |
-| Conexión OAuth de Mercado Pago (tokens cifrados) | HU-18 |
-| Reserva temporal de cupo (`reservedUntil`) | HU-21 |
 | Comisión de servicio | HU-22 |
 | Planes y créditos | HU-26, HU-27 |
 | Convocatorias recurrentes | HU-28 |
