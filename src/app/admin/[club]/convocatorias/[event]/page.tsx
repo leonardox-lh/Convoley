@@ -4,7 +4,9 @@ import { Suspense } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
 import { getOrganizerEvent } from "@/modules/events";
+import { listVouchersInReview, signVoucherPath } from "@/modules/payments";
 import {
+  REJECTION_REASON_MAX_LENGTH,
   listEventRegistrations,
   seatSummary,
   type RegistrationStatus,
@@ -15,6 +17,7 @@ import { requireOrganizer } from "../../require-organizer";
 import { AddPlayerForm } from "./add-player-form";
 import { AutoRefresh } from "./auto-refresh";
 import { RegistrationActions } from "./registration-actions";
+import { VoucherReview } from "./voucher-review";
 
 type Props = PageProps<"/admin/[club]/convocatorias/[event]">;
 
@@ -63,6 +66,18 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
     ...listed.filter((registration) => registration.status === "waitlisted"),
   ];
   const waitlistStart = registrations.findIndex((r) => r.status === "waitlisted");
+  const vouchers = await listVouchersInReview(
+    registrations.filter((r) => r.status === "in_review").map((r) => r.id),
+  );
+  const voucherViews = new Map(
+    [...vouchers].map(([registrationId, voucher]) => [
+      registrationId,
+      {
+        imageUrl: voucher.proofFileKey ? signVoucherPath(voucher.proofFileKey) : null,
+        securityCode: voucher.yapeSecurityCode,
+      },
+    ]),
+  );
   const seats = seatSummary(event.capacity, event.confirmedCount);
   const basePath = `/admin/${clubSlug}/convocatorias/${event.id}`;
   const listEditable = event.status !== "cancelled";
@@ -137,6 +152,16 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
               >
                 {STATUS_LABELS[registration.status]}
               </span>
+              {listEditable && voucherViews.has(registration.id) && (
+                <VoucherReview
+                  clubSlug={clubSlug}
+                  eventId={event.id}
+                  registrationId={registration.id}
+                  playerName={registration.firstName}
+                  reasonMaxLength={REJECTION_REASON_MAX_LENGTH}
+                  {...voucherViews.get(registration.id)!}
+                />
+              )}
               {listEditable && registration.status !== "cancelled" && (
                 <RegistrationActions
                   clubSlug={clubSlug}

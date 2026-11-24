@@ -19,3 +19,11 @@ export {
   InvalidVoucherTypeError,
   VoucherTooLargeError,
 } from "./domain/errors";
+export {
+  approveVoucher,
+  findLastVoucherRejection,
+  findVoucherInReview,
+  listVouchersInReview,
+  rejectVoucher,
+} from "./infrastructure/prisma-voucher-review";
+export { signVoucherPath, verifyVoucherSignature } from "./infrastructure/voucher-url";

@@ -3,6 +3,7 @@ import type {
   EventSeats,
   ManualPayments,
   VoucherPayments,
+  VoucherReviews,
   RegistrationListItem,
   RegistrationListReader,
   PlayerDetails,
@@ -139,4 +140,20 @@ export function fakeVoucherPayments() {
     },
   };
   return { vouchers, stored, recorded };
+}
+
+export function fakeVoucherReviews(inReview: Record<string, string>) {
+  const approved: string[] = [];
+  const rejected: { paymentId: string; reason: string }[] = [];
+  const reviews: VoucherReviews = {
+    findInReview: async (registrationId) =>
+      inReview[registrationId] ? { id: inReview[registrationId] } : null,
+    approve: async ({ paymentId }) => {
+      approved.push(paymentId);
+    },
+    reject: async ({ paymentId, reason }) => {
+      rejected.push({ paymentId, reason });
+    },
+  };
+  return { reviews, approved, rejected };
 }

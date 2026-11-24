@@ -3,6 +3,10 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { config } from "dotenv";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { PrismaClient } from "@/generated/prisma/client";
+import {
+  makeApproveVoucher,
+  makeRejectVoucher,
+} from "@/modules/registrations/application/review-voucher";
 import { makeSubmitVoucher } from "@/modules/registrations/application/submit-voucher";
 
 config({ path: ".env.local", quiet: true });
@@ -22,6 +26,8 @@ let db: PrismaClient;
 let clubId: string;
 let eventId: string;
 let submitVoucher: ReturnType<typeof makeSubmitVoucher>;
+let approveVoucher: ReturnType<typeof makeApproveVoucher>;
+let rejectVoucher: ReturnType<typeof makeRejectVoucher>;
 let readVoucherImage: typeof import("@/modules/payments").readVoucherImage;
 
 beforeAll(async () => {
@@ -32,7 +38,7 @@ beforeAll(async () => {
   // These modules read `db` from src/lib/db.ts at load, so they are imported after DATABASE_URL points at the test database.
   process.env.DATABASE_URL = TEST_DATABASE_URL;
   const { eventsAdapter } = await import("@/modules/registrations/infrastructure/events-adapter");
-  const { voucherPaymentsAdapter } =
+  const { voucherPaymentsAdapter, voucherReviewsAdapter } =
     await import("@/modules/registrations/infrastructure/payments-adapter");
   const { prismaRegistrationRepository, prismaTransactions } =
     await import("@/modules/registrations/infrastructure/prisma-registration-repository");
@@ -44,6 +50,15 @@ beforeAll(async () => {
     vouchers: voucherPaymentsAdapter,
     transactions: prismaTransactions(db),
   });
+  const reviewDeps = {
+    events: eventsAdapter,
+    registrations: prismaRegistrationRepository,
+    reviews: voucherReviewsAdapter,
+    transactions: prismaTransactions(db),
+    now: () => new Date("2030-12-01T12:00:00Z"),
+  };
+  approveVoucher = makeApproveVoucher(reviewDeps);
+  rejectVoucher = makeRejectVoucher(reviewDeps);
   const club = await db.club.create({
     data: {
       slug: `hu14-${Date.now()}`,
@@ -105,5 +120,62 @@ describe("HU-14: subir voucher (Postgres + S3Mock)", () => {
     expect(
       (await db.registration.findUniqueOrThrow({ where: { id: registration.id } })).status,
     ).toBe("in_review");
+  });
+});
+
+describe("HU-15: aprobar o rechazar (Postgres)", () => {
+  async function registrationWithVoucher(phone: string) {
+    const registration = await db.registration.create({
+      data: { eventId, firstName: "Leo", lastName: "Rojas", phone },
+    });
+    await submitVoucher({
+      registrationId: registration.id,
+      image: { bytes: new Uint8Array([1, 2, 3]), contentType: "image/png" },
+      yapeSecurityCode: null,
+    });
+    return registration.id;
+  }
+
+  it("HU-15 criterio 3: al aprobar, el pago queda aprobado y la inscripción pagada", async () => {
+    const organizer = await db.user.create({ data: { email: `hu15-${Date.now()}@test.pe` } });
+    const registrationId = await registrationWithVoucher("+51911111111");
+
+    await approveVoucher({ eventId, registrationId, reviewedByUserId: organizer.id });
+
+    const payment = await db.payment.findFirstOrThrow({ where: { registrationId } });
+    expect(payment).toMatchObject({ status: "approved", reviewedByUserId: organizer.id });
+    expect(
+      (await db.registration.findUniqueOrThrow({ where: { id: registrationId } })).status,
+    ).toBe("paid");
+    await db.payment.updateMany({
+      where: { reviewedByUserId: organizer.id },
+      data: { reviewedByUserId: null },
+    });
+    await db.user.delete({ where: { id: organizer.id } });
+  });
+
+  it("HU-15 criterio 2: al rechazar, guarda el motivo y vuelve a pendiente de pago", async () => {
+    const organizer = await db.user.create({ data: { email: `hu15r-${Date.now()}@test.pe` } });
+    const registrationId = await registrationWithVoucher("+51922222222");
+
+    await rejectVoucher({
+      eventId,
+      registrationId,
+      reviewedByUserId: organizer.id,
+      reason: "El monto no coincide",
+    });
+
+    const payment = await db.payment.findFirstOrThrow({ where: { registrationId } });
+    expect(payment).toMatchObject({ status: "rejected", rejectionReason: "El monto no coincide" });
+    expect(
+      (await db.registration.findUniqueOrThrow({ where: { id: registrationId } })).status,
+    ).toBe("pending_payment");
+    const { findLastVoucherRejection } = await import("@/modules/payments");
+    expect(await findLastVoucherRejection(registrationId)).toBe("El monto no coincide");
+    await db.payment.updateMany({
+      where: { reviewedByUserId: organizer.id },
+      data: { reviewedByUserId: null },
+    });
+    await db.user.delete({ where: { id: organizer.id } });
   });
 });

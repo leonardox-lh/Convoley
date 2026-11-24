@@ -6,7 +6,7 @@ import { FormMessage } from "@/components/form";
 import { formatInLima } from "@/lib/lima-time";
 import { cn } from "@/lib/utils";
 import { listEventSummaries } from "@/modules/events";
-import { MAX_VOUCHER_BYTES } from "@/modules/payments";
+import { findLastVoucherRejection, MAX_VOUCHER_BYTES } from "@/modules/payments";
 import { findRegistrationOverview } from "@/modules/registrations";
 import { PaymentInstructions } from "../../c/[club]/[event]/payment-instructions";
 import { loadPaymentInfo } from "../../payment-info";
@@ -84,10 +84,18 @@ async function RegistrationContent({ params, searchParams }: Props) {
       {awaitingPayment && (
         <section className="flex flex-col gap-4 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
           <h2 className="text-lg font-semibold">Paga y sube tu captura</h2>
+          <RejectionNotice registrationId={registration.id} />
           <PaymentInstructions info={await loadPaymentInfo(event.clubSlug, event.priceCents)} />
           <VoucherForm registrationId={registration.id} maxBytes={MAX_VOUCHER_BYTES} />
         </section>
       )}
     </>
   );
+}
+
+/** After a rejection the player is back to "pending payment": tell them why (HU-15). */
+async function RejectionNotice({ registrationId }: { registrationId: string }) {
+  const reason = await findLastVoucherRejection(registrationId);
+  if (!reason) return null;
+  return <FormMessage tone="error">{`Tu captura anterior fue rechazada: ${reason}`}</FormMessage>;
 }

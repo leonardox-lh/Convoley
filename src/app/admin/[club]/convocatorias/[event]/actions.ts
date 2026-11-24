@@ -5,6 +5,10 @@ import { z } from "zod";
 import { getOrganizerEvent } from "@/modules/events";
 import {
   addPlayerManually,
+  approveVoucher,
+  InvalidRejectionReasonError,
+  NothingToReviewError,
+  rejectVoucher,
   DuplicateRegistrationError,
   EventFullError,
   EventNotOpenError,
@@ -40,6 +44,8 @@ const ERROR_MESSAGES: [new (...args: never[]) => Error, string][] = [
   [EventFullError, "Ya no quedan cupos."],
   [EventNotOpenError, "Esta convocatoria ya no acepta cambios en la lista."],
   [RegistrationNotFoundError, "No encontramos esa inscripción. Recarga la lista."],
+  [NothingToReviewError, "Esa captura ya fue revisada. Recarga la lista."],
+  [InvalidRejectionReasonError, "Escribe el motivo del rechazo (hasta 200 letras)."],
 ];
 
 /** The organizer's user id, only if they manage the club and the event belongs to it. */
@@ -104,5 +110,39 @@ export async function removeRegistrationAction(
   return run(parsed.data, async () => {
     await removeRegistration(parsed.data);
     return "Jugador quitado: su cupo quedó libre.";
+  });
+}
+
+export async function approveVoucherAction(
+  _previous: RegistrationActionState,
+  formData: FormData,
+): Promise<RegistrationActionState> {
+  const parsed = registrationSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { status: "error", message: "No encontramos esa inscripción." };
+
+  return run(parsed.data, async (reviewedByUserId) => {
+    await approveVoucher({ ...parsed.data, reviewedByUserId });
+    return "Pago aprobado.";
+  });
+}
+
+const rejectSchema = registrationSchema.extend({
+  reason: z
+    .string()
+    .trim()
+    .min(1, "Escribe el motivo del rechazo.")
+    .max(200, "Ese motivo es muy largo."),
+});
+
+export async function rejectVoucherAction(
+  _previous: RegistrationActionState,
+  formData: FormData,
+): Promise<RegistrationActionState> {
+  const parsed = rejectSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { status: "error", message: parsed.error.issues[0].message };
+
+  return run(parsed.data, async (reviewedByUserId) => {
+    await rejectVoucher({ ...parsed.data, reviewedByUserId });
+    return "Captura rechazada: el jugador verá el motivo.";
   });
 }

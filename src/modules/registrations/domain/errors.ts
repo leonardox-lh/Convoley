@@ -43,3 +43,18 @@ export class PaymentNotExpectedError extends Error {
     this.name = "PaymentNotExpectedError";
   }
 }
+
+/** The registration has no voucher waiting for the organizer (already reviewed, or none). */
+export class NothingToReviewError extends Error {
+  constructor(readonly registrationId: string) {
+    super(`Registration ${registrationId} has no voucher in review`);
+    this.name = "NothingToReviewError";
+  }
+}
+
+export class InvalidRejectionReasonError extends Error {
+  constructor() {
+    super("A rejection needs a reason of up to 200 characters");
+    this.name = "InvalidRejectionReasonError";
+  }
+}

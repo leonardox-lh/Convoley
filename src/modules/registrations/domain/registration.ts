@@ -1,4 +1,9 @@
-import { EventFullError, EventNotOpenError, PaymentNotExpectedError } from "./errors";
+import {
+  EventFullError,
+  EventNotOpenError,
+  InvalidRejectionReasonError,
+  PaymentNotExpectedError,
+} from "./errors";
 
 /** Registrations that take a spot: everyone signed up who has not cancelled, paid or not. */
 export const SEAT_HOLDING_STATUSES = ["pending_payment", "in_review", "paid"] as const;
@@ -82,4 +87,15 @@ export function assertAwaitingPayment(registration: { id: string; status: Regist
   if (registration.status !== "pending_payment") {
     throw new PaymentNotExpectedError(registration.id, registration.status);
   }
+}
+
+export const REJECTION_REASON_MAX_LENGTH = 200;
+
+/** The player reads this to fix their payment, so it can't be empty (HU-15). */
+export function parseRejectionReason(raw: string): string {
+  const reason = raw.trim();
+  if (!reason || reason.length > REJECTION_REASON_MAX_LENGTH) {
+    throw new InvalidRejectionReasonError();
+  }
+  return reason;
 }

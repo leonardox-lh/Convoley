@@ -6,11 +6,16 @@ import {
   makeLinkGuestRegistrations,
   makeListPlayerRegistrations,
 } from "./application/player-registrations";
+import { makeApproveVoucher, makeRejectVoucher } from "./application/review-voucher";
 import { makeSubmitVoucher } from "./application/submit-voucher";
 import { makeRegisterGuest } from "./application/register-guest";
 import { makeRemoveRegistration } from "./application/remove-registration";
 import { eventsAdapter } from "./infrastructure/events-adapter";
-import { paymentsAdapter, voucherPaymentsAdapter } from "./infrastructure/payments-adapter";
+import {
+  paymentsAdapter,
+  voucherPaymentsAdapter,
+  voucherReviewsAdapter,
+} from "./infrastructure/payments-adapter";
 import {
   prismaPlayerRegistrations,
   prismaRegistrationListReader,
@@ -58,6 +63,16 @@ export const submitVoucher = makeSubmitVoucher({
   transactions,
 });
 
+const reviewDeps = {
+  events: eventsAdapter,
+  registrations: prismaRegistrationRepository,
+  reviews: voucherReviewsAdapter,
+  transactions,
+  now,
+};
+export const approveVoucher = makeApproveVoucher(reviewDeps);
+export const rejectVoucher = makeRejectVoucher(reviewDeps);
+
 export const listEventRegistrations = makeListEventRegistrations({
   registrations: prismaRegistrationListReader,
 });
@@ -73,6 +88,7 @@ export { PhoneNumber } from "./domain/phone-number";
 export type { RegisterGuestInput } from "./application/register-guest";
 export {
   acceptsWaitlist,
+  REJECTION_REASON_MAX_LENGTH,
   isOpenForRegistration,
   PLAYER_LEVELS,
   PLAYER_POSITIONS,
@@ -87,6 +103,8 @@ export {
   EventFullError,
   EventNotOpenError,
   InvalidPhoneNumberError,
+  InvalidRejectionReasonError,
+  NothingToReviewError,
   PaymentNotExpectedError,
   RegistrationNotFoundError,
 } from "./domain/errors";

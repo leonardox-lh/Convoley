@@ -129,3 +129,16 @@ export interface VoucherPayments {
     tx: TransactionContext,
   ): Promise<void>;
 }
+
+/** Voucher reviews owned by the `payments` module (HU-15). */
+export interface VoucherReviews {
+  findInReview(registrationId: string, tx: TransactionContext): Promise<{ id: string } | null>;
+  approve(
+    input: { paymentId: string; reviewedByUserId: string; at: Date },
+    tx: TransactionContext,
+  ): Promise<void>;
+  reject(
+    input: { paymentId: string; reason: string; reviewedByUserId: string; at: Date },
+    tx: TransactionContext,
+  ): Promise<void>;
+}
