@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { SEAT_HOLDING_STATUSES, seatSummary } from "./registration";
+import {
+  PLAYER_LEVELS,
+  PLAYER_POSITIONS,
+  SEAT_HOLDING_STATUSES,
+  seatSummary,
+} from "./registration";
 
 describe("HU-05 criterio 1: confirmados", () => {
   it("HU-05: los estados que ocupan cupo son pending_payment, in_review y paid", () => {
@@ -26,5 +31,22 @@ describe("HU-07 criterio 3: contador de cupos", () => {
 
   it("HU-07 criterio 3: libres nunca es negativo", () => {
     expect(seatSummary(10, 12).free).toBe(0);
+  });
+});
+
+describe("HU-10: posiciones y niveles", () => {
+  it("HU-10 criterio 1: armador, líbero, punta, central, opuesto y cualquiera", () => {
+    expect([...PLAYER_POSITIONS]).toEqual([
+      "setter",
+      "libero",
+      "outside_hitter",
+      "middle_blocker",
+      "opposite",
+      "any",
+    ]);
+  });
+
+  it("HU-10 criterio 2: principiante, intermedio y avanzado", () => {
+    expect([...PLAYER_LEVELS]).toEqual(["beginner", "intermediate", "advanced"]);
   });
 });

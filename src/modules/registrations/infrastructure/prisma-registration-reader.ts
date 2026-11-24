@@ -36,6 +36,8 @@ export const prismaRegistrationListReader: RegistrationListReader = {
         firstName: true,
         lastName: true,
         phone: true,
+        position: true,
+        level: true,
         status: true,
         createdAt: true,
       },

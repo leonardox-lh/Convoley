@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useActionState, useState } from "react";
-import { FormMessage, submitKeepingValues, TextField } from "@/components/form";
+import { fieldClass, FormMessage, submitKeepingValues, TextField } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import type { PlayerProfile } from "@/modules/identity";
+import { LEVEL_LABELS, POSITION_LABELS } from "../../../player-labels";
 import { continueWithGoogleAction, registerAction, type RegisterState } from "./actions";
 
 export function RegistrationForm({
@@ -114,11 +115,31 @@ export function RegistrationForm({
             placeholder="987654321"
           />
         )}
+        <div className="grid grid-cols-2 gap-3">
+          <OptionalSelect label="Posición" name="position" options={POSITION_LABELS} />
+          <OptionalSelect label="Nivel" name="level" options={LEVEL_LABELS} />
+        </div>
         {state.status === "error" && <FormMessage tone="error">{state.message}</FormMessage>}
         <Button type="submit" size="lg" disabled={pending}>
           {pending ? "Inscribiendo…" : "Inscribirme"}
         </Button>
       </form>
     </section>
+  );
+}
+
+function OptionalSelect(props: { label: string; name: string; options: Record<string, string> }) {
+  return (
+    <label className="flex flex-col gap-1.5 text-sm font-medium">
+      {props.label} (opcional)
+      <select name={props.name} defaultValue="" className={fieldClass}>
+        <option value="">—</option>
+        {Object.entries(props.options).map(([value, label]) => (
+          <option key={value} value={value}>
+            {label}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }

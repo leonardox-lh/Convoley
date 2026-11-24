@@ -65,6 +65,10 @@ export { PhoneNumber } from "./domain/phone-number";
 export type { RegisterGuestInput } from "./application/register-guest";
 export {
   isOpenForRegistration,
+  PLAYER_LEVELS,
+  PLAYER_POSITIONS,
+  type PlayerLevel,
+  type PlayerPosition,
   SEAT_HOLDING_STATUSES,
   seatSummary,
   type RegistrationStatus,

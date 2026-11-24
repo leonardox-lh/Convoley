@@ -1,4 +1,9 @@
-import type { EventSeatInfo, RegistrationStatus } from "../domain/registration";
+import type {
+  EventSeatInfo,
+  PlayerLevel,
+  PlayerPosition,
+  RegistrationStatus,
+} from "../domain/registration";
 
 declare const transactionBrand: unique symbol;
 /** Handle of a running database transaction; only infrastructure looks inside it. */
@@ -23,6 +28,9 @@ export interface PlayerDetails {
   phone: string;
   /** Null for guests; set when the player signed in with Google. */
   userId: string | null;
+  /** Optional, for balanced teams later (HU-10). */
+  position?: PlayerPosition | null;
+  level?: PlayerLevel | null;
 }
 
 export interface RegistrationRepository {
@@ -61,6 +69,8 @@ export interface RegistrationListItem {
   firstName: string;
   lastName: string;
   phone: string;
+  position: PlayerPosition | null;
+  level: PlayerLevel | null;
   status: RegistrationStatus;
   createdAt: Date;
 }

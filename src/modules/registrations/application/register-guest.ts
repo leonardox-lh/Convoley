@@ -1,6 +1,6 @@
 import { DuplicateRegistrationError, EventNotOpenError } from "../domain/errors";
 import { PhoneNumber } from "../domain/phone-number";
-import { assertSpotAvailable } from "../domain/registration";
+import { assertSpotAvailable, type PlayerLevel, type PlayerPosition } from "../domain/registration";
 import type {
   EventSeats,
   RegistrationRepository,
@@ -14,6 +14,8 @@ export interface RegisterGuestInput {
   lastName: string;
   phone: string;
   userId: string | null;
+  position?: PlayerPosition | null;
+  level?: PlayerLevel | null;
 }
 
 interface RegisterPlayerDeps {
@@ -34,6 +36,8 @@ export async function registerPlayer(
     lastName: input.lastName,
     phone,
     userId: input.userId,
+    position: input.position ?? null,
+    level: input.level ?? null,
   };
 
   // The lock serializes sign-ups to this event: the count below can't go stale.

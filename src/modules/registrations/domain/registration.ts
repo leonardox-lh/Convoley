@@ -33,3 +33,17 @@ export function assertSpotAvailable(event: EventSeatInfo, confirmed: number, now
 export function seatSummary(capacity: number, confirmed: number) {
   return { taken: confirmed, free: Math.max(0, capacity - confirmed) };
 }
+
+/** Volleyball positions a player can pick when signing up (HU-10). */
+export const PLAYER_POSITIONS = [
+  "setter",
+  "libero",
+  "outside_hitter",
+  "middle_blocker",
+  "opposite",
+  "any",
+] as const;
+export type PlayerPosition = (typeof PLAYER_POSITIONS)[number];
+
+export const PLAYER_LEVELS = ["beginner", "intermediate", "advanced"] as const;
+export type PlayerLevel = (typeof PLAYER_LEVELS)[number];

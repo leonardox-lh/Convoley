@@ -9,6 +9,7 @@ import {
   seatSummary,
   type RegistrationStatus,
 } from "@/modules/registrations";
+import { LEVEL_LABELS, POSITION_LABELS } from "../../../../player-labels";
 import { REGISTRATION_STATUS_BADGE_CLASSES } from "../../../../registration-status";
 import { requireOrganizer } from "../../require-organizer";
 import { AddPlayerForm } from "./add-player-form";
@@ -108,6 +109,16 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
                   {registration.phone.replace(/^\+51/, "")} ·{" "}
                   {registeredAtFormatter.format(registration.createdAt)}
                 </p>
+                {(registration.position || registration.level) && (
+                  <p className="text-sm text-zinc-500">
+                    {[
+                      registration.position && POSITION_LABELS[registration.position],
+                      registration.level && LEVEL_LABELS[registration.level],
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </p>
+                )}
               </div>
               <span
                 className={cn(

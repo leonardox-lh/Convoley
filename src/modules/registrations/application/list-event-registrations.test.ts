@@ -9,6 +9,8 @@ function item(id: string, status: RegistrationStatus, minute: number) {
     firstName: id,
     lastName: "Perez",
     phone: "+51900000000",
+    position: null,
+    level: null,
     status,
     createdAt: new Date(Date.UTC(2026, 11, 1, 10, minute)),
   };

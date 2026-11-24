@@ -65,6 +65,8 @@ describe("HU-06 criterio 2: invitado con celular, sin cuenta", () => {
         lastName: "Perez",
         phone: "+51987654321",
         userId: null,
+        position: null,
+        level: null,
       },
     ]);
   });
@@ -180,5 +182,19 @@ describe("HU-06: cupos y estado de la convocatoria", () => {
     await registerGuest(input);
 
     expect(markFull).toEqual(["evt-1"]);
+  });
+});
+
+describe("HU-10: posición y nivel opcionales al inscribirse", () => {
+  it("HU-10 criterios 1 y 2: guarda la posición y el nivel elegidos", async () => {
+    const { registerGuest, rows } = setup(seatInfo());
+    await registerGuest({ ...input, position: "setter", level: "intermediate" });
+    expect(rows[0]).toMatchObject({ position: "setter", level: "intermediate" });
+  });
+
+  it("HU-10: son opcionales", async () => {
+    const { registerGuest, rows } = setup(seatInfo());
+    await registerGuest(input);
+    expect(rows[0]).toMatchObject({ position: null, level: null });
   });
 });

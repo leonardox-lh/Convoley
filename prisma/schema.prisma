@@ -32,6 +32,22 @@ enum RegistrationStatus {
   cancelled
 }
 
+// Optional on sign-up (HU-10), used later to balance teams (HU-31).
+enum PlayerPosition {
+  setter
+  libero
+  outside_hitter
+  middle_blocker
+  opposite
+  any
+}
+
+enum PlayerLevel {
+  beginner
+  intermediate
+  advanced
+}
+
 enum PaymentMethod {
   mercado_pago
   voucher
@@ -231,6 +247,8 @@ model Registration {
   firstName String
   lastName  String
   phone     String
+  position  PlayerPosition?
+  level     PlayerLevel?
   status    RegistrationStatus @default(pending_payment)
   createdAt DateTime           @default(now())
   updatedAt DateTime           @updatedAt
