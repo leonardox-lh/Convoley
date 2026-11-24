@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { limaDateAndTime, todayInLima } from "@/lib/lima-time";
 import { centsToSolesText } from "@/lib/money";
 import { getOrganizerEvent, type CancellationOutcome } from "@/modules/events";
-import { isEventManagementEnabled } from "../../organizer-access";
+import { requireOrganizer } from "../../../require-organizer";
 import { CancelEventForm } from "./cancel-event-form";
 import { EditEventForm } from "./edit-event-form";
 
@@ -16,8 +16,6 @@ const OUTCOME_LABELS: Record<CancellationOutcome, string> = {
 };
 
 export default function EditEventPage({ params }: Props) {
-  if (!isEventManagementEnabled()) notFound();
-
   return (
     <main className="mx-auto w-full max-w-md flex-1 px-4 py-8">
       <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
@@ -29,6 +27,7 @@ export default function EditEventPage({ params }: Props) {
 
 async function EditEventContent({ params }: { params: Props["params"] }) {
   const { club: clubSlug, event: eventId } = await params;
+  if (!(await requireOrganizer(clubSlug))) notFound();
   const event = await getOrganizerEvent({ clubSlug, eventId });
   if (!event) notFound();
   const { date, time } = limaDateAndTime(event.startsAt);

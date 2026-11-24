@@ -1,5 +1,11 @@
 import { expect, test, type Page } from "@playwright/test";
 
+import { signInAsOrganizer } from "./helpers/login";
+
+test.beforeEach(async ({ page }) => {
+  await signInAsOrganizer(page);
+});
+
 const FORM_URL = "/admin/voley-miraflores/convocatorias/nueva";
 const DAYS_AHEAD_MS = 7 * 24 * 3600 * 1000;
 
@@ -35,6 +41,6 @@ test("HU-04: con cupos 0 muestra error y no crea la convocatoria", async ({ page
   await page.locator("form").evaluate((form) => form.setAttribute("novalidate", ""));
   await page.getByRole("button", { name: "Publicar convocatoria" }).click();
 
-  await expect(page.getByRole("alert")).toBeVisible();
+  await expect(page.locator("form [role=alert]")).toBeVisible();
   await expect(page.getByLabel("Link para compartir")).toHaveCount(0);
 });

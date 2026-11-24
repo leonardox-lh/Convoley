@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <main className="mx-auto flex min-h-full w-full max-w-md flex-1 flex-col justify-center gap-3 px-4 py-16">
@@ -6,6 +8,9 @@ export default function Home() {
         Organiza las convocatorias de tu club de vóley: inscripciones, pagos y la lista lista para
         WhatsApp.
       </p>
+      <Link href="/ingresar" className="text-sm underline underline-offset-4">
+        Soy organizador: ingresar
+      </Link>
     </main>
   );
 }

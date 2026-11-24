@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { createEvent } from "@/modules/events";
 import { domainErrorMessage, eventDetailsSchema, NOT_ALLOWED_MESSAGE } from "../event-form-schema";
-import { isEventManagementEnabled } from "../organizer-access";
+import { requireOrganizer } from "../../require-organizer";
 
 export type CreateEventState =
   | { status: "idle" }
@@ -16,11 +16,12 @@ export async function createEventAction(
   _previous: CreateEventState,
   formData: FormData,
 ): Promise<CreateEventState> {
-  if (!isEventManagementEnabled()) return { status: "error", message: NOT_ALLOWED_MESSAGE };
-
   const values = Object.fromEntries(formData);
   const details = eventDetailsSchema.safeParse(values);
   if (!details.success) return { status: "error", message: details.error.issues[0].message };
+  if (!(await requireOrganizer(details.data.clubSlug))) {
+    return { status: "error", message: NOT_ALLOWED_MESSAGE };
+  }
   const intent = intentSchema.safeParse(values);
   if (!intent.success) return { status: "error", message: "Elige publicar o guardar borrador." };
 

@@ -1,9 +1,9 @@
 "use client";
 
-import { startTransition, type FormEvent } from "react";
+import { fieldClass } from "@/components/form";
 
-export const fieldClass =
-  "w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-base dark:border-zinc-700 dark:bg-zinc-900";
+export { fieldClass, FormMessage, submitKeepingValues } from "@/components/form";
+
 const labelClass = "flex flex-col gap-1.5 text-sm font-medium";
 
 /** Text values of the form fields, as the inputs show them. */
@@ -18,19 +18,6 @@ export interface EventFieldValues {
   capacity: string;
   isMixed: boolean;
   rules: string;
-}
-
-/**
- * Submitting by hand instead of <form action> keeps the typed values when there is an error;
- * React resets uncontrolled fields after a form action.
- */
-export function submitKeepingValues(formAction: (formData: FormData) => void) {
-  return (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const submitter = (event.nativeEvent as SubmitEvent).submitter;
-    const formData = new FormData(event.currentTarget, submitter);
-    startTransition(() => formAction(formData));
-  };
 }
 
 export function EventFields(props: {
@@ -162,20 +149,5 @@ export function EventFields(props: {
         />
       </label>
     </>
-  );
-}
-
-export function FormMessage({ tone, children }: { tone: "error" | "ok"; children: string }) {
-  const colors =
-    tone === "error"
-      ? "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"
-      : "bg-green-50 text-green-800 dark:bg-green-950 dark:text-green-300";
-  return (
-    <p
-      role={tone === "error" ? "alert" : "status"}
-      className={`rounded-lg px-3 py-2 text-sm ${colors}`}
-    >
-      {children}
-    </p>
   );
 }

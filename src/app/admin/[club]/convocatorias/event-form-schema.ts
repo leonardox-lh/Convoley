@@ -84,4 +84,4 @@ export function domainErrorMessage(error: unknown): string | null {
   return DOMAIN_ERROR_MESSAGES.find(([type]) => error instanceof type)?.[1] ?? null;
 }
 
-export const NOT_ALLOWED_MESSAGE = "Inicia sesión para continuar.";
+export const NOT_ALLOWED_MESSAGE = "No tienes permiso para administrar este club.";

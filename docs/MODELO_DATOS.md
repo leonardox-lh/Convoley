@@ -9,7 +9,7 @@ Fuente de verdad: [`prisma/schema.prisma`](../prisma/schema.prisma). Migraciones
 - **Celulares**: guardados normalizados `+519XXXXXXXX`. Un `CHECK` en SQL lo exige en `User`, `Registration` y `Order`.
 - **Archivos**: solo la key del bucket (`logoKey`, `imageKeys`, `proofFileKey`), nunca una URL. Los vouchers se leen con URL firmada (HT-04).
 - **IDs**: `cuid()` en texto.
-- **Borrado**: `Cascade` solo en hijos sin historial (`Account`, `Session`, `ClubMember`, `Community`, `ProductVariant`, `OrderItem`). `Restrict` en todo lo que tiene dinero o historial. `SetNull` en los vínculos opcionales a `User`. Los clubes y convocatorias no se borran: se cancelan.
+- **Borrado**: `Cascade` solo en hijos sin historial (`Account`, `Session`, `PasswordResetToken`, `ClubMember`, `Community`, `ProductVariant`, `OrderItem`). `Restrict` en todo lo que tiene dinero o historial. `SetNull` en los vínculos opcionales a `User`. Los clubes y convocatorias no se borran: se cancelan.
 
 ## Diagrama
 
@@ -17,6 +17,7 @@ Fuente de verdad: [`prisma/schema.prisma`](../prisma/schema.prisma). Migraciones
 erDiagram
   User ||--o{ Account : "tiene"
   User ||--o{ Session : "tiene"
+  User ||--o{ PasswordResetToken : "recupera contraseña"
   User ||--o{ ClubMember : "es miembro"
   Club ||--o{ ClubMember : "tiene"
   Club ||--o{ Community : "agrupa"
@@ -113,13 +114,13 @@ erDiagram
   }
 ```
 
-`VerificationToken` (Auth.js, también para recuperar contraseña) no tiene relaciones y se omite del diagrama.
+`VerificationToken` (Auth.js) no tiene relaciones, no se usa todavía y se omite del diagrama. Recuperar la contraseña usa `PasswordResetToken`.
 
 ## Tablas por módulo
 
 | Módulo | Tablas | Historias |
 |---|---|---|
-| `identity` | `User`, `Account`, `Session`, `VerificationToken` | HU-01, HU-48 |
+| `identity` | `User`, `Account`, `Session`, `VerificationToken`, `PasswordResetToken` | HU-01, HU-48 |
 | `clubs` | `Club`, `ClubMember`, `Community` | HU-01, HU-02, HU-09, HU-33 |
 | `events` | `Event` | HU-03, HU-04, HU-05 |
 | `registrations` | `Registration` | HU-06, HU-07, HU-08, HU-48 |
@@ -133,6 +134,7 @@ Cada módulo solo lee y escribe sus propias tablas (ver `docs/ARQUITECTURA.md`).
 - **Invitado**: una `Registration` con `userId = null`. No hay tabla de invitados. En HU-48 se vincula por `phone`.
 - **Inscripción duplicada**: `@@unique([eventId, phone])` la rechaza en la base incluso si llegan dos a la vez. Si alguien cancela y vuelve, se reactiva la misma fila.
 - **Pagos**: una tabla para inscripciones y pedidos; un `CHECK` exige exactamente uno de `registrationId` u `orderId`. Una fila por intento: un voucher rechazado queda como historial y el siguiente es otra fila.
+- **Recuperar contraseña (HU-01)**: `PasswordResetToken` guarda solo el sha256 del token del link (`tokenHash @unique`), vence en 1 hora y es de un solo uso: `usedAt` se marca con un `UPDATE ... WHERE usedAt IS NULL` en la misma transacción que cambia `passwordHash`. Pedir otro link borra los anteriores sin usar.
 - **Webhook idempotente**: `providerPaymentId @unique`.
 - **Convoley no retiene dinero**: no hay saldos ni cuentas internas; `Payment` solo registra lo que pasó en la cuenta de Mercado Pago del organizador.
 - **Cancelar una convocatoria (HU-05)**: el organizador elige `refund` (devolución) o `balance` (saldo a favor). Se guarda en `Event.cancellationOutcome` (lo que ven los inscritos) y en cada `Payment` `approved` o `in_review` aún sin marcar, en la misma transacción. Es solo una marca: la devolución la hace el organizador en Mercado Pago. HU-14 debe marcar igual un pago que se apruebe después de la cancelación.

@@ -25,16 +25,16 @@ Depende de: HU-04
 
 ## HU-01 · Login del organizador (3 pts)
 Depende de: HT-03 (tablas de Auth.js ya existen)
-- [ ] Aprobar e instalar `next-auth@5`, `@auth/prisma-adapter`, `@node-rs/argon2` y el proveedor de correo
-- [ ] Credenciales de Google OAuth (a cargo tuyo, en Google Cloud) y variables `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, clave del correo en `env.ts`, `.env.example` y Railway
-- [ ] Modelo: tabla `PasswordResetToken` (hash del token, `userId`, `expiresAt`, `usedAt`) y su migración
-- [ ] Módulo `identity`, dominio: value object `Password` (largo mínimo) y errores (`InvalidCredentialsError`, `EmailAlreadyRegisteredError`, `ResetTokenExpiredError`)
-- [ ] `identity`, casos de uso: `registerOrganizer`, `verifyCredentials`, `requestPasswordReset`, `resetPassword`; puertos `PasswordHasher` y `EmailSender`
-- [ ] `src/lib/auth.ts`: Auth.js con Google + Credentials, adapter de Prisma y sesión JWT
-- [ ] Páginas `/ingresar`, `/registro`, `/recuperar` y `/recuperar/[token]` (mobile-first, en español tuteando)
-- [ ] Tras iniciar sesión: si no es miembro de ningún club, redirigir a `/club/nuevo` (HU-02)
-- [ ] `requireOrganizer(clubSlug)`: verifica sesión y `ClubMember` del club; reemplaza `isEventManagementEnabled()` en páginas y server actions de convocatorias
-- [ ] Tests: unitarios de `Password` y de los casos de uso con fakes, integración del token de recuperación (expira, se usa una vez), e2e de registro e inicio de sesión con correo
+- [x] Aprobar e instalar `next-auth@5` y `@auth/prisma-adapter` (hash con `scrypt` de `node:crypto` y correo con `fetch` a Resend: sin `@node-rs/argon2` ni SDK)
+- [ ] Credenciales de Google OAuth y Resend en Railway (a cargo tuyo; en el código ya están `env.ts` y `.env.example`, en Google Cloud) y variables `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, clave del correo en `env.ts`, `.env.example` y Railway
+- [x] Modelo: tabla `PasswordResetToken` (hash del token, `userId`, `expiresAt`, `usedAt`) y su migración
+- [x] Módulo `identity`, dominio: value object `Password` (largo mínimo) y errores (`InvalidCredentialsError`, `EmailAlreadyRegisteredError`, `ResetTokenExpiredError`)
+- [x] `identity`, casos de uso: `registerOrganizer`, `verifyCredentials`, `requestPasswordReset`, `resetPassword`; puertos `PasswordHasher` y `EmailSender`
+- [x] `identity/infrastructure/auth.ts` (no en `src/lib`: eslint-boundaries no deja que `lib` importe módulos): Auth.js con Google + Credentials, adapter de Prisma y sesión JWT
+- [x] Páginas `/ingresar`, `/registro`, `/recuperar` y `/recuperar/[token]` (mobile-first, en español tuteando)
+- [x] Tras iniciar sesión: si no es miembro de ningún club, redirigir a `/club/nuevo` (HU-02)
+- [x] `requireOrganizer(clubSlug)`: verifica sesión y `ClubMember` del club; reemplaza `isEventManagementEnabled()` en páginas y server actions de convocatorias
+- [x] Tests: unitarios de `Password` y de los casos de uso con fakes, integración del token de recuperación (expira, se usa una vez), e2e de registro e inicio de sesión con correo
 
 ## HU-02 · Perfil del club (3 pts)
 Depende de: HU-01, HT-04

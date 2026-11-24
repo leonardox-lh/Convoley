@@ -75,12 +75,13 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts         Account[]
-  sessions         Session[]
-  memberships      ClubMember[]
-  registrations    Registration[]
-  orders           Order[]
-  reviewedPayments Payment[]      @relation("PaymentReviewer")
+  accounts            Account[]
+  sessions            Session[]
+  passwordResetTokens PasswordResetToken[]
+  memberships         ClubMember[]
+  registrations       Registration[]
+  orders              Order[]
+  reviewedPayments    Payment[]            @relation("PaymentReviewer")
 }
 
 model Account {
@@ -143,6 +144,20 @@ model Club {
   payments    Payment[]
   products    Product[]
   orders      Order[]
+}
+
+// Single-use link to set a new password (HU-01). Only the sha256 of the token is stored.
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model ClubMember {

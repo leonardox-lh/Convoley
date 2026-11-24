@@ -2,11 +2,14 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { config } from "dotenv";
 import { PrismaClient } from "../src/generated/prisma/client";
+import { scryptPasswordHasher } from "../src/modules/identity/infrastructure/scrypt-password-hasher";
 
 // Does not override an already-set DATABASE_URL (the integration test passes its own).
 config({ path: ".env.local", quiet: true });
 
 const SEED_CLUB_SLUG = "voley-miraflores";
+// Test-only password of organizer@convoley.test (local data and e2e). Never a real one.
+export const SEED_ORGANIZER_PASSWORD = "convoley-dev-1234";
 const EVENT_PRICE_CENTS = 1500;
 const EVENT_CAPACITY = 18;
 const POLO_PRICE_CENTS = 4500;
@@ -21,7 +24,11 @@ async function seed(db: PrismaClient) {
 
   await db.$transaction(async (tx) => {
     const organizer = await tx.user.create({
-      data: { name: "Ana Organizadora", email: "organizer@convoley.test" },
+      data: {
+        name: "Ana Organizadora",
+        email: "organizer@convoley.test",
+        passwordHash: await scryptPasswordHasher.hash(SEED_ORGANIZER_PASSWORD),
+      },
     });
     const googlePlayer = await tx.user.create({
       data: {
