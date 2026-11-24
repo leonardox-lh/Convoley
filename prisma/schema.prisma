@@ -1,0 +1,10 @@
+// Models arrive in HT-03 (initial data model).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}

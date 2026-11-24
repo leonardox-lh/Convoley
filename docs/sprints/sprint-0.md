@@ -9,15 +9,15 @@ Librerías nuevas a aprobar: `prettier`, `eslint-plugin-boundaries`, `prisma` + 
 ## HT-01 · Stack base y linters (3 pts)
 Depende de: nada
 - [x] Repo en GitHub con README y CLAUDE.md
-- [ ] Crear el proyecto Next.js (App Router, TypeScript estricto, Tailwind) e inicializar shadcn/ui
-- [ ] Postgres local con `docker-compose.yml` y `.env.example` con las variables mínimas
-- [ ] Instalar Prisma y crear `src/lib/db.ts` (cliente único) y `src/lib/env.ts` (variables validadas con Zod)
-- [ ] Prettier + ESLint, con los scripts `lint`, `typecheck`, `test` y `test:e2e` en `package.json`
-- [ ] Crear la estructura `src/{app,components,modules,lib}` y un módulo de ejemplo (`clubs`) con `domain/`, `application/`, `infrastructure/` e `index.ts`
-- [ ] Configurar `eslint-plugin-boundaries` con las 5 reglas de dependencia de `CLAUDE.md`
-- [ ] Configurar Vitest y Playwright, con un test unitario del dominio de ejemplo y un e2e de humo (la home carga)
-- [ ] Test que confirme que ESLint falla ante una importación prohibida (domain → infrastructure, y módulo → carpeta interna de otro)
-- [ ] Actualizar el README con "cómo correrlo en local" (un comando: `npm run dev`)
+- [x] Crear el proyecto Next.js (App Router, TypeScript estricto, Tailwind) e inicializar shadcn/ui
+- [x] Postgres local con `docker-compose.yml` y `.env.example` con las variables mínimas
+- [x] Instalar Prisma y crear `src/lib/db.ts` (cliente único) y `src/lib/env.ts` (variables validadas con Zod)
+- [x] Prettier + ESLint, con los scripts `lint`, `typecheck`, `test` y `test:e2e` en `package.json`
+- [x] Crear la estructura `src/{app,components,modules,lib}` y un módulo de ejemplo (`clubs`) con `domain/`, `application/`, `infrastructure/` e `index.ts`
+- [x] Configurar `eslint-plugin-boundaries` con las 5 reglas de dependencia de `CLAUDE.md`
+- [x] Configurar Vitest y Playwright, con un test unitario del dominio de ejemplo y un e2e de humo (la home carga)
+- [x] Test que confirme que ESLint falla ante una importación prohibida (domain → infrastructure, y módulo → carpeta interna de otro)
+- [x] Actualizar el README con "cómo correrlo en local" (un comando: `npm run dev`)
 
 ## HT-02 · Despliegue automático (3 pts)
 Depende de: HT-01

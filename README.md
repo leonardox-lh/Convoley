@@ -8,6 +8,18 @@ Convocatorias de vóley sin caos de WhatsApp: inscripción, pagos con Yape, list
 - Sprint actual: `docs/sprints/`
 - Instrucciones para Claude Code: `CLAUDE.md`
 
+## Correr en local
+
+Requisitos: Node 24 y Docker Desktop abierto.
+
+```bash
+npm install
+cp .env.example .env.local
+npm run dev        # levanta Postgres (docker compose, puerto 5433) y Next en http://localhost:3000
+```
+
+Otros comandos: `npm run lint` · `npm run format` · `npm run typecheck` · `npm test` · `npm run test:e2e`.
+
 ## Desarrollo con Claude Code
 
 - `/sprint 1` · prepara el Sprint Backlog del sprint 1
