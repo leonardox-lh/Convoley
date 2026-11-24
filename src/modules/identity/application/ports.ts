@@ -49,3 +49,17 @@ export interface PasswordResetTokenRepository {
     at: Date;
   }): Promise<boolean>;
 }
+
+/** What a player's account knows to autocomplete a registration (HU-48). */
+export interface PlayerProfile {
+  firstName: string;
+  lastName: string;
+  /** Normalized +519XXXXXXXX; null until the first registration asks for it. */
+  phone: string | null;
+}
+
+export interface PlayerProfileRepository {
+  find(userId: string): Promise<PlayerProfile | null>;
+  /** Throws PhoneLinkedToAnotherAccountError if another account already has the phone. */
+  setPhone(userId: string, phone: string): Promise<void>;
+}

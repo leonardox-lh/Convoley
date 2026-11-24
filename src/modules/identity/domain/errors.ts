@@ -41,3 +41,11 @@ export class ResetTokenExpiredError extends Error {
     this.name = "ResetTokenExpiredError";
   }
 }
+
+/** The phone already belongs to another player's account (HU-48). */
+export class PhoneLinkedToAnotherAccountError extends Error {
+  constructor() {
+    super("Phone already linked to another account");
+    this.name = "PhoneLinkedToAnotherAccountError";
+  }
+}

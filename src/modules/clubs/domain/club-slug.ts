@@ -18,7 +18,9 @@ const RESERVED_SLUGS = new Set([
   "clubes",
   "convoley",
   "ingresar",
+  "inscripcion",
   "logos",
+  "mis-inscripciones",
   "planes",
   "privacidad",
   "recuperar",
@@ -26,6 +28,7 @@ const RESERVED_SLUGS = new Set([
   "salir",
   "terminos",
   "tienda",
+  "vouchers",
   "www",
 ]);
 

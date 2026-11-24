@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { formatInLima } from "@/lib/lima-time";
 import { formatSoles } from "@/lib/money";
 import { getPublicEvent, type CancellationOutcome, type EventStatus } from "@/modules/events";
-import { currentUserId, isGoogleSignInEnabled } from "@/modules/identity";
+import { currentUserId, getPlayerProfile, isGoogleSignInEnabled } from "@/modules/identity";
 import { isOpenForRegistration } from "@/modules/registrations";
 import { RegistrationForm } from "./registration-form";
 
@@ -34,6 +34,8 @@ async function PublicEventContent({ params }: { params: Params }) {
   const { club, event: eventId } = await params;
   const event = await getPublicEvent({ clubSlug: club, eventId });
   if (!event) notFound();
+  const userId = await currentUserId();
+  const profile = userId ? await getPlayerProfile(userId) : null;
   const notice = STATUS_NOTICES[event.status];
   const cancellationNote =
     event.status === "cancelled" && event.cancellationOutcome
@@ -93,7 +95,7 @@ async function PublicEventContent({ params }: { params: Params }) {
         <RegistrationForm
           club={club}
           eventId={event.id}
-          signedIn={(await currentUserId()) !== null}
+          profile={profile}
           googleEnabled={isGoogleSignInEnabled}
         />
       )}

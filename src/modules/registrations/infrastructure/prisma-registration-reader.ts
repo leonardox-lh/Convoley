@@ -1,7 +1,7 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { SEAT_HOLDING_STATUSES } from "../domain/registration";
-import type { RegistrationListReader } from "../application/ports";
+import type { PlayerRegistrations, RegistrationListReader } from "../application/ports";
 
 type Client = Prisma.TransactionClient;
 
@@ -40,4 +40,19 @@ export const prismaRegistrationListReader: RegistrationListReader = {
         createdAt: true,
       },
     }),
+};
+
+export const prismaPlayerRegistrations: PlayerRegistrations = {
+  listByUser: (userId) =>
+    db.registration.findMany({
+      where: { userId },
+      select: { id: true, eventId: true, status: true, createdAt: true },
+    }),
+  async linkGuestsToUser(phone, userId) {
+    const { count } = await db.registration.updateMany({
+      where: { phone, userId: null },
+      data: { userId },
+    });
+    return count;
+  },
 };

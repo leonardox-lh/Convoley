@@ -68,3 +68,17 @@ export interface RegistrationListItem {
 export interface RegistrationListReader {
   listByEvent(eventId: string): Promise<RegistrationListItem[]>;
 }
+
+export interface PlayerRegistration {
+  id: string;
+  eventId: string;
+  status: RegistrationStatus;
+  createdAt: Date;
+}
+
+/** Registrations of a Google account (HU-48). */
+export interface PlayerRegistrations {
+  listByUser(userId: string): Promise<PlayerRegistration[]>;
+  /** Gives the guest registrations made with this phone to the account; returns how many. */
+  linkGuestsToUser(phone: string, userId: string): Promise<number>;
+}

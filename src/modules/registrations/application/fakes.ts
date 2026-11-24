@@ -5,6 +5,7 @@ import type {
   RegistrationListItem,
   RegistrationListReader,
   PlayerDetails,
+  PlayerRegistrations,
   RegistrationRepository,
   TransactionContext,
   TransactionRunner,
@@ -85,4 +86,20 @@ export function fakeManualPayments() {
     },
   };
   return { payments, recorded };
+}
+
+export function fakePlayerRegistrations(rows: StoredRegistration[]) {
+  const createdAt = new Date("2026-12-01T00:00:00Z");
+  const registrations: PlayerRegistrations = {
+    listByUser: async (userId) =>
+      rows
+        .filter((row) => row.userId === userId)
+        .map(({ id, eventId, status }) => ({ id, eventId, status, createdAt })),
+    linkGuestsToUser: async (phone, userId) => {
+      const guests = rows.filter((row) => row.phone === phone && row.userId === null);
+      guests.forEach((row) => (row.userId = userId));
+      return guests.length;
+    },
+  };
+  return { registrations, rows };
 }

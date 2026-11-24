@@ -1,19 +1,22 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useState } from "react";
 import { FormMessage, submitKeepingValues, TextField } from "@/components/form";
 import { Button } from "@/components/ui/button";
+import type { PlayerProfile } from "@/modules/identity";
 import { continueWithGoogleAction, registerAction, type RegisterState } from "./actions";
 
 export function RegistrationForm({
   club,
   eventId,
-  signedIn,
+  profile,
   googleEnabled,
 }: {
   club: string;
   eventId: string;
-  signedIn: boolean;
+  /** The Google player's account; null for guests. */
+  profile: PlayerProfile | null;
   googleEnabled: boolean;
 }) {
   const [state, formAction, pending] = useActionState<RegisterState, FormData>(registerAction, {
@@ -37,11 +40,16 @@ export function RegistrationForm({
           </span>
         </p>
         <p className="text-sm text-zinc-500">Paga al organizador para asegurar tu cupo.</p>
+        {profile && (
+          <Link href="/mis-inscripciones" className="text-sm underline underline-offset-4">
+            Ver mis inscripciones
+          </Link>
+        )}
       </section>
     );
   }
 
-  if (!signedIn && !asGuest) {
+  if (!profile && !asGuest) {
     return (
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-semibold">Inscríbete</h2>
@@ -66,16 +74,46 @@ export function RegistrationForm({
       <h2 className="text-lg font-semibold">Inscríbete</h2>
       <form onSubmit={submitKeepingValues(formAction)} className="flex flex-col gap-3">
         <input type="hidden" name="eventId" value={eventId} />
-        <TextField label="Nombre" name="firstName" autoComplete="given-name" />
-        <TextField label="Apellido" name="lastName" autoComplete="family-name" />
-        <TextField
-          label="Celular"
-          name="phone"
-          type="tel"
-          inputMode="numeric"
-          autoComplete="tel-national"
-          placeholder="987654321"
-        />
+        {profile?.firstName && profile.lastName ? (
+          <>
+            <p className="text-sm">
+              Te inscribes como{" "}
+              <span className="font-medium">
+                {profile.firstName} {profile.lastName}
+              </span>
+              {profile.phone && ` · ${profile.phone.replace(/^\+51/, "")}`}
+            </p>
+            <input type="hidden" name="firstName" value={profile.firstName} />
+            <input type="hidden" name="lastName" value={profile.lastName} />
+          </>
+        ) : (
+          <>
+            <TextField
+              label="Nombre"
+              name="firstName"
+              autoComplete="given-name"
+              defaultValue={profile?.firstName}
+            />
+            <TextField
+              label="Apellido"
+              name="lastName"
+              autoComplete="family-name"
+              defaultValue={profile?.lastName}
+            />
+          </>
+        )}
+        {profile?.phone ? (
+          <input type="hidden" name="phone" value={profile.phone} />
+        ) : (
+          <TextField
+            label="Celular"
+            name="phone"
+            type="tel"
+            inputMode="numeric"
+            autoComplete="tel-national"
+            placeholder="987654321"
+          />
+        )}
         {state.status === "error" && <FormMessage tone="error">{state.message}</FormMessage>}
         <Button type="submit" size="lg" disabled={pending}>
           {pending ? "Inscribiendo…" : "Inscribirme"}

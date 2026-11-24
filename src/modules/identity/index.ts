@@ -2,12 +2,14 @@ import { db } from "@/lib/db";
 import { env } from "@/lib/env";
 import { makeRegisterOrganizer } from "./application/register-organizer";
 import { makeRequestPasswordReset } from "./application/request-password-reset";
+import { makeSavePlayerPhone } from "./application/save-player-phone";
 import { makeResetPassword } from "./application/reset-password";
 import { makeVerifyCredentials } from "./application/verify-credentials";
 import { createAuth } from "./infrastructure/auth";
 import { consoleEmailSender, resendEmailSender } from "./infrastructure/email-senders";
 import { inMemoryAttemptLimiter } from "./infrastructure/in-memory-attempt-limiter";
 import { prismaPasswordResetTokenRepository } from "./infrastructure/prisma-password-reset-token-repository";
+import { prismaPlayerProfileRepository } from "./infrastructure/prisma-player-profile-repository";
 import { prismaUserAccountRepository } from "./infrastructure/prisma-user-account-repository";
 import { scryptPasswordHasher } from "./infrastructure/scrypt-password-hasher";
 
@@ -36,6 +38,11 @@ export const requestPasswordReset = makeRequestPasswordReset({
 });
 export const resetPassword = makeResetPassword({ tokens, hasher, now });
 
+const profiles = prismaPlayerProfileRepository(db);
+export const getPlayerProfile = (userId: string) => profiles.find(userId);
+export const savePlayerPhone = makeSavePlayerPhone({ profiles });
+export type { PlayerProfile } from "./application/ports";
+
 export const { handlers, auth, signIn, signOut } = createAuth(verifyCredentials);
 
 /** Id of the signed-in user, or null. Reads cookies: call it inside <Suspense>. */
@@ -49,6 +56,7 @@ export { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "./domain/password";
 export {
   EmailAlreadyRegisteredError,
   InvalidPasswordError,
+  PhoneLinkedToAnotherAccountError,
   ResetTokenExpiredError,
   ResetTokenInvalidError,
 } from "./domain/errors";

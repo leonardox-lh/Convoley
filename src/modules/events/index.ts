@@ -49,6 +49,7 @@ export {
   markEventFull,
   reopenEvent,
 } from "./infrastructure/prisma-event-seats";
+export { listEventSummaries } from "./infrastructure/prisma-event-summaries";
 export type { CreateEventInput } from "./application/create-event";
 export type { UpdateEventInput } from "./application/update-event";
 export type { CancelEventInput } from "./application/cancel-event";

@@ -68,6 +68,9 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
+  // From the Google profile (HU-48): autocompletes the player's registrations.
+  firstName     String?
+  lastName      String?
   // Only organizers who sign up with email + password have one.
   passwordHash  String?
   // Links guest registrations to the account later (HU-48).

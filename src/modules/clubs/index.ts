@@ -20,6 +20,7 @@ export type { ClubProfile } from "./application/ports";
 export {
   findClubBySlug,
   findClubMembership,
+  findClubNamesByIds,
   findFirstClubSlugForMember,
 } from "./infrastructure/prisma-club-reader";
 

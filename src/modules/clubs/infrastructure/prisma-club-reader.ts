@@ -30,3 +30,11 @@ export async function findFirstClubSlugForMember(userId: string): Promise<string
   });
   return membership?.club.slug ?? null;
 }
+
+/** Slug and name of several clubs in one query, for lists that span clubs. */
+export async function findClubNamesByIds(ids: string[]) {
+  return db.club.findMany({
+    where: { id: { in: ids } },
+    select: { id: true, slug: true, name: true },
+  });
+}
