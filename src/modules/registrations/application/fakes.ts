@@ -1,6 +1,8 @@
 import type { EventSeatInfo, RegistrationStatus } from "../domain/registration";
 import type {
   EventSeats,
+  RegistrationListItem,
+  RegistrationListReader,
   PlayerDetails,
   RegistrationRepository,
   TransactionContext,
@@ -57,4 +59,8 @@ export function fakeRegistrationRepository(initial: StoredRegistration[] = []) {
     },
   };
   return { repository, rows };
+}
+
+export function fakeRegistrationListReader(items: RegistrationListItem[]): RegistrationListReader {
+  return { listByEvent: async () => [...items] };
 }
