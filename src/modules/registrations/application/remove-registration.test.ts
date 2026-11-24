@@ -116,4 +116,10 @@ describe("HU-08 criterio 2: quitar a alguien libera su cupo", () => {
 
     await expect(removeRegistration(input)).rejects.toThrow(EventNotOpenError);
   });
+
+  it("HU-08 criterio 2: rechaza si la convocatoria está cancelada", async () => {
+    const { removeRegistration } = setup(seatInfo({ status: "cancelled" }), []);
+
+    await expect(removeRegistration(input)).rejects.toThrow(EventNotOpenError);
+  });
 });

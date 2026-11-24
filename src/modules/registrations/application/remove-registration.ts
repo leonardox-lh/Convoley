@@ -18,7 +18,8 @@ export function makeRemoveRegistration(deps: {
   return async function removeRegistration(input: RemoveRegistrationInput) {
     await deps.transactions.run(async (tx) => {
       const event = await deps.events.lock(input.eventId, tx);
-      if (!event) throw new EventNotOpenError(input.eventId);
+      // A cancelled event's list is frozen: its payments were already marked for refund/balance.
+      if (!event || event.status === "cancelled") throw new EventNotOpenError(input.eventId);
 
       const registration = await deps.registrations.findInEvent(input.registrationId, event.id, tx);
       if (!registration) throw new RegistrationNotFoundError(input.registrationId);
