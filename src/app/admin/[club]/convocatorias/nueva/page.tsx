@@ -3,12 +3,12 @@ import { Suspense } from "react";
 import { todayInLima } from "@/lib/lima-time";
 import { findClubBySlug } from "@/modules/clubs";
 import { CreateEventForm } from "./create-event-form";
-import { isEventCreationEnabled } from "./organizer-access";
+import { isEventManagementEnabled } from "../organizer-access";
 
 type Params = PageProps<"/admin/[club]/convocatorias/nueva">["params"];
 
 export default function NewEventPage({ params }: PageProps<"/admin/[club]/convocatorias/nueva">) {
-  if (!isEventCreationEnabled()) notFound();
+  if (!isEventManagementEnabled()) notFound();
 
   return (
     <main className="mx-auto w-full max-w-md flex-1 px-4 py-8">

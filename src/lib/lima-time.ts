@@ -21,3 +21,24 @@ const limaFormatter = new Intl.DateTimeFormat("es-PE", {
 export function formatInLima(date: Date): string {
   return limaFormatter.format(date);
 }
+
+const limaPartsFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: LIMA_TIME_ZONE,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
+
+/** Splits a UTC Date into the "YYYY-MM-DD" and "HH:MM" Lima values for date and time inputs. */
+export function limaDateAndTime(date: Date): { date: string; time: string } {
+  const parts = Object.fromEntries(
+    limaPartsFormatter.formatToParts(date).map((part) => [part.type, part.value]),
+  );
+  return {
+    date: `${parts.year}-${parts.month}-${parts.day}`,
+    time: `${parts.hour}:${parts.minute}`,
+  };
+}

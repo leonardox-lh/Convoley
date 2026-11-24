@@ -10,6 +10,12 @@ export function solesToCents(raw: string): number | null {
   return Number(soles) * CENTS_PER_SOL + Number(decimals.padEnd(2, "0"));
 }
 
+/** Integer cents as the text a price input shows, e.g. 1250 → "12.50". */
+export function centsToSolesText(cents: number): string {
+  const decimals = String(cents % CENTS_PER_SOL).padStart(2, "0");
+  return `${Math.trunc(cents / CENTS_PER_SOL)}.${decimals}`;
+}
+
 const solesFormatter = new Intl.NumberFormat("es-PE", { style: "currency", currency: "PEN" });
 
 export function formatSoles(cents: number): string {

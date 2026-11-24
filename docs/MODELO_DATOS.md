@@ -66,6 +66,7 @@ erDiagram
     int priceCents
     int capacity
     EventStatus status
+    CancellationOutcome cancellationOutcome "refund | balance, al cancelar"
   }
   Registration {
     string id PK
@@ -83,6 +84,7 @@ erDiagram
     PaymentStatus status
     string providerPaymentId UK "idempotencia webhook"
     string proofFileKey "voucher privado"
+    CancellationOutcome cancellationOutcome "marca, no mueve dinero"
   }
   Product {
     string id PK
@@ -133,7 +135,9 @@ Cada módulo solo lee y escribe sus propias tablas (ver `docs/ARQUITECTURA.md`).
 - **Pagos**: una tabla para inscripciones y pedidos; un `CHECK` exige exactamente uno de `registrationId` u `orderId`. Una fila por intento: un voucher rechazado queda como historial y el siguiente es otra fila.
 - **Webhook idempotente**: `providerPaymentId @unique`.
 - **Convoley no retiene dinero**: no hay saldos ni cuentas internas; `Payment` solo registra lo que pasó en la cuenta de Mercado Pago del organizador.
-- **Estado `full`**: se guarda en `Event.status` (HU-04). El caso de uso de inscripción (HU-06) debe contar y crear dentro de una transacción que bloquee la fila del evento (`SELECT ... FOR UPDATE`), para no sobrepasar el cupo.
+- **Cancelar una convocatoria (HU-05)**: el organizador elige `refund` (devolución) o `balance` (saldo a favor). Se guarda en `Event.cancellationOutcome` (lo que ven los inscritos) y en cada `Payment` `approved` o `in_review` aún sin marcar, en la misma transacción. Es solo una marca: la devolución la hace el organizador en Mercado Pago. HU-14 debe marcar igual un pago que se apruebe después de la cancelación.
+- **Confirmados**: las inscripciones que ocupan cupo son las que no están `cancelled` (pagadas o no). Los cupos no pueden bajar de ese número.
+- **Estado `full`**: se guarda en `Event.status` (HU-04). Editar los cupos lo recalcula (HU-05). El caso de uso de inscripción (HU-06) debe contar y crear dentro de una transacción que bloquee la fila del evento (`SELECT ... FOR UPDATE`), para no sobrepasar el cupo.
 - **CHECKs a mano**: formato de celular y XOR de pago al final de `*_init`; montos, cupo, stock y cantidades no negativos en `*_range_checks`. Prisma no los administra, así que las migraciones futuras no los borran.
 - **Consistencia entre clubes**: la base no impide que `Payment.clubId` difiera del club de su inscripción o pedido, ni que `Order.pickupEventId` sea de otro club. Lo validan los casos de uso que crean esas filas (HU-08, HU-24).
 

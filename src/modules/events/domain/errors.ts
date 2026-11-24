@@ -39,3 +39,34 @@ export class CommunityNotInClubError extends Error {
     this.name = "CommunityNotInClubError";
   }
 }
+
+export class EventNotFoundError extends Error {
+  constructor(readonly eventId: string) {
+    super(`Event not found: ${eventId}`);
+    this.name = "EventNotFoundError";
+  }
+}
+
+export class EventNotEditableError extends Error {
+  constructor(readonly status: string) {
+    super(`An event in status "${status}" can't be edited`);
+    this.name = "EventNotEditableError";
+  }
+}
+
+export class EventAlreadyCancelledError extends Error {
+  constructor() {
+    super("Event is already cancelled");
+    this.name = "EventAlreadyCancelledError";
+  }
+}
+
+export class CapacityBelowConfirmedError extends Error {
+  constructor(
+    readonly capacity: number,
+    readonly confirmed: number,
+  ) {
+    super(`Capacity ${capacity} is below the ${confirmed} confirmed registrations`);
+    this.name = "CapacityBelowConfirmedError";
+  }
+}

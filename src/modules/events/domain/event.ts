@@ -1,5 +1,8 @@
 import {
+  CapacityBelowConfirmedError,
+  EventAlreadyCancelledError,
   EventInPastError,
+  EventNotEditableError,
   InvalidCapacityError,
   InvalidMapsUrlError,
   InvalidPriceError,
@@ -14,8 +17,16 @@ export type InitialEventStatus = Extract<EventStatus, "draft" | "published">;
 const MAPS_ONLY_HOSTS = ["maps.google.com", "maps.app.goo.gl"];
 const SHARED_HOSTS = ["google.com", "www.google.com", "goo.gl"];
 
-export interface NewEventProps {
-  clubId: string;
+/** Statuses whose details the organizer can still change. */
+const EDITABLE_STATUSES: readonly EventStatus[] = ["draft", "published", "full"];
+
+// Same values as payments/domain/payment.ts (domain code can't import other modules); keep in sync.
+export const CANCELLATION_OUTCOMES = ["refund", "balance"] as const;
+/** What happens with players' payments when the event is cancelled. */
+export type CancellationOutcome = (typeof CANCELLATION_OUTCOMES)[number];
+
+/** The details an organizer types in, both when creating and when editing. */
+export interface EventDetailsProps {
   communityId: string;
   title: string;
   startsAt: Date;
@@ -25,6 +36,10 @@ export interface NewEventProps {
   capacity: number;
   isMixed: boolean;
   rules: string | null;
+}
+
+export interface NewEventProps extends EventDetailsProps {
+  clubId: string;
   status: InitialEventStatus;
 }
 
@@ -32,6 +47,11 @@ export interface NewEventProps {
 export type NewEvent = Readonly<NewEventProps>;
 
 export function newEvent(props: NewEventProps, now: Date): NewEvent {
+  validateEventDetails(props, now);
+  return { ...props };
+}
+
+export function validateEventDetails(props: EventDetailsProps, now: Date): void {
   if (props.startsAt.getTime() <= now.getTime()) throw new EventInPastError(props.startsAt);
   if (!Number.isInteger(props.capacity) || props.capacity <= 0) {
     throw new InvalidCapacityError(props.capacity);
@@ -42,7 +62,29 @@ export function newEvent(props: NewEventProps, now: Date): NewEvent {
   if (props.mapsUrl !== null && !isGoogleMapsUrl(props.mapsUrl)) {
     throw new InvalidMapsUrlError(props.mapsUrl);
   }
-  return { ...props };
+}
+
+export function assertEditable(status: EventStatus): void {
+  if (!EDITABLE_STATUSES.includes(status)) throw new EventNotEditableError(status);
+}
+
+export function assertCancellable(status: EventStatus): void {
+  if (status === "cancelled") throw new EventAlreadyCancelledError();
+}
+
+/** Capacity can't drop below the players already holding a spot. */
+export function assertCapacityCoversConfirmed(capacity: number, confirmed: number): void {
+  if (capacity < confirmed) throw new CapacityBelowConfirmedError(capacity, confirmed);
+}
+
+/** An open event becomes full when every spot is taken, and reopens when spots are added. */
+export function statusAfterCapacityChange(
+  status: EventStatus,
+  capacity: number,
+  confirmed: number,
+): EventStatus {
+  if (status !== "published" && status !== "full") return status;
+  return confirmed >= capacity ? "full" : "published";
 }
 
 function isGoogleMapsUrl(raw: string): boolean {

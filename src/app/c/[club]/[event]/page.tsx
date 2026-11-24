@@ -2,12 +2,17 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { formatInLima } from "@/lib/lima-time";
 import { formatSoles } from "@/lib/money";
-import { getPublicEvent, type EventStatus } from "@/modules/events";
+import { getPublicEvent, type CancellationOutcome, type EventStatus } from "@/modules/events";
 
 const STATUS_NOTICES: Partial<Record<EventStatus, string>> = {
   full: "Convocatoria llena",
   closed: "Inscripciones cerradas",
   cancelled: "Convocatoria cancelada",
+};
+
+const CANCELLATION_NOTES: Record<CancellationOutcome, string> = {
+  refund: "Si ya pagaste, el organizador te devolverá tu dinero.",
+  balance: "Si ya pagaste, tu pago queda como saldo a favor para otra convocatoria del club.",
 };
 
 type Params = PageProps<"/c/[club]/[event]">["params"];
@@ -27,6 +32,10 @@ async function PublicEventContent({ params }: { params: Params }) {
   const event = await getPublicEvent({ clubSlug: club, eventId });
   if (!event) notFound();
   const notice = STATUS_NOTICES[event.status];
+  const cancellationNote =
+    event.status === "cancelled" && event.cancellationOutcome
+      ? CANCELLATION_NOTES[event.cancellationOutcome]
+      : null;
 
   return (
     <>
@@ -37,9 +46,13 @@ async function PublicEventContent({ params }: { params: Params }) {
         <h1 className="text-2xl font-semibold tracking-tight">{event.title}</h1>
       </div>
       {notice && (
-        <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800 dark:bg-amber-950 dark:text-amber-300">
-          {notice}
-        </p>
+        <div
+          role="status"
+          className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+        >
+          <p className="font-medium">{notice}</p>
+          {cancellationNote && <p>{cancellationNote}</p>}
+        </div>
       )}
       <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
         <dt className="text-zinc-500">Cuándo</dt>

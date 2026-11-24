@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ClubNotFoundError, CommunityNotInClubError, EventInPastError } from "../domain/errors";
 import type { NewEvent } from "../domain/event";
 import { makeCreateEvent, type CreateEventInput } from "./create-event";
+import { fakeEventRepository } from "./fakes";
 import type { ClubReader, EventRepository } from "./ports";
 
 const NOW = new Date("2026-12-01T12:00:00.000Z");
@@ -15,13 +16,12 @@ const club = {
 function setup() {
   const saved: NewEvent[] = [];
   const clubs: ClubReader = { findBySlug: async (slug) => (slug === club.slug ? club : null) };
-  const events: EventRepository = {
+  const events: EventRepository = fakeEventRepository({
     create: async (event) => {
       saved.push(event);
       return { id: "evt-1" };
     },
-    findInClub: async () => null,
-  };
+  });
   return { saved, createEvent: makeCreateEvent({ clubs, events, now: () => NOW }) };
 }
 
