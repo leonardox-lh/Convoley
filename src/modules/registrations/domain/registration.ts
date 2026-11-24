@@ -26,3 +26,8 @@ export function assertSpotAvailable(event: EventSeatInfo, confirmed: number, now
   if (!isOpenForRegistration(event, now)) throw new EventNotOpenError(event.id);
   if (confirmed >= event.capacity) throw new EventFullError(event.id);
 }
+
+/** Taken and free seats of an event; free never goes below zero. */
+export function seatSummary(capacity: number, confirmed: number) {
+  return { taken: confirmed, free: Math.max(0, capacity - confirmed) };
+}

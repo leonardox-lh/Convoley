@@ -34,3 +34,16 @@ export interface RegistrationRepository {
   /** Brings back a cancelled registration as pending payment, with the new details. */
   reactivate(id: string, player: PlayerDetails, tx: TransactionContext): Promise<void>;
 }
+
+export interface RegistrationListItem {
+  id: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  status: RegistrationStatus;
+  createdAt: Date;
+}
+
+export interface RegistrationListReader {
+  listByEvent(eventId: string): Promise<RegistrationListItem[]>;
+}

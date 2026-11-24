@@ -1,6 +1,7 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { SEAT_HOLDING_STATUSES } from "../domain/registration";
+import type { RegistrationListReader } from "../application/ports";
 
 type Client = Prisma.TransactionClient;
 
@@ -25,3 +26,19 @@ export async function listEventRegistrationIds(eventId: string, tx: Client = db)
   const rows = await tx.registration.findMany({ where: { eventId }, select: { id: true } });
   return rows.map((row) => row.id);
 }
+
+export const prismaRegistrationListReader: RegistrationListReader = {
+  listByEvent: (eventId) =>
+    db.registration.findMany({
+      where: { eventId },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        phone: true,
+        status: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: "asc" },
+    }),
+};

@@ -37,11 +37,19 @@ async function EditEventContent({ params }: { params: Props["params"] }) {
       <div>
         <p className="text-sm text-zinc-500">{event.club.name}</p>
         <h1 className="text-2xl font-semibold tracking-tight">Editar convocatoria</h1>
-        {event.status !== "draft" && (
-          <Link href={event.sharePath} className="text-sm underline underline-offset-4">
-            Ver link público
+        <div className="flex gap-4">
+          <Link
+            href={`/admin/${clubSlug}/convocatorias/${event.id}`}
+            className="text-sm underline underline-offset-4"
+          >
+            Ver inscritos
           </Link>
-        )}
+          {event.status !== "draft" && (
+            <Link href={event.sharePath} className="text-sm underline underline-offset-4">
+              Ver link público
+            </Link>
+          )}
+        </div>
       </div>
 
       {event.status === "cancelled" && (
