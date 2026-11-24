@@ -5,6 +5,7 @@ import type {
   RegistrationStatus,
   SignUpStatus,
 } from "../domain/registration";
+import type { ChargeResult, StoredPaymentStatus } from "../domain/settlement";
 
 declare const transactionBrand: unique symbol;
 /** Handle of a running database transaction; only infrastructure looks inside it. */
@@ -140,5 +141,73 @@ export interface VoucherReviews {
   reject(
     input: { paymentId: string; reason: string; reviewedByUserId: string; at: Date },
     tx: TransactionContext,
+  ): Promise<void>;
+}
+
+/** A Mercado Pago charge as reported server to server; never built from browser data. */
+export interface ChargeReport {
+  providerPaymentId: string;
+  result: ChargeResult;
+  statusDetail: string | null;
+  amountCents: number;
+  currency: string;
+  externalReference: string | null;
+}
+
+/** Mercado Pago on the organizer's account, owned by the `payments` module (network). */
+export interface MercadoPagoGateway {
+  isEnabled(clubId: string): Promise<boolean>;
+  charge(
+    clubId: string,
+    charge: {
+      amountCents: number;
+      token: string;
+      paymentMethodId: string;
+      installments: number;
+      issuerId: string | null;
+      payerEmail: string;
+      description: string;
+      externalReference: string;
+      idempotencyKey: string;
+    },
+  ): Promise<ChargeReport>;
+  find(clubId: string, providerPaymentId: string): Promise<ChargeReport>;
+  refund(clubId: string, providerPaymentId: string, idempotencyKey: string): Promise<void>;
+  clubIdForAccount(mpUserId: string): Promise<string | null>;
+}
+
+export interface StoredMercadoPagoPayment {
+  id: string;
+  clubId: string;
+  registrationId: string | null;
+  amountCents: number;
+  status: StoredPaymentStatus;
+  providerPaymentId: string | null;
+}
+
+/** Mercado Pago payment rows, owned by the `payments` module (database). */
+export interface MercadoPagoPaymentRecords {
+  recordPending(
+    payment: {
+      clubId: string;
+      registrationId: string;
+      amountCents: number;
+      serviceFeeCents: number;
+    },
+    tx: TransactionContext,
+  ): Promise<{ id: string }>;
+  attachProviderId(paymentId: string, providerPaymentId: string): Promise<void>;
+  find(
+    where: { id: string } | { providerPaymentId: string },
+    tx?: TransactionContext,
+  ): Promise<StoredMercadoPagoPayment | null>;
+  setStatus(
+    input: {
+      paymentId: string;
+      status: Exclude<StoredPaymentStatus, "in_review">;
+      statusDetail: string | null;
+      providerPaymentId?: string;
+    },
+    tx?: TransactionContext,
   ): Promise<void>;
 }

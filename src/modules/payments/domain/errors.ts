@@ -41,3 +41,14 @@ export class MercadoPagoAccountInUseError extends Error {
     this.name = "MercadoPagoAccountInUseError";
   }
 }
+
+/** Mercado Pago answered a charge, lookup or refund with an error (network, 4xx, 5xx). */
+export class MercadoPagoChargeError extends Error {
+  constructor(
+    readonly httpStatus: number,
+    readonly body: unknown,
+  ) {
+    super(`Mercado Pago request failed with HTTP ${httpStatus}`);
+    this.name = "MercadoPagoChargeError";
+  }
+}

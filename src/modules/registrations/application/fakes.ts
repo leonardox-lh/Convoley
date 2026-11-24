@@ -1,6 +1,10 @@
 import { holdsSeat, type EventSeatInfo, type RegistrationStatus } from "../domain/registration";
 import type {
+  ChargeReport,
   EventSeats,
+  MercadoPagoGateway,
+  MercadoPagoPaymentRecords,
+  StoredMercadoPagoPayment,
   ManualPayments,
   VoucherPayments,
   VoucherReviews,
@@ -156,4 +160,68 @@ export function fakeVoucherReviews(inReview: Record<string, string>) {
     },
   };
   return { reviews, approved, rejected };
+}
+
+/** Mercado Pago as seen from registrations: canned answers, records what was asked. */
+export function fakeMercadoPagoGateway(
+  options: {
+    enabled?: boolean;
+    answer?: Partial<ChargeReport>;
+    accountClubs?: Record<string, string>;
+  } = {},
+) {
+  const calls = {
+    charged: [] as Parameters<MercadoPagoGateway["charge"]>[1][],
+    refunded: [] as { providerPaymentId: string; idempotencyKey: string }[],
+  };
+  const report = (overrides: Partial<ChargeReport>): ChargeReport => ({
+    providerPaymentId: "mp-1",
+    result: "approved",
+    statusDetail: "accredited",
+    amountCents: 1500,
+    currency: "PEN",
+    externalReference: null,
+    ...overrides,
+  });
+  const gateway: MercadoPagoGateway = {
+    isEnabled: async () => options.enabled ?? true,
+    charge: async (_clubId, charge) => {
+      calls.charged.push(charge);
+      return report({
+        amountCents: charge.amountCents,
+        externalReference: charge.externalReference,
+        ...options.answer,
+      });
+    },
+    find: async (_clubId, providerPaymentId) => report({ providerPaymentId, ...options.answer }),
+    refund: async (_clubId, providerPaymentId, idempotencyKey) => {
+      calls.refunded.push({ providerPaymentId, idempotencyKey });
+    },
+    clubIdForAccount: async (mpUserId) => options.accountClubs?.[mpUserId] ?? null,
+  };
+  return { gateway, calls, report };
+}
+
+export function fakeMercadoPagoRecords(initial: StoredMercadoPagoPayment[] = []) {
+  const rows = [...initial];
+  const records: MercadoPagoPaymentRecords = {
+    recordPending: async (payment) => {
+      const id = `pay-${rows.length + 1}`;
+      rows.push({ id, ...payment, status: "pending", providerPaymentId: null });
+      return { id };
+    },
+    attachProviderId: async (paymentId, providerPaymentId) => {
+      rows.find((row) => row.id === paymentId)!.providerPaymentId = providerPaymentId;
+    },
+    find: async (where) =>
+      rows.find((row) =>
+        "id" in where ? row.id === where.id : row.providerPaymentId === where.providerPaymentId,
+      ) ?? null,
+    setStatus: async ({ paymentId, status, providerPaymentId }) => {
+      const row = rows.find((candidate) => candidate.id === paymentId)!;
+      row.status = status;
+      if (providerPaymentId) row.providerPaymentId = providerPaymentId;
+    },
+  };
+  return { records, rows };
 }

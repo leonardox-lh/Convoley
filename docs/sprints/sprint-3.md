@@ -50,9 +50,13 @@ Todo va en `.env.local` (no versionado), nunca en el chat ni en el repo.
 
 - [x] HT-05 · Credenciales de prueba en variables de entorno (variables y validación ✅; crear la app y los usuarios de prueba en Mercado Pago lo hace el usuario)
 - [x] HU-18 · Conectar Mercado Pago
-- [ ] HU-19 · Pagar con Yape o tarjeta
-- [ ] HU-20 · Webhook marca pagado
+- [x] HU-19 · Pagar con Yape o tarjeta
+- [x] HU-20 · Webhook marca pagado
 - [ ] HU-21 · Reserva de 10 minutos
 - [ ] HU-22 · Cargo por servicio
 
 ## Decisiones tomadas sin consultar
+
+- HU-19/HU-20 van en un solo commit: comparten el caso de uso idempotente de liquidación (`settleMercadoPagoPayment`), que usan tanto la respuesta directa del cobro como el webhook.
+- Un pago rechazado deja la inscripción en `pending_payment` para que el jugador reintente; cada intento es un `Payment` nuevo con su propia clave de idempotencia.
+- Se valida club, monto exacto y moneda PEN con los datos que devuelve `GET /v1/payments/{id}`; si no coinciden, no se marca nada ("mismatch").

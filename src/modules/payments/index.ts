@@ -6,6 +6,7 @@ import {
   makeGetMercadoPagoAccess,
 } from "./application/mercado-pago-connection";
 import { mercadoPagoOAuth } from "./infrastructure/mercado-pago-api";
+import { mercadoPagoCharges } from "./infrastructure/mercado-pago-charges";
 import {
   findMercadoPagoStatus,
   prismaMercadoPagoConnections,
@@ -68,3 +69,15 @@ export {
   MercadoPagoAuthorizationError,
   MercadoPagoNotConnectedError,
 } from "./domain/errors";
+export const mercadoPagoChargesClient = mercadoPagoCharges();
+export type { MercadoPagoCharge, NewMercadoPagoCharge } from "./application/ports";
+export { chargeOutcome, type ChargeOutcome } from "./domain/mercado-pago-status";
+export { MercadoPagoChargeError } from "./domain/errors";
+export {
+  attachProviderPaymentId,
+  findClubIdByMercadoPagoAccount,
+  findMercadoPagoPayment,
+  recordMercadoPagoPayment,
+  setMercadoPagoPaymentStatus,
+} from "./infrastructure/prisma-mercado-pago-payment";
+export { verifyWebhookSignature } from "./infrastructure/webhook-signature";

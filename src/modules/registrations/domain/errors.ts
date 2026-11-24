@@ -58,3 +58,11 @@ export class InvalidRejectionReasonError extends Error {
     this.name = "InvalidRejectionReasonError";
   }
 }
+
+/** The club has no Mercado Pago account connected: players pay by voucher instead. */
+export class MercadoPagoUnavailableError extends Error {
+  constructor(readonly clubId: string) {
+    super(`Club ${clubId} doesn't take Mercado Pago payments`);
+    this.name = "MercadoPagoUnavailableError";
+  }
+}

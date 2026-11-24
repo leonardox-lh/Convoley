@@ -61,6 +61,9 @@ enum PaymentStatus {
   in_review
   approved
   rejected
+  // Mercado Pago (HU-20): approved but the seat was gone; the money goes back automatically.
+  refund_pending
+  refunded
 }
 
 // What happens with a payment when its event is cancelled (HU-05). Only a mark:
@@ -147,21 +150,21 @@ model VerificationToken {
 // ─── clubs ─────────────────────────────────────────────────────────────────
 
 model Club {
-  id             String   @id @default(cuid())
-  slug           String   @unique
-  name           String
-  description    String?
-  logoKey        String?
-  primaryColor   String?
-  secondaryColor String?
-  instagramUrl   String?
-  tiktokUrl      String?
+  id                String   @id @default(cuid())
+  slug              String   @unique
+  name              String
+  description       String?
+  logoKey           String?
+  primaryColor      String?
+  secondaryColor    String?
+  instagramUrl      String?
+  tiktokUrl         String?
   // Where players pay the organizer directly (HU-13): Yape/Plin number, holder and QR image.
   paymentPhone      String?
   paymentHolderName String?
   paymentQrKey      String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   members     ClubMember[]
   communities Community[]
@@ -276,25 +279,29 @@ model Registration {
 
 // One row per attempt; exactly one of registrationId / orderId is set (SQL CHECK).
 model Payment {
-  id                  String               @id @default(cuid())
-  clubId              String
-  registrationId      String?
-  orderId             String?
-  amountCents         Int
-  method              PaymentMethod
-  status              PaymentStatus        @default(pending)
+  id                   String               @id @default(cuid())
+  clubId               String
+  registrationId       String?
+  orderId              String?
+  // Total charged, service fee included (HU-22).
+  amountCents          Int
+  serviceFeeCents      Int                  @default(0)
+  method               PaymentMethod
+  status               PaymentStatus        @default(pending)
   // Mercado Pago payment id: makes the webhook idempotent.
-  providerPaymentId   String?              @unique
+  providerPaymentId    String?              @unique
   // Private voucher image: bucket key, read only through signed URLs.
-  proofFileKey        String?
-  yapeSecurityCode    String?
-  rejectionReason     String?
+  proofFileKey         String?
+  yapeSecurityCode     String?
+  rejectionReason      String?
+  // Mercado Pago's status_detail (cc_rejected_insufficient_amount…), to explain a failure.
+  providerStatusDetail String?
   // Set when the event is cancelled (HU-05); a mark only, no money moves through Convoley.
-  cancellationOutcome CancellationOutcome?
-  reviewedAt          DateTime?
-  reviewedByUserId    String?
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
+  cancellationOutcome  CancellationOutcome?
+  reviewedAt           DateTime?
+  reviewedByUserId     String?
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
 
   club         Club          @relation(fields: [clubId], references: [id], onDelete: Restrict)
   registration Registration? @relation(fields: [registrationId], references: [id], onDelete: Restrict)

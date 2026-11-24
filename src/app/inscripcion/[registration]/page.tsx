@@ -6,7 +6,13 @@ import { FormMessage } from "@/components/form";
 import { formatInLima } from "@/lib/lima-time";
 import { cn } from "@/lib/utils";
 import { listEventSummaries } from "@/modules/events";
-import { findLastVoucherRejection, MAX_VOUCHER_BYTES } from "@/modules/payments";
+import { findClubBySlug } from "@/modules/clubs";
+import {
+  findLastVoucherRejection,
+  getMercadoPagoStatus,
+  isMercadoPagoConfigured,
+  MAX_VOUCHER_BYTES,
+} from "@/modules/payments";
 import { findRegistrationOverview } from "@/modules/registrations";
 import { PaymentInstructions } from "../../c/[club]/[event]/payment-instructions";
 import { loadPaymentInfo } from "../../payment-info";
@@ -14,6 +20,7 @@ import {
   REGISTRATION_STATUS_BADGE_CLASSES,
   REGISTRATION_STATUS_LABELS,
 } from "../../registration-status";
+import { MercadoPagoCheckout } from "./mercado-pago-checkout";
 import { VoucherForm } from "./voucher-form";
 
 // A private link: keep it out of search engines and link previews' indexes.
@@ -40,8 +47,9 @@ async function RegistrationContent({ params, searchParams }: Props) {
   if (!registration) notFound();
   const [event] = await listEventSummaries([registration.eventId]);
   if (!event) notFound();
-  const { enviado } = await searchParams;
+  const { enviado, pagado } = await searchParams;
   const awaitingPayment = registration.status === "pending_payment" && event.status !== "cancelled";
+  const mercadoPago = awaitingPayment ? await mercadoPagoCheckout(event.clubSlug) : null;
 
   return (
     <>
@@ -67,6 +75,9 @@ async function RegistrationContent({ params, searchParams }: Props) {
           {REGISTRATION_STATUS_LABELS[registration.status]}
         </span>
       </p>
+      {pagado && registration.status === "paid" && (
+        <FormMessage tone="ok">¡Pago confirmado! Ya estás en la lista.</FormMessage>
+      )}
       {enviado && (
         <FormMessage tone="ok">
           ¡Recibimos tu captura! El organizador la revisará pronto.
@@ -81,7 +92,27 @@ async function RegistrationContent({ params, searchParams }: Props) {
       {registration.status === "in_review" && (
         <p className="text-sm text-zinc-500">El organizador está revisando tu pago.</p>
       )}
-      {awaitingPayment && (
+      {awaitingPayment && mercadoPago && (
+        <section className="flex flex-col gap-4 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+          <h2 className="text-lg font-semibold">Paga con Yape o tarjeta</h2>
+          <MercadoPagoCheckout
+            registrationId={registration.id}
+            publicKey={mercadoPago.publicKey}
+            amountCents={event.priceCents}
+          />
+          <details className="text-sm">
+            <summary className="cursor-pointer text-zinc-500">
+              ¿Ya le pagaste al organizador por fuera? Sube tu captura
+            </summary>
+            <div className="mt-3 flex flex-col gap-4">
+              <RejectionNotice registrationId={registration.id} />
+              <PaymentInstructions info={await loadPaymentInfo(event.clubSlug, event.priceCents)} />
+              <VoucherForm registrationId={registration.id} maxBytes={MAX_VOUCHER_BYTES} />
+            </div>
+          </details>
+        </section>
+      )}
+      {awaitingPayment && !mercadoPago && (
         <section className="flex flex-col gap-4 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
           <h2 className="text-lg font-semibold">Paga y sube tu captura</h2>
           <RejectionNotice registrationId={registration.id} />
@@ -91,6 +122,13 @@ async function RegistrationContent({ params, searchParams }: Props) {
       )}
     </>
   );
+}
+
+/** The club's Mercado Pago public key, when it takes Yape or card payments (HU-19). */
+async function mercadoPagoCheckout(clubSlug: string) {
+  if (!isMercadoPagoConfigured()) return null;
+  const club = await findClubBySlug(clubSlug);
+  return club && getMercadoPagoStatus(club.id);
 }
 
 /** After a rejection the player is back to "pending payment": tell them why (HU-15). */

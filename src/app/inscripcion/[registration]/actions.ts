@@ -4,16 +4,20 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import {
   InvalidSecurityCodeError,
+  MercadoPagoChargeError,
   InvalidVoucherTypeError,
   MAX_VOUCHER_BYTES,
   VoucherTooLargeError,
 } from "@/modules/payments";
 import {
   EventNotOpenError,
+  MercadoPagoUnavailableError,
   PaymentNotExpectedError,
   RegistrationNotFoundError,
+  startMercadoPagoPayment,
   submitVoucher,
 } from "@/modules/registrations";
+import { rejectionMessage } from "./mercado-pago-messages";
 
 export type VoucherState = { status: "idle" } | { status: "error"; message: string };
 
@@ -65,4 +69,69 @@ export async function submitVoucherAction(
     throw error;
   }
   redirect(`/inscripcion/${encodeURIComponent(registrationId)}?enviado=1`);
+}
+
+export type MercadoPagoPayState =
+  | { status: "idle" }
+  | { status: "error"; message: string }
+  | { status: "pending" }
+  | { status: "refunded"; message: string };
+
+const mercadoPagoSchema = z.object({
+  registrationId: z.string().min(1),
+  token: z.string().min(1, "No se pudo leer tu medio de pago. Inténtalo de nuevo."),
+  paymentMethodId: z.string().min(1).max(40),
+  installments: z.coerce.number().int().min(1).max(36).default(1),
+  issuerId: z.string().max(40).optional(),
+  payerEmail: z.email("Escribe un correo válido: Mercado Pago te envía ahí el comprobante."),
+});
+
+const MERCADO_PAGO_ERRORS: [new (...args: never[]) => Error, string][] = [
+  [PaymentNotExpectedError, "Esta inscripción no tiene un pago pendiente. Recarga la página."],
+  [EventNotOpenError, "Esta convocatoria ya no recibe pagos."],
+  [RegistrationNotFoundError, "No encontramos tu inscripción."],
+  [MercadoPagoUnavailableError, "Este club no recibe pagos con Mercado Pago. Sube tu captura."],
+  [MercadoPagoChargeError, "No pudimos comunicarnos con Mercado Pago. Inténtalo en un momento."],
+];
+
+/** HU-19: charge the Yape or card token on the organizer's Mercado Pago account. */
+export async function payWithMercadoPagoAction(
+  _previous: MercadoPagoPayState,
+  formData: FormData,
+): Promise<MercadoPagoPayState> {
+  const parsed = mercadoPagoSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { status: "error", message: parsed.error.issues[0].message };
+  const { registrationId, issuerId, ...payment } = parsed.data;
+
+  let outcome: Awaited<ReturnType<typeof startMercadoPagoPayment>>;
+  try {
+    outcome = await startMercadoPagoPayment({
+      registrationId,
+      ...payment,
+      issuerId: issuerId || null,
+    });
+  } catch (error) {
+    const known = MERCADO_PAGO_ERRORS.find(([type]) => error instanceof type);
+    if (known) return { status: "error", message: known[1] };
+    throw error;
+  }
+
+  if (outcome.result === "rejected") {
+    return { status: "error", message: rejectionMessage(outcome.statusDetail) };
+  }
+  if (outcome.result === "pending") return { status: "pending" };
+  if (outcome.settlement === "refund_to_waitlist") {
+    return {
+      status: "refunded",
+      message:
+        "Pagaste justo cuando se llenó el último cupo: te devolvimos el dinero y quedaste en la lista de espera.",
+    };
+  }
+  if (outcome.settlement === "refund") {
+    return {
+      status: "refunded",
+      message: "Este pago no se pudo usar y te lo devolvimos automáticamente.",
+    };
+  }
+  redirect(`/inscripcion/${encodeURIComponent(registrationId)}?pagado=1`);
 }

@@ -3,6 +3,11 @@ import { makeAddPlayerManually } from "./application/add-player-manually";
 import { makeListEventRegistrations } from "./application/list-event-registrations";
 import { makeMarkPaidManually } from "./application/mark-paid-manually";
 import {
+  makeSettleMercadoPagoNotification,
+  makeSettleMercadoPagoPayment,
+  makeStartMercadoPagoPayment,
+} from "./application/mercado-pago-payments";
+import {
   makeLinkGuestRegistrations,
   makeListPlayerRegistrations,
 } from "./application/player-registrations";
@@ -12,6 +17,8 @@ import { makeRegisterGuest } from "./application/register-guest";
 import { makeRemoveRegistration } from "./application/remove-registration";
 import { eventsAdapter } from "./infrastructure/events-adapter";
 import {
+  mercadoPagoGatewayAdapter,
+  mercadoPagoRecordsAdapter,
   paymentsAdapter,
   voucherPaymentsAdapter,
   voucherReviewsAdapter,
@@ -73,6 +80,26 @@ const reviewDeps = {
 export const approveVoucher = makeApproveVoucher(reviewDeps);
 export const rejectVoucher = makeRejectVoucher(reviewDeps);
 
+const mercadoPagoDeps = {
+  events: eventsAdapter,
+  registrations: prismaRegistrationRepository,
+  gateway: mercadoPagoGatewayAdapter,
+  records: mercadoPagoRecordsAdapter,
+  transactions,
+  now,
+};
+const settleMercadoPagoPayment = makeSettleMercadoPagoPayment(mercadoPagoDeps);
+export const startMercadoPagoPayment = makeStartMercadoPagoPayment(
+  mercadoPagoDeps,
+  settleMercadoPagoPayment,
+);
+export const settleMercadoPagoNotification = makeSettleMercadoPagoNotification(
+  mercadoPagoDeps,
+  settleMercadoPagoPayment,
+);
+export const canPayWithMercadoPago = (clubId: string) =>
+  mercadoPagoGatewayAdapter.isEnabled(clubId);
+
 export const listEventRegistrations = makeListEventRegistrations({
   registrations: prismaRegistrationListReader,
 });
@@ -105,6 +132,7 @@ export {
   EventNotOpenError,
   InvalidPhoneNumberError,
   InvalidRejectionReasonError,
+  MercadoPagoUnavailableError,
   NothingToReviewError,
   PaymentNotExpectedError,
   RegistrationNotFoundError,
