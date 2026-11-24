@@ -46,14 +46,15 @@ Depende de: HU-01, HT-04
 - [x] Tests: unitarios de slug, colores, redes y logo; casos de uso con fakes; integración del repositorio y del bucket; e2e en 375px
 - [ ] Bucket en Railway y variables `BUCKET_*` (a cargo tuyo)
 
-## HU-03 · Página pública del club (3 pts)
+## HU-03 · Página pública del club (3 pts) ✅
 Depende de: HU-02 (perfil), HU-04 (convocatorias)
-- [ ] `events`: caso de uso `listOpenEvents(clubSlug)`: publicadas y llenas, futuras, ordenadas por fecha, con cupos restantes (usa `countConfirmedRegistrations`)
-- [ ] Contar los confirmados de varias convocatorias en una sola consulta (evitar N+1)
-- [ ] Página `/c/[club]` (o la URL elegida en HU-02): logo, colores, descripción, redes y tarjetas de convocatoria (fecha, lugar, precio, cupos restantes), sin cuenta
-- [ ] Que un club o una convocatoria inexistente responda HTTP 404 y no 200: hoy `notFound()` corre dentro de `<Suspense>` y el estado ya salió como 200 (la página sí muestra "no encontrada")
-- [ ] Revisar en 375px; metadata básica para que el link se vea bien en WhatsApp (la imagen OG es HU-17)
-- [ ] Tests: caso de uso con fakes (sin borradores, canceladas ni pasadas, cupos restantes), e2e de la página en móvil
+- [x] `events`: caso de uso `listOpenEvents(clubSlug)`: publicadas y llenas, futuras, ordenadas por fecha, con cupos restantes (usa `countConfirmedRegistrations`)
+- [x] Contar los confirmados de varias convocatorias en una sola consulta (evitar N+1)
+- [x] Página `/<club>` (la URL elegida en HU-02): logo, colores, descripción, redes y tarjetas de convocatoria (fecha, lugar, precio, cupos restantes), sin cuenta
+- [x] Que un club o una convocatoria inexistente responda HTTP 404 y no 200: hoy `notFound()` corre dentro de `<Suspense>` y el estado ya salió como 200 (la página sí muestra "no encontrada")
+- [x] Revisar en 375px; metadata básica para que el link se vea bien en WhatsApp (la imagen OG es HU-17)
+- [x] Tests: caso de uso con fakes (sin borradores, canceladas ni pasadas, cupos restantes), e2e de la página en móvil
+- Nota: el 404 real lo da `src/proxy.ts` (con Cache Components, `notFound()` en la página sale como 200). Los nombres reservados sin página (`planes`, `tienda`) siguen con soft-404 hasta que exista su página
 
 ## HU-06 · Inscripción como invitado (3 pts)
 Depende de: HU-04, HU-03 (punto de entrada); HU-01 para el botón de Google
