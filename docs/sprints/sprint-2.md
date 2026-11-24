@@ -66,7 +66,14 @@ Depende de: HU-13, HU-06
 - [x] Límite de server actions a 6 MB (`next.config.ts`)
 - [x] Tests: unitarios de imagen y código, caso de uso con fakes (estados no permitidos no suben archivo), integración con Postgres + S3Mock
 
-## HU-15 · Aprobar o rechazar vouchers (2 pts)
+## HU-15 · Aprobar o rechazar vouchers (2 pts) ✅
+Depende de: HU-14, HU-07
+- [x] URL firmada sin librerías: HMAC-SHA256 con `AUTH_SECRET`, vence a los 10 minutos, servida por `/vouchers/[key]` (el bucket sigue privado; `Cache-Control: private`)
+- [x] `registrations`: `approveVoucher` (pago `approved`, inscripción `paid`) y `rejectVoucher` (motivo obligatorio de hasta 200 letras, pago `rejected`, inscripción vuelve a `pending_payment` y conserva su cupo); con la convocatoria bloqueada para que un doble clic no apruebe dos veces
+- [x] Lista del organizador: miniatura, "Ver captura ampliada" (abre la imagen completa en otra pestaña), código de Yape, "Aprobar" y "Rechazar…" con motivo
+- [x] El jugador ve el motivo del rechazo en `/inscripcion/[id]` y puede subir otra captura
+- [x] Tests: unitarios de la firma (vence, otra clave, firma alterada) y de los casos de uso; integración en Postgres + S3Mock
+
 ## HU-16 · Imagen de la lista (5 pts)
 ## HU-17 · Copiar la lista como texto (1 pt)
 
@@ -83,4 +90,6 @@ Depende de: HU-13, HU-06
 - **HU-14**: el invitado no tiene cuenta, así que su inscripción tiene un link privado `/inscripcion/<id>` (el id es aleatorio y no se publica). Se muestra al inscribirse con un aviso para guardarlo. No se pide verificación (regla del producto).
 - **HU-14**: se acepta JPG, PNG o WebP de hasta 5 MB. Las fotos HEIC de iPhone normalmente llegan como JPG desde Safari; si alguna llega como HEIC se rechaza con un mensaje claro. El código de seguridad acepta de 3 a 6 dígitos (Yape usa 3).
 - **HU-14**: si el voucher se sube y luego falla el registro (carrera rara), el archivo queda huérfano en el bucket; se acepta por ahora.
+- **HU-15**: al rechazar, el jugador no pierde su cupo: vuelve a "pendiente de pago" y ve el motivo para subir otra captura. Si el organizador quiere sacarlo, usa "Quitar" (HU-08).
+- **HU-15**: la firma de las URLs usa `AUTH_SECRET` (no hace falta una variable nueva). `@aws-sdk/s3-request-presigner` no está instalado, así que la imagen pasa por nuestro servidor en vez de una URL firmada del bucket; para el volumen del piloto alcanza.
 - **HU-48**: un jugador cuyo correo de Google ya tiene cuenta de organizador con contraseña no puede entrar con Google (se mantiene la regla de HU-01 de no vincular cuentas automáticamente).
