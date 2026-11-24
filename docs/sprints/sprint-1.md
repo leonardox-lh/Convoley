@@ -56,14 +56,15 @@ Depende de: HU-02 (perfil), HU-04 (convocatorias)
 - [x] Tests: caso de uso con fakes (sin borradores, canceladas ni pasadas, cupos restantes), e2e de la página en móvil
 - Nota: el 404 real lo da `src/proxy.ts` (con Cache Components, `notFound()` en la página sale como 200). Los nombres reservados sin página (`planes`, `tienda`) siguen con soft-404 hasta que exista su página
 
-## HU-06 · Inscripción como invitado (3 pts)
+## HU-06 · Inscripción como invitado (3 pts) ✅
 Depende de: HU-04, HU-03 (punto de entrada); HU-01 para el botón de Google
-- [ ] `registrations`, dominio: value object `PhoneNumber` (9 dígitos, empieza con 9, se guarda `+519XXXXXXXX`) y errores (`EventFullError`, `DuplicateRegistrationError`, `EventNotOpenError`)
-- [ ] `events`: exponer en su API pública un bloqueo de la fila del evento dentro de una transacción (el mismo `FOR UPDATE` de HU-05) y el cambio a `full`; cuidar la importación circular `events` ⇄ `registrations` (importar solo dentro de funciones)
-- [ ] `registrations`, caso de uso `registerGuest`: bloquea el evento, valida que esté publicado, cuenta confirmados, rechaza celular repetido (también por el `@@unique` de la base), reactiva una inscripción cancelada del mismo celular, crea `pending_payment` y marca `full` al ocupar el último cupo
-- [ ] Formulario en `/c/[club]/[event]` con "Continuar como invitado" (nombre, apellido, celular) y "Continuar con Google" (usa la sesión de HU-01; autocompletar es HU-48)
-- [ ] Pantalla de confirmación con estado "pendiente de pago"
-- [ ] Tests: unitarios de `PhoneNumber`, caso de uso con fakes (lleno, duplicado, reactivación, último cupo → full), integración de concurrencia (dos inscripciones al último cupo: entra solo una), e2e de inscripción en móvil
+- [x] `registrations`, dominio: value object `PhoneNumber` (9 dígitos, empieza con 9, se guarda `+519XXXXXXXX`) y errores (`EventFullError`, `DuplicateRegistrationError`, `EventNotOpenError`)
+- [x] `events`: exponer en su API pública un bloqueo de la fila del evento dentro de una transacción (el mismo `FOR UPDATE` de HU-05) y el cambio a `full`; cuidar la importación circular `events` ⇄ `registrations` (importar solo dentro de funciones)
+- [x] `registrations`, caso de uso `registerGuest`: bloquea el evento, valida que esté publicado, cuenta confirmados, rechaza celular repetido (también por el `@@unique` de la base), reactiva una inscripción cancelada del mismo celular, crea `pending_payment` y marca `full` al ocupar el último cupo
+- [x] Formulario en `/c/[club]/[event]` con "Continuar como invitado" (nombre, apellido, celular) y "Continuar con Google" (usa la sesión de HU-01; autocompletar es HU-48)
+- [x] Pantalla de confirmación con estado "pendiente de pago"
+- [x] Tests: unitarios de `PhoneNumber`, caso de uso con fakes (lleno, duplicado, reactivación, último cupo → full), integración de concurrencia (dos inscripciones al último cupo: entra solo una), e2e de inscripción en móvil
+- Nota: el botón "Continuar con Google" solo aparece con `AUTH_GOOGLE_*` configurado (igual que `/ingresar`); se prueba a mano. `registerAction` no valida que el `eventId` sea del club del slug (no filtra datos: solo convocatorias publicadas). Sin límite de intentos por ahora
 
 ## HU-07 · Lista de inscritos (3 pts)
 Depende de: HU-06, HU-01

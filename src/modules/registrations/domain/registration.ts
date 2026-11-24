@@ -22,6 +22,7 @@ export function isOpenForRegistration(
 }
 
 export function assertSpotAvailable(event: EventSeatInfo, confirmed: number, now: Date): void {
-  if (event.status === "full" || confirmed >= event.capacity) throw new EventFullError(event.id);
+  if (event.status === "full") throw new EventFullError(event.id);
   if (!isOpenForRegistration(event, now)) throw new EventNotOpenError(event.id);
+  if (confirmed >= event.capacity) throw new EventFullError(event.id);
 }
