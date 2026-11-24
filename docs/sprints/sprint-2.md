@@ -74,7 +74,14 @@ Depende de: HU-14, HU-07
 - [x] El jugador ve el motivo del rechazo en `/inscripcion/[id]` y puede subir otra captura
 - [x] Tests: unitarios de la firma (vence, otra clave, firma alterada) y de los casos de uso; integración en Postgres + S3Mock
 
-## HU-16 · Imagen de la lista (5 pts)
+## HU-16 · Imagen de la lista (5 pts) ✅
+Depende de: HU-07, HU-02 (logo y colores), HU-12 (espera)
+- [x] `registrations`: `buildRoster` (inscritos con cupo numerados por orden, marca de pagado, lista de espera aparte)
+- [x] Imagen con `next/og` (sin librerías nuevas) en `/admin/[club]/convocatorias/[event]/imagen?formato=cuadrado|historia`: 1080×1080 y 1080×1920, cabecera con color primario, borde con el secundario y logo (PNG/JPG), etiqueta "PAGÓ", dos columnas si la lista es larga; solo para organizadores del club y sin caché
+- [x] Botones "Descargar PNG" y "Compartir" (Web Share API con archivo; en computadora descarga)
+- [x] Tests: unitarios del roster y del tamaño/columnas, y render real de los dos formatos a PNG
+- [ ] Probar "Compartir" a mano en un celular (Android Chrome / iOS Safari)
+
 ## HU-17 · Copiar la lista como texto (1 pt)
 
 ## Decisiones tomadas sin consultar
@@ -92,4 +99,5 @@ Depende de: HU-14, HU-07
 - **HU-14**: si el voucher se sube y luego falla el registro (carrera rara), el archivo queda huérfano en el bucket; se acepta por ahora.
 - **HU-15**: al rechazar, el jugador no pierde su cupo: vuelve a "pendiente de pago" y ve el motivo para subir otra captura. Si el organizador quiere sacarlo, usa "Quitar" (HU-08).
 - **HU-15**: la firma de las URLs usa `AUTH_SECRET` (no hace falta una variable nueva). `@aws-sdk/s3-request-presigner` no está instalado, así que la imagen pasa por nuestro servidor en vez de una URL firmada del bucket; para el volumen del piloto alcanza.
+- **HU-16**: los nombres van completos (nombre y apellido) para distinguir a dos "Juan"; si no caben, se cortan con "…". Quien pagó lleva una etiqueta verde "PAGÓ" (el ✅ necesita una fuente de emojis que `next/og` no trae sin descargar). Un logo WebP no se dibuja (Satori solo dibuja PNG/JPG). Con muchísimos inscritos (más de ~45 en cuadrado) la letra llega a su mínimo y la lista puede cortarse: para eso está el formato historia.
 - **HU-48**: un jugador cuyo correo de Google ya tiene cuenta de organizador con contraseña no puede entrar con Google (se mantiene la regla de HU-01 de no vincular cuentas automáticamente).
