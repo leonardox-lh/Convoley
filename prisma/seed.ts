@@ -2,6 +2,7 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { config } from "dotenv";
 import { PrismaClient } from "../src/generated/prisma/client";
+import { limaDateTimeToUtc, todayInLima } from "../src/lib/lima-time";
 import { scryptPasswordHasher } from "../src/modules/identity/infrastructure/scrypt-password-hasher";
 
 // Does not override an already-set DATABASE_URL (the integration test passes its own).
@@ -12,6 +13,9 @@ const SEED_CLUB_SLUG = "voley-miraflores";
 export const SEED_ORGANIZER_PASSWORD = "convoley-dev-1234";
 const EVENT_PRICE_CENTS = 1500;
 const EVENT_CAPACITY = 18;
+// Relative to the seed date so the event stays upcoming on the public page (e2e relies on it).
+const EVENT_DAYS_AHEAD = 14;
+const DAY_MS = 24 * 60 * 60 * 1000;
 const POLO_PRICE_CENTS = 4500;
 const KNEE_PADS_PRICE_CENTS = 6000;
 
@@ -63,8 +67,10 @@ async function seed(db: PrismaClient) {
         clubId: club.id,
         communityId: club.communities[0].id,
         title: "Mixto intermedio",
-        // Lima is UTC-05:00 all year (no DST), so a fixed offset is exact.
-        startsAt: new Date("2026-12-05T19:00:00-05:00"),
+        startsAt: limaDateTimeToUtc(
+          todayInLima(new Date(Date.now() + EVENT_DAYS_AHEAD * DAY_MS)),
+          "19:00",
+        ),
         venueName: "Coliseo Manuel Bonilla",
         mapsUrl: "https://maps.google.com/?q=Coliseo+Manuel+Bonilla",
         priceCents: EVENT_PRICE_CENTS,

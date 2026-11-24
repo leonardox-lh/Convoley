@@ -4,7 +4,7 @@ const CLUB_SLUG = "voley-miraflores";
 const MOBILE_WIDTH = 375;
 
 // Mobile-first: players arrive from a WhatsApp link. No sign-in anywhere in this file.
-// Relies on the seed event (2026-12-05); it stops being listed once that date passes.
+// Relies on the seed event, dated two weeks after the seed ran; reseed if it is gone.
 test.use({ viewport: { width: MOBILE_WIDTH, height: 812 } });
 
 test("HU-03: sin cuenta se ven las convocatorias con fecha, lugar, precio y cupos", async ({
@@ -19,7 +19,7 @@ test("HU-03: sin cuenta se ven las convocatorias con fecha, lugar, precio y cupo
   await expect(card).toContainText("Coliseo Manuel Bonilla");
   await expect(card).toContainText(/S\/\s?15/);
   await expect(card).toContainText(/Quedan \d+ cupos|Queda 1 cupo|Llena/);
-  await expect(card).toContainText(/dic/i);
+  await expect(card).toContainText(/\d{1,2} de \p{L}+ de \d{4}/u);
 });
 
 test("HU-03: en 375px no hay scroll horizontal", async ({ page }) => {
@@ -44,4 +44,18 @@ test("HU-03: un club que no existe responde 404", async ({ page }) => {
 test("HU-03: una convocatoria que no existe responde 404", async ({ page }) => {
   const response = await page.goto(`/c/${CLUB_SLUG}/no-existe`);
   expect(response?.status()).toBe(404);
+});
+
+for (const path of ["/Voley-Miraflores", "/ab"]) {
+  test(`HU-03: un slug no normalizado o inválido (${path}) responde 404`, async ({ page }) => {
+    const response = await page.goto(path);
+    expect(response?.status()).toBe(404);
+  });
+}
+
+test("HU-03: las rutas de la app y los archivos no pasan por el chequeo del club", async ({
+  page,
+}) => {
+  expect((await page.goto("/registro"))?.status()).toBe(200);
+  expect((await page.request.get("/favicon.ico")).status()).toBe(200);
 });

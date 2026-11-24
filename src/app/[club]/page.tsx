@@ -2,15 +2,18 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
+import { cache, Suspense } from "react";
 import { formatInLima } from "@/lib/lima-time";
 import { formatSoles } from "@/lib/money";
-import { clubLogoPath, getClubProfile } from "@/modules/clubs";
+import { clubLogoPath, getClubProfile as readClubProfile } from "@/modules/clubs";
 import { listOpenEvents } from "@/modules/events";
 
 const LOGO_PX = 96;
 
 type Params = PageProps<"/[club]">["params"];
+
+// Metadata and page read the same profile in one request.
+const getClubProfile = cache(readClubProfile);
 
 type OpenEvent = NonNullable<Awaited<ReturnType<typeof listOpenEvents>>>[number];
 
