@@ -48,7 +48,7 @@ Todo va en `.env.local` (no versionado), nunca en el chat ni en el repo.
 
 ## Avance
 
-- [ ] HT-05 · Credenciales de prueba en variables de entorno
+- [x] HT-05 · Credenciales de prueba en variables de entorno (variables y validación ✅; crear la app y los usuarios de prueba en Mercado Pago lo hace el usuario)
 - [ ] HU-18 · Conectar Mercado Pago
 - [ ] HU-19 · Pagar con Yape o tarjeta
 - [ ] HU-20 · Webhook marca pagado
