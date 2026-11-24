@@ -38,7 +38,17 @@ Depende de: HU-04, HU-02 (colores del club)
 - [x] Tests: unitarios del texto de la descripción y de los cupos
 - [ ] Revisar a mano la vista previa pegando el link en WhatsApp (necesita la app desplegada con `APP_URL`)
 
-## HU-12 · Lista de espera (3 pts)
+## HU-12 · Lista de espera (3 pts) ✅
+Depende de: HU-06, HU-08
+- [x] Migración: estado `waitlisted` en `RegistrationStatus` (no ocupa cupo)
+- [x] Dominio: `signUpStatus` (cupo o espera), `acceptsWaitlist`, `holdsSeat`
+- [x] `registerGuest` manda a la espera cuando no hay cupo y devuelve la posición; `addPlayerManually` sigue exigiendo cupo
+- [x] Al quitar a alguien con cupo pasa el primero de la espera (la convocatoria sigue llena); si no hay nadie esperando, se reabre
+- [x] Al subir la capacidad en "Editar convocatoria", los cupos nuevos van primero a la espera
+- [x] Reinscribirse tras cancelar cuenta como llegada nueva (`createdAt` se renueva)
+- [x] UI: formulario "Entra a la lista de espera" en convocatorias llenas, confirmación con el puesto, puesto en "Mis inscripciones", filtro "En espera" y numeración E1, E2… en la lista del organizador
+- [x] Tests: unitarios (orden, promoción, posición, capacidad), integración en Postgres (promoción real y concurrencia)
+
 ## HU-13 · QR y número de Yape/Plin (2 pts)
 ## HU-14 · Subir voucher (3 pts)
 ## HU-15 · Aprobar o rechazar vouchers (2 pts)
@@ -52,4 +62,6 @@ Depende de: HU-04, HU-02 (colores del club)
 - **HU-09**: solo el admin del club gestiona comunidades (igual que el perfil). Una comunidad con convocatorias no se puede eliminar (ni siquiera si están canceladas o pasadas): hay que renombrarla. El club siempre conserva al menos una.
 - **HU-10**: la posición y el nivel se piden en cada inscripción (no se guardan en la cuenta de Google). En "Agregar jugador" del organizador no se piden.
 - **HU-11**: la imagen es 1200×630 con el color primario del club de fondo y el secundario en la etiqueta de cupos (negro y amarillo si el club no tiene colores). Sin logo en la imagen para no depender del bucket. WhatsApp guarda la vista previa en caché: los cupos pueden verse desactualizados en un link ya compartido.
+- **HU-12**: quien entra a la espera no paga hasta que pasa a la lista: el organizador no puede marcar "pagado" a alguien en espera. Cuando sube un jugador de la espera no se le avisa (no hay correos ni WhatsApp todavía): lo ve en "Mis inscripciones" o el organizador le escribe.
+- **HU-12**: un invitado ve su puesto solo al inscribirse. Desde HU-14 tiene un link propio de su inscripción donde puede verlo de nuevo.
 - **HU-48**: un jugador cuyo correo de Google ya tiene cuenta de organizador con contraseña no puede entrar con Google (se mantiene la regla de HU-01 de no vincular cuentas automáticamente).
