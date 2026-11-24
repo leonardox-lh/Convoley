@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { fieldClass, FormMessage, submitKeepingValues, TextField } from "@/components/form";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import type { PlayerProfile } from "@/modules/identity";
 import { LEVEL_LABELS, POSITION_LABELS } from "../../../player-labels";
 import { PaymentInstructions, type PaymentInfo } from "./payment-instructions";
@@ -47,6 +47,7 @@ export function RegistrationForm({
         <p className="text-sm text-zinc-500">
           Si se libera un cupo, pasas automáticamente a la lista y te toca pagar.
         </p>
+        <RegistrationLink registrationId={state.registrationId} />
         {profile && (
           <Link href="/mis-inscripciones" className="text-sm underline underline-offset-4">
             Ver mis inscripciones
@@ -72,6 +73,13 @@ export function RegistrationForm({
           </span>
         </p>
         <PaymentInstructions info={paymentInfo} />
+        <Link
+          href={`/inscripcion/${state.registrationId}`}
+          className={buttonVariants({ size: "lg", className: "h-11" })}
+        >
+          Ya pagué: subir mi captura
+        </Link>
+        <RegistrationLink registrationId={state.registrationId} />
         {profile && (
           <Link href="/mis-inscripciones" className="text-sm underline underline-offset-4">
             Ver mis inscripciones
@@ -172,5 +180,17 @@ function OptionalSelect(props: { label: string; name: string; options: Record<st
         ))}
       </select>
     </label>
+  );
+}
+
+/** Guests have no account: this private link is how they come back to their sign-up. */
+function RegistrationLink({ registrationId }: { registrationId: string }) {
+  return (
+    <p className="text-xs text-zinc-500">
+      Guarda este link para ver tu inscripción después:{" "}
+      <Link href={`/inscripcion/${registrationId}`} className="break-all underline">
+        /inscripcion/{registrationId}
+      </Link>
+    </p>
   );
 }

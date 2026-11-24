@@ -63,6 +63,10 @@ export interface RegistrationRepository {
     eventId: string,
     tx: TransactionContext,
   ): Promise<{ id: string; status: RegistrationStatus } | null>;
+  findById(
+    id: string,
+    tx: TransactionContext,
+  ): Promise<{ id: string; eventId: string; status: RegistrationStatus } | null>;
   setStatus(id: string, status: RegistrationStatus, tx: TransactionContext): Promise<void>;
 }
 
@@ -108,4 +112,20 @@ export interface PlayerRegistrations {
   listByUser(userId: string): Promise<PlayerRegistration[]>;
   /** Gives the guest registrations made with this phone to the account; returns how many. */
   linkGuestsToUser(phone: string, userId: string): Promise<number>;
+}
+
+/** Voucher payments owned by the `payments` module (HU-14). */
+export interface VoucherPayments {
+  /** Validates the screenshot (format, size) and stores it privately; returns its key. */
+  storeImage(image: { bytes: Uint8Array; contentType: string }): Promise<string>;
+  record(
+    payment: {
+      clubId: string;
+      registrationId: string;
+      amountCents: number;
+      proofFileKey: string;
+      yapeSecurityCode: string | null;
+    },
+    tx: TransactionContext,
+  ): Promise<void>;
 }

@@ -84,6 +84,12 @@ async function MyRegistrations() {
               {registration.waitlistPosition !== null &&
                 ` · puesto ${registration.waitlistPosition}`}
             </span>
+            <Link
+              href={`/inscripcion/${registration.id}`}
+              className="text-sm underline underline-offset-4"
+            >
+              {registration.status === "pending_payment" ? "Pagar y subir captura" : "Ver detalle"}
+            </Link>
           </li>
         );
       })}

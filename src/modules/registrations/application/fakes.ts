@@ -2,6 +2,7 @@ import { holdsSeat, type EventSeatInfo, type RegistrationStatus } from "../domai
 import type {
   EventSeats,
   ManualPayments,
+  VoucherPayments,
   RegistrationListItem,
   RegistrationListReader,
   PlayerDetails,
@@ -80,6 +81,7 @@ export function fakeRegistrationRepository(initial: StoredRegistration[] = []) {
     },
     findInEvent: async (id, eventId) =>
       rows.find((row) => row.id === id && row.eventId === eventId) ?? null,
+    findById: async (id) => rows.find((row) => row.id === id) ?? null,
     setStatus: async (id, status) => {
       rows.find((row) => row.id === id)!.status = status;
     },
@@ -121,4 +123,20 @@ export function fakePlayerRegistrations(rows: StoredRegistration[]) {
     },
   };
   return { registrations, rows };
+}
+
+export function fakeVoucherPayments() {
+  const stored: string[] = [];
+  const recorded: Parameters<VoucherPayments["record"]>[0][] = [];
+  const vouchers: VoucherPayments = {
+    storeImage: async () => {
+      const key = `voucher-${stored.length + 1}.jpg`;
+      stored.push(key);
+      return key;
+    },
+    record: async (payment) => {
+      recorded.push(payment);
+    },
+  };
+  return { vouchers, stored, recorded };
 }

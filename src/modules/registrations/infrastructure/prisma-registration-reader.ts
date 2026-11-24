@@ -96,3 +96,13 @@ export async function waitlistPosition(registrationId: string, tx: Client = db) 
   });
   return ahead + 1;
 }
+
+/** One registration as its owner sees it from their private link (HU-14). */
+export async function findRegistrationOverview(registrationId: string) {
+  const registration = await db.registration.findUnique({
+    where: { id: registrationId },
+    select: { id: true, eventId: true, firstName: true, lastName: true, status: true },
+  });
+  if (!registration) return null;
+  return { ...registration, waitlistPosition: await waitlistPosition(registration.id) };
+}

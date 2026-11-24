@@ -5,7 +5,14 @@ import { db } from "@/lib/db";
 export async function listEventSummaries(eventIds: string[]) {
   const events = await db.event.findMany({
     where: { id: { in: eventIds } },
-    select: { id: true, title: true, startsAt: true, status: true, clubId: true },
+    select: {
+      id: true,
+      title: true,
+      startsAt: true,
+      status: true,
+      priceCents: true,
+      clubId: true,
+    },
   });
   const clubs = new Map(
     (await findClubNamesByIds([...new Set(events.map((event) => event.clubId))])).map((club) => [

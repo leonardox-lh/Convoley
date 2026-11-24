@@ -6,10 +6,11 @@ import {
   makeLinkGuestRegistrations,
   makeListPlayerRegistrations,
 } from "./application/player-registrations";
+import { makeSubmitVoucher } from "./application/submit-voucher";
 import { makeRegisterGuest } from "./application/register-guest";
 import { makeRemoveRegistration } from "./application/remove-registration";
 import { eventsAdapter } from "./infrastructure/events-adapter";
-import { paymentsAdapter } from "./infrastructure/payments-adapter";
+import { paymentsAdapter, voucherPaymentsAdapter } from "./infrastructure/payments-adapter";
 import {
   prismaPlayerRegistrations,
   prismaRegistrationListReader,
@@ -50,6 +51,13 @@ export const removeRegistration = makeRemoveRegistration({
   transactions,
 });
 
+export const submitVoucher = makeSubmitVoucher({
+  events: eventsAdapter,
+  registrations: prismaRegistrationRepository,
+  vouchers: voucherPaymentsAdapter,
+  transactions,
+});
+
 export const listEventRegistrations = makeListEventRegistrations({
   registrations: prismaRegistrationListReader,
 });
@@ -79,9 +87,11 @@ export {
   EventFullError,
   EventNotOpenError,
   InvalidPhoneNumberError,
+  PaymentNotExpectedError,
   RegistrationNotFoundError,
 } from "./domain/errors";
 export {
+  findRegistrationOverview,
   promoteWaitlisted,
   countConfirmedRegistrations,
   countConfirmedRegistrationsByEvent,

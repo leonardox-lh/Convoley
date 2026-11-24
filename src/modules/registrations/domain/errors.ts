@@ -32,3 +32,14 @@ export class RegistrationNotFoundError extends Error {
     this.name = "RegistrationNotFoundError";
   }
 }
+
+/** Only a registration with a seat that hasn't paid yet can send a voucher (HU-14). */
+export class PaymentNotExpectedError extends Error {
+  constructor(
+    readonly registrationId: string,
+    readonly status: string,
+  ) {
+    super(`Registration ${registrationId} is ${status}: no payment expected`);
+    this.name = "PaymentNotExpectedError";
+  }
+}

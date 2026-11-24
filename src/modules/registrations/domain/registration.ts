@@ -1,4 +1,4 @@
-import { EventFullError, EventNotOpenError } from "./errors";
+import { EventFullError, EventNotOpenError, PaymentNotExpectedError } from "./errors";
 
 /** Registrations that take a spot: everyone signed up who has not cancelled, paid or not. */
 export const SEAT_HOLDING_STATUSES = ["pending_payment", "in_review", "paid"] as const;
@@ -73,3 +73,13 @@ export type PlayerPosition = (typeof PLAYER_POSITIONS)[number];
 
 export const PLAYER_LEVELS = ["beginner", "intermediate", "advanced"] as const;
 export type PlayerLevel = (typeof PLAYER_LEVELS)[number];
+
+/**
+ * A voucher is accepted only while the player holds a seat and owes the payment: not while
+ * waiting, under review, paid or cancelled.
+ */
+export function assertAwaitingPayment(registration: { id: string; status: RegistrationStatus }) {
+  if (registration.status !== "pending_payment") {
+    throw new PaymentNotExpectedError(registration.id, registration.status);
+  }
+}
