@@ -15,6 +15,7 @@ import { makeApproveVoucher, makeRejectVoucher } from "./application/review-vouc
 import { makeSubmitVoucher } from "./application/submit-voucher";
 import { makeRegisterGuest } from "./application/register-guest";
 import { makeRemoveRegistration } from "./application/remove-registration";
+import { serviceFeesAdapter } from "./infrastructure/clubs-adapter";
 import { eventsAdapter } from "./infrastructure/events-adapter";
 import {
   mercadoPagoGatewayAdapter,
@@ -91,7 +92,7 @@ const mercadoPagoDeps = {
 };
 const settleMercadoPagoPayment = makeSettleMercadoPagoPayment(mercadoPagoDeps);
 export const startMercadoPagoPayment = makeStartMercadoPagoPayment(
-  mercadoPagoDeps,
+  { ...mercadoPagoDeps, serviceFees: serviceFeesAdapter },
   settleMercadoPagoPayment,
 );
 export const settleMercadoPagoNotification = makeSettleMercadoPagoNotification(

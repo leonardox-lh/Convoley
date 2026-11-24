@@ -1,7 +1,10 @@
 import { FormMessage } from "@/components/form";
+import { centsToSolesText } from "@/lib/money";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { getMercadoPagoStatus, isMercadoPagoConfigured } from "@/modules/payments";
 import { disconnectMercadoPagoAction } from "./actions";
+import { ServiceFeeForm } from "./service-fee-form";
+import { basisPointsToPercentText } from "./service-fee-input";
 
 const RESULT_MESSAGES = {
   conectado: { tone: "ok", text: "¡Listo! Tu cuenta de Mercado Pago quedó conectada." },
@@ -12,11 +15,21 @@ const RESULT_MESSAGES = {
   },
 } as const;
 
+function serviceFeeDefaults(fee: { fixedCents: number; percentBps: number }) {
+  if (fee.fixedCents > 0)
+    return { kind: "fixed", amount: centsToSolesText(fee.fixedCents) } as const;
+  if (fee.percentBps > 0) {
+    return { kind: "percent", amount: basisPointsToPercentText(fee.percentBps) } as const;
+  }
+  return { kind: "none", amount: "" } as const;
+}
+
 /** HU-18: connect the organizer's own Mercado Pago account by OAuth, or disconnect it. */
 export async function MercadoPagoSection(props: {
   clubSlug: string;
   clubId: string;
   result: string | undefined;
+  serviceFee: { fixedCents: number; percentBps: number };
 }) {
   // Without the app credentials (HT-05) this deployment can't offer Mercado Pago at all.
   if (!isMercadoPagoConfigured()) return null;
@@ -34,6 +47,7 @@ export async function MercadoPagoSection(props: {
             {!status.liveMode && " (modo prueba)"}. Los jugadores pagan con Yape o tarjeta y el
             dinero entra directo a tu cuenta: Convoley nunca lo retiene.
           </p>
+          <ServiceFeeForm clubSlug={props.clubSlug} {...serviceFeeDefaults(props.serviceFee)} />
           <form action={disconnectMercadoPagoAction}>
             <input type="hidden" name="clubSlug" value={props.clubSlug} />
             <Button type="submit" variant="outline" className="h-11 w-full">

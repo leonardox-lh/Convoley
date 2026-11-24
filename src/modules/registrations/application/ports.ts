@@ -76,6 +76,11 @@ export interface RegistrationRepository {
   releaseExpired(eventId: string, now: Date, tx: TransactionContext): Promise<number>;
 }
 
+/** HU-22: the club's optional service fee, owned by the `clubs` module. */
+export interface ServiceFees {
+  forCharge(clubId: string, priceCents: number): Promise<number>;
+}
+
 /** Payments owned by the `payments` module. */
 export interface ManualPayments {
   record(

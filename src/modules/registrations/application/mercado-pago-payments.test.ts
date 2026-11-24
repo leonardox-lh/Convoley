@@ -56,6 +56,7 @@ function setup(options: {
   payments?: StoredMercadoPagoPayment[];
   enabled?: boolean;
   answer?: Partial<ChargeReport>;
+  serviceFeeCents?: number;
 }) {
   const { seats, markFull } = fakeEventSeats(options.event ?? seatInfo());
   const { repository, rows } = fakeRegistrationRepository(
@@ -74,6 +75,7 @@ function setup(options: {
     records,
     transactions: fakeTransactions,
     now: () => NOW,
+    serviceFees: { forCharge: async () => options.serviceFeeCents ?? 0 },
   };
   const settle = makeSettleMercadoPagoPayment(deps);
   return {
@@ -113,6 +115,18 @@ describe("HU-19: pagar con Yape o tarjeta dentro de Convoley", () => {
     expect(calls.charged[0]!.idempotencyKey).toBe("pay-1");
     expect(payments[0]).toMatchObject({ status: "approved", providerPaymentId: "mp-1" });
     expect(rows[0]!.status).toBe("paid");
+  });
+
+  it("HU-22 criterio 2: cobra el precio más el cargo por servicio y lo guarda aparte", async () => {
+    const { start, payments, calls } = setup({
+      payments: [],
+      serviceFeeCents: 53,
+      answer: { amountCents: 1553 },
+    });
+
+    expect(await start(payInput)).toMatchObject({ settlement: "mark_paid" });
+    expect(calls.charged[0]!.amountCents).toBe(1553);
+    expect(payments[0]).toMatchObject({ amountCents: 1553, status: "approved" });
   });
 
   it("HU-19 criterio 1: Yape usa el mismo flujo con su propio medio de pago", async () => {

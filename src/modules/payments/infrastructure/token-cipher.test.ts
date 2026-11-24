@@ -19,6 +19,7 @@ describe("HU-18: los tokens de Mercado Pago se guardan cifrados", () => {
     const stored = encryptToken("APP_USR-secret-token", KEY);
     expect(() => decryptToken(stored, OTHER_KEY)).toThrow();
     const [iv, tag, data] = stored.split(".");
-    expect(() => decryptToken([iv, tag, `A${data!.slice(1)}`].join("."), KEY)).toThrow();
+    const tampered = `${data!.startsWith("A") ? "B" : "A"}${data!.slice(1)}`;
+    expect(() => decryptToken([iv, tag, tampered].join("."), KEY)).toThrow();
   });
 });

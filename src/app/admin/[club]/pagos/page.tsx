@@ -40,6 +40,10 @@ async function PaymentSettingsContent({ params, searchParams }: Props) {
         clubSlug={clubSlug}
         clubId={club.id}
         result={typeof mp === "string" ? mp : undefined}
+        serviceFee={{
+          fixedCents: settings.serviceFeeFixedCents,
+          percentBps: settings.serviceFeePercentBps,
+        }}
       />
       {guardado && <FormMessage tone="ok">Cambios guardados.</FormMessage>}
       {settings.paymentQrKey && (

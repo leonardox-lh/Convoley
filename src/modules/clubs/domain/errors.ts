@@ -107,3 +107,11 @@ export class InvalidPaymentHolderError extends Error {
     this.name = "InvalidPaymentHolderError";
   }
 }
+
+/** HU-22: a fixed fee up to S/ 50 or a percentage up to 20 %. */
+export class InvalidServiceFeeError extends Error {
+  constructor() {
+    super("The service fee must be a positive amount up to S/ 50 or up to 20 %");
+    this.name = "InvalidServiceFeeError";
+  }
+}

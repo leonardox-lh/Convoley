@@ -7,9 +7,14 @@ import {
 } from "./application/communities";
 import { makeCreateClub } from "./application/create-club";
 import { makeUpdatePaymentSettings } from "./application/update-payment-settings";
+import { makeUpdateServiceFee } from "./application/update-service-fee";
+import { serviceFeeCents } from "./domain/service-fee";
 import { makeUpdateClubProfile } from "./application/update-club-profile";
 import { prismaCommunityRepository } from "./infrastructure/prisma-community-repository";
-import { prismaPaymentSettingsRepository } from "./infrastructure/prisma-payment-settings-repository";
+import {
+  findServiceFee,
+  prismaPaymentSettingsRepository,
+} from "./infrastructure/prisma-payment-settings-repository";
 import { prismaClubRepository } from "./infrastructure/prisma-club-repository";
 import { s3LogoStorage } from "./infrastructure/s3-logo-storage";
 
@@ -23,6 +28,7 @@ export {
   InvalidCommunityNameError,
   InvalidPaymentHolderError,
   InvalidPaymentPhoneError,
+  InvalidServiceFeeError,
   LastCommunityError,
   InvalidClubSlugError,
   InvalidColorError,
@@ -59,6 +65,15 @@ export const updatePaymentSettings = makeUpdatePaymentSettings({
   images: logos,
 });
 export type { ClubPaymentSettings } from "./application/ports";
+export const updateServiceFee = makeUpdateServiceFee({ settings: paymentSettings });
+export {
+  MAX_FIXED_SERVICE_FEE_CENTS,
+  MAX_SERVICE_FEE_PERCENT_BPS,
+  serviceFeeCents,
+} from "./domain/service-fee";
+/** HU-22: what a player pays on top of `priceCents` when paying this club by Mercado Pago. */
+export const serviceFeeFor = async (clubId: string, priceCents: number) =>
+  serviceFeeCents(priceCents, await findServiceFee(db, clubId));
 export const readClubLogo = (key: string) => logos.read(key);
 
 /** Public path that serves a stored logo (see src/app/logos/[key]/route.ts). */

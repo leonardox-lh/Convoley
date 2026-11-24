@@ -53,7 +53,7 @@ Todo va en `.env.local` (no versionado), nunca en el chat ni en el repo.
 - [x] HU-19 · Pagar con Yape o tarjeta
 - [x] HU-20 · Webhook marca pagado
 - [x] HU-21 · Reserva de 10 minutos
-- [ ] HU-22 · Cargo por servicio
+- [x] HU-22 · Cargo por servicio
 
 ## Decisiones tomadas sin consultar
 
@@ -63,3 +63,5 @@ Todo va en `.env.local` (no versionado), nunca en el chat ni en el repo.
 - HU-21 sin cron: las reservas vencidas se liberan dentro del candado del evento en la siguiente escritura (inscripción, cobro o liquidación), y los conteos de lectura ya no las cuentan. La página del jugador muestra "se venció tu reserva" aunque la fila aún no se haya liberado.
 - Con la reserva vencida no se puede iniciar un cobro (el cupo puede ser de otro). Si un pago llega tarde, HU-20 decide: toma un cupo libre o se devuelve y pasa a la lista de espera.
 - `docs/MODELO_DATOS.md` se actualizó con `MercadoPagoConnection`, `reservedUntil` y `serviceFeeCents` (lo exige el test de HT-03).
+- HU-22: la regla del cargo (`service-fee.ts`) vive en el módulo `clubs`, dueño de la tabla `Club`, y no en `payments` como decía el plan. `registrations` la usa por un puerto (`ServiceFees`). El formulario aparece solo con Mercado Pago conectado; el pago por captura no lleva cargo.
+- Se corrigieron dos tests intermitentes de "valor alterado" (cifrado y firma) que a veces no alteraban nada.

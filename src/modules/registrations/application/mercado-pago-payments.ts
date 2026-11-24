@@ -11,6 +11,7 @@ import type {
   MercadoPagoGateway,
   MercadoPagoPaymentRecords,
   RegistrationRepository,
+  ServiceFees,
   TransactionRunner,
 } from "./ports";
 import { releaseExpiredReservations } from "./seats";
@@ -25,6 +26,10 @@ interface Deps {
   records: MercadoPagoPaymentRecords;
   transactions: TransactionRunner;
   now: () => Date;
+}
+
+interface StartDeps extends Deps {
+  serviceFees: ServiceFees;
 }
 
 export type SettleResult = Settlement | "unknown_payment" | "mismatch";
@@ -161,7 +166,7 @@ export interface StartMercadoPagoPaymentInput {
  * locked event, never from the browser; the charge goes to the organizer's own account.
  */
 export function makeStartMercadoPagoPayment(
-  deps: Deps,
+  deps: StartDeps,
   settle: ReturnType<typeof makeSettleMercadoPagoPayment>,
 ) {
   return async function startMercadoPagoPayment(input: StartMercadoPagoPaymentInput) {
@@ -182,9 +187,11 @@ export function makeStartMercadoPagoPayment(
         throw new MercadoPagoUnavailableError(event.clubId);
       }
 
-      const amountCents = event.priceCents;
+      // HU-22: the player pays the club's service fee on top; it's recorded apart for reports.
+      const serviceFeeCents = await deps.serviceFees.forCharge(event.clubId, event.priceCents);
+      const amountCents = event.priceCents + serviceFeeCents;
       const { id } = await deps.records.recordPending(
-        { clubId: event.clubId, registrationId: current.id, amountCents, serviceFeeCents: 0 },
+        { clubId: event.clubId, registrationId: current.id, amountCents, serviceFeeCents },
         tx,
       );
       return { paymentId: id, clubId: event.clubId, amountCents };

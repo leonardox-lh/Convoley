@@ -39,7 +39,12 @@ function setup(options: {
     transactions: fakeTransactions,
     now: () => now,
   };
-  const paymentDeps = { ...deps, gateway, records: fakeMercadoPagoRecords().records };
+  const paymentDeps = {
+    ...deps,
+    gateway,
+    records: fakeMercadoPagoRecords().records,
+    serviceFees: { forCharge: async () => 0 },
+  };
   return {
     registerGuest: makeRegisterGuest({ ...deps, mercadoPago: gateway }),
     startPayment: makeStartMercadoPagoPayment(

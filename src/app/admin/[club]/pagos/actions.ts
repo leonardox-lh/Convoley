@@ -6,9 +6,13 @@ import {
   findClubBySlug,
   InvalidLogoTypeError,
   InvalidPaymentHolderError,
+  InvalidServiceFeeError,
   LogoTooLargeError,
   updatePaymentSettings,
+  updateServiceFee,
 } from "@/modules/clubs";
+import { solesToCents } from "@/lib/money";
+import { percentToBasisPoints } from "./service-fee-input";
 import { disconnectMercadoPago } from "@/modules/payments";
 import { InvalidPhoneNumberError, PhoneNumber } from "@/modules/registrations";
 import { logoFromForm } from "@/app/club/club-form-schema";
@@ -68,6 +72,42 @@ function renameFile(formData: FormData, from: string, to: string) {
   const file = formData.get(from);
   if (file) copy.set(to, file);
   return copy;
+}
+
+export type ServiceFeeState = { status: "idle" } | { status: "error"; message: string };
+
+const serviceFeeSchema = z.object({
+  clubSlug: z.string().min(1),
+  kind: z.enum(["none", "fixed", "percent"]),
+  amount: z.string().trim().default(""),
+});
+
+/** HU-22: only the admin decides what players pay on top of the price. */
+export async function updateServiceFeeAction(
+  _previous: ServiceFeeState,
+  formData: FormData,
+): Promise<ServiceFeeState> {
+  const parsed = serviceFeeSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { status: "error", message: "Elige un tipo de cargo." };
+  const { clubSlug, kind, amount } = parsed.data;
+  if ((await requireOrganizer(clubSlug))?.role !== "admin") {
+    return { status: "error", message: NOT_ALLOWED_MESSAGE };
+  }
+  const value =
+    kind === "none" ? 0 : kind === "fixed" ? solesToCents(amount) : percentToBasisPoints(amount);
+  if (value === null) {
+    return { status: "error", message: "Escribe un monto válido, por ejemplo 1.50 o 3.5." };
+  }
+
+  try {
+    await updateServiceFee({ clubSlug, kind, amount: value });
+  } catch (error) {
+    if (error instanceof InvalidServiceFeeError) {
+      return { status: "error", message: "El cargo debe ser mayor a 0 y hasta S/ 50 o 20 %." };
+    }
+    throw error;
+  }
+  redirect(`/admin/${clubSlug}/pagos?guardado=1`);
 }
 
 const disconnectSchema = z.object({ clubSlug: z.string().min(1) });

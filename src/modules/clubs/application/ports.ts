@@ -49,6 +49,9 @@ export interface ClubPaymentSettings {
   paymentPhone: string | null;
   paymentHolderName: string | null;
   paymentQrKey: string | null;
+  /** HU-22: see domain/service-fee.ts. */
+  serviceFeeFixedCents: number;
+  serviceFeePercentBps: number;
 }
 
 export interface PaymentSettingsRepository {

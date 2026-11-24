@@ -150,21 +150,24 @@ model VerificationToken {
 // ─── clubs ─────────────────────────────────────────────────────────────────
 
 model Club {
-  id                String   @id @default(cuid())
-  slug              String   @unique
-  name              String
-  description       String?
-  logoKey           String?
-  primaryColor      String?
-  secondaryColor    String?
-  instagramUrl      String?
-  tiktokUrl         String?
+  id                   String   @id @default(cuid())
+  slug                 String   @unique
+  name                 String
+  description          String?
+  logoKey              String?
+  primaryColor         String?
+  secondaryColor       String?
+  instagramUrl         String?
+  tiktokUrl            String?
   // Where players pay the organizer directly (HU-13): Yape/Plin number, holder and QR image.
-  paymentPhone      String?
-  paymentHolderName String?
-  paymentQrKey      String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  paymentPhone         String?
+  paymentHolderName    String?
+  paymentQrKey         String?
+  // HU-22: optional fee the player pays on Mercado Pago charges; at most one of the two is set.
+  serviceFeeFixedCents Int      @default(0)
+  serviceFeePercentBps Int      @default(0)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 
   members     ClubMember[]
   communities Community[]

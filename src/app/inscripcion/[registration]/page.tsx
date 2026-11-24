@@ -4,9 +4,10 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { FormMessage } from "@/components/form";
 import { formatInLima, formatTimeInLima } from "@/lib/lima-time";
+import { formatSoles } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import { listEventSummaries } from "@/modules/events";
-import { findClubBySlug } from "@/modules/clubs";
+import { findClubBySlug, serviceFeeFor } from "@/modules/clubs";
 import {
   findLastVoucherRejection,
   getMercadoPagoStatus,
@@ -55,7 +56,9 @@ async function RegistrationContent({ params, searchParams }: Props) {
     registration.reservedUntil <= new Date();
   const awaitingPayment =
     registration.status === "pending_payment" && event.status !== "cancelled" && !reservationEnded;
-  const mercadoPago = awaitingPayment ? await mercadoPagoCheckout(event.clubSlug) : null;
+  const mercadoPago = awaitingPayment
+    ? await mercadoPagoCheckout(event.clubSlug, event.priceCents)
+    : null;
 
   return (
     <>
@@ -117,10 +120,22 @@ async function RegistrationContent({ params, searchParams }: Props) {
               Si no pagas antes, se libera para otro jugador.
             </p>
           )}
+          {mercadoPago.serviceFeeCents > 0 && (
+            <dl className="grid grid-cols-2 gap-1 text-sm">
+              <dt>Precio</dt>
+              <dd className="text-right">{formatSoles(event.priceCents)}</dd>
+              <dt>Cargo por servicio</dt>
+              <dd className="text-right">{formatSoles(mercadoPago.serviceFeeCents)}</dd>
+              <dt className="font-semibold">Total</dt>
+              <dd className="text-right font-semibold">
+                {formatSoles(event.priceCents + mercadoPago.serviceFeeCents)}
+              </dd>
+            </dl>
+          )}
           <MercadoPagoCheckout
             registrationId={registration.id}
             publicKey={mercadoPago.publicKey}
-            amountCents={event.priceCents}
+            amountCents={event.priceCents + mercadoPago.serviceFeeCents}
           />
           <details className="text-sm">
             <summary className="cursor-pointer text-zinc-500">
@@ -147,10 +162,13 @@ async function RegistrationContent({ params, searchParams }: Props) {
 }
 
 /** The club's Mercado Pago public key, when it takes Yape or card payments (HU-19). */
-async function mercadoPagoCheckout(clubSlug: string) {
+async function mercadoPagoCheckout(clubSlug: string, priceCents: number) {
   if (!isMercadoPagoConfigured()) return null;
   const club = await findClubBySlug(clubSlug);
-  return club && getMercadoPagoStatus(club.id);
+  const status = club && (await getMercadoPagoStatus(club.id));
+  if (!club || !status) return null;
+  // HU-22: the same fee the charge adds, shown before paying.
+  return { ...status, serviceFeeCents: await serviceFeeFor(club.id, priceCents) };
 }
 
 /** After a rejection the player is back to "pending payment": tell them why (HU-15). */

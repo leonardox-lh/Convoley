@@ -148,6 +148,7 @@ Cada módulo solo lee y escribe sus propias tablas (ver `docs/ARQUITECTURA.md`).
 - **Recuperar contraseña (HU-01)**: `PasswordResetToken` guarda solo el sha256 del token del link (`tokenHash @unique`), vence en 1 hora y es de un solo uso: `usedAt` se marca con un `UPDATE ... WHERE usedAt IS NULL` en la misma transacción que cambia `passwordHash`. Pedir otro link borra los anteriores sin usar.
 - **Webhook idempotente**: `providerPaymentId @unique`. Un pago en estado final (`approved`, `rejected`, `refunded`) no se vuelve a liquidar; `refund_pending` reintenta la devolución.
 - **Mercado Pago por organizador (HU-18)**: `MercadoPagoConnection` guarda los tokens OAuth cifrados con `MP_TOKEN_ENCRYPTION_KEY`. Una cuenta de MP solo puede estar conectada a un club (`mpUserId @unique`). Desconectar borra la fila y conserva los pagos.
+- **Cargo por servicio (HU-22)**: `Club.serviceFeeFixedCents` o `Club.serviceFeePercentBps` (puntos básicos), nunca los dos; un `CHECK` limita a S/ 50 o 20 %. Solo se suma en pagos con Mercado Pago y queda en `Payment.serviceFeeCents`; `amountCents` ya lo incluye.
 - **Reserva de cupo (HU-21)**: con MP conectado, una inscripción `pending_payment` guarda `reservedUntil` (10 minutos). Vencida, no cuenta como cupo; la siguiente escritura del evento la pasa a `cancelled` y el cupo va a la lista de espera. Cualquier cambio de estado borra `reservedUntil`.
 - **Convoley no retiene dinero**: no hay saldos ni cuentas internas; `Payment` solo registra lo que pasó en la cuenta de Mercado Pago del organizador.
 - **Cancelar una convocatoria (HU-05)**: el organizador elige `refund` (devolución) o `balance` (saldo a favor). Se guarda en `Event.cancellationOutcome` (lo que ven los inscritos) y en cada `Payment` `approved` o `in_review` aún sin marcar, en la misma transacción. Es solo una marca: la devolución la hace el organizador en Mercado Pago. HU-14 debe marcar igual un pago que se apruebe después de la cancelación.
@@ -163,7 +164,6 @@ Cada módulo solo lee y escribe sus propias tablas (ver `docs/ARQUITECTURA.md`).
 | Posición y nivel del jugador | HU-10 |
 | Lista de espera (`WaitlistEntry`) | HU-12 |
 | Configuración de Yape / QR | HU-13 |
-| Comisión de servicio | HU-22 |
 | Planes y créditos | HU-26, HU-27 |
 | Convocatorias recurrentes | HU-28 |
 | Token de cancelación | HU-29 |
