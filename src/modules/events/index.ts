@@ -44,6 +44,7 @@ export const cancelEvent = makeCancelEvent({
   now,
 });
 
+export { lockEventForRegistration, markEventFull } from "./infrastructure/prisma-event-seats";
 export type { CreateEventInput } from "./application/create-event";
 export type { UpdateEventInput } from "./application/update-event";
 export type { CancelEventInput } from "./application/cancel-event";

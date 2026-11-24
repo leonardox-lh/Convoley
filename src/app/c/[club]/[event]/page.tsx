@@ -3,6 +3,9 @@ import { Suspense } from "react";
 import { formatInLima } from "@/lib/lima-time";
 import { formatSoles } from "@/lib/money";
 import { getPublicEvent, type CancellationOutcome, type EventStatus } from "@/modules/events";
+import { currentUserId, isGoogleSignInEnabled } from "@/modules/identity";
+import { isOpenForRegistration } from "@/modules/registrations";
+import { RegistrationForm } from "./registration-form";
 
 const STATUS_NOTICES: Partial<Record<EventStatus, string>> = {
   full: "Convocatoria llena",
@@ -86,6 +89,14 @@ async function PublicEventContent({ params }: { params: Params }) {
         )}
       </dl>
       {event.rules && <p className="text-sm whitespace-pre-line">{event.rules}</p>}
+      {isOpenForRegistration(event, new Date()) && (
+        <RegistrationForm
+          club={club}
+          eventId={event.id}
+          signedIn={(await currentUserId()) !== null}
+          googleEnabled={isGoogleSignInEnabled}
+        />
+      )}
     </>
   );
 }

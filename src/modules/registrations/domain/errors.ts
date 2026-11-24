@@ -1,0 +1,27 @@
+export class InvalidPhoneNumberError extends Error {
+  constructor(readonly phone: string) {
+    super(`Not a Peruvian mobile number: "${phone}"`);
+    this.name = "InvalidPhoneNumberError";
+  }
+}
+
+export class EventNotOpenError extends Error {
+  constructor(readonly eventId: string) {
+    super(`Event ${eventId} is not open for registration`);
+    this.name = "EventNotOpenError";
+  }
+}
+
+export class EventFullError extends Error {
+  constructor(readonly eventId: string) {
+    super(`Event ${eventId} has no spots left`);
+    this.name = "EventFullError";
+  }
+}
+
+export class DuplicateRegistrationError extends Error {
+  constructor(readonly eventId: string) {
+    super(`This phone is already registered for event ${eventId}`);
+    this.name = "DuplicateRegistrationError";
+  }
+}
