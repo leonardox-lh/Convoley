@@ -7,6 +7,10 @@ import { makeResetPassword } from "./application/reset-password";
 import { makeVerifyCredentials } from "./application/verify-credentials";
 import { createAuth } from "./infrastructure/auth";
 import { consoleEmailSender, resendEmailSender } from "./infrastructure/email-senders";
+import {
+  isPlatformAdmin as checkPlatformAdmin,
+  parseAdminEmails,
+} from "./infrastructure/platform-admin";
 import { inMemoryAttemptLimiter } from "./infrastructure/in-memory-attempt-limiter";
 import { prismaPasswordResetTokenRepository } from "./infrastructure/prisma-password-reset-token-repository";
 import { prismaPlayerProfileRepository } from "./infrastructure/prisma-player-profile-repository";
@@ -60,3 +64,8 @@ export {
   ResetTokenExpiredError,
   ResetTokenInvalidError,
 } from "./domain/errors";
+
+const platformAdminEmails = parseAdminEmails(env.PLATFORM_ADMIN_EMAILS);
+/** HU-36: whether the user is a Convoley owner (platform admin panel). */
+export const isPlatformAdmin = (userId: string) =>
+  checkPlatformAdmin(db, platformAdminEmails, userId);

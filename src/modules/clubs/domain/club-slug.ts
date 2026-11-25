@@ -25,6 +25,7 @@ const RESERVED_SLUGS = new Set([
   "pedido",
   "plan",
   "planes",
+  "plataforma",
   "privacidad",
   "recuperar",
   "registro",

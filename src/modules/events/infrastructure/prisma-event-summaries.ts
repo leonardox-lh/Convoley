@@ -27,3 +27,11 @@ export async function listEventSummaries(eventIds: string[]) {
     clubName: clubs.get(event.clubId)?.name ?? "",
   }));
 }
+
+/** HU-36: published or cancelled events of every club that start in [from, to). */
+export function listEventsStartingBetween(from: Date, to: Date) {
+  return db.event.findMany({
+    where: { startsAt: { gte: from, lt: to }, status: { not: "draft" } },
+    select: { id: true, clubId: true },
+  });
+}
