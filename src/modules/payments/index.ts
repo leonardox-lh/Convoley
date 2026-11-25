@@ -20,6 +20,10 @@ export {
 } from "./domain/payment";
 export { markPaymentsForCancellation } from "./infrastructure/prisma-payment-marker";
 export {
+  sumApprovedPaymentsByOwner,
+  sumApprovedPlanPayments,
+} from "./infrastructure/prisma-payment-totals";
+export {
   recordManualPayment,
   type ManualPaymentInput,
 } from "./infrastructure/prisma-manual-payment";

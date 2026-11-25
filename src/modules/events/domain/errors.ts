@@ -85,3 +85,10 @@ export class RecurringEventNotFoundError extends Error {
     this.name = "RecurringEventNotFoundError";
   }
 }
+
+export class InvalidCourtCostError extends Error {
+  constructor(readonly courtCostCents: number) {
+    super(`Court cost must be a non-negative integer of cents, got ${courtCostCents}`);
+    this.name = "InvalidCourtCostError";
+  }
+}

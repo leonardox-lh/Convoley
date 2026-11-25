@@ -149,3 +149,11 @@ export async function findRegistrationOverview(registrationId: string) {
   if (!registration) return null;
   return { ...registration, waitlistPosition: await waitlistPosition(registration.id) };
 }
+
+/** HU-34: which event each registration belongs to, for the finance panel. */
+export function listRegistrationEventIds(eventIds: string[]) {
+  return db.registration.findMany({
+    where: { eventId: { in: eventIds } },
+    select: { id: true, eventId: true },
+  });
+}

@@ -10,9 +10,11 @@ import {
   makePublishDueOccurrences,
   makeSetRecurringEventPaused,
 } from "./application/recurring-events";
+import { makeSetCourtCost } from "./application/set-court-cost";
 import { makeUpdateEvent } from "./application/update-event";
 import { prismaRecurringEventRepository } from "./infrastructure/prisma-recurring-event-repository";
 import { isClubWritable } from "./infrastructure/billing-adapter";
+import { prismaCourtCostWriter } from "./infrastructure/prisma-event-summaries";
 import { clubsAdapter } from "./infrastructure/clubs-adapter";
 import { paymentsAdapter } from "./infrastructure/payments-adapter";
 import { creditsAdapter } from "./infrastructure/plans-adapter";
@@ -75,9 +77,15 @@ export {
   reopenEvent,
 } from "./infrastructure/prisma-event-seats";
 export {
+  listClubEventsForFinance,
   listEventSummaries,
   listEventsStartingBetween,
 } from "./infrastructure/prisma-event-summaries";
+// HU-34: finance.
+export const setCourtCost = makeSetCourtCost({
+  clubs: clubsAdapter,
+  courtCosts: prismaCourtCostWriter,
+});
 export type { CreateEventInput } from "./application/create-event";
 export type { UpdateEventInput } from "./application/update-event";
 export type { CancelEventInput } from "./application/cancel-event";
@@ -98,6 +106,7 @@ export {
   EventNotFoundError,
   InvalidCapacityError,
   InvalidMapsUrlError,
+  InvalidCourtCostError,
   InvalidPriceError,
   InvalidRecurrenceError,
   RecurringEventNotFoundError,

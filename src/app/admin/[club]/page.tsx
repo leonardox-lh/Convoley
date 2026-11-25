@@ -29,6 +29,7 @@ const ADMIN_LINKS = [
   ["pagos", "Cobros"],
   ["tienda", "Tienda"],
   ["planes", "Planes"],
+  ["finanzas", "Finanzas"],
   ["suscripcion", "Suscripción"],
   ["organizadores", "Organizadores"],
 ] as const;

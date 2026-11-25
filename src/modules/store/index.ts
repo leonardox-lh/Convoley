@@ -81,6 +81,7 @@ export const submitOrderVoucher = makeSubmitOrderVoucher(orderPaymentDeps);
 export const findOrder = async (orderId: string) =>
   (await findOrders(db, { id: orderId }))[0] ?? null;
 export type { OrderListItem } from "./infrastructure/prisma-order-repository";
+export { listOrderPickupEventIds } from "./infrastructure/prisma-order-events";
 export { MAX_QUANTITY_PER_ITEM } from "./domain/cart";
 export { ORDER_FILTERS, ORDER_STATUSES, type OrderFilter, type OrderStatus } from "./domain/order";
 

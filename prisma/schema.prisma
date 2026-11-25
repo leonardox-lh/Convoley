@@ -287,6 +287,8 @@ model Event {
   // scheduled start and never changes, so editing or cancelling the date doesn't recreate it.
   recurringEventId    String?
   recurringSlot       DateTime?
+  // HU-34: what the court cost the organizer; null = not recorded yet.
+  courtCostCents      Int?
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
 

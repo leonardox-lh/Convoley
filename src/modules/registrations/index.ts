@@ -172,6 +172,7 @@ export {
   promoteWaitlisted,
   countConfirmedRegistrations,
   countConfirmedRegistrationsByEvent,
+  listRegistrationEventIds,
   listEventRegistrationIds,
 } from "./infrastructure/prisma-registration-reader";
 

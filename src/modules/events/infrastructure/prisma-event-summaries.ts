@@ -1,3 +1,4 @@
+import type { CourtCostWriter } from "../application/ports";
 import { findClubNamesByIds } from "@/modules/clubs";
 import { db } from "@/lib/db";
 
@@ -33,5 +34,28 @@ export function listEventsStartingBetween(from: Date, to: Date) {
   return db.event.findMany({
     where: { startsAt: { gte: from, lt: to }, status: { not: "draft" } },
     select: { id: true, clubId: true },
+  });
+}
+
+export const prismaCourtCostWriter: CourtCostWriter = {
+  async set(clubId, eventId, courtCostCents) {
+    const { count } = await db.event.updateMany({
+      where: { id: eventId, clubId },
+      data: { courtCostCents },
+    });
+    return count > 0;
+  },
+};
+
+/** HU-34: the club's non-draft events starting in [from, to), for the finance panel. */
+export function listClubEventsForFinance(input: { clubId: string; from: Date; to: Date }) {
+  return db.event.findMany({
+    where: {
+      clubId: input.clubId,
+      startsAt: { gte: input.from, lt: input.to },
+      status: { not: "draft" },
+    },
+    orderBy: { startsAt: "asc" },
+    select: { id: true, title: true, startsAt: true, status: true, courtCostCents: true },
   });
 }

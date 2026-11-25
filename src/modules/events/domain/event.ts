@@ -4,6 +4,7 @@ import {
   EventInPastError,
   EventNotEditableError,
   InvalidCapacityError,
+  InvalidCourtCostError,
   InvalidMapsUrlError,
   InvalidPriceError,
 } from "./errors";
@@ -64,6 +65,14 @@ export function validateEventDetails(props: EventDetailsProps, now: Date): void 
   }
   if (props.mapsUrl !== null && !isGoogleMapsUrl(props.mapsUrl)) {
     throw new InvalidMapsUrlError(props.mapsUrl);
+  }
+}
+
+/** HU-34: what the court cost, in cents; null clears it. */
+export function validateCourtCost(courtCostCents: number | null): void {
+  if (courtCostCents === null) return;
+  if (!Number.isInteger(courtCostCents) || courtCostCents < 0) {
+    throw new InvalidCourtCostError(courtCostCents);
   }
 }
 

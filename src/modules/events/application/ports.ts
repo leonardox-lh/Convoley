@@ -100,3 +100,8 @@ export interface RecurringEventRepository {
    */
   publishOccurrences(template: RecurringEvent, slots: Date[]): Promise<void>;
 }
+
+/** HU-34: stores the court cost of one of the club's events; false if it isn't the club's. */
+export interface CourtCostWriter {
+  set(clubId: string, eventId: string, courtCostCents: number | null): Promise<boolean>;
+}
