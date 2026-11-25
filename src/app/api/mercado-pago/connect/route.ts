@@ -5,7 +5,7 @@ import {
   mercadoPagoAuthorizationUrl,
   signOAuthState,
 } from "@/modules/payments";
-import { requireOrganizer } from "@/app/admin/[club]/require-organizer";
+import { requireOrganizerToEdit } from "@/app/admin/[club]/require-organizer";
 import { mercadoPagoRedirectUri } from "../redirect-uri";
 
 const querySchema = z.object({ club: z.string().min(1) });
@@ -15,7 +15,7 @@ export async function GET(request: Request) {
   const parsed = querySchema.safeParse(Object.fromEntries(new URL(request.url).searchParams));
   if (!parsed.success || !isMercadoPagoConfigured()) notFound();
   const clubSlug = parsed.data.club;
-  const organizer = await requireOrganizer(clubSlug, "manage_club");
+  const organizer = await requireOrganizerToEdit(clubSlug, "manage_club");
   if (!organizer) notFound();
 
   const state = signOAuthState({ clubSlug, userId: organizer.userId });

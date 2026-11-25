@@ -56,6 +56,10 @@ const envSchema = z
         "Must be 32 bytes in base64",
       )
       .optional(),
+    // HU-35: how clubs pay the Convoley subscription (free text shown to organizers).
+    BILLING_PAYMENT_INSTRUCTIONS: z.string().optional(),
+    // HU-36: emails of the Convoley owners (comma-separated); they also need Google sign-in.
+    PLATFORM_ADMIN_EMAILS: z.string().optional(),
   })
   .superRefine((env, context) => {
     if (env.NODE_ENV !== "production") return;

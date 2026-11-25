@@ -12,6 +12,7 @@ import {
 } from "./application/recurring-events";
 import { makeUpdateEvent } from "./application/update-event";
 import { prismaRecurringEventRepository } from "./infrastructure/prisma-recurring-event-repository";
+import { isClubWritable } from "./infrastructure/billing-adapter";
 import { clubsAdapter } from "./infrastructure/clubs-adapter";
 import { paymentsAdapter } from "./infrastructure/payments-adapter";
 import { creditsAdapter } from "./infrastructure/plans-adapter";
@@ -23,7 +24,11 @@ const events = new PrismaEventRepository(db);
 const transactions = prismaTransactions(db);
 const now = () => new Date();
 const recurring = prismaRecurringEventRepository(db);
-const publishDueOccurrences = makePublishDueOccurrences({ recurring, now });
+const publishDue = makePublishDueOccurrences({ recurring, now });
+// HU-35: a read-only club keeps its published dates but gets no new recurring ones.
+const publishDueOccurrences = async (clubId: string) => {
+  if (await isClubWritable(clubId)) await publishDue(clubId);
+};
 
 export const createEvent = makeCreateEvent({ clubs: clubsAdapter, events, now });
 export const getPublicEvent = makeGetPublicEvent({ clubs: clubsAdapter, events });
@@ -69,7 +74,10 @@ export {
   markEventFull,
   reopenEvent,
 } from "./infrastructure/prisma-event-seats";
-export { listEventSummaries } from "./infrastructure/prisma-event-summaries";
+export {
+  listEventSummaries,
+  listEventsStartingBetween,
+} from "./infrastructure/prisma-event-summaries";
 export type { CreateEventInput } from "./application/create-event";
 export type { UpdateEventInput } from "./application/update-event";
 export type { CancelEventInput } from "./application/cancel-event";

@@ -17,7 +17,7 @@ export async function findClubBySlug(slug: string) {
 export async function findClubMembership(input: { clubSlug: string; userId: string }) {
   return db.clubMember.findFirst({
     where: { userId: input.userId, club: { slug: input.clubSlug } },
-    select: { role: true },
+    select: { role: true, clubId: true },
   });
 }
 
@@ -36,5 +36,13 @@ export async function findClubNamesByIds(ids: string[]) {
   return db.club.findMany({
     where: { id: { in: ids } },
     select: { id: true, slug: true, name: true },
+  });
+}
+
+/** HU-36: every club, newest first, for the platform owner. */
+export async function listAllClubs() {
+  return db.club.findMany({
+    orderBy: { createdAt: "desc" },
+    select: { id: true, slug: true, name: true, createdAt: true },
   });
 }

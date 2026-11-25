@@ -14,7 +14,7 @@ import {
   rejectOrderVoucher,
 } from "@/modules/store";
 import { NOT_ALLOWED_MESSAGE } from "../convocatorias/event-form-schema";
-import { requireOrganizer } from "../require-organizer";
+import { requireOrganizerToEdit } from "../require-organizer";
 
 export type OrderActionState = { status: "idle" } | { status: "error"; message: string };
 
@@ -51,7 +51,7 @@ async function run(
   const parsed = schema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { status: "error", message: parsed.error.issues[0].message };
   const { clubSlug, orderId } = parsed.data;
-  const organizer = await requireOrganizer(clubSlug, "run_game_day");
+  const organizer = await requireOrganizerToEdit(clubSlug, "run_game_day");
   const club = organizer && (await findClubBySlug(clubSlug));
   if (!club) return { status: "error", message: NOT_ALLOWED_MESSAGE };
   try {

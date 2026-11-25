@@ -19,7 +19,7 @@ import {
 } from "@/modules/registrations";
 import { genderField, nameField, PHONE_FORMAT_MESSAGE } from "../../../../player-schema";
 import { NOT_ALLOWED_MESSAGE } from "../event-form-schema";
-import { requireOrganizer } from "../../require-organizer";
+import { requireOrganizerToEdit } from "../../require-organizer";
 
 export type RegistrationActionState =
   { status: "idle" } | { status: "error"; message: string } | { status: "done"; message: string };
@@ -51,7 +51,7 @@ const ERROR_MESSAGES: [new (...args: never[]) => Error, string][] = [
 
 /** The organizer's user id, only if they manage the club and the event belongs to it. */
 async function authorize(target: z.infer<typeof targetSchema>) {
-  const organizer = await requireOrganizer(target.clubSlug, "run_game_day");
+  const organizer = await requireOrganizerToEdit(target.clubSlug, "run_game_day");
   if (!organizer) return null;
   const event = await getOrganizerEvent({ clubSlug: target.clubSlug, eventId: target.eventId });
   return event ? organizer.userId : null;

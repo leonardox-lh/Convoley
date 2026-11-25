@@ -13,7 +13,7 @@ import {
   eventDetailsSchema,
   NOT_ALLOWED_MESSAGE,
 } from "../../event-form-schema";
-import { requireOrganizer } from "../../../require-organizer";
+import { requireOrganizerToEdit } from "../../../require-organizer";
 
 export type UpdateEventState =
   | { status: "idle" }
@@ -42,7 +42,7 @@ export async function updateEventAction(
   if (!details.success) return { status: "error", message: details.error.issues[0].message };
   const target = updateSchema.safeParse(values);
   if (!target.success) return { status: "error", message: "No encontramos la convocatoria." };
-  if (!(await requireOrganizer(details.data.clubSlug, "manage_club"))) {
+  if (!(await requireOrganizerToEdit(details.data.clubSlug, "manage_club"))) {
     return { status: "error", message: NOT_ALLOWED_MESSAGE };
   }
 
@@ -66,7 +66,7 @@ export async function cancelEventAction(
 ): Promise<CancelEventState> {
   const parsed = cancelSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { status: "error", message: parsed.error.issues[0].message };
-  if (!(await requireOrganizer(parsed.data.clubSlug, "manage_club"))) {
+  if (!(await requireOrganizerToEdit(parsed.data.clubSlug, "manage_club"))) {
     return { status: "error", message: NOT_ALLOWED_MESSAGE };
   }
 

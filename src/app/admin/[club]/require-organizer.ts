@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { isClubWritable } from "@/modules/billing";
 import { can, type ClubPermission, findClubMembership } from "@/modules/clubs";
 import { currentUserId, SIGN_IN_PATH } from "@/modules/identity";
 
@@ -13,5 +14,15 @@ export async function requireOrganizer(clubSlug: string, permission: ClubPermiss
   if (!userId) redirect(SIGN_IN_PATH);
   const membership = await findClubMembership({ clubSlug, userId });
   if (!membership || !can(membership.role, permission)) return null;
-  return { userId, role: membership.role };
+  return { userId, role: membership.role, clubId: membership.clubId };
+}
+
+/**
+ * HU-35: like `requireOrganizer`, but also null while the club is read-only (trial over and
+ * unpaid, or suspended). Every admin server action that writes uses this one.
+ */
+export async function requireOrganizerToEdit(clubSlug: string, permission: ClubPermission) {
+  const organizer = await requireOrganizer(clubSlug, permission);
+  if (!organizer || !(await isClubWritable(organizer.clubId))) return null;
+  return organizer;
 }

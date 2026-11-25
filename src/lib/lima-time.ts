@@ -52,3 +52,36 @@ export function limaDateAndTime(date: Date): { date: string; time: string } {
     time: `${parts.hour}:${parts.minute}`,
   };
 }
+
+const limaDateFormatter = new Intl.DateTimeFormat("es-PE", {
+  timeZone: LIMA_TIME_ZONE,
+  dateStyle: "long",
+});
+
+/** Only the date in Lima, like "25 de noviembre de 2026". */
+export function formatDateInLima(date: Date): string {
+  return limaDateFormatter.format(date);
+}
+
+const MONTH_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/;
+
+/** The current month in Lima as "YYYY-MM". */
+export function currentLimaMonth(now = new Date()): string {
+  return todayInLima(now).slice(0, 7);
+}
+
+/** "YYYY-MM" if valid, else the current month in Lima: for `?mes=` query params. */
+export function parseLimaMonth(raw: unknown, now = new Date()): string {
+  return typeof raw === "string" && MONTH_PATTERN.test(raw) ? raw : currentLimaMonth(now);
+}
+
+/** UTC bounds [from, to) of a "YYYY-MM" month in Lima. */
+export function limaMonthRange(month: string): { from: Date; to: Date } {
+  const [year, monthNumber] = month.split("-").map(Number);
+  const next =
+    monthNumber === 12 ? `${year + 1}-01` : `${year}-${String(monthNumber + 1).padStart(2, "0")}`;
+  return {
+    from: limaDateTimeToUtc(`${month}-01`, "00:00"),
+    to: limaDateTimeToUtc(`${next}-01`, "00:00"),
+  };
+}

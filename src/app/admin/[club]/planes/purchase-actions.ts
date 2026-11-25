@@ -11,7 +11,7 @@ import {
 } from "@/modules/plans";
 import { REJECTION_REASON_MAX_LENGTH } from "@/modules/registrations";
 import { NOT_ALLOWED_MESSAGE } from "../convocatorias/event-form-schema";
-import { requireOrganizer } from "../require-organizer";
+import { requireOrganizerToEdit } from "../require-organizer";
 
 export type PurchaseActionState = { status: "idle" } | { status: "error"; message: string };
 
@@ -32,7 +32,7 @@ async function review(
   const parsed = purchaseSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { status: "error", message: parsed.error.issues[0].message };
   const { clubSlug, purchaseId } = parsed.data;
-  const organizer = await requireOrganizer(clubSlug, "manage_club");
+  const organizer = await requireOrganizerToEdit(clubSlug, "manage_club");
   const club = organizer ? await findClubBySlug(clubSlug) : null;
   if (!organizer || !club) return { status: "error", message: NOT_ALLOWED_MESSAGE };
   try {

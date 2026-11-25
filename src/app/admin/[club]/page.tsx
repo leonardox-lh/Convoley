@@ -2,9 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { formatInLima } from "@/lib/lima-time";
+import { getClubSubscription } from "@/modules/billing";
 import { can, findClubBySlug } from "@/modules/clubs";
 import { listOpenEvents } from "@/modules/events";
 import { requireOrganizer } from "./require-organizer";
+import { SubscriptionBanner } from "./subscription-banner";
 
 type Props = PageProps<"/admin/[club]">;
 
@@ -27,6 +29,7 @@ const ADMIN_LINKS = [
   ["pagos", "Cobros"],
   ["tienda", "Tienda"],
   ["planes", "Planes"],
+  ["suscripcion", "Suscripción"],
   ["organizadores", "Organizadores"],
 ] as const;
 
@@ -34,7 +37,11 @@ async function ClubAdminHome({ params }: Pick<Props, "params">) {
   const clubSlug = (await params).club;
   const organizer = await requireOrganizer(clubSlug, "run_game_day");
   if (!organizer) notFound();
-  const [club, events] = await Promise.all([findClubBySlug(clubSlug), listOpenEvents(clubSlug)]);
+  const [club, events, { access }] = await Promise.all([
+    findClubBySlug(clubSlug),
+    listOpenEvents(clubSlug),
+    getClubSubscription(organizer.clubId),
+  ]);
   if (!club || !events) notFound();
   const links = [
     ...(can(organizer.role, "manage_club") ? ADMIN_LINKS : []),
@@ -44,6 +51,7 @@ async function ClubAdminHome({ params }: Pick<Props, "params">) {
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-2xl font-semibold tracking-tight">{club.name}</h1>
+      <SubscriptionBanner clubSlug={clubSlug} access={access} />
       <nav aria-label="Menú del club" className="flex flex-wrap gap-2">
         {links.map(([path, label]) => (
           <Link

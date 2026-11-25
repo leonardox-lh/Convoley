@@ -15,7 +15,7 @@ import {
   type InvalidPlanReason,
 } from "@/modules/plans";
 import { NOT_ALLOWED_MESSAGE } from "../convocatorias/event-form-schema";
-import { requireOrganizer } from "../require-organizer";
+import { requireOrganizerToEdit } from "../require-organizer";
 
 export type PlanActionState = { status: "idle" | "created" } | { status: "error"; message: string };
 
@@ -51,7 +51,7 @@ const PLAN_MESSAGES: Record<InvalidPlanReason, string> = {
 
 /** Plans are part of the club's prices, so only its admin manages them. */
 async function adminClub(clubSlug: string) {
-  if (!(await requireOrganizer(clubSlug, "manage_club"))) return null;
+  if (!(await requireOrganizerToEdit(clubSlug, "manage_club"))) return null;
   return findClubBySlug(clubSlug);
 }
 

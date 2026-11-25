@@ -23,7 +23,7 @@ import {
   type InvalidProductReason,
 } from "@/modules/store";
 import { NOT_ALLOWED_MESSAGE } from "../convocatorias/event-form-schema";
-import { requireOrganizer } from "../require-organizer";
+import { requireOrganizerToEdit } from "../require-organizer";
 import { parseStockInput } from "./stock-input";
 
 export type ProductActionState = { status: "idle" } | { status: "error"; message: string };
@@ -73,7 +73,7 @@ const ERROR_MESSAGES: [new (...args: never[]) => Error, string][] = [
 
 /** Products shape the club's store, so only its admin manages them. */
 async function adminClub(clubSlug: string) {
-  if (!(await requireOrganizer(clubSlug, "manage_club"))) return null;
+  if (!(await requireOrganizerToEdit(clubSlug, "manage_club"))) return null;
   return findClubBySlug(clubSlug);
 }
 

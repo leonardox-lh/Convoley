@@ -112,16 +112,17 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts            Account[]
-  sessions            Session[]
-  passwordResetTokens PasswordResetToken[]
-  memberships         ClubMember[]
-  sentInvitations     ClubInvitation[]
-  registrations       Registration[]
-  orders              Order[]
-  planPurchases       PlanPurchase[]
-  balances            PlayerBalance[]
-  reviewedPayments    Payment[]            @relation("PaymentReviewer")
+  accounts                     Account[]
+  sessions                     Session[]
+  passwordResetTokens          PasswordResetToken[]
+  memberships                  ClubMember[]
+  sentInvitations              ClubInvitation[]
+  registrations                Registration[]
+  orders                       Order[]
+  planPurchases                PlanPurchase[]
+  balances                     PlayerBalance[]
+  reviewedPayments             Payment[]             @relation("PaymentReviewer")
+  recordedSubscriptionPayments SubscriptionPayment[]
 }
 
 model Account {
@@ -201,6 +202,7 @@ model Club {
   balances        PlayerBalance[]
 
   mercadoPagoConnection MercadoPagoConnection?
+  subscription          Subscription?
 }
 
 // Single-use link to set a new password (HU-01). Only the sha256 of the token is stored.
@@ -595,4 +597,36 @@ model BalanceUse {
   registration  Registration  @relation(fields: [registrationId], references: [id], onDelete: Restrict)
 
   @@index([playerBalanceId])
+}
+
+// ─── billing ───────────────────────────────────────────────────────────────
+
+// HU-35: the club's Convoley subscription. Access ends at max(trialEndsAt, paidUntil).
+model Subscription {
+  clubId      String    @id
+  trialEndsAt DateTime
+  paidUntil   DateTime?
+  // HU-36: set by the platform owner; forces read-only even if paid.
+  suspendedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  club     Club                  @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  payments SubscriptionPayment[]
+}
+
+// HU-35: a monthly payment to Convoley, recorded by the platform owner (manual collection).
+model SubscriptionPayment {
+  id               String   @id @default(cuid())
+  clubId           String
+  amountCents      Int
+  // Access date this payment extended the subscription to.
+  paidUntil        DateTime
+  recordedByUserId String?
+  createdAt        DateTime @default(now())
+
+  subscription Subscription @relation(fields: [clubId], references: [clubId], onDelete: Restrict)
+  recordedBy   User?        @relation(fields: [recordedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([clubId, createdAt])
 }

@@ -8,7 +8,7 @@ import {
   NOT_ALLOWED_MESSAGE,
   recurringEventSchema,
 } from "../convocatorias/event-form-schema";
-import { requireOrganizer } from "../require-organizer";
+import { requireOrganizerToEdit } from "../require-organizer";
 
 export type RecurringEventState =
   { status: "idle" } | { status: "created" } | { status: "error"; message: string };
@@ -20,7 +20,7 @@ const pauseSchema = z.object({
 });
 
 async function run(clubSlug: string, work: () => Promise<void>): Promise<string | null> {
-  if (!(await requireOrganizer(clubSlug, "manage_club"))) return NOT_ALLOWED_MESSAGE;
+  if (!(await requireOrganizerToEdit(clubSlug, "manage_club"))) return NOT_ALLOWED_MESSAGE;
   try {
     await work();
   } catch (error) {

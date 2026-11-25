@@ -10,7 +10,7 @@ import {
   removeClubMember,
 } from "@/modules/clubs";
 import { NOT_ALLOWED_MESSAGE } from "../convocatorias/event-form-schema";
-import { requireOrganizer } from "../require-organizer";
+import { requireOrganizerToEdit } from "../require-organizer";
 
 export type InviteState =
   { status: "idle" } | { status: "done"; link: string } | { status: "error"; message: string };
@@ -28,7 +28,7 @@ export async function createInvitationAction(
 ): Promise<InviteState> {
   const parsed = inviteSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { status: "error", message: parsed.error.issues[0].message };
-  const organizer = await requireOrganizer(parsed.data.clubSlug, "manage_club");
+  const organizer = await requireOrganizerToEdit(parsed.data.clubSlug, "manage_club");
   if (!organizer) return { status: "error", message: NOT_ALLOWED_MESSAGE };
   const token = await createInvitation({ ...parsed.data, createdByUserId: organizer.userId });
   return { status: "done", link: `${await appUrl()}/invitacion/${token}` };
@@ -40,7 +40,7 @@ export async function removeMemberAction(
 ): Promise<RemoveMemberState> {
   const parsed = removeSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { status: "error", message: NOT_ALLOWED_MESSAGE };
-  if (!(await requireOrganizer(parsed.data.clubSlug, "manage_club"))) {
+  if (!(await requireOrganizerToEdit(parsed.data.clubSlug, "manage_club"))) {
     return { status: "error", message: NOT_ALLOWED_MESSAGE };
   }
   try {

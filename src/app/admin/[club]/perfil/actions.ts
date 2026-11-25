@@ -9,7 +9,7 @@ import {
   type ClubFormState,
 } from "@/app/club/club-form-schema";
 import { NOT_ALLOWED_MESSAGE } from "../convocatorias/event-form-schema";
-import { requireOrganizer } from "../require-organizer";
+import { requireOrganizerToEdit } from "../require-organizer";
 
 export async function updateClubProfileAction(
   _previous: ClubFormState,
@@ -19,7 +19,7 @@ export async function updateClubProfileAction(
   if (!parsed.success) return { status: "error", message: parsed.error.issues[0].message };
   const { clubSlug, ...profile } = parsed.data;
   // Only the admin edits the club's identity; helpers manage events.
-  if (!(await requireOrganizer(clubSlug, "manage_club"))) {
+  if (!(await requireOrganizerToEdit(clubSlug, "manage_club"))) {
     return { status: "error", message: NOT_ALLOWED_MESSAGE };
   }
 

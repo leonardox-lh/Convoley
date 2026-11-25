@@ -12,7 +12,7 @@ import {
   NotEnoughWomenError,
 } from "@/modules/registrations";
 import { NOT_ALLOWED_MESSAGE } from "../../event-form-schema";
-import { requireOrganizer } from "../../../require-organizer";
+import { requireOrganizerToEdit } from "../../../require-organizer";
 
 export type TeamsState = { status: "idle" } | { status: "error"; message: string };
 
@@ -32,7 +32,7 @@ const moveSchema = targetSchema.extend({
 
 /** HU-31: admin and helper; only events of their club. */
 async function authorize(target: z.infer<typeof targetSchema>) {
-  if (!(await requireOrganizer(target.clubSlug, "run_game_day"))) return false;
+  if (!(await requireOrganizerToEdit(target.clubSlug, "run_game_day"))) return false;
   return (await getOrganizerEvent(target)) !== null;
 }
 

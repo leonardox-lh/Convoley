@@ -14,7 +14,7 @@ import {
   renameCommunity,
 } from "@/modules/clubs";
 import { NOT_ALLOWED_MESSAGE } from "../convocatorias/event-form-schema";
-import { requireOrganizer } from "../require-organizer";
+import { requireOrganizerToEdit } from "../require-organizer";
 
 export type CommunityActionState = { status: "idle" } | { status: "error"; message: string };
 
@@ -37,7 +37,7 @@ const ERROR_MESSAGES: [new (...args: never[]) => Error, string][] = [
 
 async function run(clubSlug: string, work: () => Promise<void>): Promise<CommunityActionState> {
   // Communities shape the club, so only its admin changes them (like the profile).
-  if (!(await requireOrganizer(clubSlug, "manage_club"))) {
+  if (!(await requireOrganizerToEdit(clubSlug, "manage_club"))) {
     return { status: "error", message: NOT_ALLOWED_MESSAGE };
   }
   try {

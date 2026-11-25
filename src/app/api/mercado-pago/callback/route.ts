@@ -7,7 +7,7 @@ import {
   MercadoPagoAuthorizationError,
   verifyOAuthState,
 } from "@/modules/payments";
-import { requireOrganizer } from "@/app/admin/[club]/require-organizer";
+import { requireOrganizerToEdit } from "@/app/admin/[club]/require-organizer";
 import { mercadoPagoRedirectUri, paymentsPagePath } from "../redirect-uri";
 
 const querySchema = z.object({ code: z.string().min(1).optional(), state: z.string().min(1) });
@@ -19,7 +19,7 @@ export async function GET(request: Request) {
   if (!parsed.success || !state) notFound();
 
   // The person finishing the flow must be the admin who started it, still in that club.
-  const organizer = await requireOrganizer(state.clubSlug, "manage_club");
+  const organizer = await requireOrganizerToEdit(state.clubSlug, "manage_club");
   if (!organizer || organizer.userId !== state.userId) notFound();
   // No code: the organizer cancelled on Mercado Pago's page.
   if (!parsed.data.code) redirect(paymentsPagePath(state.clubSlug, "error"));

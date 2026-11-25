@@ -21,7 +21,7 @@ import { InvalidPhoneNumberError, PhoneNumber } from "@/modules/registrations";
 import { logoFromForm } from "@/app/club/club-form-schema";
 import { PHONE_FORMAT_MESSAGE } from "@/app/player-schema";
 import { NOT_ALLOWED_MESSAGE } from "../convocatorias/event-form-schema";
-import { requireOrganizer } from "../require-organizer";
+import { requireOrganizerToEdit } from "../require-organizer";
 
 export type PaymentSettingsState = { status: "idle" } | { status: "error"; message: string };
 
@@ -50,7 +50,7 @@ export async function updatePaymentSettingsAction(
   if (!parsed.success) return { status: "error", message: parsed.error.issues[0].message };
   const { clubSlug, paymentHolderName } = parsed.data;
   // Where the money goes is the admin's call, not a helper's.
-  if (!(await requireOrganizer(clubSlug, "manage_club"))) {
+  if (!(await requireOrganizerToEdit(clubSlug, "manage_club"))) {
     return { status: "error", message: NOT_ALLOWED_MESSAGE };
   }
 
@@ -93,7 +93,7 @@ export async function updateServiceFeeAction(
   const parsed = serviceFeeSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { status: "error", message: "Elige un tipo de cargo." };
   const { clubSlug, kind, amount } = parsed.data;
-  if (!(await requireOrganizer(clubSlug, "manage_club"))) {
+  if (!(await requireOrganizerToEdit(clubSlug, "manage_club"))) {
     return { status: "error", message: NOT_ALLOWED_MESSAGE };
   }
   const value =
@@ -118,7 +118,7 @@ const disconnectSchema = z.object({ clubSlug: z.string().min(1) });
 /** HU-18: forget the Mercado Pago tokens; players go back to paying by voucher. */
 export async function disconnectMercadoPagoAction(formData: FormData): Promise<void> {
   const { clubSlug } = disconnectSchema.parse(Object.fromEntries(formData));
-  if (!(await requireOrganizer(clubSlug, "manage_club"))) return;
+  if (!(await requireOrganizerToEdit(clubSlug, "manage_club"))) return;
   const club = await findClubBySlug(clubSlug);
   if (club) await disconnectMercadoPago(club.id);
   redirect(`/admin/${clubSlug}/pagos?mp=desconectado`);
@@ -144,7 +144,7 @@ export async function updateCancellationPolicyAction(
 ): Promise<CancellationPolicyState> {
   const parsed = policySchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { status: "error", message: POLICY_MESSAGE };
-  if (!(await requireOrganizer(parsed.data.clubSlug, "manage_club"))) {
+  if (!(await requireOrganizerToEdit(parsed.data.clubSlug, "manage_club"))) {
     return { status: "error", message: NOT_ALLOWED_MESSAGE };
   }
   try {

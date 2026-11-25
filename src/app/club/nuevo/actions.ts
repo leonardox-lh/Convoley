@@ -1,7 +1,8 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { createClub } from "@/modules/clubs";
+import { startTrial } from "@/modules/billing";
+import { createClub, findClubBySlug } from "@/modules/clubs";
 import { currentUserId, SIGN_IN_PATH } from "@/modules/identity";
 import {
   domainErrorMessage,
@@ -28,6 +29,9 @@ export async function createClubAction(
       profile,
       logo: await logoFromForm(formData),
     }));
+    // HU-35: the 30-day free trial starts with the club.
+    const club = await findClubBySlug(slug);
+    if (club) await startTrial(club.id);
   } catch (error) {
     const message = domainErrorMessage(error);
     if (message) return { status: "error", message };

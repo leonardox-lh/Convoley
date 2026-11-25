@@ -55,6 +55,7 @@ export {
   findClubMembership,
   findClubNamesByIds,
   findFirstClubSlugForMember,
+  listAllClubs,
 } from "./infrastructure/prisma-club-reader";
 
 const clubs = prismaClubRepository(db);
