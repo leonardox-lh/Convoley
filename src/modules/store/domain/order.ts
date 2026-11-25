@@ -44,4 +44,11 @@ export function orderSettlement(input: {
   return input.inStock ? "mark_paid" : "out_of_stock_refund";
 }
 
-export const isAwaitingPayment = (status: OrderStatus) => AWAITING_PAYMENT.includes(status);
+/** HU-25: the organizer's filters; "pending" gathers unpaid orders and those under review. */
+export const ORDER_FILTERS = {
+  pending: ["pending_payment", "in_review"],
+  paid: ["paid"],
+  delivered: ["delivered"],
+  cancelled: ["cancelled"],
+} as const satisfies Record<string, readonly OrderStatus[]>;
+export type OrderFilter = keyof typeof ORDER_FILTERS;

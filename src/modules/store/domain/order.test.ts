@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { inStock, orderTotalCents, validateCart } from "./cart";
 import { InvalidCartError } from "./errors";
-import { orderSettlement } from "./order";
+import { ORDER_FILTERS, orderSettlement } from "./order";
 
 describe("HU-24: carrito simple", () => {
   test("suma cantidades de la misma talla y calcula el total en céntimos", () => {
@@ -59,5 +59,12 @@ describe("HU-23/HU-24: el stock se descuenta al pagar", () => {
     expect(orderSettlement({ ...base, paymentStatus: "refund_pending" })).toBe("retry_refund");
     expect(orderSettlement({ ...base, charge: "rejected" })).toBe("mark_rejected");
     expect(orderSettlement({ ...base, charge: "pending" })).toBe("keep_pending");
+  });
+});
+
+describe("HU-25: filtro por estado", () => {
+  test("pendiente reúne sin pagar y en revisión", () => {
+    expect(ORDER_FILTERS.pending).toEqual(["pending_payment", "in_review"]);
+    expect(ORDER_FILTERS.delivered).toEqual(["delivered"]);
   });
 });

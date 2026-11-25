@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { ORDER_FILTERS, type OrderFilter } from "./domain/order";
 import {
   makeAddProductPhoto,
   makeCreateProduct,
@@ -13,6 +14,11 @@ import {
   makeStartOrderMercadoPagoPayment,
   makeSubmitOrderVoucher,
 } from "./application/orders";
+import {
+  makeApproveOrderVoucher,
+  makeMarkOrderDelivered,
+  makeRejectOrderVoucher,
+} from "./application/manage-orders";
 import { productImagesAdapter, serviceFeesAdapter } from "./infrastructure/clubs-adapter";
 import { pickupEventsAdapter } from "./infrastructure/events-adapter";
 import { gatewayAdapter, orderPaymentsAdapter } from "./infrastructure/payments-adapter";
@@ -76,7 +82,15 @@ export const findOrder = async (orderId: string) =>
   (await findOrders(db, { id: orderId }))[0] ?? null;
 export type { OrderListItem } from "./infrastructure/prisma-order-repository";
 export { MAX_QUANTITY_PER_ITEM } from "./domain/cart";
-export { ORDER_STATUSES, type OrderStatus } from "./domain/order";
+export { ORDER_FILTERS, ORDER_STATUSES, type OrderFilter, type OrderStatus } from "./domain/order";
+
+const reviewDeps = { ...orderPaymentDeps, now: () => new Date() };
+export const approveOrderVoucher = makeApproveOrderVoucher(reviewDeps);
+export const rejectOrderVoucher = makeRejectOrderVoucher(reviewDeps);
+export const markOrderDelivered = makeMarkOrderDelivered(reviewDeps);
+/** HU-25: the club's orders, newest first, optionally of one filter. */
+export const listOrders = (clubId: string, filter: OrderFilter | null) =>
+  findOrders(db, { clubId, ...(filter && { status: { in: [...ORDER_FILTERS[filter]] } }) });
 export {
   InvalidCartError,
   MercadoPagoUnavailableError,
