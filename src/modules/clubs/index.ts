@@ -9,6 +9,7 @@ import { makeCreateClub } from "./application/create-club";
 import { makeUpdatePaymentSettings } from "./application/update-payment-settings";
 import { makeUpdateServiceFee } from "./application/update-service-fee";
 import { serviceFeeCents } from "./domain/service-fee";
+import { uploadLogo } from "./application/upload-logo";
 import { makeUpdateClubProfile } from "./application/update-club-profile";
 import { prismaCommunityRepository } from "./infrastructure/prisma-community-repository";
 import {
@@ -75,6 +76,11 @@ export {
 export const serviceFeeFor = async (clubId: string, priceCents: number) =>
   serviceFeeCents(priceCents, await findServiceFee(db, clubId));
 export const readClubLogo = (key: string) => logos.read(key);
+/** HU-23: public images of the club (product photos), stored and served like the logo. */
+export const saveClubImage = (
+  clubSlug: string,
+  image: { bytes: Uint8Array; contentType: string },
+) => uploadLogo(logos, clubSlug, image);
 
 /** Public path that serves a stored logo (see src/app/logos/[key]/route.ts). */
 export const clubLogoPath = (logoKey: string) => `/logos/${logoKey}`;
