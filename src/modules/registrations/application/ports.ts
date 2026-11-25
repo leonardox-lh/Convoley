@@ -93,8 +93,25 @@ export interface Credits {
     },
     tx: TransactionContext,
   ): Promise<void>;
-  /** Gives back the credits these registrations used, if any. */
+  /** Gives back the credits and balance (HU-30) these registrations used, if any. */
   giveBack(registrationIds: string[], tx: TransactionContext): Promise<void>;
+  /** HU-30: true when it was paid with a plan credit or balance instead of money. */
+  paidWithoutMoney(registrationId: string, tx: TransactionContext): Promise<boolean>;
+  /** HU-30: keeps the price of a cancelled sign-up as balance in the club. */
+  earnBalance(
+    input: { clubId: string; phone: string; amountCents: number },
+    tx: TransactionContext,
+  ): Promise<void>;
+  /** HU-30: pays the whole price with balance; throws NoBalanceError when it doesn't cover it. */
+  spendBalance(
+    input: { clubId: string; phone: string; amountCents: number; registrationId: string },
+    tx: TransactionContext,
+  ): Promise<void>;
+}
+
+/** HU-30: the club's cancellation deadline, owned by the `clubs` module. */
+export interface CancellationPolicies {
+  deadlineHours(clubId: string): Promise<number | null>;
 }
 
 /** HU-22: the club's optional service fee, owned by the `clubs` module. */

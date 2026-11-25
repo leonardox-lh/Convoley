@@ -1,5 +1,5 @@
 import { holdsSeat, type EventSeatInfo, type RegistrationStatus } from "../domain/registration";
-import { NoCreditError } from "../domain/errors";
+import { NoBalanceError, NoCreditError } from "../domain/errors";
 import type {
   ChargeReport,
   Credits,
@@ -115,10 +115,21 @@ export function fakeRegistrationRepository(initial: StoredRegistration[] = []) {
   return { repository, rows };
 }
 
-export function fakeCredits(options: { available?: boolean } = {}) {
+export function fakeCredits(options: { available?: boolean; balanceCents?: number } = {}) {
   const used: string[] = [];
   const returned: string[] = [];
+  const earned: number[] = [];
+  let balanceCents = options.balanceCents ?? 0;
   const credits: Credits = {
+    paidWithoutMoney: async (registrationId) => used.includes(registrationId),
+    earnBalance: async ({ amountCents }) => {
+      earned.push(amountCents);
+    },
+    spendBalance: async ({ amountCents, registrationId }) => {
+      if (balanceCents < amountCents) throw new NoBalanceError();
+      balanceCents -= amountCents;
+      used.push(registrationId);
+    },
     consume: async ({ registrationId }) => {
       if (!(options.available ?? true)) throw new NoCreditError();
       used.push(registrationId);
@@ -127,7 +138,7 @@ export function fakeCredits(options: { available?: boolean } = {}) {
       returned.push(...registrationIds);
     },
   };
-  return { credits, used, returned };
+  return { credits, used, returned, earned, balance: () => balanceCents };
 }
 
 export function fakeRegistrationListReader(items: RegistrationListItem[]): RegistrationListReader {

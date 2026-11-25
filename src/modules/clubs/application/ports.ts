@@ -53,6 +53,8 @@ export interface ClubPaymentSettings {
   /** HU-22: see domain/service-fee.ts. */
   serviceFeeFixedCents: number;
   serviceFeePercentBps: number;
+  /** HU-30: see domain/cancellation-policy.ts. */
+  cancellationDeadlineHours: number | null;
 }
 
 export interface PaymentSettingsRepository {

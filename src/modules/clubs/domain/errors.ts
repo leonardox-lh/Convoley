@@ -145,3 +145,11 @@ export class ClubMemberNotFoundError extends Error {
     this.name = "ClubMemberNotFoundError";
   }
 }
+
+/** HU-30: the deadline must be whole hours between 0 and 168. */
+export class InvalidCancellationPolicyError extends Error {
+  constructor() {
+    super("The cancellation deadline must be between 0 and 168 hours");
+    this.name = "InvalidCancellationPolicyError";
+  }
+}

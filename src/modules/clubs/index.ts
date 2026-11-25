@@ -16,11 +16,13 @@ import {
 import { prismaClubMemberRepository } from "./infrastructure/prisma-club-member-repository";
 import { makeUpdatePaymentSettings } from "./application/update-payment-settings";
 import { makeUpdateServiceFee } from "./application/update-service-fee";
+import { makeUpdateCancellationPolicy } from "./application/update-cancellation-policy";
 import { serviceFeeCents } from "./domain/service-fee";
 import { uploadLogo } from "./application/upload-logo";
 import { makeUpdateClubProfile } from "./application/update-club-profile";
 import { prismaCommunityRepository } from "./infrastructure/prisma-community-repository";
 import {
+  findCancellationDeadlineHours,
   findServiceFee,
   prismaPaymentSettingsRepository,
 } from "./infrastructure/prisma-payment-settings-repository";
@@ -110,3 +112,10 @@ export const getInvitation = makeGetInvitation(memberDeps);
 export const acceptInvitation = makeAcceptInvitation(memberDeps);
 export const listClubMembers = makeListClubMembers(memberDeps);
 export const removeClubMember = makeRemoveClubMember(memberDeps);
+
+// HU-30: cancellation policy.
+export const updateCancellationPolicy = makeUpdateCancellationPolicy({ settings: paymentSettings });
+export const cancellationDeadlineHoursFor = (clubId: string) =>
+  findCancellationDeadlineHours(db, clubId);
+export { MAX_CANCELLATION_DEADLINE_HOURS } from "./domain/cancellation-policy";
+export { InvalidCancellationPolicyError } from "./domain/errors";

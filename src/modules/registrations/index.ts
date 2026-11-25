@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { makeAddPlayerManually } from "./application/add-player-manually";
 import { makeListEventRegistrations } from "./application/list-event-registrations";
 import { makeMarkPaidManually } from "./application/mark-paid-manually";
-import { makePayWithCredit } from "./application/pay-with-credit";
+import { makePayWithBalance, makePayWithCredit } from "./application/pay-with-credit";
 import {
   makeSettleMercadoPagoNotification,
   makeSettleMercadoPagoPayment,
@@ -68,13 +68,15 @@ export const removeRegistration = makeRemoveRegistration({
   transactions,
 });
 
-export const payWithCredit = makePayWithCredit({
+const playerFundsDeps = {
   events: eventsAdapter,
   registrations: prismaRegistrationRepository,
   credits: creditsAdapter,
   transactions,
   now,
-});
+};
+export const payWithCredit = makePayWithCredit(playerFundsDeps);
+export const payWithBalance = makePayWithBalance(playerFundsDeps);
 
 export const submitVoucher = makeSubmitVoucher({
   events: eventsAdapter,
@@ -126,6 +128,7 @@ export const listPlayerRegistrations = makeListPlayerRegistrations({
 
 export { PhoneNumber } from "./domain/phone-number";
 export { buildRoster, rosterText, type Roster } from "./domain/roster";
+export { cancellationDeadline, type CancellationResult } from "./domain/cancellation";
 export type { RegisterGuestInput } from "./application/register-guest";
 export {
   acceptsWaitlist,
@@ -146,6 +149,8 @@ export {
   InvalidPhoneNumberError,
   InvalidRejectionReasonError,
   MercadoPagoUnavailableError,
+  CancellationNotAllowedError,
+  NoBalanceError,
   NoCreditError,
   NothingToReviewError,
   PaymentNotExpectedError,

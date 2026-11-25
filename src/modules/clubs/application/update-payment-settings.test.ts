@@ -26,6 +26,7 @@ const empty = {
   paymentQrKey: null,
   serviceFeeFixedCents: 0,
   serviceFeePercentBps: 0,
+  cancellationDeadlineHours: null,
 };
 const input = {
   clubSlug: "voley-miraflores",

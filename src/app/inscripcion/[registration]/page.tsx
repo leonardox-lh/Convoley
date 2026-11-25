@@ -14,7 +14,7 @@ import {
   isMercadoPagoConfigured,
   MAX_VOUCHER_BYTES,
 } from "@/modules/payments";
-import { getCreditBalance } from "@/modules/plans";
+import { getBalance, getCreditBalance } from "@/modules/plans";
 import { findRegistrationOverview } from "@/modules/registrations";
 import { PaymentInstructions } from "../../c/[club]/[event]/payment-instructions";
 import { loadPaymentInfo } from "../../payment-info";
@@ -22,7 +22,12 @@ import {
   REGISTRATION_STATUS_BADGE_CLASSES,
   REGISTRATION_STATUS_LABELS,
 } from "../../registration-status";
-import { payWithMercadoPagoAction, submitVoucherAction } from "./actions";
+import {
+  payWithBalanceAction,
+  payWithCreditAction,
+  payWithMercadoPagoAction,
+  submitVoucherAction,
+} from "./actions";
 import { PayWithCreditForm } from "./pay-with-credit-form";
 import { MercadoPagoCheckout } from "./mercado-pago-checkout";
 import { VoucherForm } from "./voucher-form";
@@ -69,6 +74,11 @@ async function RegistrationContent({ params, searchParams }: Props) {
         event,
       })
     : 0;
+  // HU-30: balance kept from a cancellation pays only the whole price.
+  const balanceCents =
+    awaitingPayment && event.priceCents > 0
+      ? await getBalance({ clubId: event.clubId, phone: registration.phone })
+      : 0;
 
   return (
     <>
@@ -127,7 +137,23 @@ async function RegistrationContent({ params, searchParams }: Props) {
               ? "Tu plan te da fechas ilimitadas."
               : `Tienes ${credits} ${credits === 1 ? "fecha" : "fechas"} de tu plan.`}
           </p>
-          <PayWithCreditForm registrationId={registration.id} />
+          <PayWithCreditForm
+            registrationId={registration.id}
+            action={payWithCreditAction}
+            label="Usar una fecha de mi plan"
+          />
+        </section>
+      )}
+      {balanceCents >= event.priceCents && balanceCents > 0 && (
+        <section className="flex flex-col gap-3 rounded-lg border border-emerald-200 p-4 dark:border-emerald-900">
+          <p className="text-sm">
+            Tienes {formatSoles(balanceCents)} de saldo a favor en este club.
+          </p>
+          <PayWithCreditForm
+            registrationId={registration.id}
+            action={payWithBalanceAction}
+            label={`Pagar ${formatSoles(event.priceCents)} con mi saldo`}
+          />
         </section>
       )}
       {awaitingPayment && mercadoPago && (

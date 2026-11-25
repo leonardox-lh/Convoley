@@ -4,8 +4,13 @@ import { Suspense } from "react";
 import { formatInLima } from "@/lib/lima-time";
 import { formatSoles } from "@/lib/money";
 import { type CancellationOutcome, type EventStatus } from "@/modules/events";
+import { getPaymentSettings } from "@/modules/clubs";
 import { currentUserId, getPlayerProfile, isGoogleSignInEnabled } from "@/modules/identity";
-import { acceptsWaitlist, isOpenForRegistration } from "@/modules/registrations";
+import {
+  acceptsWaitlist,
+  cancellationDeadline,
+  isOpenForRegistration,
+} from "@/modules/registrations";
 import { loadEventPreview, seatsText, shareDescription } from "./event-preview";
 import { loadPaymentInfo } from "../../../payment-info";
 import { RegistrationForm } from "./registration-form";
@@ -110,6 +115,9 @@ async function PublicEventContent({ params }: { params: Params }) {
         )}
       </dl>
       {event.rules && <p className="text-sm whitespace-pre-line">{event.rules}</p>}
+      {event.status !== "cancelled" && event.priceCents > 0 && (
+        <CancellationPolicyNote clubSlug={club} startsAt={event.startsAt} />
+      )}
       {(isOpenForRegistration(event, now) || waitlistOnly) && (
         <RegistrationForm
           waitlistOnly={waitlistOnly}
@@ -121,5 +129,24 @@ async function PublicEventContent({ params }: { params: Params }) {
         />
       )}
     </>
+  );
+}
+
+/** HU-30: what happens with the payment if the player cancels. */
+async function CancellationPolicyNote({
+  clubSlug,
+  startsAt,
+}: {
+  clubSlug: string;
+  startsAt: Date;
+}) {
+  const settings = await getPaymentSettings(clubSlug);
+  const deadline = cancellationDeadline(startsAt, settings?.cancellationDeadlineHours ?? null);
+  return (
+    <p className="text-sm text-zinc-500">
+      {deadline
+        ? `Si cancelas hasta el ${formatInLima(deadline)}, lo que pagaste queda como saldo a favor en el club. Después, se pierde.`
+        : "Si cancelas después de pagar, pierdes lo que pagaste."}
+    </p>
   );
 }

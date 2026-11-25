@@ -164,3 +164,30 @@ export interface PurchasePayments {
     tx: TransactionContext,
   ): Promise<void>;
 }
+
+// ─── Balance in favor (HU-30) ───
+
+export interface BalanceKey {
+  clubId: string;
+  /** Normalized +519XXXXXXXX. */
+  phone: string;
+}
+
+export interface BalanceRepository {
+  /** 0 when the player never had balance in the club. */
+  find(key: BalanceKey): Promise<number>;
+  add(key: BalanceKey, amountCents: number, tx: TransactionContext): Promise<void>;
+  /** Takes the amount only if it is covered (one conditional UPDATE); false otherwise. */
+  spend(
+    key: BalanceKey,
+    use: { amountCents: number; registrationId: string },
+    tx: TransactionContext,
+  ): Promise<boolean>;
+  /** Deletes these registrations' uses and puts their amounts back. */
+  returnUses(registrationIds: string[], tx: TransactionContext): Promise<void>;
+  /** How the registration was paid without money: plan credit, balance or neither. */
+  paidWithoutMoney(
+    registrationId: string,
+    tx: TransactionContext,
+  ): Promise<"plan_credit" | "balance" | null>;
+}

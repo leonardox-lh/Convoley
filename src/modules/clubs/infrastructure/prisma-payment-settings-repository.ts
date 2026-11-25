@@ -13,6 +13,7 @@ export function prismaPaymentSettingsRepository(db: PrismaClient): PaymentSettin
           paymentQrKey: true,
           serviceFeeFixedCents: true,
           serviceFeePercentBps: true,
+          cancellationDeadlineHours: true,
         },
       }),
     async update(clubSlug, changes) {
@@ -29,4 +30,16 @@ export async function findServiceFee(db: PrismaClient, clubId: string): Promise<
   });
   if (!club) return NO_SERVICE_FEE;
   return { fixedCents: club.serviceFeeFixedCents, percentBps: club.serviceFeePercentBps };
+}
+
+/** HU-30: the club's cancellation deadline in hours, or null when it has no policy. */
+export async function findCancellationDeadlineHours(
+  db: PrismaClient,
+  clubId: string,
+): Promise<number | null> {
+  const club = await db.club.findUnique({
+    where: { id: clubId },
+    select: { cancellationDeadlineHours: true },
+  });
+  return club?.cancellationDeadlineHours ?? null;
 }

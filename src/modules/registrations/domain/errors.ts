@@ -74,3 +74,19 @@ export class MercadoPagoUnavailableError extends Error {
     this.name = "MercadoPagoUnavailableError";
   }
 }
+
+/** HU-29: the player can't cancel now. */
+export class CancellationNotAllowedError extends Error {
+  constructor(readonly reason: "already_cancelled" | "payment_in_review" | "event_started") {
+    super(`Registration can't be cancelled: ${reason}`);
+    this.name = "CancellationNotAllowedError";
+  }
+}
+
+/** HU-30: the player's balance in the club doesn't cover the price. */
+export class NoBalanceError extends Error {
+  constructor() {
+    super("Not enough balance in favor for this sign-up");
+    this.name = "NoBalanceError";
+  }
+}

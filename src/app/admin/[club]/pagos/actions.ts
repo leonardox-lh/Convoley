@@ -6,8 +6,11 @@ import {
   findClubBySlug,
   InvalidLogoTypeError,
   InvalidPaymentHolderError,
+  InvalidCancellationPolicyError,
   InvalidServiceFeeError,
   LogoTooLargeError,
+  MAX_CANCELLATION_DEADLINE_HOURS,
+  updateCancellationPolicy,
   updatePaymentSettings,
   updateServiceFee,
 } from "@/modules/clubs";
@@ -119,4 +122,38 @@ export async function disconnectMercadoPagoAction(formData: FormData): Promise<v
   const club = await findClubBySlug(clubSlug);
   if (club) await disconnectMercadoPago(club.id);
   redirect(`/admin/${clubSlug}/pagos?mp=desconectado`);
+}
+
+export type CancellationPolicyState = { status: "idle" } | { status: "error"; message: string };
+
+const POLICY_MESSAGE = `Escribe las horas entre 0 y ${MAX_CANCELLATION_DEADLINE_HOURS}, o déjalo vacío.`;
+const policySchema = z.object({
+  clubSlug: z.string().min(1),
+  // Empty = no policy: cancelling a paid sign-up loses the payment.
+  deadlineHours: z
+    .string()
+    .trim()
+    .transform((value) => (value === "" ? null : Number(value)))
+    .pipe(z.number(POLICY_MESSAGE).int(POLICY_MESSAGE).nullable()),
+});
+
+/** HU-30: until how many hours before the game a cancelling player keeps their payment. */
+export async function updateCancellationPolicyAction(
+  _previous: CancellationPolicyState,
+  formData: FormData,
+): Promise<CancellationPolicyState> {
+  const parsed = policySchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { status: "error", message: POLICY_MESSAGE };
+  if (!(await requireOrganizer(parsed.data.clubSlug, "manage_club"))) {
+    return { status: "error", message: NOT_ALLOWED_MESSAGE };
+  }
+  try {
+    await updateCancellationPolicy(parsed.data);
+  } catch (error) {
+    if (error instanceof InvalidCancellationPolicyError) {
+      return { status: "error", message: POLICY_MESSAGE };
+    }
+    throw error;
+  }
+  redirect(`/admin/${parsed.data.clubSlug}/pagos?guardado=1`);
 }

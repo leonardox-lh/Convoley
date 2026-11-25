@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { FormMessage } from "@/components/form";
 import { clubLogoPath, findClubBySlug, getPaymentSettings } from "@/modules/clubs";
 import { requireOrganizer } from "../require-organizer";
+import { CancellationPolicyForm } from "./cancellation-policy-form";
 import { MercadoPagoSection } from "./mercado-pago-section";
 import { PaymentSettingsForm } from "./payment-settings-form";
 
@@ -58,6 +59,10 @@ async function PaymentSettingsContent({ params, searchParams }: Props) {
         clubSlug={clubSlug}
         defaults={settings}
         hasQr={settings.paymentQrKey !== null}
+      />
+      <CancellationPolicyForm
+        clubSlug={clubSlug}
+        deadlineHours={settings.cancellationDeadlineHours}
       />
     </div>
   );

@@ -52,3 +52,11 @@ export class NothingToReviewError extends Error {
     this.name = "NothingToReviewError";
   }
 }
+
+/** HU-30: the player's balance in the club doesn't cover the price. */
+export class NoBalanceAvailableError extends Error {
+  constructor() {
+    super("Not enough balance in favor for this sign-up");
+    this.name = "NoBalanceAvailableError";
+  }
+}

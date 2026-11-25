@@ -12,7 +12,9 @@ import {
 import {
   EventNotOpenError,
   MercadoPagoUnavailableError,
+  NoBalanceError,
   NoCreditError,
+  payWithBalance,
   payWithCredit,
   PaymentNotExpectedError,
   RegistrationNotFoundError,
@@ -92,6 +94,26 @@ export async function payWithCreditAction(
         status: "error",
         message: "Ya no tienes fechas disponibles para esta convocatoria.",
       };
+    }
+    const known = ERROR_MESSAGES.find(([type]) => error instanceof type);
+    if (known) return { status: "error", message: known[1] };
+    throw error;
+  }
+  redirect(`/inscripcion/${encodeURIComponent(parsed.data.registrationId)}?pagado=1`);
+}
+
+/** HU-30: the player's balance in favor pays the whole price. */
+export async function payWithBalanceAction(
+  _previous: CreditState,
+  formData: FormData,
+): Promise<CreditState> {
+  const parsed = creditSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { status: "error", message: "No encontramos tu inscripción." };
+  try {
+    await payWithBalance(parsed.data.registrationId);
+  } catch (error) {
+    if (error instanceof NoBalanceError) {
+      return { status: "error", message: "Tu saldo a favor ya no alcanza para esta convocatoria." };
     }
     const known = ERROR_MESSAGES.find(([type]) => error instanceof type);
     if (known) return { status: "error", message: known[1] };
