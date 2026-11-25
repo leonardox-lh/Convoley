@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-import { signInAsOrganizer } from "./helpers/login";
+import { signInToNewEvent } from "./helpers/login";
 
 const MOBILE_WIDTH = 375;
 const DAYS_AHEAD_MS = 7 * 24 * 3600 * 1000;
@@ -15,7 +15,7 @@ let eventUrl: string;
 test.beforeAll(async ({ browser }) => {
   const context = await browser.newContext();
   const page = await context.newPage();
-  await signInAsOrganizer(page);
+  await signInToNewEvent(page);
   await page.getByLabel("Nombre").fill(`E2E inscripción ${Date.now()}`);
   await page
     .getByLabel("Fecha")

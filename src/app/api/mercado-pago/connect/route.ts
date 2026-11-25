@@ -15,8 +15,8 @@ export async function GET(request: Request) {
   const parsed = querySchema.safeParse(Object.fromEntries(new URL(request.url).searchParams));
   if (!parsed.success || !isMercadoPagoConfigured()) notFound();
   const clubSlug = parsed.data.club;
-  const organizer = await requireOrganizer(clubSlug);
-  if (organizer?.role !== "admin") notFound();
+  const organizer = await requireOrganizer(clubSlug, "manage_club");
+  if (!organizer) notFound();
 
   const state = signOAuthState({ clubSlug, userId: organizer.userId });
   redirect(mercadoPagoAuthorizationUrl({ state, redirectUri: await mercadoPagoRedirectUri() }));

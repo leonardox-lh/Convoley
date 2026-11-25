@@ -6,6 +6,14 @@ import {
   makeRenameCommunity,
 } from "./application/communities";
 import { makeCreateClub } from "./application/create-club";
+import {
+  makeAcceptInvitation,
+  makeCreateInvitation,
+  makeGetInvitation,
+  makeListClubMembers,
+  makeRemoveClubMember,
+} from "./application/members";
+import { prismaClubMemberRepository } from "./infrastructure/prisma-club-member-repository";
 import { makeUpdatePaymentSettings } from "./application/update-payment-settings";
 import { makeUpdateServiceFee } from "./application/update-service-fee";
 import { serviceFeeCents } from "./domain/service-fee";
@@ -84,3 +92,21 @@ export const saveClubImage = (
 
 /** Public path that serves a stored logo (see src/app/logos/[key]/route.ts). */
 export const clubLogoPath = (logoKey: string) => `/logos/${logoKey}`;
+
+// HU-33: co-organizers.
+export { can, type ClubPermission, type ClubRole } from "./domain/permissions";
+export { INVITATION_TTL_DAYS } from "./domain/invitation";
+export {
+  ClubMemberNotFoundError,
+  InvitationExpiredError,
+  InvitationInvalidError,
+  LastAdminError,
+} from "./domain/errors";
+export type { ClubMemberView } from "./application/ports";
+const members = prismaClubMemberRepository(db);
+const memberDeps = { members, now: () => new Date() };
+export const createInvitation = makeCreateInvitation(memberDeps);
+export const getInvitation = makeGetInvitation(memberDeps);
+export const acceptInvitation = makeAcceptInvitation(memberDeps);
+export const listClubMembers = makeListClubMembers(memberDeps);
+export const removeClubMember = makeRemoveClubMember(memberDeps);

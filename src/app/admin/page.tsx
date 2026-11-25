@@ -18,7 +18,7 @@ async function RedirectToClub(): Promise<never> {
   const userId = await currentUserId();
   if (!userId) redirect(SIGN_IN_PATH);
   // shortcut: with several clubs this opens the oldest one; replace with a club picker /
-  // dashboard when one exists (only the new-event page exists today).
+  // home that lists them all.
   const clubSlug = await findFirstClubSlugForMember(userId);
-  redirect(clubSlug ? `/admin/${clubSlug}/convocatorias/nueva` : "/club/nuevo");
+  redirect(clubSlug ? `/admin/${clubSlug}` : "/club/nuevo");
 }

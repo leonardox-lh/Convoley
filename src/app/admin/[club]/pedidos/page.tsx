@@ -40,7 +40,7 @@ export default function OrdersPage(props: Props) {
 
 async function OrdersContent({ params, searchParams }: Props) {
   const clubSlug = (await params).club;
-  if (!(await requireOrganizer(clubSlug))) notFound();
+  if (!(await requireOrganizer(clubSlug, "run_game_day"))) notFound();
   const club = await findClubBySlug(clubSlug);
   if (!club) notFound();
   const estado = filterSchema.parse((await searchParams).estado);

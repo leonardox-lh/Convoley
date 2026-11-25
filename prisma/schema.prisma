@@ -110,6 +110,7 @@ model User {
   sessions            Session[]
   passwordResetTokens PasswordResetToken[]
   memberships         ClubMember[]
+  sentInvitations     ClubInvitation[]
   registrations       Registration[]
   orders              Order[]
   planPurchases       PlanPurchase[]
@@ -178,6 +179,7 @@ model Club {
   updatedAt            DateTime @updatedAt
 
   members       ClubMember[]
+  invitations   ClubInvitation[]
   communities   Community[]
   events        Event[]
   payments      Payment[]
@@ -215,6 +217,23 @@ model ClubMember {
 
   @@unique([clubId, userId])
   @@index([userId])
+}
+
+// HU-33: single-use link to join a club as admin or helper. Only the sha256 of the token is stored.
+model ClubInvitation {
+  id              String    @id @default(cuid())
+  clubId          String
+  role            ClubRole
+  tokenHash       String    @unique
+  expiresAt       DateTime
+  usedAt          DateTime?
+  createdByUserId String
+  createdAt       DateTime  @default(now())
+
+  club      Club @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  createdBy User @relation(fields: [createdByUserId], references: [id], onDelete: Cascade)
+
+  @@index([clubId])
 }
 
 model Community {

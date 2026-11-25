@@ -5,13 +5,20 @@ import { FormMessage, submitKeepingValues, TextField } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import { signUpAction, type SignUpState } from "./actions";
 
-export function SignUpForm({ passwordMinLength }: { passwordMinLength: number }) {
+export function SignUpForm({
+  passwordMinLength,
+  returnPath,
+}: {
+  passwordMinLength: number;
+  returnPath: string;
+}) {
   const [state, formAction, pending] = useActionState<SignUpState, FormData>(signUpAction, {
     status: "idle",
   });
 
   return (
     <form onSubmit={submitKeepingValues(formAction)} className="flex flex-col gap-4">
+      <input type="hidden" name="volver" value={returnPath} />
       <TextField label="Tu nombre" name="name" autoComplete="name" />
       <TextField label="Correo" name="email" type="email" autoComplete="email" />
       <TextField

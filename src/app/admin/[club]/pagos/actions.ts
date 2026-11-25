@@ -47,7 +47,7 @@ export async function updatePaymentSettingsAction(
   if (!parsed.success) return { status: "error", message: parsed.error.issues[0].message };
   const { clubSlug, paymentHolderName } = parsed.data;
   // Where the money goes is the admin's call, not a helper's.
-  if ((await requireOrganizer(clubSlug))?.role !== "admin") {
+  if (!(await requireOrganizer(clubSlug, "manage_club"))) {
     return { status: "error", message: NOT_ALLOWED_MESSAGE };
   }
 
@@ -90,7 +90,7 @@ export async function updateServiceFeeAction(
   const parsed = serviceFeeSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { status: "error", message: "Elige un tipo de cargo." };
   const { clubSlug, kind, amount } = parsed.data;
-  if ((await requireOrganizer(clubSlug))?.role !== "admin") {
+  if (!(await requireOrganizer(clubSlug, "manage_club"))) {
     return { status: "error", message: NOT_ALLOWED_MESSAGE };
   }
   const value =
@@ -115,7 +115,7 @@ const disconnectSchema = z.object({ clubSlug: z.string().min(1) });
 /** HU-18: forget the Mercado Pago tokens; players go back to paying by voucher. */
 export async function disconnectMercadoPagoAction(formData: FormData): Promise<void> {
   const { clubSlug } = disconnectSchema.parse(Object.fromEntries(formData));
-  if ((await requireOrganizer(clubSlug))?.role !== "admin") return;
+  if (!(await requireOrganizer(clubSlug, "manage_club"))) return;
   const club = await findClubBySlug(clubSlug);
   if (club) await disconnectMercadoPago(club.id);
   redirect(`/admin/${clubSlug}/pagos?mp=desconectado`);

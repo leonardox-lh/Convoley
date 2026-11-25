@@ -20,11 +20,9 @@ test("HU-01: registro con correo nuevo termina en crear club", async ({ page }) 
   await expect(page.getByRole("heading", { name: "Crea tu club" })).toBeVisible();
 });
 
-test("HU-01: login con correo y contraseña lleva a Nueva convocatoria de su club", async ({
-  page,
-}) => {
+test("HU-01: login con correo y contraseña lleva al inicio de su club", async ({ page }) => {
   await signInAsOrganizer(page);
-  await expect(page.getByRole("heading", { name: "Nueva convocatoria" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Nueva convocatoria" })).toBeVisible();
 });
 
 test("HU-01: contraseña errada muestra el error y conserva el correo", async ({ page }) => {

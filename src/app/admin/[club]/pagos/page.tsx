@@ -20,7 +20,7 @@ export default function PaymentSettingsPage(props: Props) {
 
 async function PaymentSettingsContent({ params, searchParams }: Props) {
   const clubSlug = (await params).club;
-  if ((await requireOrganizer(clubSlug))?.role !== "admin") notFound();
+  if (!(await requireOrganizer(clubSlug, "manage_club"))) notFound();
   const [settings, club] = await Promise.all([
     getPaymentSettings(clubSlug),
     findClubBySlug(clubSlug),

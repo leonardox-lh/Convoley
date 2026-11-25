@@ -8,5 +8,11 @@ export async function signInAsOrganizer(page: Page) {
   await page.getByLabel("Correo").fill(SEED_ORGANIZER.email);
   await page.getByLabel("Contraseña").fill(SEED_ORGANIZER.password);
   await page.getByRole("button", { name: "Ingresar" }).click();
-  await expect(page).toHaveURL(/\/admin\/voley-miraflores\/convocatorias\/nueva/);
+  await expect(page).toHaveURL(/\/admin\/voley-miraflores$/);
+}
+
+/** Most specs start by creating an event. */
+export async function signInToNewEvent(page: Page) {
+  await signInAsOrganizer(page);
+  await page.goto("/admin/voley-miraflores/convocatorias/nueva");
 }

@@ -26,7 +26,7 @@ export default function PlansPage(props: Props) {
 
 async function PlansContent({ params }: Pick<Props, "params">) {
   const clubSlug = (await params).club;
-  if ((await requireOrganizer(clubSlug))?.role !== "admin") notFound();
+  if (!(await requireOrganizer(clubSlug, "manage_club"))) notFound();
   const club = await findClubBySlug(clubSlug);
   if (!club) notFound();
   const [plans, purchases] = await Promise.all([

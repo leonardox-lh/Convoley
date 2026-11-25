@@ -32,8 +32,8 @@ async function review(
   const parsed = purchaseSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { status: "error", message: parsed.error.issues[0].message };
   const { clubSlug, purchaseId } = parsed.data;
-  const organizer = await requireOrganizer(clubSlug);
-  const club = organizer?.role === "admin" ? await findClubBySlug(clubSlug) : null;
+  const organizer = await requireOrganizer(clubSlug, "manage_club");
+  const club = organizer ? await findClubBySlug(clubSlug) : null;
   if (!organizer || !club) return { status: "error", message: NOT_ALLOWED_MESSAGE };
   try {
     await work({ clubId: club.id, purchaseId, reviewedByUserId: organizer.userId });

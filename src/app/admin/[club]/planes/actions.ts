@@ -51,7 +51,7 @@ const PLAN_MESSAGES: Record<InvalidPlanReason, string> = {
 
 /** Plans are part of the club's prices, so only its admin manages them. */
 async function adminClub(clubSlug: string) {
-  if ((await requireOrganizer(clubSlug))?.role !== "admin") return null;
+  if (!(await requireOrganizer(clubSlug, "manage_club"))) return null;
   return findClubBySlug(clubSlug);
 }
 

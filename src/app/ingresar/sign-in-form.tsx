@@ -5,7 +5,13 @@ import { FormMessage, submitKeepingValues, TextField } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import { signInWithPasswordAction, type SignInState } from "./actions";
 
-export function SignInForm({ initialError }: { initialError?: string }) {
+export function SignInForm({
+  initialError,
+  returnPath,
+}: {
+  initialError?: string;
+  returnPath: string;
+}) {
   const [state, formAction, pending] = useActionState<SignInState, FormData>(
     signInWithPasswordAction,
     initialError ? { status: "error", message: initialError } : { status: "idle" },
@@ -13,6 +19,7 @@ export function SignInForm({ initialError }: { initialError?: string }) {
 
   return (
     <form onSubmit={submitKeepingValues(formAction)} className="flex flex-col gap-4">
+      <input type="hidden" name="volver" value={returnPath} />
       <TextField label="Correo" name="email" type="email" autoComplete="email" />
       <TextField
         label="Contraseña"

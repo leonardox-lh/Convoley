@@ -50,7 +50,7 @@ const ERROR_MESSAGES: [new (...args: never[]) => Error, string][] = [
 
 /** The organizer's user id, only if they manage the club and the event belongs to it. */
 async function authorize(target: z.infer<typeof targetSchema>) {
-  const organizer = await requireOrganizer(target.clubSlug);
+  const organizer = await requireOrganizer(target.clubSlug, "run_game_day");
   if (!organizer) return null;
   const event = await getOrganizerEvent({ clubSlug: target.clubSlug, eventId: target.eventId });
   return event ? organizer.userId : null;

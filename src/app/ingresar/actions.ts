@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { PASSWORD_MAX_LENGTH, signIn } from "@/modules/identity";
-import { AFTER_SIGN_IN_PATH, signInWithPassword } from "./sign-in-with-password";
+import { RETURN_PATH_PARAM, safeReturnPath, signInWithPassword } from "./sign-in-with-password";
 
 export type SignInState = { status: "idle" } | { status: "error"; message: string };
 
@@ -21,9 +21,10 @@ export async function signInWithPasswordAction(
 ): Promise<SignInState> {
   const parsed = signInSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { status: "error", message: parsed.error.issues[0].message };
-  return { status: "error", message: await signInWithPassword(parsed.data) };
+  const returnPath = safeReturnPath(formData.get(RETURN_PATH_PARAM));
+  return { status: "error", message: await signInWithPassword(parsed.data, returnPath) };
 }
 
-export async function signInWithGoogleAction(): Promise<void> {
-  await signIn("google", { redirectTo: AFTER_SIGN_IN_PATH });
+export async function signInWithGoogleAction(formData: FormData): Promise<void> {
+  await signIn("google", { redirectTo: safeReturnPath(formData.get(RETURN_PATH_PARAM)) });
 }

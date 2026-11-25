@@ -7,7 +7,11 @@ import {
   PASSWORD_MIN_LENGTH,
   registerOrganizer,
 } from "@/modules/identity";
-import { signInWithPassword } from "../ingresar/sign-in-with-password";
+import {
+  RETURN_PATH_PARAM,
+  safeReturnPath,
+  signInWithPassword,
+} from "../ingresar/sign-in-with-password";
 
 export type SignUpState = { status: "idle" } | { status: "error"; message: string };
 
@@ -50,5 +54,6 @@ export async function signUpAction(
     throw error;
   }
 
-  return { status: "error", message: await signInWithPassword(parsed.data) };
+  const returnPath = safeReturnPath(formData.get(RETURN_PATH_PARAM));
+  return { status: "error", message: await signInWithPassword(parsed.data, returnPath) };
 }

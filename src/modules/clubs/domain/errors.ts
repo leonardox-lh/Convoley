@@ -115,3 +115,33 @@ export class InvalidServiceFeeError extends Error {
     this.name = "InvalidServiceFeeError";
   }
 }
+
+/** HU-33: the invitation link doesn't exist or was already used. */
+export class InvitationInvalidError extends Error {
+  constructor() {
+    super("Invitation not found or already used");
+    this.name = "InvitationInvalidError";
+  }
+}
+
+export class InvitationExpiredError extends Error {
+  constructor() {
+    super("Invitation expired");
+    this.name = "InvitationExpiredError";
+  }
+}
+
+/** HU-33: a club always keeps an admin who can manage it. */
+export class LastAdminError extends Error {
+  constructor() {
+    super("A club needs at least one admin");
+    this.name = "LastAdminError";
+  }
+}
+
+export class ClubMemberNotFoundError extends Error {
+  constructor(readonly userId: string) {
+    super(`User ${userId} is not a member of this club`);
+    this.name = "ClubMemberNotFoundError";
+  }
+}

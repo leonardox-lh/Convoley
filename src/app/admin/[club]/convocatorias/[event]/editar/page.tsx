@@ -27,7 +27,7 @@ export default function EditEventPage({ params }: Props) {
 
 async function EditEventContent({ params }: { params: Props["params"] }) {
   const { club: clubSlug, event: eventId } = await params;
-  if (!(await requireOrganizer(clubSlug))) notFound();
+  if (!(await requireOrganizer(clubSlug, "manage_club"))) notFound();
   const event = await getOrganizerEvent({ clubSlug, eventId });
   if (!event) notFound();
   const { date, time } = limaDateAndTime(event.startsAt);

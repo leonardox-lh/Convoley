@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-import { signInAsOrganizer } from "./helpers/login";
+import { signInAsOrganizer, signInToNewEvent } from "./helpers/login";
 
 const MOBILE_WIDTH = 375;
 const DAYS_AHEAD_MS = 7 * 24 * 3600 * 1000;
@@ -30,7 +30,7 @@ async function register(page: Page, firstName: string, phone: string) {
 test.beforeAll(async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: MOBILE_WIDTH, height: 812 } });
   const page = await context.newPage();
-  await signInAsOrganizer(page);
+  await signInToNewEvent(page);
   await page.getByLabel("Nombre").fill(`E2E lista ${Date.now()}`);
   await page
     .getByLabel("Fecha")

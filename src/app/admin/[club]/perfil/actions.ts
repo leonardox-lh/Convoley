@@ -19,7 +19,7 @@ export async function updateClubProfileAction(
   if (!parsed.success) return { status: "error", message: parsed.error.issues[0].message };
   const { clubSlug, ...profile } = parsed.data;
   // Only the admin edits the club's identity; helpers manage events.
-  if ((await requireOrganizer(clubSlug))?.role !== "admin") {
+  if (!(await requireOrganizer(clubSlug, "manage_club"))) {
     return { status: "error", message: NOT_ALLOWED_MESSAGE };
   }
 

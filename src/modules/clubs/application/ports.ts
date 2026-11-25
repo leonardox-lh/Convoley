@@ -1,4 +1,5 @@
 import type { ClubProfileProps } from "../domain/club-profile";
+import type { ClubRole } from "../domain/permissions";
 import type { LogoContentType } from "../domain/logo";
 
 export interface ClubProfile extends ClubProfileProps {
@@ -58,4 +59,41 @@ export interface PaymentSettingsRepository {
   /** Null when the club doesn't exist. */
   find(clubSlug: string): Promise<ClubPaymentSettings | null>;
   update(clubSlug: string, changes: Partial<ClubPaymentSettings>): Promise<void>;
+}
+
+export interface ClubMemberView {
+  userId: string;
+  name: string | null;
+  email: string | null;
+  role: ClubRole;
+}
+
+export interface PendingInvitation {
+  id: string;
+  clubId: string;
+  clubSlug: string;
+  clubName: string;
+  role: ClubRole;
+  expiresAt: Date;
+  usedAt: Date | null;
+}
+
+/** HU-33: invitations and the members they create. */
+export interface ClubMemberRepository {
+  findClubId(clubSlug: string): Promise<string | null>;
+  createInvitation(input: {
+    clubId: string;
+    role: ClubRole;
+    tokenHash: string;
+    expiresAt: Date;
+    createdByUserId: string;
+  }): Promise<void>;
+  findInvitation(tokenHash: string): Promise<PendingInvitation | null>;
+  /**
+   * Marks the invitation used and adds the member, atomically; false if it was used meanwhile.
+   * An existing member keeps their role.
+   */
+  acceptInvitation(input: { invitationId: string; userId: string; now: Date }): Promise<boolean>;
+  listMembers(clubId: string): Promise<ClubMemberView[]>;
+  removeMember(clubId: string, userId: string): Promise<void>;
 }

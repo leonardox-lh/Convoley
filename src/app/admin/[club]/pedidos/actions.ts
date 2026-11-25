@@ -51,7 +51,7 @@ async function run(
   const parsed = schema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { status: "error", message: parsed.error.issues[0].message };
   const { clubSlug, orderId } = parsed.data;
-  const organizer = await requireOrganizer(clubSlug);
+  const organizer = await requireOrganizer(clubSlug, "run_game_day");
   const club = organizer && (await findClubBySlug(clubSlug));
   if (!club) return { status: "error", message: NOT_ALLOWED_MESSAGE };
   try {

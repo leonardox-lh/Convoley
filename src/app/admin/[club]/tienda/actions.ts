@@ -73,7 +73,7 @@ const ERROR_MESSAGES: [new (...args: never[]) => Error, string][] = [
 
 /** Products shape the club's store, so only its admin manages them. */
 async function adminClub(clubSlug: string) {
-  if ((await requireOrganizer(clubSlug))?.role !== "admin") return null;
+  if (!(await requireOrganizer(clubSlug, "manage_club"))) return null;
   return findClubBySlug(clubSlug);
 }
 

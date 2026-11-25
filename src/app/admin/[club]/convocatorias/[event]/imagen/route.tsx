@@ -23,7 +23,8 @@ export async function GET(
   context: RouteContext<"/admin/[club]/convocatorias/[event]/imagen">,
 ) {
   const { club: clubSlug, event: eventId } = await context.params;
-  if (!(await requireOrganizer(clubSlug))) return new Response(null, { status: 404 });
+  if (!(await requireOrganizer(clubSlug, "run_game_day")))
+    return new Response(null, { status: 404 });
   const event = await getOrganizerEvent({ clubSlug, eventId });
   const club = await getClubProfile(clubSlug);
   if (!event || !club) return new Response(null, { status: 404 });

@@ -37,7 +37,7 @@ const ERROR_MESSAGES: [new (...args: never[]) => Error, string][] = [
 
 async function run(clubSlug: string, work: () => Promise<void>): Promise<CommunityActionState> {
   // Communities shape the club, so only its admin changes them (like the profile).
-  if ((await requireOrganizer(clubSlug))?.role !== "admin") {
+  if (!(await requireOrganizer(clubSlug, "manage_club"))) {
     return { status: "error", message: NOT_ALLOWED_MESSAGE };
   }
   try {

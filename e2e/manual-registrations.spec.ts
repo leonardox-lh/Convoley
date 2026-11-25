@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { signInAsOrganizer } from "./helpers/login";
+import { signInToNewEvent } from "./helpers/login";
 
 const MOBILE_WIDTH = 375;
 const DAYS_AHEAD_MS = 7 * 24 * 3600 * 1000;
@@ -15,7 +15,7 @@ function randomPhone() {
 test("HU-08 criterios 1 y 2: agregar pagado, agregar y marcar pagado manual, y quitar libera el cupo", async ({
   page,
 }) => {
-  await signInAsOrganizer(page);
+  await signInToNewEvent(page);
   await page.getByLabel("Nombre").fill(`E2E manual ${Date.now()}`);
   await page
     .getByLabel("Fecha")

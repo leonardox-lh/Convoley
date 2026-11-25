@@ -23,7 +23,7 @@ export default function ProductPage({ params }: Props) {
 
 async function ProductContent({ params }: Pick<Props, "params">) {
   const { club: clubSlug, product: productId } = await params;
-  if ((await requireOrganizer(clubSlug))?.role !== "admin") notFound();
+  if (!(await requireOrganizer(clubSlug, "manage_club"))) notFound();
   const club = await findClubBySlug(clubSlug);
   const product = club && (await findProduct(club.id, productId));
   if (!product) notFound();

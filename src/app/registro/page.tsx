@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { PASSWORD_MIN_LENGTH } from "@/modules/identity";
+import { RETURN_PATH_PARAM, safeReturnPath } from "../ingresar/sign-in-with-password";
 import { SignUpForm } from "./sign-up-form";
 
-export default function SignUpPage() {
+export default function SignUpPage({ searchParams }: PageProps<"/registro">) {
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 py-8">
       <div>
@@ -11,7 +13,9 @@ export default function SignUpPage() {
           Luego creas tu club y publicas tu primera convocatoria.
         </p>
       </div>
-      <SignUpForm passwordMinLength={PASSWORD_MIN_LENGTH} />
+      <Suspense>
+        <SignUpWithReturn searchParams={searchParams} />
+      </Suspense>
       <p className="text-center text-sm">
         ¿Ya tienes cuenta?{" "}
         <Link href="/ingresar" className="underline underline-offset-4">
@@ -20,4 +24,13 @@ export default function SignUpPage() {
       </p>
     </main>
   );
+}
+
+async function SignUpWithReturn({
+  searchParams,
+}: {
+  searchParams: PageProps<"/registro">["searchParams"];
+}) {
+  const returnPath = safeReturnPath((await searchParams)[RETURN_PATH_PARAM]);
+  return <SignUpForm passwordMinLength={PASSWORD_MIN_LENGTH} returnPath={returnPath} />;
 }

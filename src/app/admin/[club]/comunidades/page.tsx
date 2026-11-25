@@ -19,7 +19,7 @@ export default function CommunitiesPage({ params }: Props) {
 
 async function CommunitiesContent({ params }: Pick<Props, "params">) {
   const clubSlug = (await params).club;
-  if ((await requireOrganizer(clubSlug))?.role !== "admin") notFound();
+  if (!(await requireOrganizer(clubSlug, "manage_club"))) notFound();
   const communities = await listCommunities(clubSlug);
 
   return (

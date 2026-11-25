@@ -19,7 +19,7 @@ export async function createEventAction(
   const values = Object.fromEntries(formData);
   const details = eventDetailsSchema.safeParse(values);
   if (!details.success) return { status: "error", message: details.error.issues[0].message };
-  if (!(await requireOrganizer(details.data.clubSlug))) {
+  if (!(await requireOrganizer(details.data.clubSlug, "manage_club"))) {
     return { status: "error", message: NOT_ALLOWED_MESSAGE };
   }
   const intent = intentSchema.safeParse(values);

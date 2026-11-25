@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { z } from "zod";
 import { formatInLima } from "@/lib/lima-time";
 import { cn } from "@/lib/utils";
+import { can } from "@/modules/clubs";
 import { getOrganizerEvent } from "@/modules/events";
 import { listVouchersInReview, signVoucherPath } from "@/modules/payments";
 import {
@@ -58,7 +59,8 @@ export default function EventRegistrationsPage({ params, searchParams }: Props) 
 
 async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "children">) {
   const { club: clubSlug, event: eventId } = await params;
-  if (!(await requireOrganizer(clubSlug))) notFound();
+  const organizer = await requireOrganizer(clubSlug, "run_game_day");
+  if (!organizer) notFound();
   const event = await getOrganizerEvent({ clubSlug, eventId });
   if (!event) notFound();
 
@@ -92,9 +94,11 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
       <div>
         <p className="text-sm text-zinc-500">{event.club.name}</p>
         <h1 className="text-2xl font-semibold tracking-tight">{event.title}</h1>
-        <Link href={`${basePath}/editar`} className="text-sm underline underline-offset-4">
-          Editar convocatoria
-        </Link>
+        {can(organizer.role, "manage_club") && (
+          <Link href={`${basePath}/editar`} className="text-sm underline underline-offset-4">
+            Editar convocatoria
+          </Link>
+        )}
       </div>
 
       <p role="status" aria-label="Cupos" className="text-lg font-medium">

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { isGoogleSignInEnabled } from "@/modules/identity";
 import { signInWithGoogleAction } from "./actions";
 import { SignInForm } from "./sign-in-form";
+import { RETURN_PATH_PARAM, safeReturnPath } from "./sign-in-with-password";
 
 // Errors Auth.js puts in ?error= when it redirects back here (Google sign-in).
 const REDIRECT_ERRORS: Record<string, string> = {
@@ -22,9 +23,27 @@ export default function SignInPage({ searchParams }: PageProps<"/ingresar">) {
         <p className="text-sm text-zinc-500">Para organizar las convocatorias de tu club.</p>
       </div>
 
+      <Suspense>
+        <SignInOptions searchParams={searchParams} />
+      </Suspense>
+    </main>
+  );
+}
+
+async function SignInOptions({ searchParams }: { searchParams: SearchParams }) {
+  const { error, [RETURN_PATH_PARAM]: returnParam } = await searchParams;
+  const code = typeof error === "string" ? error : undefined;
+  const returnPath = safeReturnPath(returnParam);
+  const signUpHref =
+    typeof returnParam === "string"
+      ? `/registro?${new URLSearchParams({ [RETURN_PATH_PARAM]: returnPath })}`
+      : "/registro";
+  return (
+    <>
       {isGoogleSignInEnabled && (
         <>
           <form action={signInWithGoogleAction}>
+            <input type="hidden" name={RETURN_PATH_PARAM} value={returnPath} />
             <Button type="submit" variant="outline" size="lg" className="h-11 w-full">
               Continuar con Google
             </Button>
@@ -33,9 +52,10 @@ export default function SignInPage({ searchParams }: PageProps<"/ingresar">) {
         </>
       )}
 
-      <Suspense>
-        <SignInFormWithRedirectError searchParams={searchParams} />
-      </Suspense>
+      <SignInForm
+        initialError={code && (REDIRECT_ERRORS[code] ?? GENERIC_REDIRECT_ERROR)}
+        returnPath={returnPath}
+      />
 
       <div className="flex flex-col gap-2 text-center text-sm">
         <Link href="/recuperar" className="underline underline-offset-4">
@@ -43,17 +63,11 @@ export default function SignInPage({ searchParams }: PageProps<"/ingresar">) {
         </Link>
         <p>
           ¿No tienes cuenta?{" "}
-          <Link href="/registro" className="underline underline-offset-4">
+          <Link href={signUpHref} className="underline underline-offset-4">
             Regístrate
           </Link>
         </p>
       </div>
-    </main>
+    </>
   );
-}
-
-async function SignInFormWithRedirectError({ searchParams }: { searchParams: SearchParams }) {
-  const { error } = await searchParams;
-  const code = typeof error === "string" ? error : undefined;
-  return <SignInForm initialError={code && (REDIRECT_ERRORS[code] ?? GENERIC_REDIRECT_ERROR)} />;
 }

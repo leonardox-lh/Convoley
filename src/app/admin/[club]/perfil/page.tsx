@@ -25,7 +25,7 @@ export default function ClubProfilePage(props: Props) {
 
 async function ClubProfileContent({ params, searchParams }: Props) {
   const clubSlug = (await params).club;
-  if ((await requireOrganizer(clubSlug))?.role !== "admin") notFound();
+  if (!(await requireOrganizer(clubSlug, "manage_club"))) notFound();
   const club = await getClubProfile(clubSlug);
   if (!club) notFound();
   const query = await searchParams;
