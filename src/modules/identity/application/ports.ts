@@ -62,4 +62,6 @@ export interface PlayerProfileRepository {
   find(userId: string): Promise<PlayerProfile | null>;
   /** Throws PhoneLinkedToAnotherAccountError if another account already has the phone. */
   setPhone(userId: string, phone: string): Promise<void>;
+  /** Throws PhoneLinkedToAnotherAccountError if another account already has the phone. */
+  update(userId: string, profile: PlayerProfile): Promise<void>;
 }

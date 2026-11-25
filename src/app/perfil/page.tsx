@@ -1,0 +1,34 @@
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { Suspense } from "react";
+import { currentUserId, getPlayerProfile, SIGN_IN_PATH } from "@/modules/identity";
+import { RETURN_PATH_PARAM } from "../ingresar/sign-in-with-password";
+import { ProfileForm } from "./profile-form";
+
+export const metadata: Metadata = { title: "Mi perfil · Convoley" };
+
+const PROFILE_PATH = "/perfil";
+
+export default function ProfilePage() {
+  return (
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 py-8">
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight">Mi perfil</h1>
+        <p className="text-sm text-zinc-500">Con estos datos te inscribes a las convocatorias.</p>
+      </div>
+      <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
+        <Profile />
+      </Suspense>
+    </main>
+  );
+}
+
+async function Profile() {
+  const userId = await currentUserId();
+  if (!userId) {
+    redirect(`${SIGN_IN_PATH}?${new URLSearchParams({ [RETURN_PATH_PARAM]: PROFILE_PATH })}`);
+  }
+  const profile = await getPlayerProfile(userId);
+  if (!profile) redirect(SIGN_IN_PATH);
+  return <ProfileForm profile={profile} />;
+}

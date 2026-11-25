@@ -22,17 +22,24 @@ export function prismaPlayerProfileRepository(db: PrismaClient): PlayerProfileRe
     },
 
     async setPhone(userId, phone) {
-      try {
-        await db.user.update({ where: { id: userId }, data: { phone } });
-      } catch (error) {
-        if (
-          error instanceof Prisma.PrismaClientKnownRequestError &&
-          error.code === UNIQUE_VIOLATION
-        ) {
-          throw new PhoneLinkedToAnotherAccountError();
-        }
-        throw error;
-      }
+      await updateUser(db, userId, { phone });
+    },
+
+    async update(userId, { firstName, lastName, phone }) {
+      // `name` is what organizers see in lists; keep it in sync with the edited parts.
+      const name = [firstName, lastName].filter(Boolean).join(" ");
+      await updateUser(db, userId, { firstName, lastName, name, phone });
     },
   };
+}
+
+async function updateUser(db: PrismaClient, userId: string, data: Prisma.UserUpdateInput) {
+  try {
+    await db.user.update({ where: { id: userId }, data });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === UNIQUE_VIOLATION) {
+      throw new PhoneLinkedToAnotherAccountError();
+    }
+    throw error;
+  }
 }

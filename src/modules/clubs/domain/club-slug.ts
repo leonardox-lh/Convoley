@@ -23,6 +23,7 @@ const RESERVED_SLUGS = new Set([
   "logos",
   "mis-inscripciones",
   "pedido",
+  "perfil",
   "plan",
   "planes",
   "plataforma",

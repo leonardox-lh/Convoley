@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { PASSWORD_MIN_LENGTH } from "@/modules/identity";
+import { GoogleSignInButton } from "../ingresar/google-sign-in-button";
 import { RETURN_PATH_PARAM, safeReturnPath } from "../ingresar/sign-in-with-password";
 import { SignUpForm } from "./sign-up-form";
 
@@ -32,5 +33,10 @@ async function SignUpWithReturn({
   searchParams: PageProps<"/registro">["searchParams"];
 }) {
   const returnPath = safeReturnPath((await searchParams)[RETURN_PATH_PARAM]);
-  return <SignUpForm passwordMinLength={PASSWORD_MIN_LENGTH} returnPath={returnPath} />;
+  return (
+    <>
+      <GoogleSignInButton returnPath={returnPath} />
+      <SignUpForm passwordMinLength={PASSWORD_MIN_LENGTH} returnPath={returnPath} />
+    </>
+  );
 }

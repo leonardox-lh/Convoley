@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { Button } from "@/components/ui/button";
-import { isGoogleSignInEnabled } from "@/modules/identity";
-import { signInWithGoogleAction } from "./actions";
+import { GoogleSignInButton } from "./google-sign-in-button";
 import { SignInForm } from "./sign-in-form";
 import { RETURN_PATH_PARAM, safeReturnPath } from "./sign-in-with-password";
 
@@ -40,17 +38,7 @@ async function SignInOptions({ searchParams }: { searchParams: SearchParams }) {
       : "/registro";
   return (
     <>
-      {isGoogleSignInEnabled && (
-        <>
-          <form action={signInWithGoogleAction}>
-            <input type="hidden" name={RETURN_PATH_PARAM} value={returnPath} />
-            <Button type="submit" variant="outline" size="lg" className="h-11 w-full">
-              Continuar con Google
-            </Button>
-          </form>
-          <p className="text-center text-sm text-zinc-500">o con tu correo</p>
-        </>
-      )}
+      <GoogleSignInButton returnPath={returnPath} />
 
       <SignInForm
         initialError={code && (REDIRECT_ERRORS[code] ?? GENERIC_REDIRECT_ERROR)}

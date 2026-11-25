@@ -288,6 +288,7 @@ async function UpcomingEvents() {
 }
 
 const SIGNED_IN_LINKS: ProfileLink[] = [
+  { href: "/perfil", title: "Mis datos", text: "Tu nombre y tu celular.", icon: UserRound },
   {
     href: "/mis-inscripciones",
     title: "Mis inscripciones",

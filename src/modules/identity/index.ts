@@ -1,6 +1,7 @@
 import { connection } from "next/server";
 import { db } from "@/lib/db";
 import { env } from "@/lib/env";
+import type { PlayerProfile } from "./application/ports";
 import { makeRegisterOrganizer } from "./application/register-organizer";
 import { makeRequestPasswordReset } from "./application/request-password-reset";
 import { makeSavePlayerPhone } from "./application/save-player-phone";
@@ -46,6 +47,8 @@ export const resetPassword = makeResetPassword({ tokens, hasher, now });
 const profiles = prismaPlayerProfileRepository(db);
 export const getPlayerProfile = (userId: string) => profiles.find(userId);
 export const savePlayerPhone = makeSavePlayerPhone({ profiles });
+export const updatePlayerProfile = (userId: string, profile: PlayerProfile) =>
+  profiles.update(userId, profile);
 export type { PlayerProfile } from "./application/ports";
 
 export const { handlers, auth, signIn, signOut } = createAuth(verifyCredentials);

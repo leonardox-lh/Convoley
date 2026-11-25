@@ -7,6 +7,7 @@ function fakeProfiles(profile: PlayerProfile | null) {
   const profiles: PlayerProfileRepository = {
     find: async () => profile,
     setPhone: async (_userId, phone) => void saved.push(phone),
+    update: async () => {},
   };
   return { profiles, saved };
 }
