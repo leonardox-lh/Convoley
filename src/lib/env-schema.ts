@@ -1,7 +1,6 @@
 import { z } from "zod";
 
-// Without these, production would have no Google login, password-reset emails, club logos
-// or Mercado Pago payments.
+// Without these, production would have no Google login, password-reset emails or club logos.
 const REQUIRED_IN_PRODUCTION = [
   "APP_URL",
   "AUTH_GOOGLE_ID",
@@ -12,6 +11,11 @@ const REQUIRED_IN_PRODUCTION = [
   "BUCKET_ENDPOINT",
   "BUCKET_ACCESS_KEY_ID",
   "BUCKET_SECRET_ACCESS_KEY",
+] as const;
+
+// Mercado Pago is all or nothing: a deployment without it still works with voucher payments,
+// but half a setup would take payments it can't confirm (no webhook secret).
+const MERCADO_PAGO_VARIABLES = [
   "MP_CLIENT_ID",
   "MP_CLIENT_SECRET",
   "MP_WEBHOOK_SECRET",
@@ -58,6 +62,16 @@ const envSchema = z
     for (const key of REQUIRED_IN_PRODUCTION) {
       if (!env[key])
         context.addIssue({ code: "custom", path: [key], message: "Required in production" });
+    }
+    if (!MERCADO_PAGO_VARIABLES.some((key) => env[key])) return;
+    for (const key of MERCADO_PAGO_VARIABLES) {
+      if (!env[key]) {
+        context.addIssue({
+          code: "custom",
+          path: [key],
+          message: "Set all MP_* variables or none",
+        });
+      }
     }
   });
 

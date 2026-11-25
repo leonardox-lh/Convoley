@@ -32,8 +32,10 @@ describe("HT-05: credenciales de Mercado Pago en variables de entorno", () => {
     expect(() => parseEnv(BASE)).not.toThrow();
   });
 
-  it("HT-05 criterio 1: en producción exige las cuatro variables MP_*", () => {
-    expect(() => parseEnv(PRODUCTION)).toThrow(/MP_CLIENT_ID/);
+  it("HT-05 criterio 1: en producción las variables MP_* van todas o ninguna", () => {
+    // Without them the club keeps taking voucher payments, as in Sprint 2.
+    expect(() => parseEnv(PRODUCTION)).not.toThrow();
+    expect(() => parseEnv({ ...PRODUCTION, MP_CLIENT_ID: "123" })).toThrow(/MP_WEBHOOK_SECRET/);
     expect(parseEnv({ ...PRODUCTION, ...MERCADO_PAGO }).MP_CLIENT_ID).toBe("123");
   });
 
