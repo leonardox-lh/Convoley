@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { FormMessage } from "@/components/form";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { shareImage } from "./share-image";
 
 const FORMATS = [
   { value: "cuadrado", label: "Cuadrado (1:1)" },
@@ -14,27 +15,11 @@ export function ListSharing(props: { imagePath: string; fileName: string; listTe
   const [message, setMessage] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
 
   async function share(format: string) {
-    const url = `${props.imagePath}?formato=${format}`;
-    try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`Image request failed: ${response.status}`);
-      const file = new File([await response.blob()], `${props.fileName}-${format}.png`, {
-        type: "image/png",
-      });
-      if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file] });
-        return;
-      }
-      // Desktop browsers can't share files: fall back to downloading it.
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(file);
-      link.download = file.name;
-      link.click();
-      // Revoked on the next tick: revoking right away can cancel the download.
-      setTimeout(() => URL.revokeObjectURL(link.href));
-    } catch (error) {
-      // Closing the share sheet is not an error.
-      if (error instanceof DOMException && error.name === "AbortError") return;
+    const shared = await shareImage(
+      `${props.imagePath}?formato=${format}`,
+      `${props.fileName}-${format}.png`,
+    );
+    if (!shared) {
       setMessage({ tone: "error", text: "No pudimos compartir la imagen. Prueba descargarla." });
     }
   }

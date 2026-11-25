@@ -22,6 +22,7 @@ import { AddPlayerForm } from "./add-player-form";
 import { AutoRefresh } from "./auto-refresh";
 import { CheckInButton } from "./check-in-button";
 import { RegistrationActions } from "./registration-actions";
+import { FlyerSharing } from "./flyer-sharing";
 import { ListSharing } from "./list-sharing";
 import { VoucherReview } from "./voucher-review";
 
@@ -121,6 +122,10 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
 
       {event.status === "published" && (
         <AddPlayerForm clubSlug={clubSlug} eventId={event.id} isMixed={event.isMixed} />
+      )}
+
+      {!status && (event.status === "published" || event.status === "full") && (
+        <FlyerSharing flyerPath={`${basePath}/flyer`} fileName={`flyer-${event.id}.png`} />
       )}
 
       {!status && registrations.length > 0 && (
