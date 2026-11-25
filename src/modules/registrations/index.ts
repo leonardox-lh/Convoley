@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { makeAddPlayerManually } from "./application/add-player-manually";
 import { makeListEventRegistrations } from "./application/list-event-registrations";
 import { makeMarkPaidManually } from "./application/mark-paid-manually";
+import { makePayWithCredit } from "./application/pay-with-credit";
 import {
   makeSettleMercadoPagoNotification,
   makeSettleMercadoPagoPayment,
@@ -17,6 +18,7 @@ import { makeRegisterGuest } from "./application/register-guest";
 import { makeRemoveRegistration } from "./application/remove-registration";
 import { serviceFeesAdapter } from "./infrastructure/clubs-adapter";
 import { eventsAdapter } from "./infrastructure/events-adapter";
+import { creditsAdapter } from "./infrastructure/plans-adapter";
 import {
   mercadoPagoGatewayAdapter,
   mercadoPagoRecordsAdapter,
@@ -62,7 +64,16 @@ export const markPaidManually = makeMarkPaidManually({
 export const removeRegistration = makeRemoveRegistration({
   events: eventsAdapter,
   registrations: prismaRegistrationRepository,
+  credits: creditsAdapter,
   transactions,
+});
+
+export const payWithCredit = makePayWithCredit({
+  events: eventsAdapter,
+  registrations: prismaRegistrationRepository,
+  credits: creditsAdapter,
+  transactions,
+  now,
 });
 
 export const submitVoucher = makeSubmitVoucher({
@@ -135,6 +146,7 @@ export {
   InvalidPhoneNumberError,
   InvalidRejectionReasonError,
   MercadoPagoUnavailableError,
+  NoCreditError,
   NothingToReviewError,
   PaymentNotExpectedError,
   RegistrationNotFoundError,

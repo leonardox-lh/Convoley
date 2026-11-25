@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { EventNotOpenError, RegistrationNotFoundError } from "../domain/errors";
 import type { EventSeatInfo } from "../domain/registration";
 import {
+  fakeCredits,
   fakeEventSeats,
   fakeRegistrationRepository,
   fakeTransactions,
@@ -32,6 +33,7 @@ function setup(event: EventSeatInfo | null, existing: StoredRegistration[]) {
   const removeRegistration = makeRemoveRegistration({
     events: seats,
     registrations: repository,
+    credits: fakeCredits().credits,
     transactions: fakeTransactions,
   });
   const registerGuest = makeRegisterGuest({

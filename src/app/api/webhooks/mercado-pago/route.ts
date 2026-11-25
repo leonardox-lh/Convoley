@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { findMercadoPagoPaymentOwner, verifyWebhookSignature } from "@/modules/payments";
+import { settlePlanPurchaseNotification } from "@/modules/plans";
 import { settleMercadoPagoNotification } from "@/modules/registrations";
 import { settleOrderNotification } from "@/modules/store";
 
@@ -34,13 +35,20 @@ export async function POST(request: Request) {
 type Notification = { providerPaymentId: string; mpUserId: string | null };
 
 /**
- * Sends the notification to the module that owns the payment: registrations or the store
- * (HU-24). A payment we haven't linked yet is unknown here: each module looks it up by its
+ * Sends the notification to the module that owns the payment: registrations, the store (HU-24)
+ * or plans (HU-27). A payment we haven't linked yet is unknown here: each module looks it up by its
  * external_reference and answers "unknown_payment" when it isn't theirs.
  */
 async function settle(notification: Notification) {
   const owner = await findMercadoPagoPaymentOwner(notification.providerPaymentId);
   if (owner === "order") return settleOrderNotification(notification);
-  const result = await settleMercadoPagoNotification(notification);
-  if (owner === null && result === "unknown_payment") await settleOrderNotification(notification);
+  if (owner === "plan_purchase") return settlePlanPurchaseNotification(notification);
+  if (owner === "registration") return settleMercadoPagoNotification(notification);
+  for (const tryModule of [
+    settleMercadoPagoNotification,
+    settleOrderNotification,
+    settlePlanPurchaseNotification,
+  ]) {
+    if ((await tryModule(notification)) !== "unknown_payment") return;
+  }
 }

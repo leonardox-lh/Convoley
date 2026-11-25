@@ -7,6 +7,7 @@ import { makeListOpenEvents } from "./application/list-open-events";
 import { makeUpdateEvent } from "./application/update-event";
 import { clubsAdapter } from "./infrastructure/clubs-adapter";
 import { paymentsAdapter } from "./infrastructure/payments-adapter";
+import { creditsAdapter } from "./infrastructure/plans-adapter";
 import { PrismaEventRepository } from "./infrastructure/prisma-event-repository";
 import { prismaTransactions } from "./infrastructure/prisma-transactions";
 import { registrationsAdapter } from "./infrastructure/registrations-adapter";
@@ -40,6 +41,7 @@ export const cancelEvent = makeCancelEvent({
   events,
   registrations: registrationsAdapter,
   payments: paymentsAdapter,
+  credits: creditsAdapter,
   transactions,
   now,
 });

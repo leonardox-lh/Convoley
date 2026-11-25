@@ -22,6 +22,8 @@ export function holdsSeat(status: RegistrationStatus): boolean {
 export interface EventSeatInfo {
   id: string;
   clubId: string;
+  /** HU-27: plan credits are valid per community. */
+  communityId: string;
   status: string;
   capacity: number;
   priceCents: number;

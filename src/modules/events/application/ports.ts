@@ -68,6 +68,11 @@ export interface ConfirmedCountsReader {
 }
 
 /** Payments owned by the `payments` module. */
+/** HU-27: plan credits used by the event's registrations go back (owned by `plans`). */
+export interface CreditsReturner {
+  giveBack(registrationIds: string[], tx: TransactionContext): Promise<void>;
+}
+
 export interface PaymentsMarker {
   markForCancellation(
     input: { registrationIds: string[]; outcome: CancellationOutcome },

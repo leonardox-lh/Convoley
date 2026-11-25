@@ -73,6 +73,13 @@ enum CancellationOutcome {
   balance
 }
 
+// HU-27: a plan bought by a player; credits are usable only once it's active (paid).
+enum PlanPurchaseStatus {
+  pending_payment
+  in_review
+  active
+}
+
 enum OrderStatus {
   pending_payment
   in_review
@@ -105,6 +112,7 @@ model User {
   memberships         ClubMember[]
   registrations       Registration[]
   orders              Order[]
+  planPurchases       PlanPurchase[]
   reviewedPayments    Payment[]            @relation("PaymentReviewer")
 }
 
@@ -169,13 +177,14 @@ model Club {
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
-  members     ClubMember[]
-  communities Community[]
-  events      Event[]
-  payments    Payment[]
-  products    Product[]
-  orders      Order[]
-  plans       Plan[]
+  members       ClubMember[]
+  communities   Community[]
+  events        Event[]
+  payments      Payment[]
+  products      Product[]
+  orders        Order[]
+  plans         Plan[]
+  planPurchases PlanPurchase[]
 
   mercadoPagoConnection MercadoPagoConnection?
 }
@@ -270,9 +279,11 @@ model Registration {
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
 
-  event    Event     @relation(fields: [eventId], references: [id], onDelete: Restrict)
-  user     User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
-  payments Payment[]
+  event     Event      @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  user      User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  payments  Payment[]
+  // HU-27: set when the registration was paid with a plan credit.
+  creditUse CreditUse?
 
   // Database-level guard against double registration, even under concurrency.
   @@unique([eventId, phone])
@@ -283,12 +294,13 @@ model Registration {
 
 // ─── payments ──────────────────────────────────────────────────────────────
 
-// One row per attempt; exactly one of registrationId / orderId is set (SQL CHECK).
+// One row per attempt; exactly one of registrationId / orderId / planPurchaseId is set (SQL CHECK).
 model Payment {
   id                   String               @id @default(cuid())
   clubId               String
   registrationId       String?
   orderId              String?
+  planPurchaseId       String?
   // Total charged, service fee included (HU-22).
   amountCents          Int
   serviceFeeCents      Int                  @default(0)
@@ -312,10 +324,12 @@ model Payment {
   club         Club          @relation(fields: [clubId], references: [id], onDelete: Restrict)
   registration Registration? @relation(fields: [registrationId], references: [id], onDelete: Restrict)
   order        Order?        @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  planPurchase PlanPurchase? @relation(fields: [planPurchaseId], references: [id], onDelete: Restrict)
   reviewedBy   User?         @relation("PaymentReviewer", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
 
   @@index([registrationId])
   @@index([orderId])
+  @@index([planPurchaseId])
   @@index([clubId, createdAt])
 }
 
@@ -431,7 +445,50 @@ model Plan {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  club Club @relation(fields: [clubId], references: [id], onDelete: Restrict)
+  club      Club           @relation(fields: [clubId], references: [id], onDelete: Restrict)
+  purchases PlanPurchase[]
 
   @@index([clubId])
+}
+
+// A plan bought by a player (HU-27). The player is recognized by phone (always) or by their
+// Google account. The plan's terms are read from `Plan`, which never changes once offered.
+model PlanPurchase {
+  id               String             @id @default(cuid())
+  clubId           String
+  planId           String
+  userId           String?
+  firstName        String
+  lastName         String
+  phone            String
+  status           PlanPurchaseStatus @default(pending_payment)
+  // null = unlimited dates; set from the plan when it becomes active.
+  creditsRemaining Int?
+  paidAt           DateTime?
+  // null = no expiry; paidAt + validityDays.
+  expiresAt        DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  club       Club        @relation(fields: [clubId], references: [id], onDelete: Restrict)
+  plan       Plan        @relation(fields: [planId], references: [id], onDelete: Restrict)
+  user       User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  payments   Payment[]
+  creditUses CreditUse[]
+
+  @@index([clubId, phone])
+  @@index([userId])
+}
+
+// One registration paid with one credit (HU-27); deleted when the credit is given back.
+model CreditUse {
+  id             String   @id @default(cuid())
+  planPurchaseId String
+  registrationId String   @unique
+  createdAt      DateTime @default(now())
+
+  planPurchase PlanPurchase @relation(fields: [planPurchaseId], references: [id], onDelete: Restrict)
+  registration Registration @relation(fields: [registrationId], references: [id], onDelete: Restrict)
+
+  @@index([planPurchaseId])
 }

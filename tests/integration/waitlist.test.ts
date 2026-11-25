@@ -33,12 +33,14 @@ beforeAll(async () => {
   // These modules read `db` from src/lib/db.ts at load, so they are imported after DATABASE_URL points at the test database.
   process.env.DATABASE_URL = TEST_DATABASE_URL;
   const { eventsAdapter } = await import("@/modules/registrations/infrastructure/events-adapter");
+  const { creditsAdapter } = await import("@/modules/registrations/infrastructure/plans-adapter");
   const { prismaRegistrationRepository, prismaTransactions } =
     await import("@/modules/registrations/infrastructure/prisma-registration-repository");
   db = new PrismaClient({ adapter: new PrismaPg({ connectionString: TEST_DATABASE_URL }) });
   const deps = {
     events: eventsAdapter,
     registrations: prismaRegistrationRepository,
+    credits: creditsAdapter,
     transactions: prismaTransactions(db),
   };
   registerGuest = makeRegisterGuest({

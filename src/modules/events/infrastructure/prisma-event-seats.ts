@@ -11,6 +11,7 @@ export async function lockEventForRegistration(eventId: string, tx: Prisma.Trans
     select: {
       id: true,
       clubId: true,
+      communityId: true,
       status: true,
       capacity: true,
       priceCents: true,

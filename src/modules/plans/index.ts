@@ -1,9 +1,29 @@
 import { db } from "@/lib/db";
+import { makeConsumeCredit, makeGetCreditBalance, makeReturnCredits } from "./application/credits";
 import { makeCreatePlan, makeSetPlanActive } from "./application/plans";
-import { clubCommunitiesAdapter } from "./infrastructure/clubs-adapter";
+import {
+  makeApprovePlanVoucher,
+  makeBuyPlan,
+  makeRejectPlanVoucher,
+  makeSettlePlanPurchaseNotification,
+  makeSettlePlanPurchasePayment,
+  makeStartPlanMercadoPagoPayment,
+  makeSubmitPlanVoucher,
+} from "./application/purchases";
+import { clubCommunitiesAdapter, serviceFeesAdapter } from "./infrastructure/clubs-adapter";
+import { gatewayAdapter, purchasePaymentsAdapter } from "./infrastructure/payments-adapter";
 import { listClubPlans, prismaPlanRepository } from "./infrastructure/prisma-plan-repository";
+import {
+  findPurchases,
+  fromPrismaTx,
+  prismaPurchaseRepository,
+  prismaTransactions,
+} from "./infrastructure/prisma-purchase-repository";
 
 const plans = prismaPlanRepository(db);
+const purchases = prismaPurchaseRepository(db);
+const transactions = prismaTransactions(db);
+const now = () => new Date();
 
 // ─── Plans (HU-26) ───
 export const createPlan = makeCreatePlan({ plans, communities: clubCommunitiesAdapter });
@@ -12,4 +32,50 @@ export const listPlans = (clubId: string, options: { onlyActive: boolean }) =>
   listClubPlans(db, clubId, options);
 export type { StoredPlan as Plan } from "./application/ports";
 export { MAX_PLAN_CREDITS, MAX_PLAN_VALIDITY_DAYS, PLAN_NAME_MAX_LENGTH } from "./domain/plan";
-export { InvalidPlanError, PlanNotFoundError, type InvalidPlanReason } from "./domain/errors";
+
+// ─── Purchases (HU-27) ───
+const paymentDeps = {
+  purchases,
+  gateway: gatewayAdapter,
+  payments: purchasePaymentsAdapter,
+  transactions,
+  now,
+};
+const settlePlanPurchasePayment = makeSettlePlanPurchasePayment(paymentDeps);
+export const buyPlan = makeBuyPlan({ plans, purchases });
+export const startPlanMercadoPagoPayment = makeStartPlanMercadoPagoPayment(
+  { ...paymentDeps, serviceFees: serviceFeesAdapter },
+  settlePlanPurchasePayment,
+);
+export const settlePlanPurchaseNotification = makeSettlePlanPurchaseNotification(
+  paymentDeps,
+  settlePlanPurchasePayment,
+);
+export const submitPlanVoucher = makeSubmitPlanVoucher(paymentDeps);
+export const approvePlanVoucher = makeApprovePlanVoucher(paymentDeps);
+export const rejectPlanVoucher = makeRejectPlanVoucher(paymentDeps);
+export const findPlanPurchase = async (purchaseId: string) =>
+  (await findPurchases(db, { id: purchaseId }))[0] ?? null;
+export const listPlanPurchases = (clubId: string) => findPurchases(db, { clubId });
+
+// ─── Credits (HU-27): they run inside the registrations module's transaction ───
+type PrismaTransaction = Parameters<typeof fromPrismaTx>[0];
+export const getCreditBalance = makeGetCreditBalance({ purchases });
+const consume = makeConsumeCredit({ purchases });
+const giveBack = makeReturnCredits({ purchases });
+export const consumeCredit = (input: Parameters<typeof consume>[0], tx: PrismaTransaction) =>
+  consume(input, fromPrismaTx(tx));
+export const returnCredits = (registrationIds: string[], tx: PrismaTransaction) =>
+  giveBack(registrationIds, fromPrismaTx(tx));
+
+export {
+  InvalidPlanError,
+  MercadoPagoUnavailableError,
+  NoCreditAvailableError,
+  NothingToReviewError,
+  PlanNotFoundError,
+  PlanPurchaseNotFoundError,
+  PlanPurchaseStatusError,
+  type InvalidPlanReason,
+} from "./domain/errors";
+export type { PlanPurchaseStatus } from "./domain/purchase";

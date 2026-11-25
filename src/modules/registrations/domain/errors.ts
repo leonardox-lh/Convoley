@@ -5,6 +5,14 @@ export class InvalidPhoneNumberError extends Error {
   }
 }
 
+/** HU-27: the player has no active plan with credits for this event. */
+export class NoCreditError extends Error {
+  constructor() {
+    super("No plan credit available for this event");
+    this.name = "NoCreditError";
+  }
+}
+
 export class EventNotOpenError extends Error {
   constructor(readonly eventId: string) {
     super(`Event ${eventId} is not open for registration`);

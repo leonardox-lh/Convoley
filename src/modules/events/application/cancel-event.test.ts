@@ -14,6 +14,7 @@ function setup(stored: EventDetails | null, options: { markerFails?: boolean } =
   const calls: string[] = [];
   const marked: unknown[] = [];
   const cancelled: unknown[] = [];
+  const creditsReturned: string[][] = [];
   const cancelEvent = makeCancelEvent({
     clubs: { findBySlug: async (slug) => (slug === CLUB.slug ? CLUB : null) },
     events: fakeEventRepository({
@@ -38,13 +39,26 @@ function setup(stored: EventDetails | null, options: { markerFails?: boolean } =
         marked.push(marking);
       },
     },
+    credits: {
+      giveBack: async (registrationIds) => {
+        creditsReturned.push(registrationIds);
+      },
+    },
     transactions: fakeTransactions,
     now: () => NOW,
   });
-  return { cancelEvent, calls, marked, cancelled };
+  return { cancelEvent, calls, marked, cancelled, creditsReturned };
 }
 
 const input = { clubSlug: CLUB.slug, eventId: "evt-1", outcome: "refund" as const };
+
+describe("HU-27: cancelar la convocatoria devuelve los créditos de plan", () => {
+  it("devuelve los créditos de sus inscripciones", async () => {
+    const { cancelEvent, creditsReturned } = setup(eventDetails());
+    await cancelEvent(input);
+    expect(creditsReturned).toEqual([["reg-1", "reg-2"]]);
+  });
+});
 
 describe("HU-05 criterio 3: cancelEvent marca los pagos", () => {
   it("HU-05: marca los pagos de las inscripciones con el outcome elegido", async () => {

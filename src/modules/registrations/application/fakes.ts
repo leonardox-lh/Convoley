@@ -1,6 +1,8 @@
 import { holdsSeat, type EventSeatInfo, type RegistrationStatus } from "../domain/registration";
+import { NoCreditError } from "../domain/errors";
 import type {
   ChargeReport,
+  Credits,
   EventSeats,
   MercadoPagoGateway,
   MercadoPagoPaymentRecords,
@@ -26,6 +28,7 @@ export function seatInfo(overrides: Partial<EventSeatInfo> = {}): EventSeatInfo 
   return {
     id: "evt-1",
     clubId: "club-1",
+    communityId: "community-1",
     status: "published",
     capacity: 18,
     priceCents: 1500,
@@ -110,6 +113,21 @@ export function fakeRegistrationRepository(initial: StoredRegistration[] = []) {
     },
   };
   return { repository, rows };
+}
+
+export function fakeCredits(options: { available?: boolean } = {}) {
+  const used: string[] = [];
+  const returned: string[] = [];
+  const credits: Credits = {
+    consume: async ({ registrationId }) => {
+      if (!(options.available ?? true)) throw new NoCreditError();
+      used.push(registrationId);
+    },
+    giveBack: async (registrationIds) => {
+      returned.push(...registrationIds);
+    },
+  };
+  return { credits, used, returned };
 }
 
 export function fakeRegistrationListReader(items: RegistrationListItem[]): RegistrationListReader {

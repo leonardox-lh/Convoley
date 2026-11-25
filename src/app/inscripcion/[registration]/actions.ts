@@ -12,6 +12,8 @@ import {
 import {
   EventNotOpenError,
   MercadoPagoUnavailableError,
+  NoCreditError,
+  payWithCredit,
   PaymentNotExpectedError,
   RegistrationNotFoundError,
   startMercadoPagoPayment,
@@ -69,6 +71,33 @@ export async function submitVoucherAction(
     throw error;
   }
   redirect(`/inscripcion/${encodeURIComponent(registrationId)}?enviado=1`);
+}
+
+export type CreditState = { status: "idle" } | { status: "error"; message: string };
+
+const creditSchema = z.object({ registrationId: z.string().min(1) });
+
+/** HU-27: the player uses one date of their plan instead of paying. */
+export async function payWithCreditAction(
+  _previous: CreditState,
+  formData: FormData,
+): Promise<CreditState> {
+  const parsed = creditSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { status: "error", message: "No encontramos tu inscripción." };
+  try {
+    await payWithCredit(parsed.data.registrationId);
+  } catch (error) {
+    if (error instanceof NoCreditError) {
+      return {
+        status: "error",
+        message: "Ya no tienes fechas disponibles para esta convocatoria.",
+      };
+    }
+    const known = ERROR_MESSAGES.find(([type]) => error instanceof type);
+    if (known) return { status: "error", message: known[1] };
+    throw error;
+  }
+  redirect(`/inscripcion/${encodeURIComponent(parsed.data.registrationId)}?pagado=1`);
 }
 
 export type MercadoPagoPayState =

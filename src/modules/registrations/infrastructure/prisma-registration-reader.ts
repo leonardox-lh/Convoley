@@ -112,6 +112,8 @@ export async function findRegistrationOverview(registrationId: string) {
       lastName: true,
       status: true,
       reservedUntil: true,
+      phone: true,
+      userId: true,
     },
   });
   if (!registration) return null;

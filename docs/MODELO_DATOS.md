@@ -137,7 +137,7 @@ erDiagram
 | `registrations` | `Registration` | HU-06, HU-07, HU-08, HU-48 |
 | `payments` | `Payment`, `MercadoPagoConnection` | HU-08, HU-14, HU-15, HU-18, HU-19, HU-20 |
 | `store` | `Product`, `ProductVariant`, `Order`, `OrderItem` | HU-23, HU-24, HU-25 |
-| `plans` | `Plan` | HU-26 |
+| `plans` | `Plan`, `PlanPurchase`, `CreditUse` | HU-26, HU-27 |
 
 Cada módulo solo lee y escribe sus propias tablas (ver `docs/ARQUITECTURA.md`). `Event.clubId` se repite aunque se pueda sacar de la comunidad, para que `events` filtre por club sin consultar tablas de `clubs`.
 
@@ -145,13 +145,14 @@ Cada módulo solo lee y escribe sus propias tablas (ver `docs/ARQUITECTURA.md`).
 
 - **Invitado**: una `Registration` con `userId = null`. No hay tabla de invitados. En HU-48 se vincula por `phone`.
 - **Inscripción duplicada**: `@@unique([eventId, phone])` la rechaza en la base incluso si llegan dos a la vez. Si alguien cancela y vuelve, se reactiva la misma fila.
-- **Pagos**: una tabla para inscripciones y pedidos; un `CHECK` exige exactamente uno de `registrationId` u `orderId`. Una fila por intento: un voucher rechazado queda como historial y el siguiente es otra fila.
+- **Pagos**: una tabla para inscripciones, pedidos y compras de planes; un `CHECK` exige exactamente uno de `registrationId`, `orderId` o `planPurchaseId`. Una fila por intento: un voucher rechazado queda como historial y el siguiente es otra fila.
 - **Recuperar contraseña (HU-01)**: `PasswordResetToken` guarda solo el sha256 del token del link (`tokenHash @unique`), vence en 1 hora y es de un solo uso: `usedAt` se marca con un `UPDATE ... WHERE usedAt IS NULL` en la misma transacción que cambia `passwordHash`. Pedir otro link borra los anteriores sin usar.
 - **Webhook idempotente**: `providerPaymentId @unique`. Un pago en estado final (`approved`, `rejected`, `refunded`) no se vuelve a liquidar; `refund_pending` reintenta la devolución.
 - **Mercado Pago por organizador (HU-18)**: `MercadoPagoConnection` guarda los tokens OAuth cifrados con `MP_TOKEN_ENCRYPTION_KEY`. Una cuenta de MP solo puede estar conectada a un club (`mpUserId @unique`). Desconectar borra la fila y conserva los pagos.
 - **Cargo por servicio (HU-22)**: `Club.serviceFeeFixedCents` o `Club.serviceFeePercentBps` (puntos básicos), nunca los dos; un `CHECK` limita a S/ 50 o 20 %. Solo se suma en pagos con Mercado Pago y queda en `Payment.serviceFeeCents`; `amountCents` ya lo incluye.
 - **Reserva de cupo (HU-21)**: con MP conectado, una inscripción `pending_payment` guarda `reservedUntil` (10 minutos). Vencida, no cuenta como cupo; la siguiente escritura del evento la pasa a `cancelled` y el cupo va a la lista de espera. Cualquier cambio de estado borra `reservedUntil`.
 - **Planes (HU-26)**: `Plan` tiene `creditCount` (fechas; `null` = ilimitadas), `validityDays` (`null` = sin vencimiento) o ambos; un `CHECK` exige al menos uno, positivos, y precio > 0. `communityIds` es un arreglo de ids de `Community`: el plan solo vale en esas comunidades. Un plan no se edita, solo se desactiva (`isActive`), para no cambiar las condiciones de quien ya lo compró.
+- **Compras de planes (HU-27)**: `PlanPurchase` guarda quién compra (celular normalizado y `userId` si entró con Google) y pasa de `pending_payment` a `in_review` (voucher) o a `active`. Al activarse se fijan `creditsRemaining` (`null` = ilimitadas) y `expiresAt` desde el `Plan`. Pagar una inscripción con crédito no crea `Payment` (el dinero ya se pagó con el plan): crea un `CreditUse` (`registrationId @unique`) y descuenta `creditsRemaining` en la misma transacción que marca la inscripción `paid`, bloqueando las compras del jugador (`FOR UPDATE`). Quitar la inscripción o cancelar la convocatoria borra el `CreditUse` y devuelve el crédito. Se usa primero el plan que vence antes.
 - **Convoley no retiene dinero**: no hay saldos ni cuentas internas; `Payment` solo registra lo que pasó en la cuenta de Mercado Pago del organizador.
 - **Cancelar una convocatoria (HU-05)**: el organizador elige `refund` (devolución) o `balance` (saldo a favor). Se guarda en `Event.cancellationOutcome` (lo que ven los inscritos) y en cada `Payment` `approved` o `in_review` aún sin marcar, en la misma transacción. Es solo una marca: la devolución la hace el organizador en Mercado Pago. HU-14 debe marcar igual un pago que se apruebe después de la cancelación.
 - **Confirmados**: las inscripciones que ocupan cupo son las que no están `cancelled` (pagadas o no). Los cupos no pueden bajar de ese número.
@@ -166,7 +167,6 @@ Cada módulo solo lee y escribe sus propias tablas (ver `docs/ARQUITECTURA.md`).
 | Posición y nivel del jugador | HU-10 |
 | Lista de espera (`WaitlistEntry`) | HU-12 |
 | Configuración de Yape / QR | HU-13 |
-| Planes y créditos | HU-26, HU-27 |
 | Convocatorias recurrentes | HU-28 |
 | Token de cancelación | HU-29 |
 | Política de cancelación y saldo a favor | HU-30 |

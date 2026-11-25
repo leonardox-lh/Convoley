@@ -4,6 +4,7 @@ import type { EventSeatInfo } from "../domain/registration";
 import { makeAddPlayerManually } from "./add-player-manually";
 import {
   FAKE_TX,
+  fakeCredits,
   fakeEventSeats,
   fakeManualPayments,
   fakeRegistrationRepository,
@@ -31,7 +32,12 @@ function seated(id: string, phone: string): StoredRegistration {
 function setup(event: EventSeatInfo, existing: StoredRegistration[]) {
   const { seats, reopened } = fakeEventSeats(event);
   const { repository, rows } = fakeRegistrationRepository(existing);
-  const deps = { events: seats, registrations: repository, transactions: fakeTransactions };
+  const deps = {
+    events: seats,
+    registrations: repository,
+    credits: fakeCredits().credits,
+    transactions: fakeTransactions,
+  };
   return {
     rows,
     reopened,

@@ -140,6 +140,7 @@ function buildCancelEvent(payments?: PaymentsMarker) {
         await markPaymentsForCancellation(input, toPrismaTx(tx));
       },
     },
+    credits: { giveBack: async () => {} },
     transactions: prismaTransactions(db),
     now: () => new Date("2030-12-01T12:00:00.000Z"),
   });

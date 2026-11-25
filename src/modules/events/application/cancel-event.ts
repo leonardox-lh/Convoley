@@ -2,6 +2,7 @@ import { assertCancellable, type CancellationOutcome } from "../domain/event";
 import { EventNotFoundError } from "../domain/errors";
 import type {
   ClubReader,
+  CreditsReturner,
   EventRepository,
   PaymentsMarker,
   RegistrationsReader,
@@ -16,6 +17,7 @@ export function makeCancelEvent(deps: {
   events: EventRepository;
   registrations: RegistrationsReader;
   payments: PaymentsMarker;
+  credits: CreditsReturner;
   transactions: TransactionRunner;
   now: () => Date;
 }) {
@@ -30,6 +32,7 @@ export function makeCancelEvent(deps: {
 
       const registrationIds = await deps.registrations.listIds(input.eventId, tx);
       await deps.payments.markForCancellation({ registrationIds, outcome: input.outcome }, tx);
+      await deps.credits.giveBack(registrationIds, tx);
       await deps.events.markCancelled(
         input.eventId,
         { at: deps.now(), outcome: input.outcome },

@@ -24,6 +24,7 @@ const SETTLEMENT_FIELDS = {
   clubId: true,
   registrationId: true,
   orderId: true,
+  planPurchaseId: true,
   amountCents: true,
   status: true,
   providerPaymentId: true,
@@ -63,7 +64,9 @@ export async function setMercadoPagoPaymentStatus(
 export async function findMercadoPagoPaymentOwner(providerPaymentId: string) {
   const payment = await findMercadoPagoPayment({ providerPaymentId });
   if (!payment) return null;
-  return payment.orderId ? ("order" as const) : ("registration" as const);
+  if (payment.orderId) return "order" as const;
+  if (payment.planPurchaseId) return "plan_purchase" as const;
+  return "registration" as const;
 }
 
 /** The club whose connected Mercado Pago account is this one (webhooks carry user_id). */

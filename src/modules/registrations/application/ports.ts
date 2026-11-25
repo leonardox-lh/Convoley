@@ -67,13 +67,34 @@ export interface RegistrationRepository {
   findById(
     id: string,
     tx: TransactionContext,
-  ): Promise<{ id: string; eventId: string; status: RegistrationStatus } | null>;
+  ): Promise<{
+    id: string;
+    eventId: string;
+    status: RegistrationStatus;
+    phone: string;
+    userId: string | null;
+  } | null>;
   /** Any status change also ends a reservation (HU-21). */
   setStatus(id: string, status: RegistrationStatus, tx: TransactionContext): Promise<void>;
   /** HU-21: holds the seat of a pending payment until `until`. */
   reserve(id: string, until: Date, tx: TransactionContext): Promise<void>;
   /** HU-21: cancels pending payments whose reservation ended; returns how many seats it freed. */
   releaseExpired(eventId: string, now: Date, tx: TransactionContext): Promise<number>;
+}
+
+/** HU-27: plan credits, owned by the `plans` module; they run in our transaction. */
+export interface Credits {
+  /** Spends one credit for this registration; throws NoCreditError when there is none. */
+  consume(
+    input: {
+      player: { clubId: string; phone: string; userId: string | null };
+      event: { communityId: string; startsAt: Date };
+      registrationId: string;
+    },
+    tx: TransactionContext,
+  ): Promise<void>;
+  /** Gives back the credits these registrations used, if any. */
+  giveBack(registrationIds: string[], tx: TransactionContext): Promise<void>;
 }
 
 /** HU-22: the club's optional service fee, owned by the `clubs` module. */

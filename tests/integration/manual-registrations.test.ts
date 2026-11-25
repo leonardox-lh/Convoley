@@ -44,6 +44,7 @@ beforeAll(async () => {
     await import("@/modules/registrations/application/mark-paid-manually");
   const { makeRemoveRegistration } =
     await import("@/modules/registrations/application/remove-registration");
+  const { creditsAdapter } = await import("@/modules/registrations/infrastructure/plans-adapter");
   db = new PrismaClient({ adapter: new PrismaPg({ connectionString: TEST_DATABASE_URL }) });
   const transactions = prismaTransactions(db);
   markPaidManually = makeMarkPaidManually({
@@ -55,6 +56,7 @@ beforeAll(async () => {
   removeRegistration = makeRemoveRegistration({
     events: eventsAdapter,
     registrations: prismaRegistrationRepository,
+    credits: creditsAdapter,
     transactions,
   });
   const club = await db.club.create({

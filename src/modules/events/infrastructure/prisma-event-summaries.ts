@@ -12,6 +12,7 @@ export async function listEventSummaries(eventIds: string[]) {
       status: true,
       priceCents: true,
       clubId: true,
+      communityId: true,
     },
   });
   const clubs = new Map(
@@ -20,9 +21,9 @@ export async function listEventSummaries(eventIds: string[]) {
       club,
     ]),
   );
-  return events.map(({ clubId, ...event }) => ({
+  return events.map((event) => ({
     ...event,
-    clubSlug: clubs.get(clubId)?.slug ?? "",
-    clubName: clubs.get(clubId)?.name ?? "",
+    clubSlug: clubs.get(event.clubId)?.slug ?? "",
+    clubName: clubs.get(event.clubId)?.name ?? "",
   }));
 }

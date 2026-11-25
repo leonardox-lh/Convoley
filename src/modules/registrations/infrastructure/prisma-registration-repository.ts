@@ -70,7 +70,7 @@ export const prismaRegistrationRepository: RegistrationRepository = {
   findById: (id, tx) =>
     toPrismaTx(tx).registration.findUnique({
       where: { id },
-      select: { id: true, eventId: true, status: true },
+      select: { id: true, eventId: true, status: true, phone: true, userId: true },
     }),
 
   async setStatus(id, status, tx) {
