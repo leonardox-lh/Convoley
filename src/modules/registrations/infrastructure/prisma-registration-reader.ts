@@ -2,6 +2,7 @@ import type { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { SEAT_HOLDING_STATUSES } from "../domain/registration";
 import type {
+  CheckIns,
   PlayerRegistrations,
   RegistrationListReader,
   TeamAssignments,
@@ -49,9 +50,20 @@ export const prismaRegistrationListReader: RegistrationListReader = {
         gender: true,
         teamNumber: true,
         status: true,
+        checkedInAt: true,
         createdAt: true,
       },
     }),
+};
+
+export const prismaCheckIns: CheckIns = {
+  async set(eventId, registrationId, checkedInAt) {
+    const { count } = await db.registration.updateMany({
+      where: { id: registrationId, eventId, status: { in: [...SEAT_HOLDING_STATUSES] } },
+      data: { checkedInAt },
+    });
+    return count > 0;
+  },
 };
 
 export const prismaTeamAssignments: TeamAssignments = {

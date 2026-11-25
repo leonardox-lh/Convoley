@@ -7,6 +7,7 @@ import {
   makeGetCancellationPreview,
 } from "./application/cancel-own-registration";
 import { makePayWithBalance, makePayWithCredit } from "./application/pay-with-credit";
+import { makeSetCheckIn } from "./application/check-in";
 import { makeBuildEventTeams, makeListEventTeams, makeMoveToTeam } from "./application/teams";
 import {
   makeSettleMercadoPagoNotification,
@@ -34,6 +35,7 @@ import {
 import {
   prismaPlayerRegistrations,
   prismaRegistrationListReader,
+  prismaCheckIns,
   prismaTeamAssignments,
 } from "./infrastructure/prisma-registration-reader";
 import {
@@ -185,3 +187,6 @@ export type { EventTeam } from "./application/teams";
 export { MAX_TEAMS, MIN_TEAMS } from "./domain/teams";
 export { InvalidTeamCountError, NotEnoughWomenError } from "./domain/errors";
 export { PLAYER_GENDERS, type PlayerGender } from "./domain/registration";
+
+// HU-38: check-in.
+export const setCheckIn = makeSetCheckIn({ checkIns: prismaCheckIns, now: () => new Date() });

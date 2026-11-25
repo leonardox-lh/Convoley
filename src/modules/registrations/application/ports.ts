@@ -145,6 +145,8 @@ export interface RegistrationListItem {
   gender: PlayerGender | null;
   teamNumber: number | null;
   status: RegistrationStatus;
+  /** HU-38: when the player was marked present, or null. */
+  checkedInAt: Date | null;
   createdAt: Date;
 }
 
@@ -271,4 +273,10 @@ export interface MercadoPagoPaymentRecords {
     },
     tx?: TransactionContext,
   ): Promise<void>;
+}
+
+/** HU-38: attendance on game day. */
+export interface CheckIns {
+  /** Sets or clears `checkedInAt` of a seat-holding registration; false if there is none. */
+  set(eventId: string, registrationId: string, checkedInAt: Date | null): Promise<boolean>;
 }

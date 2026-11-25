@@ -20,6 +20,7 @@ import { REGISTRATION_STATUS_BADGE_CLASSES } from "../../../../registration-stat
 import { requireOrganizer } from "../../require-organizer";
 import { AddPlayerForm } from "./add-player-form";
 import { AutoRefresh } from "./auto-refresh";
+import { CheckInButton } from "./check-in-button";
 import { RegistrationActions } from "./registration-actions";
 import { ListSharing } from "./list-sharing";
 import { VoucherReview } from "./voucher-review";
@@ -87,6 +88,9 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
   const seats = seatSummary(event.capacity, event.confirmedCount);
   const basePath = `/admin/${clubSlug}/convocatorias/${event.id}`;
   const listEditable = event.status !== "cancelled";
+  // HU-38: attendance counts only players holding a seat.
+  const seated = listed.filter((r) => r.status !== "waitlisted" && r.status !== "cancelled");
+  const present = seated.filter((r) => r.checkedInAt !== null).length;
 
   return (
     <div className="flex flex-col gap-6">
@@ -109,6 +113,11 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
       <p role="status" aria-label="Cupos" className="text-lg font-medium">
         {seats.taken} ocupados · {seats.free} libres
       </p>
+      {!status && present > 0 && (
+        <p className="text-sm text-zinc-500">
+          {present} de {seated.length} asistieron
+        </p>
+      )}
 
       {event.status === "published" && (
         <AddPlayerForm clubSlug={clubSlug} eventId={event.id} isMixed={event.isMixed} />
@@ -179,6 +188,11 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
               >
                 {STATUS_LABELS[registration.status]}
               </span>
+              {registration.checkedInAt && (
+                <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                  Asistió
+                </span>
+              )}
               {listEditable && voucherViews.has(registration.id) && (
                 <VoucherReview
                   clubSlug={clubSlug}
@@ -189,6 +203,16 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
                   {...voucherViews.get(registration.id)!}
                 />
               )}
+              {listEditable &&
+                registration.status !== "cancelled" &&
+                registration.status !== "waitlisted" && (
+                  <CheckInButton
+                    clubSlug={clubSlug}
+                    eventId={event.id}
+                    registrationId={registration.id}
+                    checkedIn={registration.checkedInAt !== null}
+                  />
+                )}
               {listEditable && registration.status !== "cancelled" && (
                 <RegistrationActions
                   clubSlug={clubSlug}

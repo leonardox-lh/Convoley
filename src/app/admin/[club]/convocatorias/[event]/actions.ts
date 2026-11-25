@@ -16,6 +16,7 @@ import {
   markPaidManually,
   RegistrationNotFoundError,
   removeRegistration,
+  setCheckIn,
 } from "@/modules/registrations";
 import { genderField, nameField, PHONE_FORMAT_MESSAGE } from "../../../../player-schema";
 import { NOT_ALLOWED_MESSAGE } from "../event-form-schema";
@@ -145,5 +146,26 @@ export async function rejectVoucherAction(
   return run(parsed.data, async (reviewedByUserId) => {
     await rejectVoucher({ ...parsed.data, reviewedByUserId });
     return "Captura rechazada: el jugador verá el motivo.";
+  });
+}
+
+const checkInSchema = registrationSchema.extend({ present: z.enum(["true", "false"]) });
+
+/** HU-38: marks or unmarks a player as present, from the list or after scanning their QR. */
+export async function checkInAction(
+  _previous: RegistrationActionState,
+  formData: FormData,
+): Promise<RegistrationActionState> {
+  const parsed = checkInSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { status: "error", message: "No encontramos esa inscripción." };
+  const present = parsed.data.present === "true";
+
+  return run(parsed.data, async () => {
+    if (!(await setCheckIn({ ...parsed.data, present })))
+      throw new RegistrationNotFoundError(parsed.data.registrationId);
+    revalidatePath(
+      `/admin/${parsed.data.clubSlug}/convocatorias/${parsed.data.eventId}/asistencia`,
+    );
+    return present ? "Asistencia registrada." : "Asistencia quitada.";
   });
 }

@@ -13,6 +13,7 @@ function item(id: string, status: RegistrationStatus, minute: number) {
     level: null,
     gender: null,
     teamNumber: null,
+    checkedInAt: null,
     status,
     createdAt: new Date(Date.UTC(2026, 11, 1, 10, minute)),
   };

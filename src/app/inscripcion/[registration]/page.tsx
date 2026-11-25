@@ -37,6 +37,7 @@ import {
   submitVoucherAction,
 } from "./actions";
 import { CancelRegistrationForm, CopyLinkButton } from "./cancel-form";
+import { CheckInQr } from "./check-in-qr";
 import { PayWithCreditForm } from "./pay-with-credit-form";
 import { MercadoPagoCheckout } from "./mercado-pago-checkout";
 import { VoucherForm } from "./voucher-form";
@@ -155,6 +156,16 @@ async function RegistrationContent({ params, searchParams }: Props) {
       {registration.status === "in_review" && (
         <p className="text-sm text-zinc-500">El organizador está revisando tu pago.</p>
       )}
+      {registration.status !== "waitlisted" &&
+        registration.status !== "cancelled" &&
+        !reservationEnded &&
+        event.status !== "cancelled" && (
+          <CheckInQr
+            clubSlug={event.clubSlug}
+            eventId={event.id}
+            registrationId={registration.id}
+          />
+        )}
       {canSignInForFunds && (
         <form action={signInToUseFundsAction} className="flex flex-col gap-2 text-sm">
           <input type="hidden" name="registrationId" value={registration.id} />

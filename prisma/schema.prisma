@@ -351,6 +351,8 @@ model Registration {
   status        RegistrationStatus @default(pending_payment)
   // HU-21: while paying with Mercado Pago the seat is held only until this moment.
   reservedUntil DateTime?
+  // HU-38: when the organizer marked the player as present (QR or by hand).
+  checkedInAt   DateTime?
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
 
