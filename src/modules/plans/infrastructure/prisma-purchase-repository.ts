@@ -9,11 +9,12 @@ export function prismaTransactions(db: PrismaClient): TransactionRunner {
   return { run: (work) => db.$transaction((tx) => work(tx as unknown as TransactionContext)) };
 }
 
-/** The Prisma client behind a TransactionContext created by prismaTransactions. */
 /** Another module's Prisma transaction, so credits are spent inside it (HU-27). */
 export function fromPrismaTx(tx: Prisma.TransactionClient): TransactionContext {
   return tx as unknown as TransactionContext;
 }
+
+/** The Prisma client behind a TransactionContext created by prismaTransactions. */
 
 export function toPrismaTx(tx: TransactionContext): Prisma.TransactionClient {
   return tx as unknown as Prisma.TransactionClient;
@@ -91,7 +92,9 @@ export function prismaPurchaseRepository(db: PrismaClient): PurchaseRepository {
         select: { id: true, planPurchaseId: true },
       });
       for (const use of uses) {
-        await client.creditUse.delete({ where: { id: use.id } });
+        // Two give-backs of the same use at once: only the one that deleted it returns the credit.
+        const { count } = await client.creditUse.deleteMany({ where: { id: use.id } });
+        if (count === 0) continue;
         await client.planPurchase.updateMany({
           where: { id: use.planPurchaseId, creditsRemaining: { not: null } },
           data: { creditsRemaining: { increment: 1 } },

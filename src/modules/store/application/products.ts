@@ -18,11 +18,27 @@ async function requireProduct(deps: Deps, clubId: string, productId: string) {
   return product;
 }
 
+/**
+ * HU-23: edit a product. `loadedVariants` is the stock the form showed: a size the organizer
+ * didn't change keeps the stored stock, so saving a new price doesn't undo sales made meanwhile.
+ */
 export function makeUpdateProduct(deps: Deps) {
-  return async (input: { clubId: string; productId: string; product: ProductInput }) => {
+  return async (input: {
+    clubId: string;
+    productId: string;
+    product: ProductInput;
+    loadedVariants: ProductInput["variants"];
+  }) => {
     const product = validateProduct(input.product);
     await requireProduct(deps, input.clubId, input.productId);
-    await deps.products.update(input.productId, product);
+    const keepStockOf = product.variants
+      .filter((variant) =>
+        input.loadedVariants.some(
+          (loaded) => loaded.size === variant.size && loaded.stock === variant.stock,
+        ),
+      )
+      .map((variant) => variant.size);
+    await deps.products.update(input.productId, product, keepStockOf);
   };
 }
 

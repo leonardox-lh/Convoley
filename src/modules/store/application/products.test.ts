@@ -60,11 +60,27 @@ describe("HU-23: publicar productos", () => {
         priceCents: 5000,
         variants: [{ size: "S", stock: 4 }],
       },
+      loadedVariants: [],
     });
     expect(rows[0]!.variants).toEqual([
       { id: "var-s", size: "S", stock: 4 },
       { id: "var-m", size: "M", stock: 0 },
     ]);
+  });
+
+  test("editar el precio no pisa el stock vendido mientras el formulario estaba abierto", async () => {
+    const { products, rows } = fakeProductRepository([storedProduct()]);
+    const loadedVariants = rows[0]!.variants.map(({ size, stock }) => ({ size, stock }));
+    rows[0]!.variants[0]!.stock -= 2; // a paid order took 2 units meanwhile
+    const soldDown = rows[0]!.variants[0]!.stock;
+    await makeUpdateProduct({ products })({
+      clubId: "club-1",
+      productId: "prod-1",
+      product: { name: "Polo", description: null, priceCents: 6000, variants: loadedVariants },
+      loadedVariants,
+    });
+    expect(rows[0]!.priceCents).toBe(6000);
+    expect(rows[0]!.variants[0]!.stock).toBe(soldDown);
   });
 
   test("un organizador solo toca productos de su club", async () => {

@@ -22,12 +22,16 @@ export function prismaProductRepository(db: PrismaClient): ProductRepository {
 
     find: (clubId, id) => db.product.findFirst({ where: { id, clubId }, select: PRODUCT_FIELDS }),
 
-    update: (productId, { variants, ...product }) =>
+    update: (productId, { variants, ...product }, keepStockOf) =>
       db.$transaction(async (tx) => {
         await tx.product.update({ where: { id: productId }, data: product });
-        const existing = await tx.productVariant.findMany({ where: { productId } });
+        // Locked in id order, like orders taking stock, so a sale can't slip in between.
+        const existing = await tx.$queryRaw<{ id: string; size: string | null }[]>`
+          SELECT id, size FROM "ProductVariant" WHERE "productId" = ${productId}
+          ORDER BY id FOR UPDATE`;
         for (const variant of variants) {
           const match = existing.find((row) => row.size === variant.size);
+          if (match && keepStockOf.includes(variant.size)) continue;
           if (match) {
             await tx.productVariant.update({
               where: { id: match.id },

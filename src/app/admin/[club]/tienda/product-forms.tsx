@@ -50,6 +50,9 @@ export function ProductForm(props: { clubSlug: string; values?: ProductFormValue
         defaultValue={values?.price}
         placeholder="45.00"
       />
+      {values?.stock !== undefined && (
+        <input type="hidden" name="loadedStock" value={values.stock} />
+      )}
       <label className="flex flex-col gap-1.5 text-sm font-medium">
         Stock
         <input

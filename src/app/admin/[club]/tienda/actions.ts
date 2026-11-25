@@ -47,6 +47,11 @@ const productSchema = z.object({
     .string()
     .transform(parseStockInput)
     .refine((variants) => variants !== null, STOCK_FORMAT_MESSAGE),
+  // The stock the edit form showed; new products have none.
+  loadedStock: z
+    .string()
+    .optional()
+    .transform((raw) => (raw ? (parseStockInput(raw) ?? []) : [])),
 });
 
 const PRODUCT_MESSAGES: Record<InvalidProductReason, string> = {
@@ -87,14 +92,15 @@ export async function saveProductAction(
 ): Promise<ProductActionState> {
   const parsed = productSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { status: "error", message: parsed.error.issues[0].message };
-  const { clubSlug, productId, name, description, price, stock } = parsed.data;
+  const { clubSlug, productId, name, description, price, stock, loadedStock } = parsed.data;
   const club = await adminClub(clubSlug);
   if (!club) return { status: "error", message: NOT_ALLOWED_MESSAGE };
 
   const product = { name, description: description || null, priceCents: price!, variants: stock! };
   let id = productId;
   try {
-    if (id) await updateProduct({ clubId: club.id, productId: id, product });
+    if (id)
+      await updateProduct({ clubId: club.id, productId: id, product, loadedVariants: loadedStock });
     else id = (await createProduct({ clubId: club.id, product })).id;
   } catch (error) {
     return errorState(error);

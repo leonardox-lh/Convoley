@@ -62,9 +62,15 @@ export function fakeProductRepository(initial: StoredProduct[] = []) {
       return { id };
     },
     find: async (clubId, id) => rows.find((row) => row.id === id && row.clubId === clubId) ?? null,
-    update: async (id, product) => {
+    update: async (id, product, keepStockOf) => {
       const row = find(id);
-      Object.assign(row, product, { variants: variantsOf(product, row.variants) });
+      const stored = (size: string | null) => row.variants.find((old) => old.size === size)?.stock;
+      const variants = product.variants.map((variant) =>
+        keepStockOf.includes(variant.size)
+          ? { ...variant, stock: stored(variant.size) ?? 0 }
+          : variant,
+      );
+      Object.assign(row, product, { variants: variantsOf({ ...product, variants }, row.variants) });
     },
     appendImageKey: async (id, key, max) => {
       const row = find(id);

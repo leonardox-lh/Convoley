@@ -49,11 +49,11 @@ Modo: rápido, como en el Sprint 3 (sin aprobación por historia), una vez aprob
 
 ## Avance
 
-- [ ] HU-23 · Publicar productos
-- [ ] HU-24 · Comprar con carrito y pagar
-- [ ] HU-25 · Gestionar pedidos
-- [ ] HU-26 · Crear planes
-- [ ] HU-27 · Comprar plan y usar créditos
+- [x] HU-23 · Publicar productos
+- [x] HU-24 · Comprar con carrito y pagar
+- [x] HU-25 · Gestionar pedidos
+- [x] HU-26 · Crear planes
+- [x] HU-27 · Comprar plan y usar créditos
 
 ## Decisiones tomadas sin consultar
 
@@ -61,4 +61,14 @@ Modo: rápido, como en el Sprint 3 (sin aprobación por historia), una vez aprob
 - Los pedidos `pending_payment` abandonados se quedan así (no descuentan stock); "Pendiente" en HU-25 reúne `pending_payment` e `in_review`. Sin cancelación manual de pedidos (no se pidió).
 - Un segundo pago MP aprobado de un pedido o plan ya pagado se devuelve automáticamente, igual que en inscripciones.
 - Tallas: texto libre corto (máx. 10 caracteres); `size = null` = talla única.
-- Mover `settleMercadoPagoNotification` a `payments` toca el webhook del Sprint 3: sus tests se mueven y deben seguir en verde antes de agregar pedidos.
+- `settleMercadoPagoNotification` no se movió a `payments`: el webhook busca el dueño del pago (`findMercadoPagoPaymentOwner`) y llama al caso de uso de `registrations`, `store` o `plans`. Si el pago aún no está vinculado, prueba los tres en orden. Así el Sprint 3 no se tocó; a cambio, la liquidación se repite un poco en cada módulo.
+- Las fotos de producto usan el mismo almacenamiento y la ruta `/logos/[key]` de los logos, sin una ruta nueva.
+- El motivo de rechazo de vouchers de pedidos y planes se valida con Zod en `app/`.
+- `PlanPurchase` no tiene estado `cancelled` (nadie lo pidió). Las condiciones del plan se leen del `Plan`, que no se edita, en vez de copiarse a la compra.
+- Pagar con crédito no crea un `Payment` (no se mueve dinero nuevo); queda un `CreditUse`. El crédito vuelve al quitar la inscripción o cancelar la convocatoria.
+- El saldo de créditos se muestra en `/inscripcion/[id]` (botón "Usar una fecha de mi plan"); no se agregó a `/mis-inscripciones`.
+- **Riesgo aceptado (revisar)**: los créditos de un plan se encuentran por celular o por cuenta de Google, y el celular no se verifica (regla "sin códigos de verificación"). Alguien que se inscribe como invitado con el celular de otro jugador puede gastar sus fechas. Para cerrarlo habría que pedir Google para usar créditos, a decisión del producto.
+- Revisión: editar un producto solo cambia el stock de las tallas que el organizador modificó; las demás conservan lo vendido mientras el formulario estaba abierto (variantes bloqueadas con `FOR UPDATE`).
+- La lista de compras de planes del admin muestra las 100 más recientes (`shortcut:` en el código).
+- Las migraciones `add_plans` y `add_plan_purchases` se generaron con `prisma migrate diff` y se aplicaron solo a `convoley_test` en los tests de integración, no a la BD de desarrollo compartida. Falta `npx prisma migrate deploy` en dev y en Railway.
+- 4 tests de integración (logo y voucher) necesitan el S3Mock de `docker compose`, que no se levantó en esta sesión.

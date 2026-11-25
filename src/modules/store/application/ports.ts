@@ -29,8 +29,11 @@ export interface StoredProduct {
 export interface ProductRepository {
   create(clubId: string, product: ProductInput): Promise<{ id: string }>;
   find(clubId: string, productId: string): Promise<StoredProduct | null>;
-  /** Variants are matched by size; a size left out keeps its row (it may have sales) with stock 0. */
-  update(productId: string, product: ProductInput): Promise<void>;
+  /**
+   * Variants are matched by size; a size left out keeps its row (it may have sales) with stock 0.
+   * Sizes in `keepStockOf` keep the stored stock: orders may have taken units since the form loaded.
+   */
+  update(productId: string, product: ProductInput, keepStockOf: (string | null)[]): Promise<void>;
   /** Adds the photo only while the product has fewer than `max`; false when it was full. */
   appendImageKey(productId: string, key: string, max: number): Promise<boolean>;
   removeImageKey(productId: string, key: string): Promise<void>;
