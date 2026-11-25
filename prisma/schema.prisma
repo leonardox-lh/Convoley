@@ -44,6 +44,12 @@ enum PlayerPosition {
   any
 }
 
+// HU-31: asked only in mixed events, to respect the minimum of women per team.
+enum PlayerGender {
+  female
+  male
+}
+
 enum PlayerLevel {
   beginner
   intermediate
@@ -334,6 +340,9 @@ model Registration {
   phone         String
   position      PlayerPosition?
   level         PlayerLevel?
+  gender        PlayerGender?
+  // HU-31: team assigned when the organizer builds teams (1..8); null = no team yet.
+  teamNumber    Int?
   status        RegistrationStatus @default(pending_payment)
   // HU-21: while paying with Mercado Pago the seat is held only until this moment.
   reservedUntil DateTime?

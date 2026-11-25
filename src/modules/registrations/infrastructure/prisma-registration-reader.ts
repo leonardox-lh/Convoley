@@ -1,7 +1,11 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { SEAT_HOLDING_STATUSES } from "../domain/registration";
-import type { PlayerRegistrations, RegistrationListReader } from "../application/ports";
+import type {
+  PlayerRegistrations,
+  RegistrationListReader,
+  TeamAssignments,
+} from "../application/ports";
 
 type Client = Prisma.TransactionClient;
 
@@ -42,10 +46,36 @@ export const prismaRegistrationListReader: RegistrationListReader = {
         phone: true,
         position: true,
         level: true,
+        gender: true,
+        teamNumber: true,
         status: true,
         createdAt: true,
       },
     }),
+};
+
+export const prismaTeamAssignments: TeamAssignments = {
+  replaceAll: (eventId, teams) =>
+    db.$transaction(async (tx) => {
+      await tx.registration.updateMany({ where: { eventId }, data: { teamNumber: null } });
+      // One UPDATE per team, not per player.
+      const byTeam = new Map<number, string[]>();
+      for (const [id, team] of teams) byTeam.set(team, [...(byTeam.get(team) ?? []), id]);
+      for (const [teamNumber, ids] of byTeam) {
+        await tx.registration.updateMany({
+          where: { eventId, id: { in: ids } },
+          data: { teamNumber },
+        });
+      }
+    }),
+
+  async setTeam(eventId, registrationId, teamNumber) {
+    const { count } = await db.registration.updateMany({
+      where: { id: registrationId, eventId },
+      data: { teamNumber },
+    });
+    return count > 0;
+  },
 };
 
 export const prismaPlayerRegistrations: PlayerRegistrations = {

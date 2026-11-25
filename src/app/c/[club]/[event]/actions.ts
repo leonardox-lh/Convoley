@@ -17,7 +17,13 @@ import {
   PhoneNumber,
   registerGuest,
 } from "@/modules/registrations";
-import { levelField, nameField, PHONE_FORMAT_MESSAGE, positionField } from "../../../player-schema";
+import {
+  genderField,
+  levelField,
+  nameField,
+  PHONE_FORMAT_MESSAGE,
+  positionField,
+} from "../../../player-schema";
 
 export type RegisterState =
   | { status: "idle" }
@@ -37,6 +43,7 @@ const registerSchema = z.object({
   phone: z.string().trim().min(1, "Escribe tu celular."),
   position: positionField,
   level: levelField,
+  gender: genderField,
 });
 
 const ERROR_MESSAGES: [new (...args: never[]) => Error, string][] = [

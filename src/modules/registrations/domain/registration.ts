@@ -86,6 +86,10 @@ export const PLAYER_POSITIONS = [
 ] as const;
 export type PlayerPosition = (typeof PLAYER_POSITIONS)[number];
 
+export const PLAYER_GENDERS = ["female", "male"] as const;
+/** HU-31: asked only in mixed events. */
+export type PlayerGender = (typeof PLAYER_GENDERS)[number];
+
 export const PLAYER_LEVELS = ["beginner", "intermediate", "advanced"] as const;
 export type PlayerLevel = (typeof PLAYER_LEVELS)[number];
 

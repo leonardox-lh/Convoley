@@ -72,6 +72,7 @@ describe("HU-06 criterio 2: invitado con celular, sin cuenta", () => {
         userId: null,
         position: null,
         level: null,
+        gender: null,
       },
     ]);
   });

@@ -126,6 +126,7 @@ async function PublicEventContent({ params }: { params: Params }) {
           eventId={event.id}
           profile={profile}
           googleEnabled={isGoogleSignInEnabled}
+          isMixed={event.isMixed}
         />
       )}
     </>

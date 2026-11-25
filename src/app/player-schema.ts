@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PLAYER_LEVELS, PLAYER_POSITIONS } from "@/modules/registrations";
+import { PLAYER_GENDERS, PLAYER_LEVELS, PLAYER_POSITIONS } from "@/modules/registrations";
 
 const NAME_MAX_LENGTH = 60;
 
@@ -15,3 +15,5 @@ const emptyAsUndefined = (value: unknown) => (value === "" ? undefined : value);
 /** Optional position and level of the sign-up form (HU-10). */
 export const positionField = z.preprocess(emptyAsUndefined, z.enum(PLAYER_POSITIONS).optional());
 export const levelField = z.preprocess(emptyAsUndefined, z.enum(PLAYER_LEVELS).optional());
+/** HU-31: asked only in mixed events, where the form makes it required. */
+export const genderField = z.preprocess(emptyAsUndefined, z.enum(PLAYER_GENDERS).optional());

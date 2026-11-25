@@ -1,5 +1,5 @@
 // Type-only imports: client components use these labels without loading the module.
-import type { PlayerLevel, PlayerPosition } from "@/modules/registrations";
+import type { PlayerGender, PlayerLevel, PlayerPosition } from "@/modules/registrations";
 
 export const POSITION_LABELS: Record<PlayerPosition, string> = {
   setter: "Armador",
@@ -14,4 +14,9 @@ export const LEVEL_LABELS: Record<PlayerLevel, string> = {
   beginner: "Principiante",
   intermediate: "Intermedio",
   advanced: "Avanzado",
+};
+
+export const GENDER_LABELS: Record<PlayerGender, string> = {
+  female: "Chica",
+  male: "Chico",
 };

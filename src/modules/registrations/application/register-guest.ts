@@ -4,6 +4,7 @@ import {
   assertSpotAvailable,
   reservationDeadline,
   signUpStatus,
+  type PlayerGender,
   type PlayerLevel,
   type PlayerPosition,
   type SignUpStatus,
@@ -24,6 +25,8 @@ export interface RegisterGuestInput {
   userId: string | null;
   position?: PlayerPosition | null;
   level?: PlayerLevel | null;
+  /** HU-31: asked only in mixed events. */
+  gender?: PlayerGender | null;
 }
 
 interface RegisterPlayerDeps {
@@ -49,6 +52,7 @@ export async function registerPlayer(
     userId: input.userId,
     position: input.position ?? null,
     level: input.level ?? null,
+    gender: input.gender ?? null,
   };
 
   // The lock serializes sign-ups to this event: the count below can't go stale.

@@ -94,18 +94,25 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
       <div>
         <p className="text-sm text-zinc-500">{event.club.name}</p>
         <h1 className="text-2xl font-semibold tracking-tight">{event.title}</h1>
-        {can(organizer.role, "manage_club") && (
-          <Link href={`${basePath}/editar`} className="text-sm underline underline-offset-4">
-            Editar convocatoria
+        <div className="flex gap-4">
+          {can(organizer.role, "manage_club") && (
+            <Link href={`${basePath}/editar`} className="text-sm underline underline-offset-4">
+              Editar convocatoria
+            </Link>
+          )}
+          <Link href={`${basePath}/equipos`} className="text-sm underline underline-offset-4">
+            Armar equipos
           </Link>
-        )}
+        </div>
       </div>
 
       <p role="status" aria-label="Cupos" className="text-lg font-medium">
         {seats.taken} ocupados · {seats.free} libres
       </p>
 
-      {event.status === "published" && <AddPlayerForm clubSlug={clubSlug} eventId={event.id} />}
+      {event.status === "published" && (
+        <AddPlayerForm clubSlug={clubSlug} eventId={event.id} isMixed={event.isMixed} />
+      )}
 
       {!status && registrations.length > 0 && (
         <ListSharing

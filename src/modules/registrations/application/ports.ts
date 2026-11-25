@@ -1,5 +1,6 @@
 import type {
   EventSeatInfo,
+  PlayerGender,
   PlayerLevel,
   PlayerPosition,
   RegistrationStatus,
@@ -33,6 +34,8 @@ export interface PlayerDetails {
   /** Optional, for balanced teams later (HU-10). */
   position?: PlayerPosition | null;
   level?: PlayerLevel | null;
+  /** HU-31: only asked in mixed events. */
+  gender?: PlayerGender | null;
 }
 
 export interface RegistrationRepository {
@@ -139,12 +142,22 @@ export interface RegistrationListItem {
   phone: string;
   position: PlayerPosition | null;
   level: PlayerLevel | null;
+  gender: PlayerGender | null;
+  teamNumber: number | null;
   status: RegistrationStatus;
   createdAt: Date;
 }
 
 export interface RegistrationListReader {
   listByEvent(eventId: string): Promise<RegistrationListItem[]>;
+}
+
+/** HU-31: team numbers, set by the organizer. */
+export interface TeamAssignments {
+  /** Replaces every team of the event: listed registrations get theirs, the rest none. */
+  replaceAll(eventId: string, teams: Map<string, number>): Promise<void>;
+  /** False when the registration isn't in the event. */
+  setTeam(eventId: string, registrationId: string, teamNumber: number | null): Promise<boolean>;
 }
 
 export interface PlayerRegistration {

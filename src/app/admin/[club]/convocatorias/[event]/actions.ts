@@ -17,7 +17,7 @@ import {
   RegistrationNotFoundError,
   removeRegistration,
 } from "@/modules/registrations";
-import { nameField, PHONE_FORMAT_MESSAGE } from "../../../../player-schema";
+import { genderField, nameField, PHONE_FORMAT_MESSAGE } from "../../../../player-schema";
 import { NOT_ALLOWED_MESSAGE } from "../event-form-schema";
 import { requireOrganizer } from "../../require-organizer";
 
@@ -33,6 +33,7 @@ const addPlayerSchema = targetSchema.extend({
   firstName: nameField("Escribe el nombre."),
   lastName: nameField("Escribe el apellido."),
   phone: z.string().trim().min(1, "Escribe el celular."),
+  gender: genderField,
   markPaid: z.literal("on").optional(),
 });
 

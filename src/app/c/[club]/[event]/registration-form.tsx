@@ -5,6 +5,7 @@ import { useActionState, useState } from "react";
 import { fieldClass, FormMessage, submitKeepingValues, TextField } from "@/components/form";
 import { Button, buttonVariants } from "@/components/ui/button";
 import type { PlayerProfile } from "@/modules/identity";
+import { GenderSelect } from "../../../gender-select";
 import { LEVEL_LABELS, POSITION_LABELS } from "../../../player-labels";
 import { PaymentInstructions, type PaymentInfo } from "./payment-instructions";
 import { continueWithGoogleAction, registerAction, type RegisterState } from "./actions";
@@ -16,7 +17,10 @@ export function RegistrationForm({
   googleEnabled,
   waitlistOnly,
   paymentInfo,
+  isMixed,
 }: {
+  /** HU-31: mixed events ask the gender, for the minimum of women per team. */
+  isMixed: boolean;
   paymentInfo: PaymentInfo;
   club: string;
   eventId: string;
@@ -158,6 +162,7 @@ export function RegistrationForm({
           <OptionalSelect label="Posición" name="position" options={POSITION_LABELS} />
           <OptionalSelect label="Nivel" name="level" options={LEVEL_LABELS} />
         </div>
+        {isMixed && <GenderSelect />}
         {state.status === "error" && <FormMessage tone="error">{state.message}</FormMessage>}
         <Button type="submit" size="lg" disabled={pending}>
           {pending ? "Inscribiendo…" : waitlistOnly ? "Anotarme en la espera" : "Inscribirme"}

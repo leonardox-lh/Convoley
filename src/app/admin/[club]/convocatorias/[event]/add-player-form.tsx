@@ -3,9 +3,10 @@
 import { useActionState } from "react";
 import { FormMessage, submitKeepingValues, TextField } from "@/components/form";
 import { Button } from "@/components/ui/button";
+import { GenderSelect } from "../../../../gender-select";
 import { addPlayerAction, type RegistrationActionState } from "./actions";
 
-export function AddPlayerForm(props: { clubSlug: string; eventId: string }) {
+export function AddPlayerForm(props: { clubSlug: string; eventId: string; isMixed: boolean }) {
   const [state, formAction, pending] = useActionState<RegistrationActionState, FormData>(
     addPlayerAction,
     { status: "idle" },
@@ -32,6 +33,7 @@ export function AddPlayerForm(props: { clubSlug: string; eventId: string }) {
           autoComplete="off"
           placeholder="987654321"
         />
+        {props.isMixed && <GenderSelect />}
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" name="markPaid" className="size-5" />
           Ya pagó (pagado manual)

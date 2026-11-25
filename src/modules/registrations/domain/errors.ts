@@ -90,3 +90,22 @@ export class NoBalanceError extends Error {
     this.name = "NoBalanceError";
   }
 }
+
+/** HU-31: between 2 and 8 teams, and no more teams than players. */
+export class InvalidTeamCountError extends Error {
+  constructor(readonly teamCount: number) {
+    super(`Invalid number of teams: ${teamCount}`);
+    this.name = "InvalidTeamCountError";
+  }
+}
+
+/** HU-31: not enough women signed up for the mixed-team minimum. */
+export class NotEnoughWomenError extends Error {
+  constructor(
+    readonly needed: number,
+    readonly available: number,
+  ) {
+    super(`Mixed teams need ${needed} women, only ${available} signed up`);
+    this.name = "NotEnoughWomenError";
+  }
+}

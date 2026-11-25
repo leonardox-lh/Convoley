@@ -1,3 +1,4 @@
+import type { PlayerGender } from "../domain/registration";
 import { recordPaid } from "./mark-paid-manually";
 import type {
   EventSeats,
@@ -12,6 +13,8 @@ export interface AddPlayerManuallyInput {
   firstName: string;
   lastName: string;
   phone: string;
+  /** HU-31: asked only in mixed events. */
+  gender?: PlayerGender | null;
   /** The player already paid the organizer outside Convoley (cash, transfer). */
   markPaid: boolean;
   organizerUserId: string;

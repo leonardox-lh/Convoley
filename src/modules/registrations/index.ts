@@ -7,6 +7,7 @@ import {
   makeGetCancellationPreview,
 } from "./application/cancel-own-registration";
 import { makePayWithBalance, makePayWithCredit } from "./application/pay-with-credit";
+import { makeBuildEventTeams, makeListEventTeams, makeMoveToTeam } from "./application/teams";
 import {
   makeSettleMercadoPagoNotification,
   makeSettleMercadoPagoPayment,
@@ -33,6 +34,7 @@ import {
 import {
   prismaPlayerRegistrations,
   prismaRegistrationListReader,
+  prismaTeamAssignments,
 } from "./infrastructure/prisma-registration-reader";
 import {
   prismaRegistrationRepository,
@@ -171,3 +173,13 @@ export {
   countConfirmedRegistrationsByEvent,
   listEventRegistrationIds,
 } from "./infrastructure/prisma-registration-reader";
+
+// HU-31: teams.
+const teamDeps = { registrations: prismaRegistrationListReader, teams: prismaTeamAssignments };
+export const buildEventTeams = makeBuildEventTeams(teamDeps);
+export const moveToTeam = makeMoveToTeam(teamDeps);
+export const listEventTeams = makeListEventTeams(teamDeps);
+export type { EventTeam } from "./application/teams";
+export { MAX_TEAMS, MIN_TEAMS } from "./domain/teams";
+export { InvalidTeamCountError, NotEnoughWomenError } from "./domain/errors";
+export { PLAYER_GENDERS, type PlayerGender } from "./domain/registration";
