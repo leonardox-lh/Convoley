@@ -1,7 +1,7 @@
 "use client";
 
-import { DatePicker, TimePicker } from "@/components/date-time-pickers";
-import { Field, fieldClass, floatingFieldClass } from "@/components/form";
+import { DatePicker, SelectPicker, TimePicker } from "@/components/date-time-pickers";
+import { Field, floatingFieldClass } from "@/components/form";
 import { LocationPicker } from "@/components/location-picker";
 
 export { fieldClass, FormMessage, submitKeepingValues } from "@/components/form";
@@ -45,20 +45,12 @@ export function EventFields(props: {
           className={floatingFieldClass}
         />
       </Field>
-      <Field label="Nivel" float="always">
-        <select
-          name="communityId"
-          required
-          defaultValue={defaults?.communityId}
-          className={fieldClass}
-        >
-          {props.communities.map((community) => (
-            <option key={community.id} value={community.id}>
-              {community.name}
-            </option>
-          ))}
-        </select>
-      </Field>
+      <SelectPicker
+        label="Nivel"
+        name="communityId"
+        defaultValue={defaults?.communityId}
+        options={props.communities.map((community) => ({ value: community.id, label: community.name }))}
+      />
       {props.schedule ?? (
         <>
           <DatePicker label="Fecha" name="date" min={props.minDate} defaultValue={defaults?.date} />

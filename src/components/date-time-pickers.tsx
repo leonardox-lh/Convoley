@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDays, ChevronLeft, ChevronRight, Clock } from "lucide-react";
+import { CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { fieldClass } from "./form";
@@ -288,6 +288,66 @@ export function TimePicker(props: { label: string; name: string; defaultValue?: 
             </div>
           </div>
         </div>
+      )}
+    </div>
+  );
+}
+
+/** A list choice in the same popover style as the date picker (the native <select> can't be styled). */
+export function SelectPicker(props: {
+  label: string;
+  name: string;
+  options: { value: string; label: string }[];
+  defaultValue?: string;
+}) {
+  const { open, setOpen, ref } = usePopover();
+  const id = useId();
+  const [value, setValue] = useState(props.defaultValue ?? props.options[0]?.value ?? "");
+  const selected = props.options.find((option) => option.value === value);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-labelledby={`${id}-label ${id}-value`}
+        onClick={() => setOpen(!open)}
+        className={cn(fieldClass, "flex items-center gap-2 text-left", !selected && "text-muted-foreground/70")}
+      >
+        <span id={`${id}-value`} className="flex-1 truncate">
+          {selected?.label ?? "Elige una opción"}
+        </span>
+        <ChevronDown className={cn("size-4 shrink-0 text-primary transition-transform", open && "rotate-180")} aria-hidden />
+      </button>
+      <span id={`${id}-label`} className={pickerLabelClass}>
+        {props.label}
+      </span>
+      <RequiredValue name={props.name} value={value} />
+      {open && (
+        <ul role="listbox" aria-label={props.label} className={cn(panelClass, "w-full p-1.5")}>
+          {props.options.map((option) => {
+            const isSelected = option.value === value;
+            return (
+              <li key={option.value} role="option" aria-selected={isSelected}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setValue(option.value);
+                    setOpen(false);
+                  }}
+                  className={cn(
+                    "flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors hover:bg-secondary",
+                    isSelected && "bg-secondary text-primary",
+                  )}
+                >
+                  {option.label}
+                  {isSelected && <Check className="size-4" aria-hidden />}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
       )}
     </div>
   );
