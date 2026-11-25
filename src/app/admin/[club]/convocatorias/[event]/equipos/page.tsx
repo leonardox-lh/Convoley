@@ -79,13 +79,21 @@ async function TeamsContent({ params }: Pick<Props, "params">) {
         hasTeams={teams.length > 0}
       />
       {teams.length > 0 && (
-        <a
-          href={`${basePath}/equipos/imagen`}
-          download={`equipos-${event.id}.png`}
-          className="rounded-lg border border-zinc-300 px-4 py-2.5 text-center text-sm font-medium dark:border-zinc-700"
-        >
-          Descargar imagen de los equipos
-        </a>
+        <div className="grid grid-cols-2 gap-2">
+          {[
+            ["cuadrado", "Imagen cuadrada"],
+            ["historia", "Imagen para historia"],
+          ].map(([format, label]) => (
+            <a
+              key={format}
+              href={`${basePath}/equipos/imagen?formato=${format}`}
+              download={`equipos-${event.id}-${format}.png`}
+              className="rounded-lg border border-zinc-300 px-3 py-2.5 text-center text-sm font-medium dark:border-zinc-700"
+            >
+              {label}
+            </a>
+          ))}
+        </div>
       )}
       {teams.map((team) => (
         <section key={team.number} className="flex flex-col gap-1">
