@@ -1,9 +1,9 @@
 import { Prisma, type PrismaClient } from "@/generated/prisma/client";
 import type { ClubRepository } from "../application/ports";
+import { defaultLevelRows } from "../domain/community";
 import { ClubSlugTakenError } from "../domain/errors";
 
 const UNIQUE_VIOLATION = "P2002";
-const DEFAULT_COMMUNITY_NAME = "General";
 
 export function prismaClubRepository(db: PrismaClient): ClubRepository {
   return {
@@ -16,7 +16,7 @@ export function prismaClubRepository(db: PrismaClient): ClubRepository {
             logoKey,
             ...profile,
             members: { create: { userId: adminUserId, role: "admin" } },
-            communities: { create: { name: DEFAULT_COMMUNITY_NAME } },
+            communities: { create: defaultLevelRows(new Date()) },
           },
         });
       } catch (error) {

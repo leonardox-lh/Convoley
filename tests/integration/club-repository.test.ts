@@ -67,11 +67,16 @@ describe("HU-02: prismaClubRepository", () => {
 
     const club = await db.club.findUniqueOrThrow({
       where: { slug },
-      include: { members: true, communities: true },
+      include: { members: true, communities: { orderBy: { createdAt: "asc" } } },
     });
     expect(club).toMatchObject(profile);
     expect(club.members).toMatchObject([{ userId, role: "admin" }]);
-    expect(club.communities.map((community) => community.name)).toEqual(["General"]);
+    expect(club.communities.map((community) => community.name)).toEqual([
+      "General",
+      "Básico",
+      "Intermedio",
+      "Competitivo",
+    ]);
   });
 
   it("HU-02: no permite el mismo link dos veces", async () => {

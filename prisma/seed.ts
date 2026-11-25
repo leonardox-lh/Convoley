@@ -3,6 +3,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { config } from "dotenv";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { limaDateTimeToUtc, todayInLima } from "../src/lib/lima-time";
+import { defaultLevelRows } from "../src/modules/clubs/domain/community";
 import { scryptPasswordHasher } from "../src/modules/identity/infrastructure/scrypt-password-hasher";
 
 // Does not override an already-set DATABASE_URL (the integration test passes its own).
@@ -57,9 +58,9 @@ async function seed(db: PrismaClient) {
         primaryColor: "#1D4ED8",
         instagramUrl: "https://instagram.com/voleymiraflores",
         members: { create: { userId: organizer.id, role: "admin" } },
-        communities: { create: { name: "General" } },
+        communities: { create: defaultLevelRows(new Date()) },
       },
-      include: { communities: true },
+      include: { communities: { orderBy: { createdAt: "asc" } } },
     });
 
     const event = await tx.event.create({
