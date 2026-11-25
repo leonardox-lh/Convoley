@@ -146,6 +146,7 @@ export function RegistrationForm({
             />
             <TextField
               label="Apellido (opcional)"
+              required={false}
               name="lastName"
               autoComplete="family-name"
               defaultValue={profile?.lastName}
@@ -157,6 +158,7 @@ export function RegistrationForm({
         ) : (
           <TextField
             label="Celular (opcional)"
+            required={false}
             name="phone"
             type="tel"
             inputMode="numeric"
