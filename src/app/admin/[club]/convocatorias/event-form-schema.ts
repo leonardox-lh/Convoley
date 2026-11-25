@@ -12,6 +12,9 @@ import {
   InvalidCapacityError,
   InvalidMapsUrlError,
   InvalidPriceError,
+  InvalidRecurrenceError,
+  MAX_PUBLISH_DAYS_BEFORE,
+  RecurringEventNotFoundError,
 } from "@/modules/events";
 
 const TITLE_MAX_LENGTH = 80;
@@ -30,41 +33,61 @@ const optionalText = (max: number) =>
     .optional()
     .transform((value) => value || null);
 
+const eventFieldsObject = z.object({
+  clubSlug: z.string().min(1),
+  communityId: z.string().min(1, "Elige el nivel."),
+  title: z.string().trim().min(1, "Ponle un nombre a la convocatoria.").max(TITLE_MAX_LENGTH),
+  date: z.iso.date("Elige la fecha."),
+  time: z.string().regex(TIME_FORMAT, "Elige la hora."),
+  venueName: z.string().trim().min(1, "Indica el lugar.").max(VENUE_MAX_LENGTH),
+  mapsUrl: optionalText(URL_MAX_LENGTH),
+  price: z.string().transform((value, ctx) => {
+    const cents = solesToCents(value);
+    if (cents === null) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Escribe el precio en soles, por ejemplo 15 o 12.50.",
+      });
+      return z.NEVER;
+    }
+    return cents;
+  }),
+  capacity: z.coerce
+    .number("Escribe cuántos cupos hay.")
+    .max(MAX_CAPACITY, `Puedes abrir hasta ${MAX_CAPACITY} cupos.`),
+  isMixed: z
+    .literal("on")
+    .optional()
+    .transform((value) => value === "on"),
+  rules: optionalText(RULES_MAX_LENGTH),
+});
+
 /** The event fields shared by the create and edit forms, already turned into domain values. */
-export const eventDetailsSchema = z
-  .object({
-    clubSlug: z.string().min(1),
-    communityId: z.string().min(1, "Elige el nivel."),
-    title: z.string().trim().min(1, "Ponle un nombre a la convocatoria.").max(TITLE_MAX_LENGTH),
-    date: z.iso.date("Elige la fecha."),
-    time: z.string().regex(TIME_FORMAT, "Elige la hora."),
-    venueName: z.string().trim().min(1, "Indica el lugar.").max(VENUE_MAX_LENGTH),
-    mapsUrl: optionalText(URL_MAX_LENGTH),
-    price: z.string().transform((value, ctx) => {
-      const cents = solesToCents(value);
-      if (cents === null) {
-        ctx.addIssue({
-          code: "custom",
-          message: "Escribe el precio en soles, por ejemplo 15 o 12.50.",
-        });
-        return z.NEVER;
-      }
-      return cents;
-    }),
-    capacity: z.coerce
-      .number("Escribe cuántos cupos hay.")
-      .max(MAX_CAPACITY, `Puedes abrir hasta ${MAX_CAPACITY} cupos.`),
-    isMixed: z
-      .literal("on")
-      .optional()
-      .transform((value) => value === "on"),
-    rules: optionalText(RULES_MAX_LENGTH),
-  })
-  .transform(({ date, time, price, ...fields }) => ({
+export const eventDetailsSchema = eventFieldsObject.transform(
+  ({ date, time, price, ...fields }) => ({
     ...fields,
     startsAt: limaDateTimeToUtc(date, time),
     priceCents: price,
-  }));
+  }),
+);
+
+const MINUTES_PER_HOUR = 60;
+
+/** HU-28: the same fields with a weekday instead of a date. */
+export const recurringEventSchema = eventFieldsObject
+  .omit({ date: true })
+  .extend({
+    weekday: z.coerce.number().int().min(0).max(6, "Elige el día."),
+    publishDaysBefore: z.coerce
+      .number("Indica cuántos días antes se publica.")
+      .int("Indica cuántos días antes se publica.")
+      .min(0, `Publica entre 0 y ${MAX_PUBLISH_DAYS_BEFORE} días antes.`)
+      .max(MAX_PUBLISH_DAYS_BEFORE, `Publica entre 0 y ${MAX_PUBLISH_DAYS_BEFORE} días antes.`),
+  })
+  .transform(({ time, price, ...fields }) => {
+    const [hours, minutes] = time.split(":").map(Number);
+    return { ...fields, startMinute: hours * MINUTES_PER_HOUR + minutes, priceCents: price };
+  });
 
 const DOMAIN_ERROR_MESSAGES: [new (...args: never[]) => Error, string][] = [
   [EventInPastError, "La fecha y hora deben ser futuras."],
@@ -77,6 +100,8 @@ const DOMAIN_ERROR_MESSAGES: [new (...args: never[]) => Error, string][] = [
   [EventNotFoundError, "No encontramos la convocatoria."],
   [EventNotEditableError, "Esta convocatoria ya no se puede editar."],
   [EventAlreadyCancelledError, "Esta convocatoria ya está cancelada."],
+  [InvalidRecurrenceError, "Revisa el día, la hora y los días de anticipación."],
+  [RecurringEventNotFoundError, "No encontramos esa convocatoria recurrente."],
 ];
 
 /** The message to show for a business rule error, or null if the error is unexpected. */

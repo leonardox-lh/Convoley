@@ -14,6 +14,7 @@ function build(
     clubs: { findBySlug: async (slug) => (slug === CLUB.slug ? CLUB : null) },
     events: fakeEventRepository({ listInClub }),
     registrations: { countConfirmedByEvent },
+    publishDueOccurrences: async () => undefined,
     now: () => NOW,
   });
   return { listOpenEvents, listInClub, countConfirmedByEvent };

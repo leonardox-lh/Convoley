@@ -4,7 +4,14 @@ import { makeCreateEvent } from "./application/create-event";
 import { makeGetOrganizerEvent } from "./application/get-organizer-event";
 import { makeGetPublicEvent } from "./application/get-public-event";
 import { makeListOpenEvents } from "./application/list-open-events";
+import {
+  makeCreateRecurringEvent,
+  makeListRecurringEvents,
+  makePublishDueOccurrences,
+  makeSetRecurringEventPaused,
+} from "./application/recurring-events";
 import { makeUpdateEvent } from "./application/update-event";
+import { prismaRecurringEventRepository } from "./infrastructure/prisma-recurring-event-repository";
 import { clubsAdapter } from "./infrastructure/clubs-adapter";
 import { paymentsAdapter } from "./infrastructure/payments-adapter";
 import { creditsAdapter } from "./infrastructure/plans-adapter";
@@ -15,6 +22,8 @@ import { registrationsAdapter } from "./infrastructure/registrations-adapter";
 const events = new PrismaEventRepository(db);
 const transactions = prismaTransactions(db);
 const now = () => new Date();
+const recurring = prismaRecurringEventRepository(db);
+const publishDueOccurrences = makePublishDueOccurrences({ recurring, now });
 
 export const createEvent = makeCreateEvent({ clubs: clubsAdapter, events, now });
 export const getPublicEvent = makeGetPublicEvent({ clubs: clubsAdapter, events });
@@ -22,6 +31,7 @@ export const listOpenEvents = makeListOpenEvents({
   clubs: clubsAdapter,
   events,
   registrations: registrationsAdapter,
+  publishDueOccurrences,
   now,
 });
 export const getOrganizerEvent = makeGetOrganizerEvent({
@@ -45,6 +55,14 @@ export const cancelEvent = makeCancelEvent({
   transactions,
   now,
 });
+
+// HU-28: weekly events.
+const recurringDeps = { clubs: clubsAdapter, recurring, now };
+export const createRecurringEvent = makeCreateRecurringEvent(recurringDeps);
+export const listRecurringEvents = makeListRecurringEvents(recurringDeps);
+export const setRecurringEventPaused = makeSetRecurringEventPaused(recurringDeps);
+export type { CreateRecurringEventInput } from "./application/recurring-events";
+export { MAX_PUBLISH_DAYS_BEFORE } from "./domain/recurrence";
 
 export {
   lockEventForRegistration,
@@ -73,4 +91,6 @@ export {
   InvalidCapacityError,
   InvalidMapsUrlError,
   InvalidPriceError,
+  InvalidRecurrenceError,
+  RecurringEventNotFoundError,
 } from "./domain/errors";

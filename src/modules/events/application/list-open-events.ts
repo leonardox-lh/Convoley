@@ -6,11 +6,14 @@ export function makeListOpenEvents(deps: {
   clubs: ClubReader;
   events: EventRepository;
   registrations: ConfirmedCountsReader;
+  /** HU-28: weekly dates appear when the club's page is opened. */
+  publishDueOccurrences: (clubId: string) => Promise<void>;
   now: () => Date;
 }) {
   return async function listOpenEvents(clubSlug: string) {
     const club = await deps.clubs.findBySlug(clubSlug);
     if (!club) return null;
+    await deps.publishDueOccurrences(club.id);
     const events = await deps.events.listInClub(club.id, {
       statuses: LISTED_STATUSES,
       from: deps.now(),

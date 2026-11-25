@@ -4,6 +4,7 @@ import type {
   EventStatus,
   NewEvent,
 } from "../domain/event";
+import type { RecurrenceProps } from "../domain/recurrence";
 
 export interface ClubSummary {
   id: string;
@@ -78,4 +79,24 @@ export interface PaymentsMarker {
     input: { registrationIds: string[]; outcome: CancellationOutcome },
     tx: TransactionContext,
   ): Promise<void>;
+}
+
+/** HU-28: a weekly template and the dates published from it. */
+export interface RecurringEvent extends RecurrenceProps {
+  id: string;
+  clubId: string;
+  isPaused: boolean;
+}
+
+export interface RecurringEventRepository {
+  create(template: Omit<RecurringEvent, "id" | "isPaused">): Promise<{ id: string }>;
+  /** Newest first, with the community name for the list. */
+  listInClub(clubId: string): Promise<(RecurringEvent & { communityName: string })[]>;
+  /** False if the template isn't in this club. */
+  setPaused(clubId: string, recurringEventId: string, isPaused: boolean): Promise<boolean>;
+  /**
+   * Creates the published events for these slots; a slot that already has one (even cancelled
+   * or rescheduled) is skipped, so concurrent calls never duplicate a date.
+   */
+  publishOccurrences(template: RecurringEvent, slots: Date[]): Promise<void>;
 }

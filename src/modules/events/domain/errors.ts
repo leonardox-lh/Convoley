@@ -70,3 +70,18 @@ export class CapacityBelowConfirmedError extends Error {
     this.name = "CapacityBelowConfirmedError";
   }
 }
+
+/** HU-28: weekday, start time or "publish N days before" out of range. */
+export class InvalidRecurrenceError extends Error {
+  constructor() {
+    super("Invalid weekly schedule");
+    this.name = "InvalidRecurrenceError";
+  }
+}
+
+export class RecurringEventNotFoundError extends Error {
+  constructor(readonly recurringEventId: string) {
+    super(`Recurring event ${recurringEventId} not found in this club`);
+    this.name = "RecurringEventNotFoundError";
+  }
+}

@@ -178,15 +178,16 @@ model Club {
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
-  members       ClubMember[]
-  invitations   ClubInvitation[]
-  communities   Community[]
-  events        Event[]
-  payments      Payment[]
-  products      Product[]
-  orders        Order[]
-  plans         Plan[]
-  planPurchases PlanPurchase[]
+  members         ClubMember[]
+  invitations     ClubInvitation[]
+  communities     Community[]
+  events          Event[]
+  recurringEvents RecurringEvent[]
+  payments        Payment[]
+  products        Product[]
+  orders          Order[]
+  plans           Plan[]
+  planPurchases   PlanPurchase[]
 
   mercadoPagoConnection MercadoPagoConnection?
 }
@@ -243,8 +244,9 @@ model Community {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  club   Club    @relation(fields: [clubId], references: [id], onDelete: Cascade)
-  events Event[]
+  club            Club             @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  events          Event[]
+  recurringEvents RecurringEvent[]
 
   @@unique([clubId, name])
 }
@@ -268,15 +270,51 @@ model Event {
   cancelledAt         DateTime?
   // Chosen by the organizer on cancel; tells registered players what happens to their money.
   cancellationOutcome CancellationOutcome?
+  // HU-28: set when the event was published from a weekly template. `recurringSlot` is the
+  // scheduled start and never changes, so editing or cancelling the date doesn't recreate it.
+  recurringEventId    String?
+  recurringSlot       DateTime?
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
 
-  club          Club           @relation(fields: [clubId], references: [id], onDelete: Restrict)
-  community     Community      @relation(fields: [communityId], references: [id], onDelete: Restrict)
-  registrations Registration[]
-  pickupOrders  Order[]
+  club           Club            @relation(fields: [clubId], references: [id], onDelete: Restrict)
+  community      Community       @relation(fields: [communityId], references: [id], onDelete: Restrict)
+  recurringEvent RecurringEvent? @relation(fields: [recurringEventId], references: [id], onDelete: Restrict)
+  registrations  Registration[]
+  pickupOrders   Order[]
 
+  @@unique([recurringEventId, recurringSlot])
   @@index([clubId, startsAt])
+  @@index([communityId])
+}
+
+// HU-28: weekly template ("todos los martes 8 p. m."). Dates are published `publishDaysBefore`
+// days ahead, lazily when the club's pages are opened. Templates aren't edited, only paused.
+model RecurringEvent {
+  id                String   @id @default(cuid())
+  clubId            String
+  communityId       String
+  title             String
+  // 0 = Sunday … 6 = Saturday, in Lima.
+  weekday           Int
+  // Minutes after 00:00 in Lima.
+  startMinute       Int
+  venueName         String
+  mapsUrl           String?
+  priceCents        Int
+  capacity          Int
+  isMixed           Boolean  @default(false)
+  rules             String?
+  publishDaysBefore Int
+  isPaused          Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  club      Club      @relation(fields: [clubId], references: [id], onDelete: Restrict)
+  community Community @relation(fields: [communityId], references: [id], onDelete: Restrict)
+  events    Event[]
+
+  @@index([clubId])
   @@index([communityId])
 }
 

@@ -26,6 +26,8 @@ export function EventFields(props: {
   minDate: string;
   minCapacity?: number;
   defaults?: EventFieldValues;
+  /** HU-28: the recurring form asks for a weekday and time instead (`schedule`). */
+  schedule?: React.ReactNode;
 }) {
   const { defaults, minCapacity = 1 } = props;
   return (
@@ -57,29 +59,31 @@ export function EventFields(props: {
           ))}
         </select>
       </label>
-      <div className="grid grid-cols-2 gap-3">
-        <label className={labelClass}>
-          Fecha
-          <input
-            type="date"
-            name="date"
-            required
-            min={props.minDate}
-            defaultValue={defaults?.date}
-            className={fieldClass}
-          />
-        </label>
-        <label className={labelClass}>
-          Hora
-          <input
-            type="time"
-            name="time"
-            required
-            defaultValue={defaults?.time}
-            className={fieldClass}
-          />
-        </label>
-      </div>
+      {props.schedule ?? (
+        <div className="grid grid-cols-2 gap-3">
+          <label className={labelClass}>
+            Fecha
+            <input
+              type="date"
+              name="date"
+              required
+              min={props.minDate}
+              defaultValue={defaults?.date}
+              className={fieldClass}
+            />
+          </label>
+          <label className={labelClass}>
+            Hora
+            <input
+              type="time"
+              name="time"
+              required
+              defaultValue={defaults?.time}
+              className={fieldClass}
+            />
+          </label>
+        </div>
+      )}
       <label className={labelClass}>
         Lugar
         <input
