@@ -137,6 +137,7 @@ erDiagram
 | `registrations` | `Registration` | HU-06, HU-07, HU-08, HU-48 |
 | `payments` | `Payment`, `MercadoPagoConnection` | HU-08, HU-14, HU-15, HU-18, HU-19, HU-20 |
 | `store` | `Product`, `ProductVariant`, `Order`, `OrderItem` | HU-23, HU-24, HU-25 |
+| `plans` | `Plan` | HU-26 |
 
 Cada módulo solo lee y escribe sus propias tablas (ver `docs/ARQUITECTURA.md`). `Event.clubId` se repite aunque se pueda sacar de la comunidad, para que `events` filtre por club sin consultar tablas de `clubs`.
 
@@ -150,6 +151,7 @@ Cada módulo solo lee y escribe sus propias tablas (ver `docs/ARQUITECTURA.md`).
 - **Mercado Pago por organizador (HU-18)**: `MercadoPagoConnection` guarda los tokens OAuth cifrados con `MP_TOKEN_ENCRYPTION_KEY`. Una cuenta de MP solo puede estar conectada a un club (`mpUserId @unique`). Desconectar borra la fila y conserva los pagos.
 - **Cargo por servicio (HU-22)**: `Club.serviceFeeFixedCents` o `Club.serviceFeePercentBps` (puntos básicos), nunca los dos; un `CHECK` limita a S/ 50 o 20 %. Solo se suma en pagos con Mercado Pago y queda en `Payment.serviceFeeCents`; `amountCents` ya lo incluye.
 - **Reserva de cupo (HU-21)**: con MP conectado, una inscripción `pending_payment` guarda `reservedUntil` (10 minutos). Vencida, no cuenta como cupo; la siguiente escritura del evento la pasa a `cancelled` y el cupo va a la lista de espera. Cualquier cambio de estado borra `reservedUntil`.
+- **Planes (HU-26)**: `Plan` tiene `creditCount` (fechas; `null` = ilimitadas), `validityDays` (`null` = sin vencimiento) o ambos; un `CHECK` exige al menos uno, positivos, y precio > 0. `communityIds` es un arreglo de ids de `Community`: el plan solo vale en esas comunidades. Un plan no se edita, solo se desactiva (`isActive`), para no cambiar las condiciones de quien ya lo compró.
 - **Convoley no retiene dinero**: no hay saldos ni cuentas internas; `Payment` solo registra lo que pasó en la cuenta de Mercado Pago del organizador.
 - **Cancelar una convocatoria (HU-05)**: el organizador elige `refund` (devolución) o `balance` (saldo a favor). Se guarda en `Event.cancellationOutcome` (lo que ven los inscritos) y en cada `Payment` `approved` o `in_review` aún sin marcar, en la misma transacción. Es solo una marca: la devolución la hace el organizador en Mercado Pago. HU-14 debe marcar igual un pago que se apruebe después de la cancelación.
 - **Confirmados**: las inscripciones que ocupan cupo son las que no están `cancelled` (pagadas o no). Los cupos no pueden bajar de ese número.

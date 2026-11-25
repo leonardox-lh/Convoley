@@ -175,6 +175,7 @@ model Club {
   payments    Payment[]
   products    Product[]
   orders      Order[]
+  plans       Plan[]
 
   mercadoPagoConnection MercadoPagoConnection?
 }
@@ -408,4 +409,29 @@ model OrderItem {
 
   @@index([orderId])
   @@index([variantId])
+}
+
+// ─── plans ─────────────────────────────────────────────────────────────────
+
+// A package of dates or a period (HU-26): "4 fechas por S/ 50", "mensualidad". At least one of
+// creditCount / validityDays is set (SQL CHECK). Plans aren't edited, only deactivated, so the
+// terms never change for players who already bought one.
+model Plan {
+  id           String   @id @default(cuid())
+  clubId       String
+  name         String
+  priceCents   Int
+  // Dates included; null = unlimited during the validity period.
+  creditCount  Int?
+  // Days the plan lasts from its payment; null = no expiry.
+  validityDays Int?
+  // Communities whose events accept the plan's credits (ids; a deleted one just never matches).
+  communityIds String[]
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  club Club @relation(fields: [clubId], references: [id], onDelete: Restrict)
+
+  @@index([clubId])
 }
