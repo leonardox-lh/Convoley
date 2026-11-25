@@ -10,6 +10,8 @@ import {
   VoucherTooLargeError,
 } from "@/modules/payments";
 import {
+  CancellationNotAllowedError,
+  cancelOwnRegistration,
   EventNotOpenError,
   MercadoPagoUnavailableError,
   NoBalanceError,
@@ -185,4 +187,30 @@ export async function payWithMercadoPagoAction(
     };
   }
   redirect(`/inscripcion/${encodeURIComponent(registrationId)}?pagado=1`);
+}
+
+export type CancelState = { status: "idle" } | { status: "error"; message: string };
+
+const CANCEL_ERRORS: [new (...args: never[]) => Error, string][] = [
+  [CancellationNotAllowedError, "Ya no puedes cancelar esta inscripción."],
+  [EventNotOpenError, "Esta convocatoria ya no acepta cambios."],
+  [RegistrationNotFoundError, "No encontramos tu inscripción."],
+];
+
+/** HU-29: the player frees their seat from their private link. */
+export async function cancelOwnRegistrationAction(
+  _previous: CancelState,
+  formData: FormData,
+): Promise<CancelState> {
+  const parsed = creditSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { status: "error", message: "No encontramos tu inscripción." };
+  let result: string;
+  try {
+    result = await cancelOwnRegistration(parsed.data.registrationId);
+  } catch (error) {
+    const known = CANCEL_ERRORS.find(([type]) => error instanceof type);
+    if (known) return { status: "error", message: known[1] };
+    throw error;
+  }
+  redirect(`/inscripcion/${encodeURIComponent(parsed.data.registrationId)}?cancelado=${result}`);
 }

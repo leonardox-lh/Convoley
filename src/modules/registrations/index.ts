@@ -2,6 +2,10 @@ import { db } from "@/lib/db";
 import { makeAddPlayerManually } from "./application/add-player-manually";
 import { makeListEventRegistrations } from "./application/list-event-registrations";
 import { makeMarkPaidManually } from "./application/mark-paid-manually";
+import {
+  makeCancelOwnRegistration,
+  makeGetCancellationPreview,
+} from "./application/cancel-own-registration";
 import { makePayWithBalance, makePayWithCredit } from "./application/pay-with-credit";
 import {
   makeSettleMercadoPagoNotification,
@@ -16,7 +20,7 @@ import { makeApproveVoucher, makeRejectVoucher } from "./application/review-vouc
 import { makeSubmitVoucher } from "./application/submit-voucher";
 import { makeRegisterGuest } from "./application/register-guest";
 import { makeRemoveRegistration } from "./application/remove-registration";
-import { serviceFeesAdapter } from "./infrastructure/clubs-adapter";
+import { cancellationPoliciesAdapter, serviceFeesAdapter } from "./infrastructure/clubs-adapter";
 import { eventsAdapter } from "./infrastructure/events-adapter";
 import { creditsAdapter } from "./infrastructure/plans-adapter";
 import {
@@ -76,6 +80,10 @@ const playerFundsDeps = {
   now,
 };
 export const payWithCredit = makePayWithCredit(playerFundsDeps);
+// HU-29: the player cancels from their link, under the club's policy (HU-30).
+const cancelDeps = { ...playerFundsDeps, policies: cancellationPoliciesAdapter };
+export const cancelOwnRegistration = makeCancelOwnRegistration(cancelDeps);
+export const getCancellationPreview = makeGetCancellationPreview(cancelDeps);
 export const payWithBalance = makePayWithBalance(playerFundsDeps);
 
 export const submitVoucher = makeSubmitVoucher({

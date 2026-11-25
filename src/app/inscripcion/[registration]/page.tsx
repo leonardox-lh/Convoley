@@ -15,7 +15,12 @@ import {
   MAX_VOUCHER_BYTES,
 } from "@/modules/payments";
 import { getBalance, getCreditBalance } from "@/modules/plans";
-import { findRegistrationOverview } from "@/modules/registrations";
+import {
+  CancellationNotAllowedError,
+  type CancellationResult,
+  findRegistrationOverview,
+  getCancellationPreview,
+} from "@/modules/registrations";
 import { PaymentInstructions } from "../../c/[club]/[event]/payment-instructions";
 import { loadPaymentInfo } from "../../payment-info";
 import {
@@ -28,6 +33,7 @@ import {
   payWithMercadoPagoAction,
   submitVoucherAction,
 } from "./actions";
+import { CancelRegistrationForm, CopyLinkButton } from "./cancel-form";
 import { PayWithCreditForm } from "./pay-with-credit-form";
 import { MercadoPagoCheckout } from "./mercado-pago-checkout";
 import { VoucherForm } from "./voucher-form";
@@ -56,7 +62,7 @@ async function RegistrationContent({ params, searchParams }: Props) {
   if (!registration) notFound();
   const [event] = await listEventSummaries([registration.eventId]);
   if (!event) notFound();
-  const { enviado, pagado } = await searchParams;
+  const { enviado, pagado, cancelado } = await searchParams;
   // HU-21: an ended reservation no longer holds the seat, even before a sign-up releases it.
   const reservationEnded =
     registration.status === "pending_payment" &&
@@ -104,6 +110,15 @@ async function RegistrationContent({ params, searchParams }: Props) {
           {REGISTRATION_STATUS_LABELS[registration.status]}
         </span>
       </p>
+      {typeof cancelado === "string" && cancelado in CANCELLED_MESSAGES && (
+        <FormMessage tone="ok">{CANCELLED_MESSAGES[cancelado as CancellationResult]}</FormMessage>
+      )}
+      {registration.status !== "cancelled" && (
+        <div className="flex items-center justify-between gap-3 text-sm text-zinc-500">
+          <span>Guarda este link: con él pagas o cancelas.</span>
+          <CopyLinkButton />
+        </div>
+      )}
       {pagado && registration.status === "paid" && (
         <FormMessage tone="ok">¡Pago confirmado! Ya estás en la lista.</FormMessage>
       )}
@@ -212,7 +227,40 @@ async function RegistrationContent({ params, searchParams }: Props) {
           />
         </section>
       )}
+      {event.status !== "cancelled" && (
+        <CancelSection registrationId={registration.id} priceCents={event.priceCents} />
+      )}
     </>
+  );
+}
+
+const CANCELLED_MESSAGES: Record<CancellationResult, string> = {
+  nothing_paid: "Cancelaste tu inscripción. Tu cupo quedó libre.",
+  balance: "Cancelaste tu inscripción. Lo que pagaste quedó como saldo a favor en el club.",
+  returned: "Cancelaste tu inscripción. Te devolvimos tu fecha o tu saldo.",
+  forfeited: "Cancelaste tu inscripción. Como fue después del límite, el pago se pierde.",
+};
+
+/** HU-29: "¿No puedes ir?", with what the player keeps under the club's policy (HU-30). */
+async function CancelSection(props: { registrationId: string; priceCents: number }) {
+  let preview: CancellationResult;
+  try {
+    preview = await getCancellationPreview(props.registrationId);
+  } catch (error) {
+    if (error instanceof CancellationNotAllowedError) return null;
+    throw error;
+  }
+  const outcome: Record<CancellationResult, string> = {
+    nothing_paid: "Tu cupo quedará libre para otro jugador.",
+    balance: `Te quedará ${formatSoles(props.priceCents)} de saldo a favor para otra fecha del club.`,
+    returned: "Recuperas tu fecha del plan o tu saldo.",
+    forfeited: "Ya pasó el límite para cancelar: perderás lo que pagaste.",
+  };
+  return (
+    <section className="flex flex-col gap-2 border-t border-zinc-200 pt-4 dark:border-zinc-800">
+      <h2 className="text-lg font-semibold">¿No puedes ir?</h2>
+      <CancelRegistrationForm registrationId={props.registrationId} outcome={outcome[preview]} />
+    </section>
   );
 }
 
