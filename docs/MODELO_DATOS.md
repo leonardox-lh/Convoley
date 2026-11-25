@@ -138,6 +138,7 @@ erDiagram
 | `payments` | `Payment`, `MercadoPagoConnection` | HU-08, HU-14, HU-15, HU-18, HU-19, HU-20 |
 | `store` | `Product`, `ProductVariant`, `Order`, `OrderItem` | HU-23, HU-24, HU-25 |
 | `plans` | `Plan`, `PlanPurchase`, `CreditUse`, `PlayerBalance`, `BalanceUse` | HU-26, HU-27, HU-30 |
+| `billing` | `Subscription`, `SubscriptionPayment` | HU-35, HU-36 |
 
 Cada módulo solo lee y escribe sus propias tablas (ver `docs/ARQUITECTURA.md`). `Event.clubId` se repite aunque se pueda sacar de la comunidad, para que `events` filtre por club sin consultar tablas de `clubs`.
 
@@ -157,6 +158,9 @@ Cada módulo solo lee y escribe sus propias tablas (ver `docs/ARQUITECTURA.md`).
 - **Recurrentes (HU-28)**: `RecurringEvent` es una plantilla semanal (día 0–6 y minuto 0–1439 en hora Lima, `publishDaysBefore` 0–13). Las fechas se crean como `Event` `published` al abrir las páginas del club, con `recurringEventId` + `recurringSlot` (inicio programado, nunca cambia) y `@@unique([recurringEventId, recurringSlot])` + `ON CONFLICT DO NOTHING`: dos visitas a la vez no duplican y una fecha editada o cancelada no se recrea. Las plantillas no se editan, solo se pausan.
 - **Saldo a favor (HU-30)**: `Club.cancellationDeadlineHours` (0–168, `null` = sin política). Si el jugador cancela algo pagado con dinero antes del límite, el precio pasa a `PlayerBalance` (por club + cuenta de Google, `CHECK balanceCents >= 0`). Un invitado que cancela a tiempo no genera saldo (`guest_forfeited`): el celular no identifica a nadie. Es crédito para pagar inscripciones completas del mismo club, no dinero que Convoley guarde o devuelva. Pagar con saldo crea un `BalanceUse` (`registrationId @unique`) y descuenta con un `UPDATE ... WHERE balanceCents >= monto`. Quitar la inscripción o cancelar la convocatoria devuelve el saldo usado, igual que los créditos.
 - **Equipos (HU-31)**: `Registration.gender` (`female | male`, solo se pregunta en mixtos) y `Registration.teamNumber` (1–8, `null` = sin equipo).
+- **Suscripción (HU-35/36)**: `Subscription` (una por club, `clubId` como llave) guarda `trialEndsAt`, `paidUntil` y `suspendedAt`. El club puede editar hasta `max(trialEndsAt, paidUntil)` y si no está suspendido; si no, queda en solo lectura. El cobro es manual: el dueño de Convoley registra cada pago en `/plataforma`, que crea un `SubscriptionPayment` (`CHECK amountCents > 0`) y mueve `paidUntil` 30 días desde `max(vencimiento, hoy)` con un `UPDATE ... WHERE paidUntil = <el que vio el formulario>`, para que un doble clic no sume dos meses. La migración da 30 días de prueba a los clubes que ya existían. Es dinero del club a Convoley, nunca de los jugadores.
+- **Finanzas (HU-34)**: `Event.courtCostCents` (`null` = sin registrar, `CHECK >= 0`). Lo recaudado se calcula de los `Payment` `approved`; no se guarda.
+- **Check-in (HU-38)**: `Registration.checkedInAt` (`null` = no marcó asistencia). Solo se marca en inscripciones que ocupan cupo.
 - **Convoley no retiene dinero**: no hay cuentas internas de dinero (el saldo a favor de HU-30 es crédito dentro del club); `Payment` solo registra lo que pasó en la cuenta de Mercado Pago del organizador.
 - **Cancelar una convocatoria (HU-05)**: el organizador elige `refund` (devolución) o `balance` (saldo a favor). Se guarda en `Event.cancellationOutcome` (lo que ven los inscritos) y en cada `Payment` `approved` o `in_review` aún sin marcar, en la misma transacción. Es solo una marca: la devolución la hace el organizador en Mercado Pago. HU-14 debe marcar igual un pago que se apruebe después de la cancelación.
 - **Confirmados**: las inscripciones que ocupan cupo son las que no están `cancelled` (pagadas o no). Los cupos no pueden bajar de ese número.
@@ -171,9 +175,6 @@ Cada módulo solo lee y escribe sus propias tablas (ver `docs/ARQUITECTURA.md`).
 | Posición y nivel del jugador | HU-10 |
 | Lista de espera (`WaitlistEntry`) | HU-12 |
 | Configuración de Yape / QR | HU-13 |
-| Costo de cancha | HU-34 |
-| Suscripción de Convoley | HU-35 |
-| Check-in | HU-38 |
 
 ## Comandos
 

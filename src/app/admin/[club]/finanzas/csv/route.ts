@@ -6,7 +6,7 @@ import { buildFinanceReport } from "../finance-report";
 // Excel only reads UTF-8 (tildes) when the file starts with a byte order mark.
 const UTF8_BOM = String.fromCharCode(0xfeff);
 // A cell starting with one of these runs as a formula in Excel: prefix it to show it as text.
-const FORMULA_START = /^[=+\-@]/;
+const FORMULA_START = /^[=+\-@\t\r]/;
 
 const cell = (value: string) => `"${value.replaceAll('"', '""')}"`;
 // Only free text typed by organizers needs it; amounts stay numbers (a loss starts with "-").

@@ -56,11 +56,11 @@ Modo: rápido, sin aprobación por historia, una vez aprobado este plan. **No se
 
 ## Avance
 
-- [ ] HU-35 · Suscripción con prueba gratis y solo lectura
-- [ ] HU-36 · Panel del dueño de Convoley
-- [ ] HU-34 · Finanzas
-- [ ] HU-38 · Check-in con QR
-- [ ] HU-37 · Flyer 9:16
+- [x] HU-35 · Suscripción con prueba gratis y solo lectura
+- [x] HU-36 · Panel del dueño de Convoley
+- [x] HU-34 · Finanzas
+- [x] HU-38 · Check-in con QR
+- [x] HU-37 · Flyer 9:16
 
 ## Riesgos
 
@@ -73,4 +73,13 @@ Modo: rápido, sin aprobación por historia, una vez aprobado este plan. **No se
 
 ## Decisiones tomadas sin consultar
 
-- (vacío)
+- **Doble pago de suscripción**: en vez de `FOR UPDATE`, un `UPDATE ... WHERE paidUntil = <el que vio el formulario>` dentro de la transacción. Si no actualiza ninguna fila, no se registra el pago. El efecto es el mismo con menos código.
+- **Suscripción perezosa**: si un club no tiene fila de `Subscription`, se crea con 30 días de prueba la primera vez que se consulta. Los clubes nuevos la crean al registrarse.
+- **Sin enlace a Finanzas para el ayudante**: Finanzas y Suscripción requieren `manage_club`.
+- **Recaudado (HU-34)**: suma los pagos `approved` aunque la inscripción se haya cancelado después. Si el jugador cancela, el dinero se convierte en saldo a favor o se devuelve por fuera de Convoley, y eso no se refleja aquí.
+- **Reporte de finanzas en `app/`** (`finanzas/finance-report.ts`): combina lecturas de cuatro módulos, sin reglas de dominio propias. El reviewer sugirió moverlo a un caso de uso; se dejó así para no crear puertos con una sola implementación.
+- **Check-in en solo lectura**: un club en solo lectura tampoco puede marcar asistencia. Es coherente con HU-35. Si molesta el día del partido, basta con cambiar `checkInAction` a `requireOrganizer`.
+- **QR**: lo ve el jugador mientras ocupa cupo (pendiente, en revisión o pagado), si la convocatoria no está cancelada.
+- **Flyer**: se muestra solo en convocatorias publicadas o llenas.
+- **Pendiente anotado**: `SubscriptionPayment` → `Subscription` usa `RESTRICT`. Si algún día se borran clubes con pagos registrados, habrá que ajustarlo. Un `clubId` manipulado en `/plataforma` da error 500; solo afecta al dueño.
+- **Dependencias**: se instaló `uqr` (aprobado). La worktree no tenía `node_modules`: se corrió `npm ci` con el lockfile.
