@@ -21,6 +21,8 @@ export function makeSpendBalance(deps: Deps) {
     input: BalanceKey & { amountCents: number; registrationId: string },
     tx: TransactionContext,
   ) => {
+    // A free event has nothing to pay; BalanceUse requires a positive amount.
+    if (input.amountCents <= 0) throw new NoBalanceAvailableError();
     const spent = await deps.balances.spend(input, input, tx);
     if (!spent) throw new NoBalanceAvailableError();
   };

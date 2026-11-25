@@ -110,9 +110,11 @@ async function RegistrationContent({ params, searchParams }: Props) {
           {REGISTRATION_STATUS_LABELS[registration.status]}
         </span>
       </p>
-      {typeof cancelado === "string" && cancelado in CANCELLED_MESSAGES && (
-        <FormMessage tone="ok">{CANCELLED_MESSAGES[cancelado as CancellationResult]}</FormMessage>
-      )}
+      {registration.status === "cancelled" &&
+        typeof cancelado === "string" &&
+        cancelado in CANCELLED_MESSAGES && (
+          <FormMessage tone="ok">{CANCELLED_MESSAGES[cancelado as CancellationResult]}</FormMessage>
+        )}
       {registration.status !== "cancelled" && (
         <div className="flex items-center justify-between gap-3 text-sm text-zinc-500">
           <span>Guarda este link: con él pagas o cancelas.</span>

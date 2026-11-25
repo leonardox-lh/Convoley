@@ -13,7 +13,7 @@ describe("HU-33: después de ingresar vuelve al link de invitación", () => {
     expect(safeReturnPath("/invitacion/abc")).toBe("/invitacion/abc");
   });
 
-  it.each(["//evil.com", "/\\evil.com", "https://evil.com", undefined, ["/a"]])(
+  it.each(["//evil.com", "/\\evil.com", "/\t/evil.com", "https://evil.com", undefined, ["/a"]])(
     "HU-33: ignora %s y va al admin",
     (value) => {
       expect(safeReturnPath(value)).toBe(AFTER_SIGN_IN_PATH);

@@ -7,8 +7,9 @@ export const AFTER_SIGN_IN_PATH = "/admin";
 /** Query param that brings the user back after signing in, e.g. to an invitation (HU-33). */
 export const RETURN_PATH_PARAM = "volver";
 
-// Only paths of this site: "//evil.com" or "/\evil.com" would leave it (open redirect).
-const returnPathSchema = z.string().regex(/^\/(?![/\\])/);
+// Only paths of this site: "//evil.com" or "/\evil.com" would leave it (open redirect). Control
+// characters are refused too: browsers strip tabs, so "/\t/evil.com" would become "//evil.com".
+const returnPathSchema = z.string().regex(/^\/(?![/\\])[^\x00-\x1f]*$/);
 
 export function safeReturnPath(value: unknown): string {
   const parsed = returnPathSchema.safeParse(value);

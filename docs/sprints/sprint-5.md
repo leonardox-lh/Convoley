@@ -2,7 +2,7 @@
 
 Rama: `feat/sprint-5-operacion-semanal` (sale de `main`, que ya tiene el Sprint 4, commit `df0bdad`).
 Orden: HU-33 → HU-28 → HU-30 → HU-29 → HU-31 → HU-32. Los permisos (HU-33) protegen todas las pantallas nuevas. La política y el saldo (HU-30) van antes de la cancelación del jugador (HU-29). Los equipos (HU-31) van antes de su imagen (HU-32). Un commit por historia, un test por criterio y revisión del `reviewer` al final.
-Modo: rápido, como en el Sprint 4 (sin aprobación por historia), una vez aprobado este plan. **Plan pendiente de aprobación.**
+Modo: rápido, como en el Sprint 4 (sin aprobación por historia), una vez aprobado este plan. **Plan aprobado.**
 
 ## Plan propuesto
 
@@ -91,13 +91,25 @@ Modo: rápido, como en el Sprint 4 (sin aprobación por historia), una vez aprob
 
 ## Avance
 
-- [ ] HU-33 · Coorganizadores con roles
-- [ ] HU-28 · Convocatorias recurrentes
-- [ ] HU-30 · Política de cancelación con saldo a favor
-- [ ] HU-29 · Cancelar inscripción con link
-- [ ] HU-31 · Armar equipos parejos
-- [ ] HU-32 · Imagen de los equipos
+- [x] HU-33 · Coorganizadores con roles
+- [x] HU-28 · Convocatorias recurrentes
+- [x] HU-30 · Política de cancelación con saldo a favor
+- [x] HU-29 · Cancelar inscripción con link
+- [x] HU-31 · Armar equipos parejos
+- [x] HU-32 · Imagen de los equipos
 
 ## Decisiones tomadas sin consultar
 
-- (ninguna todavía)
+- **Tests:** a pedido del usuario, desde HU-28 no se escribieron tests nuevos para ir más rápido. HU-33 sí tiene tests (permisos, invitaciones, último admin y `?volver=`); HU-28 conserva los suyos (recurrencia en hora Lima). Las demás historias solo se cubren con typecheck, lint y los tests existentes. Falta probarlas a mano en el celular (375px).
+- **Permisos:** solo dos: `manage_club` (admin) y `run_game_day` (admin y ayudante), en lugar de los cuatro del plan. `requireOrganizer(clubSlug, permiso)` reemplazó todas las comparaciones `role !== "admin"`. Editar la convocatoria ahora es solo del admin: el ayudante ya no ve el link.
+- **Invitaciones:** `/ingresar` y `/registro` aceptan `?volver=` (solo rutas internas, sin `//`, `/\` ni caracteres de control) para volver al link de invitación. Se reservaron los slugs `invitacion`, `pedido` y `plan`; los dos últimos faltaban desde el Sprint 4.
+- **`/admin` lleva a `/admin/[club]`,** el nuevo inicio del club, en vez de a "Nueva convocatoria". Se ajustaron los e2e con `signInToNewEvent`.
+- **Recurrentes:** `Event.recurringSlot` guarda el inicio programado, que nunca cambia. Así, una fecha que el organizador movió o canceló no se vuelve a crear. "Publicar N días antes" cuenta días calendario de Lima: 0 significa desde las 00:00 del mismo día. La primera versión con 0 nunca publicaba nada.
+- **Saldo a favor:** se acredita el precio vigente de la convocatoria (`event.priceCents`), sin el cargo por servicio. También vale para pagos marcados a mano. Si la convocatoria es gratis, no se acredita nada y no se puede pagar con saldo.
+- **Cancelar con crédito o saldo después del límite:** se pierde, igual que el dinero.
+- **Género:** es obligatorio en el formulario (`required`) solo en convocatorias mixtas. El servidor lo acepta como opcional, porque el caso de uso de inscripción no conoce `isMixed`. Riesgo bajo: es un dato para armar equipos, no de dinero.
+- **Equipos:** se guarda la suma de niveles de cada equipo y se muestra para ver qué tan parejos están. Las chicas que cubren el mínimo se reparten en serpiente por nivel.
+- **Imagen de equipos:** está en cuadrado y en historia, con el mismo encabezado y pie que la lista (`imagen/image-header.tsx`, `imagen/image-assets.ts`). Muestra el nombre y la inicial del apellido.
+- **Riesgo aceptado (revisar):** el saldo a favor, como los créditos de plan del Sprint 4, se encuentra por club + celular, y el celular no se verifica. Alguien que se inscribe como invitado con el celular de otro jugador puede gastar su saldo. Para cerrarlo habría que exigir Google para usar el saldo (`PlayerBalance.userId`), y es decisión del producto.
+- **Pendiente menor del reviewer:** la vista previa de cancelación en `/inscripcion/[id]` toma el bloqueo del evento en cada visita. Funciona, pero serializa lecturas; conviene una variante sin bloqueo si hay mucho tráfico.
+- **Migraciones nuevas** (`add_club_invitations`, `add_recurring_events`, `add_cancellation_policy_and_balance`, `add_teams`): se generaron con `prisma migrate diff` y CHECKs a mano. No se aplicaron a ninguna BD. Falta `npx prisma migrate deploy` en dev y en Railway, junto con las dos del Sprint 4.
