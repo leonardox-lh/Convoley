@@ -38,14 +38,15 @@ export interface Buyer {
   lastName: string;
   /** Normalized +519XXXXXXXX. */
   phone: string;
-  userId: string | null;
+  /** Required: a plan is only bought signed in with Google, so nobody can use it by phone. */
+  userId: string;
 }
 
 /** The player whose credits are looked up: same phone, or same Google account. */
+/** HU-27: plans belong to the buyer's Google account, the only identity Convoley verifies. */
 export interface PlayerKey {
   clubId: string;
-  phone: string;
-  userId: string | null;
+  userId: string;
 }
 
 export interface LockedPurchase {
@@ -167,10 +168,10 @@ export interface PurchasePayments {
 
 // ─── Balance in favor (HU-30) ───
 
+/** HU-30: balance belongs to the player's Google account, never to a phone anyone can type. */
 export interface BalanceKey {
   clubId: string;
-  /** Normalized +519XXXXXXXX. */
-  phone: string;
+  userId: string;
 }
 
 export interface BalanceRepository {

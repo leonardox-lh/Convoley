@@ -4,33 +4,33 @@ import { toPrismaTx } from "./prisma-purchase-repository";
 
 export function prismaBalanceRepository(db: PrismaClient): BalanceRepository {
   return {
-    async find({ clubId, phone }) {
+    async find({ clubId, userId }) {
       const row = await db.playerBalance.findUnique({
-        where: { clubId_phone: { clubId, phone } },
+        where: { clubId_userId: { clubId, userId } },
         select: { balanceCents: true },
       });
       return row?.balanceCents ?? 0;
     },
 
-    async add({ clubId, phone }, amountCents, tx) {
+    async add({ clubId, userId }, amountCents, tx) {
       await toPrismaTx(tx).playerBalance.upsert({
-        where: { clubId_phone: { clubId, phone } },
-        create: { clubId, phone, balanceCents: amountCents },
+        where: { clubId_userId: { clubId, userId } },
+        create: { clubId, userId, balanceCents: amountCents },
         update: { balanceCents: { increment: amountCents } },
       });
     },
 
-    async spend({ clubId, phone }, { amountCents, registrationId }, tx) {
+    async spend({ clubId, userId }, { amountCents, registrationId }, tx) {
       const client = toPrismaTx(tx);
       // The condition and the decrement are one statement: two sign-ups at once can't both
       // spend the same balance, and the CHECK keeps it from going negative anyway.
       const { count } = await client.playerBalance.updateMany({
-        where: { clubId, phone, balanceCents: { gte: amountCents } },
+        where: { clubId, userId, balanceCents: { gte: amountCents } },
         data: { balanceCents: { decrement: amountCents } },
       });
       if (count === 0) return false;
       const balance = await client.playerBalance.findUniqueOrThrow({
-        where: { clubId_phone: { clubId, phone } },
+        where: { clubId_userId: { clubId, userId } },
         select: { id: true },
       });
       await client.balanceUse.create({

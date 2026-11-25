@@ -9,8 +9,10 @@ const MS_PER_HOUR = 60 * 60 * 1000;
  * - `balance`: paid with money before the deadline; the price becomes balance in the club.
  * - `returned`: paid with a plan credit or balance before the deadline; it goes back.
  * - `forfeited`: paid, but past the deadline (or the club has no policy); it is lost.
+ * - `guest_forfeited`: paid with money in time, but as a guest: balance needs a Google account.
  */
-export type CancellationResult = "nothing_paid" | "balance" | "returned" | "forfeited";
+export type CancellationResult =
+  "nothing_paid" | "balance" | "returned" | "forfeited" | "guest_forfeited";
 
 /** Last moment to cancel keeping the payment, or null when the club has no policy. */
 export function cancellationDeadline(startsAt: Date, deadlineHours: number | null): Date | null {
@@ -21,6 +23,8 @@ export function cancellationDeadline(startsAt: Date, deadlineHours: number | nul
 export function cancellationResult(input: {
   status: RegistrationStatus;
   paidWithoutMoney: boolean;
+  /** Signed up with Google: only then can money become balance (a phone proves nothing). */
+  hasAccount: boolean;
   startsAt: Date;
   now: Date;
   deadlineHours: number | null;
@@ -32,5 +36,6 @@ export function cancellationResult(input: {
   if (input.status !== "paid") return "nothing_paid";
   const deadline = cancellationDeadline(input.startsAt, input.deadlineHours);
   if (!deadline || input.now > deadline) return "forfeited";
-  return input.paidWithoutMoney ? "returned" : "balance";
+  if (input.paidWithoutMoney) return "returned";
+  return input.hasAccount ? "balance" : "guest_forfeited";
 }

@@ -77,7 +77,7 @@ export const returnCredits = async (registrationIds: string[], tx: PrismaTransac
 const balances = prismaBalanceRepository(db);
 const earn = makeEarnBalance({ balances });
 const spend = makeSpendBalance({ balances });
-export const getBalance = (input: { clubId: string; phone: string }) => balances.find(input);
+export const getBalance = (input: { clubId: string; userId: string }) => balances.find(input);
 export const earnBalance = (input: Parameters<typeof earn>[0], tx: PrismaTransaction) =>
   earn(input, fromPrismaTx(tx));
 export const spendBalance = (input: Parameters<typeof spend>[0], tx: PrismaTransaction) =>

@@ -41,7 +41,7 @@ const PLAN = {
 interface Row extends CreditSource {
   clubId: string;
   phone: string;
-  userId: string | null;
+  userId: string;
   uses: string[];
 }
 
@@ -50,7 +50,7 @@ function fakePurchases(initial: Partial<Row>[] = []) {
     id: `pur-${index + 1}`,
     clubId: "club-1",
     phone: "+51987654321",
-    userId: null,
+    userId: "user-1",
     status: "pending_payment" as PlanPurchaseStatus,
     creditsRemaining: null,
     expiresAt: null,
@@ -96,11 +96,7 @@ function fakePurchases(initial: Partial<Row>[] = []) {
       );
     },
     listForPlayer: async (player) =>
-      rows.filter(
-        (row) =>
-          row.clubId === player.clubId &&
-          (row.phone === player.phone || (row.userId !== null && row.userId === player.userId)),
-      ),
+      rows.filter((row) => row.clubId === player.clubId && row.userId === player.userId),
     useCredit: async (id, registrationId) => {
       const row = rows.find((candidate) => candidate.id === id)!;
       if (row.creditsRemaining !== null) row.creditsRemaining -= 1;
@@ -299,25 +295,19 @@ describe("HU-27: comprar un plan", () => {
 
 const event = { communityId: "amateur", startsAt: new Date("2026-12-10T00:00:00Z") };
 
-describe("HU-27: se identifica por su cuenta de Google o por el celular", () => {
-  test("encuentra el plan por el celular o por la cuenta, nunca el de otro jugador", async () => {
+describe("HU-27: el plan es de la cuenta de Google, no del celular", () => {
+  test("solo la cuenta que lo compró ve sus créditos, aunque otro use el mismo celular", async () => {
     const { purchases } = fakePurchases([
       { status: "active", creditsRemaining: 2, phone: "+51911111111", userId: "user-1" },
-      { status: "active", creditsRemaining: 5, phone: "+51922222222", userId: null },
     ]);
     const balance = makeGetCreditBalance({ purchases });
-    const byAccount = { clubId: "club-1", phone: "+51900000000", userId: "user-1" };
-    const byPhone = { clubId: "club-1", phone: "+51922222222", userId: null };
-    expect(await balance({ player: byAccount, event })).toBe(2);
-    expect(await balance({ player: byPhone, event })).toBe(5);
-    expect(
-      await balance({ player: { clubId: "club-1", phone: "+51933333333", userId: null }, event }),
-    ).toBe(0);
+    expect(await balance({ player: { clubId: "club-1", userId: "user-1" }, event })).toBe(2);
+    expect(await balance({ player: { clubId: "club-1", userId: "user-2" }, event })).toBe(0);
   });
 });
 
 describe("HU-27: usar créditos al inscribirse", () => {
-  const player = { clubId: "club-1", phone: "+51987654321", userId: null };
+  const player = { clubId: "club-1", userId: "user-1" };
 
   test("descuenta un crédito y lo devuelve si la inscripción se quita", async () => {
     const { purchases, rows } = fakePurchases([{ status: "active", creditsRemaining: 1 }]);

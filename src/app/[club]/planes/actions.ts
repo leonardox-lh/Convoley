@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { findClubBySlug } from "@/modules/clubs";
-import { currentUserId } from "@/modules/identity";
+import { currentUserId, signIn } from "@/modules/identity";
 import { buyPlan, PlanNotFoundError } from "@/modules/plans";
 import { InvalidPhoneNumberError, PhoneNumber } from "@/modules/registrations";
 import { nameField, PHONE_FORMAT_MESSAGE } from "../../player-schema";
@@ -28,6 +28,9 @@ export async function buyPlanAction(
   const { clubSlug, planId, firstName, lastName, phone } = parsed.data;
   const club = await findClubBySlug(clubSlug);
   if (!club) return { status: "error", message: "No encontramos este club." };
+  // The plan belongs to a Google account: a phone alone would let anyone use it.
+  const userId = await currentUserId();
+  if (!userId) return { status: "error", message: "Entra con Google para comprar un plan." };
 
   let purchaseId: string;
   try {
@@ -38,7 +41,7 @@ export async function buyPlanAction(
         firstName,
         lastName,
         phone: PhoneNumber.parse(phone).value,
-        userId: await currentUserId(),
+        userId,
       },
     }));
   } catch (error) {
@@ -51,4 +54,10 @@ export async function buyPlanAction(
     throw error;
   }
   redirect(`/plan/${encodeURIComponent(purchaseId)}`);
+}
+
+/** HU-27: buying a plan needs a Google account; come back to the club's plans after. */
+export async function signInToBuyPlanAction(formData: FormData): Promise<void> {
+  const clubSlug = z.string().min(1).parse(formData.get("clubSlug"));
+  await signIn("google", { redirectTo: `/${encodeURIComponent(clubSlug)}/planes` });
 }

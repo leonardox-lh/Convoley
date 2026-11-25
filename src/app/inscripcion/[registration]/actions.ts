@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { currentUserId, signIn } from "@/modules/identity";
 import {
   InvalidSecurityCodeError,
   MercadoPagoChargeError,
@@ -10,6 +11,7 @@ import {
   VoucherTooLargeError,
 } from "@/modules/payments";
 import {
+  AccountRequiredError,
   CancellationNotAllowedError,
   cancelOwnRegistration,
   EventNotOpenError,
@@ -46,6 +48,7 @@ const ERROR_MESSAGES: [new (...args: never[]) => Error, string][] = [
   [PaymentNotExpectedError, "Esta inscripción no tiene un pago pendiente. Recarga la página."],
   [EventNotOpenError, "Esta convocatoria ya no recibe pagos."],
   [RegistrationNotFoundError, "No encontramos tu inscripción."],
+  [AccountRequiredError, "Entra con la cuenta de Google con la que te inscribiste."],
 ];
 
 export async function submitVoucherAction(
@@ -89,7 +92,10 @@ export async function payWithCreditAction(
   const parsed = creditSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { status: "error", message: "No encontramos tu inscripción." };
   try {
-    await payWithCredit(parsed.data.registrationId);
+    await payWithCredit({
+      registrationId: parsed.data.registrationId,
+      signedInUserId: await currentUserId(),
+    });
   } catch (error) {
     if (error instanceof NoCreditError) {
       return {
@@ -112,7 +118,10 @@ export async function payWithBalanceAction(
   const parsed = creditSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { status: "error", message: "No encontramos tu inscripción." };
   try {
-    await payWithBalance(parsed.data.registrationId);
+    await payWithBalance({
+      registrationId: parsed.data.registrationId,
+      signedInUserId: await currentUserId(),
+    });
   } catch (error) {
     if (error instanceof NoBalanceError) {
       return { status: "error", message: "Tu saldo a favor ya no alcanza para esta convocatoria." };
@@ -213,4 +222,10 @@ export async function cancelOwnRegistrationAction(
     throw error;
   }
   redirect(`/inscripcion/${encodeURIComponent(parsed.data.registrationId)}?cancelado=${result}`);
+}
+
+/** HU-27/HU-30: plan and balance need the sign-up's Google account; come back here after. */
+export async function signInToUseFundsAction(formData: FormData): Promise<void> {
+  const { registrationId } = creditSchema.parse(Object.fromEntries(formData));
+  await signIn("google", { redirectTo: `/inscripcion/${encodeURIComponent(registrationId)}` });
 }

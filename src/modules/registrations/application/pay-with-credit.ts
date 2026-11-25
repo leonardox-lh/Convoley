@@ -1,4 +1,8 @@
-import { EventNotOpenError, RegistrationNotFoundError } from "../domain/errors";
+import {
+  AccountRequiredError,
+  EventNotOpenError,
+  RegistrationNotFoundError,
+} from "../domain/errors";
 import { assertAwaitingPayment, type EventSeatInfo } from "../domain/registration";
 import type {
   Credits,
@@ -17,7 +21,7 @@ type Deps = {
   now: () => Date;
 };
 
-type Registration = { id: string; phone: string; userId: string | null };
+type Registration = { id: string; userId: string };
 
 /**
  * Pays a sign-up with something the player already has in the club (no new money moves, so no
@@ -31,10 +35,14 @@ function makePayFromPlayerFunds(
     tx: TransactionContext;
   }) => Promise<void>,
 ) {
-  return async (registrationId: string) => {
+  return async (input: { registrationId: string; signedInUserId: string | null }) => {
     await deps.transactions.run(async (tx) => {
-      const registration = await deps.registrations.findById(registrationId, tx);
-      if (!registration) throw new RegistrationNotFoundError(registrationId);
+      const registration = await deps.registrations.findById(input.registrationId, tx);
+      if (!registration) throw new RegistrationNotFoundError(input.registrationId);
+      // The private link alone isn't enough: a guest sign-up later linked to an account by phone
+      // could otherwise spend that account's plan or balance.
+      const userId = registration.userId;
+      if (!userId || userId !== input.signedInUserId) throw new AccountRequiredError();
       const locked = await deps.events.lock(registration.eventId, tx);
       if (!locked || locked.status === "cancelled" || locked.startsAt <= deps.now()) {
         throw new EventNotOpenError(registration.eventId);
@@ -45,18 +53,18 @@ function makePayFromPlayerFunds(
       if (!current) throw new RegistrationNotFoundError(registration.id);
       assertAwaitingPayment(current);
 
-      await spend({ registration, event, tx });
+      await spend({ registration: { id: registration.id, userId }, event, tx });
       await deps.registrations.setStatus(registration.id, "paid", tx);
     });
   };
 }
 
-/** HU-27: one credit of the player's plan, found by their phone or Google account. */
+/** HU-27: one credit of the plan bought with the player's Google account. */
 export function makePayWithCredit(deps: Deps) {
   return makePayFromPlayerFunds(deps, ({ registration, event, tx }) =>
     deps.credits.consume(
       {
-        player: { clubId: event.clubId, phone: registration.phone, userId: registration.userId },
+        player: { clubId: event.clubId, userId: registration.userId },
         event: { communityId: event.communityId, startsAt: event.startsAt },
         registrationId: registration.id,
       },
@@ -71,7 +79,7 @@ export function makePayWithBalance(deps: Deps) {
     deps.credits.spendBalance(
       {
         clubId: event.clubId,
-        phone: registration.phone,
+        userId: registration.userId,
         amountCents: event.priceCents,
         registrationId: registration.id,
       },

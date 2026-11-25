@@ -91,6 +91,17 @@ export class NoBalanceError extends Error {
   }
 }
 
+/**
+ * HU-27/HU-30: plan credits and balance are spent only by the Google account that signed up,
+ * never by whoever knows the link or the phone.
+ */
+export class AccountRequiredError extends Error {
+  constructor() {
+    super("Sign in with the registration's Google account to use a plan or balance");
+    this.name = "AccountRequiredError";
+  }
+}
+
 /** HU-31: between 2 and 8 teams, and no more teams than players. */
 export class InvalidTeamCountError extends Error {
   constructor(readonly teamCount: number) {

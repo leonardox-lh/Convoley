@@ -90,7 +90,7 @@ export interface Credits {
   /** Spends one credit for this registration; throws NoCreditError when there is none. */
   consume(
     input: {
-      player: { clubId: string; phone: string; userId: string | null };
+      player: { clubId: string; userId: string };
       event: { communityId: string; startsAt: Date };
       registrationId: string;
     },
@@ -102,12 +102,12 @@ export interface Credits {
   paidWithoutMoney(registrationId: string, tx: TransactionContext): Promise<boolean>;
   /** HU-30: keeps the price of a cancelled sign-up as balance in the club. */
   earnBalance(
-    input: { clubId: string; phone: string; amountCents: number },
+    input: { clubId: string; userId: string; amountCents: number },
     tx: TransactionContext,
   ): Promise<void>;
   /** HU-30: pays the whole price with balance; throws NoBalanceError when it doesn't cover it. */
   spendBalance(
-    input: { clubId: string; phone: string; amountCents: number; registrationId: string },
+    input: { clubId: string; userId: string; amountCents: number; registrationId: string },
     tx: TransactionContext,
   ): Promise<void>;
 }

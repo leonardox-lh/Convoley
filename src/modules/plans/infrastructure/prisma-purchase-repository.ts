@@ -51,18 +51,18 @@ export function prismaPurchaseRepository(db: PrismaClient): PurchaseRepository {
       });
     },
 
-    async listForPlayer({ clubId, phone, userId }, tx) {
+    async listForPlayer({ clubId, userId }, tx) {
       const client = tx ? toPrismaTx(tx) : db;
       if (tx) {
         // Serializes two sign-ups of the same player, so the last credit is spent only once.
         await client.$queryRaw`
           SELECT id FROM "PlanPurchase"
           WHERE "clubId" = ${clubId} AND status = 'active'
-            AND (phone = ${phone} OR ("userId" IS NOT NULL AND "userId" = ${userId}))
+            AND "userId" = ${userId}
           ORDER BY id FOR UPDATE`;
       }
       const rows = await client.planPurchase.findMany({
-        where: { clubId, status: "active", OR: [{ phone }, ...(userId ? [{ userId }] : [])] },
+        where: { clubId, status: "active", userId },
         select: {
           id: true,
           status: true,

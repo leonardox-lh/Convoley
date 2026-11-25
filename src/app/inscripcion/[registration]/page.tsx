@@ -8,6 +8,8 @@ import { formatSoles } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import { listEventSummaries } from "@/modules/events";
 import { findClubBySlug, serviceFeeFor } from "@/modules/clubs";
+import { currentUserId, isGoogleSignInEnabled } from "@/modules/identity";
+import { Button } from "@/components/ui/button";
 import {
   findLastVoucherRejection,
   getMercadoPagoStatus,
@@ -31,6 +33,7 @@ import {
   payWithBalanceAction,
   payWithCreditAction,
   payWithMercadoPagoAction,
+  signInToUseFundsAction,
   submitVoucherAction,
 } from "./actions";
 import { CancelRegistrationForm, CopyLinkButton } from "./cancel-form";
@@ -73,18 +76,23 @@ async function RegistrationContent({ params, searchParams }: Props) {
   const mercadoPago = awaitingPayment
     ? await mercadoPagoCheckout(event.clubSlug, event.priceCents)
     : null;
-  // HU-27: a plan bought with this phone or Google account can pay the sign-up.
-  const credits = awaitingPayment
-    ? await getCreditBalance({
-        player: { clubId: event.clubId, phone: registration.phone, userId: registration.userId },
-        event,
-      })
-    : 0;
+  // HU-27/HU-30: plan and balance belong to a Google account, so only that signed-in account
+  // sees and spends them; guests and other sessions don't.
+  const ownerId =
+    registration.userId !== null && registration.userId === (await currentUserId())
+      ? registration.userId
+      : null;
+  const credits =
+    awaitingPayment && ownerId
+      ? await getCreditBalance({ player: { clubId: event.clubId, userId: ownerId }, event })
+      : 0;
   // HU-30: balance kept from a cancellation pays only the whole price.
   const balanceCents =
-    awaitingPayment && event.priceCents > 0
-      ? await getBalance({ clubId: event.clubId, phone: registration.phone })
+    awaitingPayment && ownerId && event.priceCents > 0
+      ? await getBalance({ clubId: event.clubId, userId: ownerId })
       : 0;
+  const canSignInForFunds =
+    awaitingPayment && registration.userId !== null && !ownerId && isGoogleSignInEnabled;
 
   return (
     <>
@@ -146,6 +154,17 @@ async function RegistrationContent({ params, searchParams }: Props) {
       )}
       {registration.status === "in_review" && (
         <p className="text-sm text-zinc-500">El organizador está revisando tu pago.</p>
+      )}
+      {canSignInForFunds && (
+        <form action={signInToUseFundsAction} className="flex flex-col gap-2 text-sm">
+          <input type="hidden" name="registrationId" value={registration.id} />
+          <p className="text-zinc-500">
+            ¿Tienes un plan o saldo a favor? Entra con Google para usarlo.
+          </p>
+          <Button type="submit" variant="outline">
+            Entrar con Google
+          </Button>
+        </form>
       )}
       {credits !== 0 && (
         <section className="flex flex-col gap-3 rounded-lg border border-emerald-200 p-4 dark:border-emerald-900">
@@ -241,6 +260,8 @@ const CANCELLED_MESSAGES: Record<CancellationResult, string> = {
   balance: "Cancelaste tu inscripción. Lo que pagaste quedó como saldo a favor en el club.",
   returned: "Cancelaste tu inscripción. Te devolvimos tu fecha o tu saldo.",
   forfeited: "Cancelaste tu inscripción. Como fue después del límite, el pago se pierde.",
+  guest_forfeited:
+    "Cancelaste tu inscripción. Como te inscribiste sin cuenta de Google, el pago no quedó como saldo.",
 };
 
 /** HU-29: "¿No puedes ir?", with what the player keeps under the club's policy (HU-30). */
@@ -257,6 +278,8 @@ async function CancelSection(props: { registrationId: string; priceCents: number
     balance: `Te quedará ${formatSoles(props.priceCents)} de saldo a favor para otra fecha del club.`,
     returned: "Recuperas tu fecha del plan o tu saldo.",
     forfeited: "Ya pasó el límite para cancelar: perderás lo que pagaste.",
+    guest_forfeited:
+      "Te inscribiste sin cuenta de Google, así que lo que pagaste no se puede guardar como saldo.",
   };
   return (
     <section className="flex flex-col gap-2 border-t border-zinc-200 pt-4 dark:border-zinc-800">

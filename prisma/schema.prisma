@@ -120,6 +120,7 @@ model User {
   registrations       Registration[]
   orders              Order[]
   planPurchases       PlanPurchase[]
+  balances            PlayerBalance[]
   reviewedPayments    Payment[]            @relation("PaymentReviewer")
 }
 
@@ -523,8 +524,8 @@ model Plan {
   @@index([clubId])
 }
 
-// A plan bought by a player (HU-27). The player is recognized by phone (always) or by their
-// Google account. The plan's terms are read from `Plan`, which never changes once offered.
+// A plan bought by a player (HU-27). It belongs to the buyer's Google account (required to buy;
+// nullable only so deleting the account keeps the club's sales history). The plan's terms are read from `Plan`, which never changes once offered.
 model PlanPurchase {
   id               String             @id @default(cuid())
   clubId           String
@@ -570,15 +571,16 @@ model CreditUse {
 model PlayerBalance {
   id           String   @id @default(cuid())
   clubId       String
-  phone        String
+  userId       String
   balanceCents Int      @default(0)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   club Club         @relation(fields: [clubId], references: [id], onDelete: Restrict)
+  user User         @relation(fields: [userId], references: [id], onDelete: Restrict)
   uses BalanceUse[]
 
-  @@unique([clubId, phone])
+  @@unique([clubId, userId])
 }
 
 // One registration paid with balance (HU-30); deleted when the balance is given back.

@@ -161,6 +161,7 @@ export {
   MercadoPagoUnavailableError,
   CancellationNotAllowedError,
   NoBalanceError,
+  AccountRequiredError,
   NoCreditError,
   NothingToReviewError,
   PaymentNotExpectedError,

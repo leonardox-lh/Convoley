@@ -32,6 +32,7 @@ async function evaluate(deps: Deps, registrationId: string, tx: TransactionConte
   const result = cancellationResult({
     status: current.status,
     paidWithoutMoney: await deps.credits.paidWithoutMoney(registration.id, tx),
+    hasAccount: registration.userId !== null,
     startsAt: event.startsAt,
     now: deps.now(),
     deadlineHours: await deps.policies.deadlineHours(event.clubId),
@@ -53,9 +54,9 @@ export function makeCancelOwnRegistration(deps: Deps) {
   return (registrationId: string): Promise<CancellationResult> =>
     deps.transactions.run(async (tx) => {
       const { registration, current, event, result } = await evaluate(deps, registrationId, tx);
-      if (result === "balance") {
+      if (result === "balance" && registration.userId) {
         await deps.credits.earnBalance(
-          { clubId: event.clubId, phone: registration.phone, amountCents: event.priceCents },
+          { clubId: event.clubId, userId: registration.userId, amountCents: event.priceCents },
           tx,
         );
       }

@@ -3,9 +3,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { formatSoles } from "@/lib/money";
+import { Button } from "@/components/ui/button";
 import { findClubBySlug } from "@/modules/clubs";
+import { currentUserId, isGoogleSignInEnabled } from "@/modules/identity";
 import { listPlans } from "@/modules/plans";
 import { planTermsText } from "../../plan-terms";
+import { signInToBuyPlanAction } from "./actions";
 import { BuyPlanForm } from "./buy-plan-form";
 
 type Props = PageProps<"/[club]/planes">;
@@ -29,6 +32,7 @@ async function PlansContent({ params }: Pick<Props, "params">) {
   if (!club) notFound();
   const plans = await listPlans(club.id, { onlyActive: true });
   const communityName = new Map(club.communities.map((c) => [c.id, c.name]));
+  const signedIn = (await currentUserId()) !== null;
 
   return (
     <>
@@ -41,6 +45,21 @@ async function PlansContent({ params }: Pick<Props, "params">) {
         </Link>
         <h1 className="text-2xl font-semibold tracking-tight">Planes</h1>
       </div>
+      {plans.length > 0 && !signedIn && (
+        <section className="flex flex-col gap-2 rounded-lg border border-zinc-200 p-3 text-sm dark:border-zinc-800">
+          <p>
+            Para comprar un plan entra con tu cuenta de Google: así solo tú puedes usar tus fechas.
+          </p>
+          {isGoogleSignInEnabled && (
+            <form action={signInToBuyPlanAction} className="flex flex-col">
+              <input type="hidden" name="clubSlug" value={slug} />
+              <Button type="submit" variant="outline">
+                Entrar con Google
+              </Button>
+            </form>
+          )}
+        </section>
+      )}
       {plans.length === 0 && (
         <p className="text-sm text-zinc-500">Este club aún no ofrece planes.</p>
       )}
@@ -57,12 +76,14 @@ async function PlansContent({ params }: Pick<Props, "params">) {
             <p className="text-sm text-zinc-500">
               Vale para: {plan.communityIds.flatMap((id) => communityName.get(id) ?? []).join(", ")}
             </p>
-            <details className="text-sm">
-              <summary className="cursor-pointer font-medium">Comprar este plan</summary>
-              <div className="mt-3">
-                <BuyPlanForm clubSlug={slug} planId={plan.id} />
-              </div>
-            </details>
+            {signedIn && (
+              <details className="text-sm">
+                <summary className="cursor-pointer font-medium">Comprar este plan</summary>
+                <div className="mt-3">
+                  <BuyPlanForm clubSlug={slug} planId={plan.id} />
+                </div>
+              </details>
+            )}
           </li>
         ))}
       </ul>
