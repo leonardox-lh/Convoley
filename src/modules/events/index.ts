@@ -3,7 +3,7 @@ import { makeCancelEvent } from "./application/cancel-event";
 import { makeCreateEvent } from "./application/create-event";
 import { makeGetOrganizerEvent } from "./application/get-organizer-event";
 import { makeGetPublicEvent } from "./application/get-public-event";
-import { makeListOpenEvents } from "./application/list-open-events";
+import { makeListOpenEvents, makeListUpcomingEvents } from "./application/list-open-events";
 import {
   makeCreateRecurringEvent,
   makeListRecurringEvents,
@@ -39,6 +39,13 @@ export const listOpenEvents = makeListOpenEvents({
   events,
   registrations: registrationsAdapter,
   publishDueOccurrences,
+  now,
+});
+// shortcut: weekly dates are published when a club page opens, so a club nobody visited yet
+// shows its next recurring date late here; publish them from a cron job if that matters.
+export const listUpcomingEvents = makeListUpcomingEvents({
+  events,
+  registrations: registrationsAdapter,
   now,
 });
 export const getOrganizerEvent = makeGetOrganizerEvent({
@@ -101,6 +108,7 @@ export {
   ClubNotFoundError,
   CommunityNotInClubError,
   EventAlreadyCancelledError,
+  EventEndsBeforeStartError,
   EventInPastError,
   EventNotEditableError,
   EventNotFoundError,

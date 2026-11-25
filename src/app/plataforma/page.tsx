@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { fieldClass } from "@/components/form";
+import { Field, fieldClass } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import { formatDateInLima, limaMonthRange, parseLimaMonth } from "@/lib/lima-time";
 import { formatSoles } from "@/lib/money";
@@ -55,10 +55,9 @@ async function PlatformContent({ searchParams }: PageProps<"/plataforma">) {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <h1 className="text-2xl font-semibold tracking-tight">Clubes en Convoley</h1>
         <form className="flex items-end gap-2">
-          <label className="flex flex-col gap-1 text-sm font-medium">
-            Mes
+          <Field label="Mes" float="always">
             <input type="month" name="mes" defaultValue={month} className={fieldClass} />
-          </label>
+          </Field>
           <Button type="submit" variant="outline" className="h-11">
             Ver
           </Button>

@@ -1,6 +1,7 @@
 import {
   CapacityBelowConfirmedError,
   EventAlreadyCancelledError,
+  EventEndsBeforeStartError,
   EventInPastError,
   EventNotEditableError,
   InvalidCapacityError,
@@ -34,11 +35,15 @@ export interface EventDetailsProps {
   communityId: string;
   title: string;
   startsAt: Date;
+  /** Null only on events created before end times existed. */
+  endsAt?: Date | null;
   venueName: string;
   mapsUrl: string | null;
   priceCents: number;
   capacity: number;
   isMixed: boolean;
+  /** Players' names are public on the event page; false when left out. */
+  showRoster?: boolean;
   rules: string | null;
 }
 
@@ -57,6 +62,9 @@ export function newEvent(props: NewEventProps, now: Date): NewEvent {
 
 export function validateEventDetails(props: EventDetailsProps, now: Date): void {
   if (props.startsAt.getTime() <= now.getTime()) throw new EventInPastError(props.startsAt);
+  if (props.endsAt && props.endsAt.getTime() <= props.startsAt.getTime()) {
+    throw new EventEndsBeforeStartError();
+  }
   if (!Number.isInteger(props.capacity) || props.capacity <= 0) {
     throw new InvalidCapacityError(props.capacity);
   }

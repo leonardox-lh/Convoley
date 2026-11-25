@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { fieldClass, FormMessage, submitKeepingValues, TextField } from "@/components/form";
+import { Field, fieldClass, FormMessage, submitKeepingValues, TextField } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import { updateServiceFeeAction, type ServiceFeeState } from "./actions";
 
@@ -18,8 +18,11 @@ export function ServiceFeeForm(props: { clubSlug: string; kind: Kind; amount: st
   return (
     <form onSubmit={submitKeepingValues(formAction)} className="flex flex-col gap-3">
       <input type="hidden" name="clubSlug" value={props.clubSlug} />
-      <label className="flex flex-col gap-1.5 text-sm font-medium">
-        Cargo por servicio (opcional)
+      <Field
+        label="Cargo por servicio (opcional)"
+        float="always"
+        hint="Para trasladar la comisión de Mercado Pago al jugador. Lo ve antes de pagar. Hasta S/ 50 o 20 %."
+      >
         <select
           name="kind"
           value={kind}
@@ -30,11 +33,7 @@ export function ServiceFeeForm(props: { clubSlug: string; kind: Kind; amount: st
           <option value="fixed">Monto fijo (S/)</option>
           <option value="percent">Porcentaje del precio (%)</option>
         </select>
-        <span className="text-xs font-normal text-zinc-500">
-          Para trasladar la comisión de Mercado Pago al jugador. Lo ve antes de pagar. Hasta S/ 50 o
-          20 %.
-        </span>
-      </label>
+      </Field>
       {kind !== "none" && (
         <TextField
           label={kind === "fixed" ? "Monto en soles" : "Porcentaje"}

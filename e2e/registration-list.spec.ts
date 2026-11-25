@@ -1,9 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
 
 import { signInAsOrganizer, signInToNewEvent } from "./helpers/login";
+import { fillEventSchedule } from "./helpers/event-form";
 
 const MOBILE_WIDTH = 375;
-const DAYS_AHEAD_MS = 7 * 24 * 3600 * 1000;
 const CAPACITY = 10;
 
 test.use({ viewport: { width: MOBILE_WIDTH, height: 812 } });
@@ -32,10 +32,7 @@ test.beforeAll(async ({ browser }) => {
   const page = await context.newPage();
   await signInToNewEvent(page);
   await page.getByLabel("Nombre").fill(`E2E lista ${Date.now()}`);
-  await page
-    .getByLabel("Fecha")
-    .fill(new Date(Date.now() + DAYS_AHEAD_MS).toISOString().slice(0, 10));
-  await page.getByLabel("Hora").fill("19:00");
+  await fillEventSchedule(page);
   await page.getByLabel("Lugar").fill("Coliseo E2E");
   await page.getByLabel("Precio (S/)").fill("15");
   await page.getByLabel("Cupos").fill(String(CAPACITY));

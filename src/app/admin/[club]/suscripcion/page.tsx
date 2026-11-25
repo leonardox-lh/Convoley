@@ -1,3 +1,4 @@
+import { BadgeCheck } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { env } from "@/lib/env";
@@ -11,7 +12,7 @@ type Props = PageProps<"/admin/[club]/suscripcion">;
 
 export default function SubscriptionPage(props: Props) {
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-4 py-8">
+    <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
       <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
         <SubscriptionContent {...props} />
       </Suspense>
@@ -28,7 +29,12 @@ async function SubscriptionContent({ params }: Props) {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-semibold tracking-tight">Suscripción a Convoley</h1>
+      <h1 className="flex items-center gap-3 text-2xl font-semibold tracking-tight">
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md">
+            <BadgeCheck className="size-5" aria-hidden />
+          </span>
+          Suscripción a Convoley
+        </h1>
       <SubscriptionBanner clubSlug={clubSlug} access={access} />
       <p className="text-sm">
         {formatSoles(MONTHLY_PRICE_CENTS)} al mes, con {TRIAL_DAYS} días de prueba gratis. Puedes

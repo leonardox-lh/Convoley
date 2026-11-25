@@ -1,7 +1,6 @@
 import { ImageResponse } from "next/og";
-import { formatInLima } from "@/lib/lima-time";
+import { formatEventTimeInLima } from "@/lib/lima-time";
 import { formatSoles } from "@/lib/money";
-import { getClubProfile } from "@/modules/clubs";
 import { loadEventPreview, seatsText } from "./event-preview";
 
 export const alt = "Convocatoria de vóley";
@@ -11,20 +10,17 @@ export const contentType = "image/png";
 const DEFAULT_PRIMARY = "#18181b";
 const DEFAULT_ACCENT = "#facc15";
 
-/** The card WhatsApp shows for a shared event link (HU-11), in the club's colors. */
+/** The card WhatsApp shows for a shared event link (HU-11), in Convoley's colors. */
 export default async function EventOpenGraphImage({
   params,
 }: {
   params: Promise<{ club: string; event: string }>;
 }) {
   const { club: clubSlug, event: eventId } = await params;
-  const [event, club] = await Promise.all([
-    loadEventPreview(clubSlug, eventId),
-    getClubProfile(clubSlug),
-  ]);
-  const primary = club?.primaryColor ?? DEFAULT_PRIMARY;
-  const accent = club?.secondaryColor ?? DEFAULT_ACCENT;
-  const when = event ? formatInLima(event.startsAt) : "";
+  const event = await loadEventPreview(clubSlug, eventId);
+  const primary = DEFAULT_PRIMARY;
+  const accent = DEFAULT_ACCENT;
+  const when = event ? formatEventTimeInLima(event) : "";
 
   return new ImageResponse(
     <div

@@ -13,20 +13,20 @@ export function FlyerSharing(props: { flyerPath: string; fileName: string }) {
       <h2 id="flyer-title" className="text-lg font-semibold">
         Flyer para historias
       </h2>
-      <p className="text-sm text-zinc-500">
+      <p className="text-sm text-muted-foreground">
         Fecha, lugar, precio y cupos libres, en formato 9:16 para TikTok e Instagram.
       </p>
-      <div className="flex gap-2">
+      <div className="grid grid-cols-2 gap-2">
         <a
           href={props.flyerPath}
           download={props.fileName}
-          className={buttonVariants({ variant: "outline", className: "h-10 flex-1" })}
+          className={buttonVariants({ variant: "outline", className: "h-10" })}
         >
           Descargar PNG
         </a>
         <Button
           type="button"
-          className="h-10 flex-1"
+          className="h-10"
           onClick={async () => setFailed(!(await shareImage(props.flyerPath, props.fileName)))}
         >
           Compartir

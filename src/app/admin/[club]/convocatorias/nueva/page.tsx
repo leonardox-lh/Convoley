@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { CalendarPlus } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { todayInLima } from "@/lib/lima-time";
@@ -10,7 +10,7 @@ type Params = PageProps<"/admin/[club]/convocatorias/nueva">["params"];
 
 export default function NewEventPage({ params }: PageProps<"/admin/[club]/convocatorias/nueva">) {
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-4 py-8">
+    <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
       <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
         <NewEventContent params={params} />
       </Suspense>
@@ -26,48 +26,12 @@ async function NewEventContent({ params }: { params: Params }) {
 
   return (
     <>
-      <Link
-        href={`/admin/${club.slug}/perfil`}
-        className="text-sm text-zinc-500 underline-offset-4 hover:underline"
-      >
-        {club.name} · Perfil del club
-      </Link>
-      {" · "}
-      <Link
-        href={`/admin/${club.slug}/comunidades`}
-        className="text-sm text-zinc-500 underline-offset-4 hover:underline"
-      >
-        Comunidades
-      </Link>
-      {" · "}
-      <Link
-        href={`/admin/${club.slug}/pagos`}
-        className="text-sm text-zinc-500 underline-offset-4 hover:underline"
-      >
-        Cobros
-      </Link>
-      {" · "}
-      <Link
-        href={`/admin/${club.slug}/tienda`}
-        className="text-sm text-zinc-500 underline-offset-4 hover:underline"
-      >
-        Tienda
-      </Link>
-      {" · "}
-      <Link
-        href={`/admin/${club.slug}/pedidos`}
-        className="text-sm text-zinc-500 underline-offset-4 hover:underline"
-      >
-        Pedidos
-      </Link>
-      {" · "}
-      <Link
-        href={`/admin/${club.slug}/planes`}
-        className="text-sm text-zinc-500 underline-offset-4 hover:underline"
-      >
-        Planes
-      </Link>
-      <h1 className="mb-6 text-2xl font-semibold tracking-tight">Nueva convocatoria</h1>
+      <h1 className="mb-6 flex items-center gap-3 text-2xl font-semibold tracking-tight">
+        <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md">
+          <CalendarPlus className="size-5" aria-hidden />
+        </span>
+        Nueva convocatoria
+      </h1>
       <CreateEventForm
         clubSlug={club.slug}
         communities={club.communities}

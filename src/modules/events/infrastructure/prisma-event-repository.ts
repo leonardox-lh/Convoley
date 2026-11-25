@@ -31,6 +31,20 @@ export class PrismaEventRepository implements EventRepository {
     return rows.map(toEventDetails);
   }
 
+  async listUpcoming(filter: {
+    statuses: readonly EventStatus[];
+    from: Date;
+    limit: number;
+  }): Promise<EventDetails[]> {
+    const rows = await this.db.event.findMany({
+      where: { status: { in: [...filter.statuses] }, startsAt: { gte: filter.from } },
+      include: EVENT_INCLUDE,
+      orderBy: { startsAt: "asc" },
+      take: filter.limit,
+    });
+    return rows.map(toEventDetails);
+  }
+
   async lockInClub(
     clubId: string,
     eventId: string,
@@ -89,11 +103,13 @@ function toEventDetails(
     communityName: row.community.name,
     title: row.title,
     startsAt: row.startsAt,
+    endsAt: row.endsAt,
     venueName: row.venueName,
     mapsUrl: row.mapsUrl,
     priceCents: row.priceCents,
     capacity: row.capacity,
     isMixed: row.isMixed,
+    showRoster: row.showRoster,
     rules: row.rules,
     status: row.status,
     cancellationOutcome: row.cancellationOutcome,

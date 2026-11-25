@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { FormMessage } from "@/components/form";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   markPaidManuallyAction,
@@ -34,7 +35,7 @@ export function RegistrationActions(props: {
 
   if (confirming) {
     return (
-      <form action={remove} className="flex w-full flex-col gap-2">
+      <form action={remove} className="flex basis-full flex-col gap-2">
         {hidden}
         <p className="text-sm">
           ¿Quitar a {props.playerName}? Su cupo queda libre. Si ya pagó, coordina tú la devolución.
@@ -59,25 +60,32 @@ export function RegistrationActions(props: {
   }
 
   return (
-    <div className="flex w-full flex-col gap-2">
-      <div className="flex gap-2">
+    <div className="flex flex-1 flex-col gap-2">
+      <div className="flex flex-wrap gap-2">
         {props.canMarkPaid && (
-          <form action={markPaid} className="flex-1">
+          <form action={markPaid}>
             {hidden}
-            <Button type="submit" variant="outline" className="h-10 w-full" disabled={pending}>
-              Marcar pagado manual
+            <Button
+              type="submit"
+              variant="outline"
+              className="h-9"
+              disabled={pending}
+              aria-label="Marcar pagado manual"
+            >
+              Pagado
             </Button>
           </form>
         )}
         <Button
           type="button"
           variant="ghost"
-          className="h-10"
+          className="ml-auto h-9 text-destructive hover:text-destructive"
           onClick={() => setConfirming(true)}
           disabled={pending}
           aria-label={`Quitar a ${props.playerName}`}
+          title="Quitar"
         >
-          Quitar
+          <Trash2 aria-hidden />
         </Button>
       </div>
       {error?.status === "error" && <FormMessage tone="error">{error.message}</FormMessage>}

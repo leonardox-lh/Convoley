@@ -10,6 +10,8 @@ export const profileProps = (overrides: Partial<ClubProfileProps> = {}): ClubPro
   secondaryColor: null,
   instagramUrl: null,
   tiktokUrl: null,
+  whatsappUrl: null,
+  contactPhone: null,
   ...overrides,
 });
 

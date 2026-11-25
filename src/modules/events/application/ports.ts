@@ -41,6 +41,12 @@ export interface EventRepository {
     clubId: string,
     filter: { statuses: readonly EventStatus[]; from: Date },
   ): Promise<EventDetails[]>;
+  /** Events of any club in these statuses starting at or after `from`, soonest first. */
+  listUpcoming(filter: {
+    statuses: readonly EventStatus[];
+    from: Date;
+    limit: number;
+  }): Promise<EventDetails[]>;
   /** Reads the event and locks its row until the transaction ends. */
   lockInClub(clubId: string, eventId: string, tx: TransactionContext): Promise<EventDetails | null>;
   update(

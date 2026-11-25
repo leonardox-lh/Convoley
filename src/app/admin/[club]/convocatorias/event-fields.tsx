@@ -1,10 +1,10 @@
 "use client";
 
-import { fieldClass } from "@/components/form";
+import { DatePicker, TimePicker } from "@/components/date-time-pickers";
+import { Field, fieldClass, floatingFieldClass } from "@/components/form";
+import { LocationPicker } from "@/components/location-picker";
 
 export { fieldClass, FormMessage, submitKeepingValues } from "@/components/form";
-
-const labelClass = "flex flex-col gap-1.5 text-sm font-medium";
 
 /** Text values of the form fields, as the inputs show them. */
 export interface EventFieldValues {
@@ -12,11 +12,13 @@ export interface EventFieldValues {
   title: string;
   date: string;
   time: string;
+  endTime: string;
   venueName: string;
   mapsUrl: string;
   price: string;
   capacity: string;
   isMixed: boolean;
+  showRoster: boolean;
   rules: string;
 }
 
@@ -33,19 +35,17 @@ export function EventFields(props: {
   return (
     <>
       <input type="hidden" name="clubSlug" value={props.clubSlug} />
-      <label className={labelClass}>
-        Nombre
+      <Field label="Nombre">
         <input
           name="title"
           required
           maxLength={80}
           placeholder="Mixto intermedio"
           defaultValue={defaults?.title}
-          className={fieldClass}
+          className={floatingFieldClass}
         />
-      </label>
-      <label className={labelClass}>
-        Nivel
+      </Field>
+      <Field label="Nivel" float="always">
         <select
           name="communityId"
           required
@@ -58,67 +58,29 @@ export function EventFields(props: {
             </option>
           ))}
         </select>
-      </label>
+      </Field>
       {props.schedule ?? (
-        <div className="grid grid-cols-2 gap-3">
-          <label className={labelClass}>
-            Fecha
-            <input
-              type="date"
-              name="date"
-              required
-              min={props.minDate}
-              defaultValue={defaults?.date}
-              className={fieldClass}
-            />
-          </label>
-          <label className={labelClass}>
-            Hora
-            <input
-              type="time"
-              name="time"
-              required
-              defaultValue={defaults?.time}
-              className={fieldClass}
-            />
-          </label>
-        </div>
+        <>
+          <DatePicker label="Fecha" name="date" min={props.minDate} defaultValue={defaults?.date} />
+          <div className="grid grid-cols-2 gap-3">
+            <TimePicker label="Hora de inicio" name="time" defaultValue={defaults?.time} />
+            <TimePicker label="Hora de fin" name="endTime" defaultValue={defaults?.endTime} />
+          </div>
+        </>
       )}
-      <label className={labelClass}>
-        Lugar
-        <input
-          name="venueName"
-          required
-          maxLength={120}
-          placeholder="Coliseo Manuel Bonilla"
-          defaultValue={defaults?.venueName}
-          className={fieldClass}
-        />
-      </label>
-      <label className={labelClass}>
-        Link de Google Maps (opcional)
-        <input
-          type="url"
-          name="mapsUrl"
-          placeholder="https://maps.app.goo.gl/..."
-          defaultValue={defaults?.mapsUrl}
-          className={fieldClass}
-        />
-      </label>
+      <LocationPicker venueName={defaults?.venueName} mapsUrl={defaults?.mapsUrl} />
       <div className="grid grid-cols-2 gap-3">
-        <label className={labelClass}>
-          Precio (S/)
+        <Field label="Precio (S/)">
           <input
             name="price"
             required
             inputMode="decimal"
             placeholder="15"
             defaultValue={defaults?.price}
-            className={fieldClass}
+            className={floatingFieldClass}
           />
-        </label>
-        <label className={labelClass}>
-          Cupos
+        </Field>
+        <Field label="Cupos">
           <input
             type="number"
             name="capacity"
@@ -128,30 +90,61 @@ export function EventFields(props: {
             inputMode="numeric"
             placeholder="18"
             defaultValue={defaults?.capacity}
-            className={fieldClass}
+            className={floatingFieldClass}
           />
-        </label>
+        </Field>
       </div>
-      <label className="flex items-center gap-2 text-sm font-medium">
-        <input
-          type="checkbox"
+      <div className="flex flex-col gap-2">
+        <ToggleField
           name="isMixed"
+          title="Mixto"
+          text="Juegan hombres y mujeres en el mismo equipo."
           defaultChecked={defaults?.isMixed}
-          className="size-5"
         />
-        Mixto
-      </label>
-      <label className={labelClass}>
-        Reglas (opcional)
+        <ToggleField
+          name="showRoster"
+          title="Lista de inscritos pública"
+          text="Cualquiera con el link ve quiénes se van inscribiendo."
+          defaultChecked={defaults?.showRoster}
+        />
+      </div>
+      <Field label="Reglas (opcional)">
         <textarea
           name="rules"
           rows={3}
           maxLength={500}
           placeholder="Mínimo 2 mujeres por equipo"
           defaultValue={defaults?.rules}
-          className={fieldClass}
+          className={floatingFieldClass}
         />
-      </label>
+      </Field>
     </>
+  );
+}
+
+/** Checkbox drawn as a switch, with a line saying what it does. */
+function ToggleField(props: {
+  name: string;
+  title: string;
+  text: string;
+  defaultChecked?: boolean;
+}) {
+  return (
+    <label className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border bg-card p-3 transition-colors hover:border-primary/40 has-checked:border-primary/50 has-checked:bg-secondary/50">
+      <span className="flex flex-col">
+        <span className="text-sm font-medium">{props.title}</span>
+        <span className="text-xs text-muted-foreground">{props.text}</span>
+      </span>
+      <input
+        type="checkbox"
+        name={props.name}
+        defaultChecked={props.defaultChecked}
+        className="peer sr-only"
+      />
+      <span
+        aria-hidden
+        className="relative h-6 w-11 shrink-0 rounded-full bg-input transition-colors peer-checked:bg-primary peer-focus-visible:ring-3 peer-focus-visible:ring-primary/30 after:absolute after:top-0.5 after:left-0.5 after:size-5 after:rounded-full after:bg-white after:shadow after:transition-transform peer-checked:after:translate-x-5"
+      />
+    </label>
   );
 }

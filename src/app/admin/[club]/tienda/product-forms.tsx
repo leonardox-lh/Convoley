@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { fieldClass, FormMessage, submitKeepingValues, TextField } from "@/components/form";
+import { Field, fieldClass, floatingFieldClass, FormMessage, submitKeepingValues, TextField } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import {
   addPhotoAction,
@@ -34,15 +34,14 @@ export function ProductForm(props: { clubSlug: string; values?: ProductFormValue
         defaultValue={values?.name}
         placeholder="Polo del club"
       />
-      <label className="flex flex-col gap-1.5 text-sm font-medium">
-        Descripción (opcional)
+      <Field label="Descripción (opcional)" float="always">
         <textarea
           name="description"
           rows={2}
           defaultValue={values?.description}
           className={fieldClass}
         />
-      </label>
+      </Field>
       <TextField
         label="Precio (S/)"
         name="price"
@@ -53,19 +52,26 @@ export function ProductForm(props: { clubSlug: string; values?: ProductFormValue
       {values?.stock !== undefined && (
         <input type="hidden" name="loadedStock" value={values.stock} />
       )}
-      <label className="flex flex-col gap-1.5 text-sm font-medium">
-        Stock
+      <Field label="Stock" hint={<>Por talla: &quot;S:3, M:5&quot;. Si no tiene tallas, solo el número.</>}>
         <input
           name="stock"
           required
           defaultValue={values?.stock}
           placeholder="S:3, M:5, L:0  o  10 si es talla única"
-          className={fieldClass}
+          className={floatingFieldClass}
         />
-        <span className="text-xs font-normal text-zinc-500">
-          Por talla: &quot;S:3, M:5&quot;. Si no tiene tallas, solo el número.
-        </span>
-      </label>
+      </Field>
+      {!values?.productId && (
+        <Field label="Fotos (opcional)" float="always" hint="Hasta 5 fotos de 2 MB cada una. JPG, PNG o WebP.">
+          <input
+            type="file"
+            name="photos"
+            multiple
+            accept="image/jpeg,image/png,image/webp"
+            className={fieldClass}
+          />
+        </Field>
+      )}
       {state.status === "error" && <FormMessage tone="error">{state.message}</FormMessage>}
       <Button type="submit" size="lg" className="h-11" disabled={pending}>
         {values?.productId ? "Guardar cambios" : "Crear producto"}
@@ -99,8 +105,7 @@ export function AddPhotoForm(props: { clubSlug: string; productId: string }) {
     <form action={action} className="flex flex-col gap-2">
       <input type="hidden" name="clubSlug" value={props.clubSlug} />
       <input type="hidden" name="productId" value={props.productId} />
-      <label className="flex flex-col gap-1.5 text-sm font-medium">
-        Agregar foto (hasta 2 MB)
+      <Field label="Agregar foto (hasta 2 MB)" float="always">
         <input
           type="file"
           name="photo"
@@ -108,7 +113,7 @@ export function AddPhotoForm(props: { clubSlug: string; productId: string }) {
           required
           className={fieldClass}
         />
-      </label>
+      </Field>
       {state.status === "error" && <FormMessage tone="error">{state.message}</FormMessage>}
       <Button type="submit" variant="outline" className="h-11" disabled={pending}>
         {pending ? "Subiendo…" : "Subir foto"}

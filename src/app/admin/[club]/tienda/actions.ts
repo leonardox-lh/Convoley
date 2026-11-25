@@ -14,6 +14,7 @@ import {
   addProductPhoto,
   createProduct,
   InvalidProductError,
+  MAX_PRODUCT_PHOTOS,
   PRODUCT_NAME_MAX_LENGTH,
   ProductNotFoundError,
   removeProductPhoto,
@@ -96,19 +97,39 @@ export async function saveProductAction(
   const club = await adminClub(clubSlug);
   if (!club) return { status: "error", message: NOT_ALLOWED_MESSAGE };
 
+  // Photos come only with a new product; an existing one adds them on its own page.
+  const photos = productId ? [] : chosenPhotos(formData);
+  if (photos.length > MAX_PRODUCT_PHOTOS) {
+    return { status: "error", message: `Puedes subir hasta ${MAX_PRODUCT_PHOTOS} fotos.` };
+  }
+  if (photos.some((photo) => photo.size > MAX_LOGO_BYTES)) {
+    return { status: "error", message: "Cada foto puede pesar hasta 2 MB." };
+  }
+
   const product = { name, description: description || null, priceCents: price!, variants: stock! };
   let id = productId;
   try {
     if (id)
       await updateProduct({ clubId: club.id, productId: id, product, loadedVariants: loadedStock });
-    else id = (await createProduct({ clubId: club.id, product })).id;
+    else {
+      id = (await createProduct({ clubId: club.id, product })).id;
+      for (const photo of photos) {
+        const image = { bytes: new Uint8Array(await photo.arrayBuffer()), contentType: photo.type };
+        await addProductPhoto({ clubId: club.id, clubSlug: club.slug, productId: id, image });
+      }
+    }
   } catch (error) {
     return errorState(error);
   }
   revalidatePath(`/admin/${clubSlug}/tienda`);
-  // A new product goes straight to its page to add the photos.
+  // A new product goes straight to its page, where more photos can be added.
   if (!productId) redirect(`/admin/${clubSlug}/tienda/${id}`);
   return { status: "idle" };
+}
+
+/** The files picked in the form's photo input, leaving out the empty one browsers send. */
+function chosenPhotos(formData: FormData): File[] {
+  return formData.getAll("photos").filter((value) => value instanceof File && value.size > 0) as File[];
 }
 
 const productRefSchema = z.object({ clubSlug: z.string().min(1), productId: z.string().min(1) });

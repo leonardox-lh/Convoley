@@ -6,6 +6,7 @@ import {
   ClubNotFoundError,
   CommunityNotInClubError,
   EventAlreadyCancelledError,
+  EventEndsBeforeStartError,
   EventInPastError,
   EventNotEditableError,
   EventNotFoundError,
@@ -38,7 +39,8 @@ const eventFieldsObject = z.object({
   communityId: z.string().min(1, "Elige el nivel."),
   title: z.string().trim().min(1, "Ponle un nombre a la convocatoria.").max(TITLE_MAX_LENGTH),
   date: z.iso.date("Elige la fecha."),
-  time: z.string().regex(TIME_FORMAT, "Elige la hora."),
+  time: z.string().regex(TIME_FORMAT, "Elige la hora de inicio."),
+  endTime: z.string().regex(TIME_FORMAT, "Elige la hora de fin."),
   venueName: z.string().trim().min(1, "Indica el lugar.").max(VENUE_MAX_LENGTH),
   mapsUrl: optionalText(URL_MAX_LENGTH),
   price: z.string().transform((value, ctx) => {
@@ -59,19 +61,28 @@ const eventFieldsObject = z.object({
     .literal("on")
     .optional()
     .transform((value) => value === "on"),
+  showRoster: z
+    .literal("on")
+    .optional()
+    .transform((value) => value === "on"),
   rules: optionalText(RULES_MAX_LENGTH),
 });
 
 /** The event fields shared by the create and edit forms, already turned into domain values. */
 export const eventDetailsSchema = eventFieldsObject.transform(
-  ({ date, time, price, ...fields }) => ({
+  ({ date, time, endTime, price, ...fields }) => ({
     ...fields,
     startsAt: limaDateTimeToUtc(date, time),
+    endsAt: limaDateTimeToUtc(date, endTime),
     priceCents: price,
   }),
 );
 
 const MINUTES_PER_HOUR = 60;
+const minuteOfDay = (time: string) => {
+  const [hours, minutes] = time.split(":").map(Number);
+  return hours * MINUTES_PER_HOUR + minutes;
+};
 
 /** HU-28: the same fields with a weekday instead of a date. */
 export const recurringEventSchema = eventFieldsObject
@@ -84,13 +95,16 @@ export const recurringEventSchema = eventFieldsObject
       .min(0, `Publica entre 0 y ${MAX_PUBLISH_DAYS_BEFORE} días antes.`)
       .max(MAX_PUBLISH_DAYS_BEFORE, `Publica entre 0 y ${MAX_PUBLISH_DAYS_BEFORE} días antes.`),
   })
-  .transform(({ time, price, ...fields }) => {
-    const [hours, minutes] = time.split(":").map(Number);
-    return { ...fields, startMinute: hours * MINUTES_PER_HOUR + minutes, priceCents: price };
-  });
+  .transform(({ time, endTime, price, ...fields }) => ({
+    ...fields,
+    startMinute: minuteOfDay(time),
+    endMinute: minuteOfDay(endTime),
+    priceCents: price,
+  }));
 
 const DOMAIN_ERROR_MESSAGES: [new (...args: never[]) => Error, string][] = [
   [EventInPastError, "La fecha y hora deben ser futuras."],
+  [EventEndsBeforeStartError, "La hora de fin debe ser después de la hora de inicio."],
   [InvalidCapacityError, "Los cupos deben ser un número entero mayor que 0."],
   [CapacityBelowConfirmedError, "No puedes dejar menos cupos que jugadores inscritos."],
   [InvalidPriceError, "El precio no puede ser negativo."],

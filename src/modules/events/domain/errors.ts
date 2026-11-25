@@ -1,3 +1,10 @@
+export class EventEndsBeforeStartError extends Error {
+  constructor() {
+    super("Event must end after it starts");
+    this.name = "EventEndsBeforeStartError";
+  }
+}
+
 export class EventInPastError extends Error {
   constructor(readonly startsAt: Date) {
     super(`Event must start in the future, got ${startsAt.toISOString()}`);

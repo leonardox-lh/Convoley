@@ -1,9 +1,9 @@
 import { expect, test } from "@playwright/test";
 
 import { signInToNewEvent } from "./helpers/login";
+import { fillEventSchedule } from "./helpers/event-form";
 
 const MOBILE_WIDTH = 375;
-const DAYS_AHEAD_MS = 7 * 24 * 3600 * 1000;
 const CAPACITY = 10;
 
 test.use({ viewport: { width: MOBILE_WIDTH, height: 812 } });
@@ -17,10 +17,7 @@ test("HU-08 criterios 1 y 2: agregar pagado, agregar y marcar pagado manual, y q
 }) => {
   await signInToNewEvent(page);
   await page.getByLabel("Nombre").fill(`E2E manual ${Date.now()}`);
-  await page
-    .getByLabel("Fecha")
-    .fill(new Date(Date.now() + DAYS_AHEAD_MS).toISOString().slice(0, 10));
-  await page.getByLabel("Hora").fill("19:00");
+  await fillEventSchedule(page);
   await page.getByLabel("Lugar").fill("Coliseo E2E");
   await page.getByLabel("Precio (S/)").fill("15");
   await page.getByLabel("Cupos").fill(String(CAPACITY));
@@ -33,7 +30,9 @@ test("HU-08 criterios 1 y 2: agregar pagado, agregar y marcar pagado manual, y q
   const items = page.getByRole("list", { name: "Inscritos" }).getByRole("listitem");
 
   async function addPlayer(firstName: string, paid: boolean) {
-    await page.getByText("Agregar jugador").click();
+    // The panel stays open after adding someone; clicking its summary again would close it.
+    const panel = page.locator("details", { hasText: "Agregar jugador" });
+    if ((await panel.getAttribute("open")) === null) await page.getByText("Agregar jugador").click();
     await page.getByLabel("Nombre").fill(firstName);
     await page.getByLabel("Apellido").fill("Manual");
     await page.getByLabel("Celular").fill(randomPhone());
@@ -46,14 +45,15 @@ test("HU-08 criterios 1 y 2: agregar pagado, agregar y marcar pagado manual, y q
   await expect(items.filter({ hasText: "Paga" })).toContainText("Pagado");
   await expect(counter).toContainText("1 ocupados · 9 libres");
 
-  await addPlayer("Pendiente", false);
-  const pending = items.filter({ hasText: "Pendiente" });
-  await expect(pending).toContainText("Pendiente de pago");
+  // Named "Debe" so the row filter doesn't also match the "Pendiente" status label.
+  await addPlayer("Debe", false);
+  const pending = items.filter({ hasText: "Debe" });
+  await expect(pending).toContainText("Pendiente");
   await pending.getByRole("button", { name: "Marcar pagado manual" }).click();
   await expect(pending).toContainText("Pagado");
   await expect(counter).toContainText("2 ocupados · 8 libres");
 
-  await pending.getByRole("button", { name: "Quitar a Pendiente" }).click();
+  await pending.getByRole("button", { name: "Quitar a Debe" }).click();
   await page.getByRole("button", { name: "Sí, quitar" }).click();
   await expect(counter).toContainText("1 ocupados · 9 libres");
   await expect(items).toHaveCount(1);

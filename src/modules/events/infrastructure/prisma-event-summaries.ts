@@ -10,6 +10,7 @@ export async function listEventSummaries(eventIds: string[]) {
       id: true,
       title: true,
       startsAt: true,
+      endsAt: true,
       status: true,
       priceCents: true,
       clubId: true,

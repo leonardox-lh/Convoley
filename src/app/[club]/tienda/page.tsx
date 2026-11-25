@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { VolleyballLoader } from "@/components/volleyball";
 import { formatInLima } from "@/lib/lima-time";
 import { clubLogoPath, findClubBySlug } from "@/modules/clubs";
 import { listOpenEvents } from "@/modules/events";
@@ -15,8 +15,8 @@ export const metadata: Metadata = { title: "Tienda · Convoley" };
 /** HU-24: the club's store; orders are picked up at one of its upcoming events. */
 export default function PublicStorePage({ params }: Props) {
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 py-8">
-      <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
+    <main className="flex flex-col gap-4 p-4">
+      <Suspense fallback={<VolleyballLoader />}>
         <StoreContent params={params} />
       </Suspense>
     </main>
@@ -34,15 +34,7 @@ async function StoreContent({ params }: Pick<Props, "params">) {
 
   return (
     <>
-      <div>
-        <Link
-          href={`/${slug}`}
-          className="text-sm text-zinc-500 underline-offset-4 hover:underline"
-        >
-          {club.name}
-        </Link>
-        <h1 className="text-2xl font-semibold tracking-tight">Tienda</h1>
-      </div>
+      <h1 className="sr-only">Tienda</h1>
       {products.length === 0 ? (
         <p className="text-sm text-zinc-500">Este club aún no tiene productos a la venta.</p>
       ) : !events?.length ? (

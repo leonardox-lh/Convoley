@@ -17,7 +17,7 @@ const OUTCOME_LABELS: Record<CancellationOutcome, string> = {
 
 export default function EditEventPage({ params }: Props) {
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-4 py-8">
+    <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
       <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
         <EditEventContent params={params} />
       </Suspense>
@@ -31,6 +31,7 @@ async function EditEventContent({ params }: { params: Props["params"] }) {
   const event = await getOrganizerEvent({ clubSlug, eventId });
   if (!event) notFound();
   const { date, time } = limaDateAndTime(event.startsAt);
+  const endTime = event.endsAt ? limaDateAndTime(event.endsAt).time : "";
 
   return (
     <div className="flex flex-col gap-6">
@@ -80,11 +81,13 @@ async function EditEventContent({ params }: { params: Props["params"] }) {
             title: event.title,
             date,
             time,
+            endTime,
             venueName: event.venueName,
             mapsUrl: event.mapsUrl ?? "",
             price: centsToSolesText(event.priceCents),
             capacity: String(event.capacity),
             isMixed: event.isMixed,
+            showRoster: event.showRoster ?? false,
             rules: event.rules ?? "",
           }}
         />

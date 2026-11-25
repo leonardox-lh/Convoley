@@ -176,6 +176,10 @@ model Club {
   secondaryColor            String?
   instagramUrl              String?
   tiktokUrl                 String?
+  // Invite link to the club's WhatsApp community or group.
+  whatsappUrl               String?
+  // The admin's WhatsApp for players' questions (+519XXXXXXXX).
+  contactPhone              String?
   // Where players pay the organizer directly (HU-13): Yape/Plin number, holder and QR image.
   paymentPhone              String?
   paymentHolderName         String?
@@ -273,11 +277,15 @@ model Event {
   communityId         String
   title               String
   startsAt            DateTime
+  // Null on events created before end times existed.
+  endsAt              DateTime?
   venueName           String
   mapsUrl             String?
   priceCents          Int
   capacity            Int
   isMixed             Boolean              @default(false)
+  // Anyone with the link sees who signed up (names only).
+  showRoster          Boolean              @default(false)
   rules               String?
   status              EventStatus          @default(draft)
   cancelledAt         DateTime?
@@ -314,11 +322,14 @@ model RecurringEvent {
   weekday           Int
   // Minutes after 00:00 in Lima.
   startMinute       Int
+  // Minutes after 00:00 in Lima; null on templates created before end times existed.
+  endMinute         Int?
   venueName         String
   mapsUrl           String?
   priceCents        Int
   capacity          Int
   isMixed           Boolean  @default(false)
+  showRoster        Boolean  @default(false)
   rules             String?
   publishDaysBefore Int
   isPaused          Boolean  @default(false)

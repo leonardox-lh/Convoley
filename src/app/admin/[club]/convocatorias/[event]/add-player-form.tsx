@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronDown, UserPlus } from "lucide-react";
 import { useActionState } from "react";
 import { FormMessage, submitKeepingValues, TextField } from "@/components/form";
 import { Button } from "@/components/ui/button";
@@ -13,8 +14,15 @@ export function AddPlayerForm(props: { clubSlug: string; eventId: string; isMixe
   );
 
   return (
-    <details className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
-      <summary className="cursor-pointer font-medium">Agregar jugador</summary>
+    <details className="group rounded-2xl border bg-card p-4 shadow-xs">
+      <summary className="flex cursor-pointer list-none items-center gap-2 font-medium [&::-webkit-details-marker]:hidden">
+        <UserPlus className="size-4 text-primary" aria-hidden />
+        Agregar jugador
+        <ChevronDown
+          className="ml-auto size-4 text-muted-foreground transition-transform group-open:rotate-180"
+          aria-hidden
+        />
+      </summary>
       <form
         // Remount after each add so the fields clear for the next player.
         key={state.status === "done" ? state.message : "form"}

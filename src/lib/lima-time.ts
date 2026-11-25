@@ -85,3 +85,25 @@ export function limaMonthRange(month: string): { from: Date; to: Date } {
     to: limaDateTimeToUtc(`${next}-01`, "00:00"),
   };
 }
+
+/** Day and start time in Lima, plus the end time when the event has one: "…, 7:00 p. m. – 9:00 p. m.". */
+export function formatEventTimeInLima(event: { startsAt: Date; endsAt?: Date | null }): string {
+  const start = formatInLima(event.startsAt);
+  return event.endsAt ? `${start} – ${formatTimeInLima(event.endsAt)}` : start;
+}
+
+const limaDayFormatter = new Intl.DateTimeFormat("es-PE", {
+  timeZone: LIMA_TIME_ZONE,
+  dateStyle: "full",
+});
+
+/** The day in Lima, like "miércoles, 2 de diciembre de 2026". */
+export function formatDayInLima(date: Date): string {
+  return limaDayFormatter.format(date);
+}
+
+/** Start to end hour in Lima, like "7:00 p. m. – 9:00 p. m."; only the start when there's no end. */
+export function formatTimeRangeInLima(event: { startsAt: Date; endsAt?: Date | null }): string {
+  const start = formatTimeInLima(event.startsAt);
+  return event.endsAt ? `${start} – ${formatTimeInLima(event.endsAt)}` : start;
+}

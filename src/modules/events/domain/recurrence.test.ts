@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { InvalidMapsUrlError, InvalidRecurrenceError } from "./errors";
+import { EventEndsBeforeStartError, InvalidMapsUrlError, InvalidRecurrenceError } from "./errors";
 import {
   dueOccurrences,
   nextOccurrence,
+  occurrenceEndsAt,
   type RecurrenceProps,
   validateRecurrence,
 } from "./recurrence";
@@ -65,6 +66,26 @@ describe("HU-28 criterio 1: frecuencia semanal", () => {
     expect(() =>
       validateRecurrence(props({ mapsUrl: "https://evil.com" }), MONDAY_MORNING),
     ).toThrow(InvalidMapsUrlError);
+  });
+});
+
+describe("hora de fin de la plantilla", () => {
+  const TEN_PM = 22 * 60;
+
+  it("cada fecha termina a la hora de fin de la plantilla", () => {
+    expect(occurrenceEndsAt({ startMinute: EIGHT_PM, endMinute: TEN_PM }, NEXT_TUESDAY_8PM)).toEqual(
+      new Date("2026-12-02T03:00:00Z"),
+    );
+  });
+
+  it("sin hora de fin, la fecha tampoco tiene", () => {
+    expect(occurrenceEndsAt({ startMinute: EIGHT_PM, endMinute: null }, NEXT_TUESDAY_8PM)).toBeNull();
+  });
+
+  it("rechaza un fin que no es después del inicio", () => {
+    expect(() => validateRecurrence(props({ endMinute: EIGHT_PM }), MONDAY_MORNING)).toThrow(
+      EventEndsBeforeStartError,
+    );
   });
 });
 

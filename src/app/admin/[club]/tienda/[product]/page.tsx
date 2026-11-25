@@ -13,7 +13,7 @@ type Props = PageProps<"/admin/[club]/tienda/[product]">;
 /** HU-23: edit a product, its stock per size and up to 5 photos. */
 export default function ProductPage({ params }: Props) {
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-4 py-8">
+    <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
       <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
         <ProductContent params={params} />
       </Suspense>

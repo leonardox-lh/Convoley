@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { Toast } from "@/components/toast";
 import { useActionState, useState } from "react";
-import { fieldClass, FormMessage, submitKeepingValues, TextField } from "@/components/form";
+import { Field, fieldClass, FormMessage, submitKeepingValues, TextField } from "@/components/form";
 import { Button, buttonVariants } from "@/components/ui/button";
 import type { PlayerProfile } from "@/modules/identity";
 import { GenderSelect } from "../../../gender-select";
@@ -42,6 +43,7 @@ export function RegistrationForm({
         aria-labelledby="registered-title"
         className="flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800"
       >
+        <Toast>Inscripción enviada: estás en la lista de espera.</Toast>
         <h2 id="registered-title" className="text-lg font-semibold">
           {state.firstName}, estás en la lista de espera.
         </h2>
@@ -67,6 +69,7 @@ export function RegistrationForm({
         aria-labelledby="registered-title"
         className="flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800"
       >
+        <Toast>¡Inscripción enviada! Ya estás en la lista.</Toast>
         <h2 id="registered-title" className="text-lg font-semibold">
           ¡Listo, {state.firstName}! Ya estás inscrito.
         </h2>
@@ -174,8 +177,7 @@ export function RegistrationForm({
 
 function OptionalSelect(props: { label: string; name: string; options: Record<string, string> }) {
   return (
-    <label className="flex flex-col gap-1.5 text-sm font-medium">
-      {props.label} (opcional)
+    <Field label={<>{props.label} (opcional)</>} float="always">
       <select name={props.name} defaultValue="" className={fieldClass}>
         <option value="">—</option>
         {Object.entries(props.options).map(([value, label]) => (
@@ -184,7 +186,7 @@ function OptionalSelect(props: { label: string; name: string; options: Record<st
           </option>
         ))}
       </select>
-    </label>
+    </Field>
   );
 }
 

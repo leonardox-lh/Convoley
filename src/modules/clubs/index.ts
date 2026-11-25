@@ -43,6 +43,7 @@ export {
   LastCommunityError,
   InvalidClubSlugError,
   InvalidColorError,
+  InvalidContactPhoneError,
   InvalidLogoTypeError,
   InvalidSocialLinkError,
   LogoTooLargeError,

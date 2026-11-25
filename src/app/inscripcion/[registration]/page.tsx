@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { FormMessage } from "@/components/form";
-import { formatInLima, formatTimeInLima } from "@/lib/lima-time";
+import { formatTimeInLima, formatEventTimeInLima } from "@/lib/lima-time";
 import { formatSoles } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import { listEventSummaries } from "@/modules/events";
@@ -105,7 +105,7 @@ async function RegistrationContent({ params, searchParams }: Props) {
           </Link>
         </h1>
         <p className="text-sm text-zinc-500 first-letter:uppercase">
-          {formatInLima(event.startsAt)}
+          {formatEventTimeInLima(event)}
         </p>
       </div>
       <p className="text-sm">

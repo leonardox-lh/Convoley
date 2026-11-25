@@ -94,6 +94,13 @@ export class LastCommunityError extends Error {
   }
 }
 
+export class InvalidContactPhoneError extends Error {
+  constructor(readonly raw: string) {
+    super(`Invalid contact WhatsApp: "${raw}"`);
+    this.name = "InvalidContactPhoneError";
+  }
+}
+
 export class InvalidPaymentPhoneError extends Error {
   constructor(readonly raw: string) {
     super(`Invalid Yape/Plin number: "${raw}"`);

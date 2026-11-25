@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { formatInLima } from "@/lib/lima-time";
+import { formatEventTimeInLima } from "@/lib/lima-time";
 import { formatSoles } from "@/lib/money";
 import { getPublicEvent, type EventStatus } from "@/modules/events";
 import { countConfirmedRegistrations, seatSummary } from "@/modules/registrations";
@@ -22,12 +22,13 @@ export function seatsText(event: { status: EventStatus; freeSeats: number }): st
 /** One line for the WhatsApp preview: when, where, price and seats. */
 export function shareDescription(event: {
   startsAt: Date;
+  endsAt?: Date | null;
   venueName: string;
   priceCents: number;
   status: EventStatus;
   freeSeats: number;
 }): string {
-  const when = formatInLima(event.startsAt);
+  const when = formatEventTimeInLima(event);
   return [
     when.charAt(0).toUpperCase() + when.slice(1),
     event.venueName,

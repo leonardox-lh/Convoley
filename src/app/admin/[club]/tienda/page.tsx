@@ -1,3 +1,4 @@
+import { ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -13,7 +14,7 @@ type Props = PageProps<"/admin/[club]/tienda">;
 /** HU-23: the club's products and the form to publish a new one. */
 export default function StorePage({ params }: Props) {
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-4 py-8">
+    <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
       <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
         <StoreContent params={params} />
       </Suspense>
@@ -44,7 +45,12 @@ async function StoreContent({ params }: Pick<Props, "params">) {
         >
           Ver tienda pública
         </Link>
-        <h1 className="text-2xl font-semibold tracking-tight">Tienda</h1>
+        <h1 className="flex items-center gap-3 text-2xl font-semibold tracking-tight">
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md">
+            <ShoppingBag className="size-5" aria-hidden />
+          </span>
+          Tienda
+        </h1>
       </div>
       <ul
         aria-label="Productos"

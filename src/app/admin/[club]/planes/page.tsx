@@ -1,3 +1,4 @@
+import { Ticket } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -16,7 +17,7 @@ type Props = PageProps<"/admin/[club]/planes">;
 /** HU-26: the club's plans and the form to create one. HU-27: who bought them. */
 export default function PlansPage(props: Props) {
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-4 py-8">
+    <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
       <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
         <PlansContent {...props} />
       </Suspense>
@@ -48,7 +49,12 @@ async function PlansContent({ params }: Pick<Props, "params">) {
         >
           Ver planes públicos
         </Link>
-        <h1 className="text-2xl font-semibold tracking-tight">Planes</h1>
+        <h1 className="flex items-center gap-3 text-2xl font-semibold tracking-tight">
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md">
+            <Ticket className="size-5" aria-hidden />
+          </span>
+          Planes
+        </h1>
         <p className="text-sm text-zinc-500">
           Paquetes de fechas o mensualidades para asegurar ingresos fijos.
         </p>

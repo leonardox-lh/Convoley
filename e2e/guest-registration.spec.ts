@@ -1,9 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
 
 import { signInToNewEvent } from "./helpers/login";
+import { fillEventSchedule } from "./helpers/event-form";
 
 const MOBILE_WIDTH = 375;
-const DAYS_AHEAD_MS = 7 * 24 * 3600 * 1000;
 
 // Each run publishes its own event, so repeated runs never fill up a shared seed event.
 // The "Continuar con Google" button only renders with AUTH_GOOGLE_ID/SECRET set; it is not set
@@ -17,10 +17,7 @@ test.beforeAll(async ({ browser }) => {
   const page = await context.newPage();
   await signInToNewEvent(page);
   await page.getByLabel("Nombre").fill(`E2E inscripción ${Date.now()}`);
-  await page
-    .getByLabel("Fecha")
-    .fill(new Date(Date.now() + DAYS_AHEAD_MS).toISOString().slice(0, 10));
-  await page.getByLabel("Hora").fill("19:00");
+  await fillEventSchedule(page);
   await page.getByLabel("Lugar").fill("Coliseo E2E");
   await page.getByLabel("Precio (S/)").fill("15");
   await page.getByLabel("Cupos").fill("10");

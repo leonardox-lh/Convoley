@@ -1,7 +1,9 @@
 "use client";
 
 import { useActionState } from "react";
+import { TimePicker } from "@/components/date-time-pickers";
 import { Button } from "@/components/ui/button";
+import { Field, floatingFieldClass } from "@/components/form";
 import {
   EventFields,
   fieldClass,
@@ -11,7 +13,6 @@ import {
 import { WEEKDAY_LABELS } from "./weekdays";
 import { createRecurringEventAction, setPausedAction, type RecurringEventState } from "./actions";
 
-const labelClass = "flex flex-col gap-1.5 text-sm font-medium";
 const DEFAULT_PUBLISH_DAYS_BEFORE = 6;
 
 export function NewRecurringEventForm(props: {
@@ -25,25 +26,21 @@ export function NewRecurringEventForm(props: {
   );
   const schedule = (
     <>
+      <Field label="Día" float="always">
+        <select name="weekday" required defaultValue="2" className={fieldClass}>
+          {WEEKDAY_LABELS.map((label, weekday) => (
+            <option key={label} value={weekday}>
+              {label}
+            </option>
+          ))}
+        </select>
+      </Field>
       <div className="grid grid-cols-2 gap-3">
-        <label className={labelClass}>
-          Día
-          <select name="weekday" required defaultValue="2" className={fieldClass}>
-            {WEEKDAY_LABELS.map((label, weekday) => (
-              <option key={label} value={weekday}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className={labelClass}>
-          Hora
-          <input type="time" name="time" required className={fieldClass} />
-        </label>
+        <TimePicker label="Hora de inicio" name="time" />
+        <TimePicker label="Hora de fin" name="endTime" />
       </div>
-      <label className={labelClass}>
-        Publicar cuántos días antes
-        <input
+      <Field label="Publicar cuántos días antes">
+        <input placeholder=" "
           type="number"
           name="publishDaysBefore"
           required
@@ -51,9 +48,9 @@ export function NewRecurringEventForm(props: {
           max={props.maxPublishDaysBefore}
           defaultValue={DEFAULT_PUBLISH_DAYS_BEFORE}
           inputMode="numeric"
-          className={fieldClass}
+          className={floatingFieldClass}
         />
-      </label>
+      </Field>
     </>
   );
 

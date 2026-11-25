@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { VolleyballLoader } from "@/components/volleyball";
 import { formatSoles } from "@/lib/money";
 import { Button } from "@/components/ui/button";
 import { findClubBySlug } from "@/modules/clubs";
@@ -18,8 +18,8 @@ export const metadata: Metadata = { title: "Planes · Convoley" };
 /** HU-27: the club's active plans; the player buys one and pays it. */
 export default function PublicPlansPage({ params }: Props) {
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 py-8">
-      <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
+    <main className="flex flex-col gap-4 p-4">
+      <Suspense fallback={<VolleyballLoader />}>
         <PlansContent params={params} />
       </Suspense>
     </main>
@@ -36,15 +36,7 @@ async function PlansContent({ params }: Pick<Props, "params">) {
 
   return (
     <>
-      <div>
-        <Link
-          href={`/${slug}`}
-          className="text-sm text-zinc-500 underline-offset-4 hover:underline"
-        >
-          {club.name}
-        </Link>
-        <h1 className="text-2xl font-semibold tracking-tight">Planes</h1>
-      </div>
+      <h1 className="sr-only">Planes</h1>
       {plans.length > 0 && !signedIn && (
         <section className="flex flex-col gap-2 rounded-lg border border-zinc-200 p-3 text-sm dark:border-zinc-800">
           <p>

@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { formatInLima } from "@/lib/lima-time";
+import { formatInLima, formatEventTimeInLima } from "@/lib/lima-time";
 import { formatSoles } from "@/lib/money";
 import { type CancellationOutcome, type EventStatus } from "@/modules/events";
 import { getPaymentSettings } from "@/modules/clubs";
 import { currentUserId, getPlayerProfile, isGoogleSignInEnabled } from "@/modules/identity";
 import {
   acceptsWaitlist,
+  buildRoster,
   cancellationDeadline,
   isOpenForRegistration,
+  listEventRegistrations,
 } from "@/modules/registrations";
 import { loadEventPreview, seatsText, shareDescription } from "./event-preview";
 import { loadPaymentInfo } from "../../../payment-info";
@@ -83,7 +85,7 @@ async function PublicEventContent({ params }: { params: Params }) {
       )}
       <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
         <dt className="text-zinc-500">Cuándo</dt>
-        <dd className="first-letter:uppercase">{formatInLima(event.startsAt)}</dd>
+        <dd className="first-letter:uppercase">{formatEventTimeInLima(event)}</dd>
         <dt className="text-zinc-500">Dónde</dt>
         <dd>
           {event.venueName}
@@ -115,6 +117,9 @@ async function PublicEventContent({ params }: { params: Params }) {
         )}
       </dl>
       {event.rules && <p className="text-sm whitespace-pre-line">{event.rules}</p>}
+      {event.showRoster && event.status !== "cancelled" && (
+        <PublicRoster eventId={event.id} capacity={event.capacity} />
+      )}
       {event.status !== "cancelled" && event.priceCents > 0 && (
         <CancellationPolicyNote clubSlug={club} startsAt={event.startsAt} />
       )}
@@ -130,6 +135,41 @@ async function PublicEventContent({ params }: { params: Params }) {
         />
       )}
     </>
+  );
+}
+
+/** Who signed up, when the organizer made the list public. First name and initial only. */
+async function PublicRoster({ eventId, capacity }: { eventId: string; capacity: number }) {
+  const roster = buildRoster(await listEventRegistrations({ eventId }));
+  const shortName = (name: string) => name.replace(/^(\S+)\s+(\S).*$/, "$1 $2.");
+  return (
+    <section aria-labelledby="roster-heading" className="flex flex-col gap-2">
+      <h2 id="roster-heading" className="flex items-center justify-between text-lg font-semibold">
+        Inscritos
+        <span className="rounded-full bg-secondary px-2.5 py-0.5 text-sm font-medium text-secondary-foreground">
+          {roster.players.length}/{capacity}
+        </span>
+      </h2>
+      {roster.players.length === 0 ? (
+        <p className="text-sm text-zinc-500">Todavía no hay inscritos. ¡Sé el primero!</p>
+      ) : (
+        <ol className="divide-y overflow-hidden rounded-2xl border bg-card">
+          {roster.players.map((player) => (
+            <li key={player.number} className="flex items-center gap-3 px-3 py-2 text-sm">
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">
+                {player.number}
+              </span>
+              {shortName(player.name)}
+            </li>
+          ))}
+        </ol>
+      )}
+      {roster.waitlist.length > 0 && (
+        <p className="text-sm text-zinc-500">
+          En lista de espera: {roster.waitlist.map((player) => shortName(player.name)).join(", ")}
+        </p>
+      )}
+    </section>
   );
 }
 

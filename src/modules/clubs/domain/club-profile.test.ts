@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { validateClubProfile, type ClubProfileProps } from "./club-profile";
-import { InvalidColorError, InvalidSocialLinkError } from "./errors";
+import { InvalidColorError, InvalidContactPhoneError, InvalidSocialLinkError } from "./errors";
 
 const profile = (overrides: Partial<ClubProfileProps> = {}): ClubProfileProps => ({
   name: "Club",
@@ -9,6 +9,8 @@ const profile = (overrides: Partial<ClubProfileProps> = {}): ClubProfileProps =>
   secondaryColor: null,
   instagramUrl: null,
   tiktokUrl: null,
+  whatsappUrl: null,
+  contactPhone: null,
   ...overrides,
 });
 
@@ -57,5 +59,34 @@ describe("HU-02: validateClubProfile (colores y redes)", () => {
 
   test("HU-02: null pasa sin cambios", () => {
     expect(validateClubProfile(profile())).toEqual(profile());
+  });
+});
+
+describe("link de la comunidad de WhatsApp", () => {
+  test("acepta invitaciones de grupo o comunidad y canales", () => {
+    expect(
+      validateClubProfile(profile({ whatsappUrl: "chat.whatsapp.com/AbC123" })).whatsappUrl,
+    ).toBe("https://chat.whatsapp.com/AbC123");
+    expect(
+      validateClubProfile(profile({ whatsappUrl: "https://whatsapp.com/channel/0029Va" }))
+        .whatsappUrl,
+    ).toBe("https://whatsapp.com/channel/0029Va");
+  });
+
+  test("rechaza links que no son de WhatsApp", () => {
+    expect(() => validateClubProfile(profile({ whatsappUrl: "evil.com/x" }))).toThrow(
+      InvalidSocialLinkError,
+    );
+  });
+});
+
+describe("WhatsApp del administrador", () => {
+  test("acepta un celular peruano normalizado y lo rechaza si no lo está", () => {
+    expect(validateClubProfile(profile({ contactPhone: "+51987654321" })).contactPhone).toBe(
+      "+51987654321",
+    );
+    expect(() => validateClubProfile(profile({ contactPhone: "987654321" }))).toThrow(
+      InvalidContactPhoneError,
+    );
   });
 });

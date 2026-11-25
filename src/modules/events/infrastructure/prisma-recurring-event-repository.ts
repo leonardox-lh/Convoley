@@ -1,5 +1,6 @@
 import type { PrismaClient } from "@/generated/prisma/client";
 import type { RecurringEventRepository } from "../application/ports";
+import { occurrenceEndsAt } from "../domain/recurrence";
 
 export function prismaRecurringEventRepository(db: PrismaClient): RecurringEventRepository {
   return {
@@ -39,8 +40,10 @@ export function prismaRecurringEventRepository(db: PrismaClient): RecurringEvent
           priceCents: template.priceCents,
           capacity: template.capacity,
           isMixed: template.isMixed,
+          showRoster: template.showRoster,
           rules: template.rules,
           startsAt: slot,
+          endsAt: occurrenceEndsAt(template, slot),
           status: "published" as const,
           recurringEventId: template.id,
           recurringSlot: slot,

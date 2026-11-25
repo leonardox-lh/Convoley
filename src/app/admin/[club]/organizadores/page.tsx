@@ -1,3 +1,4 @@
+import { UserCog } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -10,7 +11,7 @@ type Props = PageProps<"/admin/[club]/organizadores">;
 
 export default function OrganizersPage({ params }: Props) {
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-4 py-8">
+    <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
       <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
         <OrganizersContent params={params} />
       </Suspense>
@@ -29,7 +30,12 @@ async function OrganizersContent({ params }: Pick<Props, "params">) {
         <Link href={`/admin/${clubSlug}`} className="text-sm text-zinc-500 underline">
           Volver al club
         </Link>
-        <h1 className="text-2xl font-semibold tracking-tight">Organizadores</h1>
+        <h1 className="flex items-center gap-3 text-2xl font-semibold tracking-tight">
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md">
+            <UserCog className="size-5" aria-hidden />
+          </span>
+          Organizadores
+        </h1>
         <p className="text-sm text-zinc-500">
           Invita a quien te ayuda sin darle tu cuenta. El ayudante no ve cobros ni finanzas.
         </p>

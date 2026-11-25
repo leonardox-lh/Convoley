@@ -1,6 +1,7 @@
+import { ChartColumn } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { fieldClass } from "@/components/form";
+import { Field, fieldClass } from "@/components/form";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { formatInLima, parseLimaMonth } from "@/lib/lima-time";
 import { centsToSolesText, formatSoles } from "@/lib/money";
@@ -12,7 +13,7 @@ type Props = PageProps<"/admin/[club]/finanzas">;
 
 export default function FinancePage(props: Props) {
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-4 py-8">
+    <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
       <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
         <FinanceContent {...props} />
       </Suspense>
@@ -30,12 +31,16 @@ async function FinanceContent({ params, searchParams }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold tracking-tight">Finanzas</h1>
+      <h1 className="flex items-center gap-3 text-2xl font-semibold tracking-tight">
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md">
+            <ChartColumn className="size-5" aria-hidden />
+          </span>
+          Finanzas
+        </h1>
       <form className="flex items-end gap-2">
-        <label className="flex flex-1 flex-col gap-1 text-sm font-medium">
-          Mes
+        <Field label="Mes" float="always" className="flex-1">
           <input type="month" name="mes" defaultValue={month} className={fieldClass} />
-        </label>
+        </Field>
         <Button type="submit" variant="outline" className="h-11">
           Ver
         </Button>

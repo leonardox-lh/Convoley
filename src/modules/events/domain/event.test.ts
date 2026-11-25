@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   CapacityBelowConfirmedError,
   EventAlreadyCancelledError,
+  EventEndsBeforeStartError,
   EventInPastError,
   EventNotEditableError,
   InvalidCapacityError,
@@ -82,6 +83,26 @@ describe("HU-04 criterio 2: fecha futura y cupos > 0", () => {
 
   it("HU-04: acepta precio 0 (convocatoria gratis)", () => {
     expect(newEvent(valid({ priceCents: 0 }), NOW).priceCents).toBe(0);
+  });
+});
+
+describe("hora de fin", () => {
+  const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
+
+  it("acepta un fin después del inicio", () => {
+    const endsAt = new Date(FUTURE.getTime() + TWO_HOURS_MS);
+    expect(newEvent(valid({ endsAt }), NOW).endsAt).toEqual(endsAt);
+  });
+
+  it.each([
+    ["igual al inicio", FUTURE],
+    ["antes del inicio", new Date(FUTURE.getTime() - TWO_HOURS_MS)],
+  ])("rechaza un fin %s", (_, endsAt) => {
+    expect(() => newEvent(valid({ endsAt }), NOW)).toThrow(EventEndsBeforeStartError);
+  });
+
+  it("acepta convocatorias sin hora de fin (las creadas antes)", () => {
+    expect(() => newEvent(valid({ endsAt: null }), NOW)).not.toThrow();
   });
 });
 

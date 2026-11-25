@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { db } from "@/lib/db";
 import { env } from "@/lib/env";
 import { makeRegisterOrganizer } from "./application/register-organizer";
@@ -51,6 +52,7 @@ export const { handlers, auth, signIn, signOut } = createAuth(verifyCredentials)
 
 /** Id of the signed-in user, or null. Reads cookies: call it inside <Suspense>. */
 export async function currentUserId(): Promise<string | null> {
+  await connection(); // Auth.js uses crypto before reading cookies; mark the request dynamic first (cacheComponents).
   return (await auth())?.user?.id ?? null;
 }
 

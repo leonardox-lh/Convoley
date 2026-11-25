@@ -1,3 +1,4 @@
+import { Wallet } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { FormMessage } from "@/components/form";
@@ -11,7 +12,7 @@ type Props = PageProps<"/admin/[club]/pagos">;
 
 export default function PaymentSettingsPage(props: Props) {
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-4 py-8">
+    <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
       <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
         <PaymentSettingsContent {...props} />
       </Suspense>
@@ -32,7 +33,12 @@ async function PaymentSettingsContent({ params, searchParams }: Props) {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Cobros por Yape o Plin</h1>
+        <h1 className="flex items-center gap-3 text-2xl font-semibold tracking-tight">
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md">
+            <Wallet className="size-5" aria-hidden />
+          </span>
+          Cobros por Yape o Plin
+        </h1>
         <p className="text-sm text-zinc-500">
           Los jugadores te pagan directo a ti y suben su captura. Convoley nunca toca tu dinero.
         </p>

@@ -49,9 +49,10 @@ export function prismaProductRepository(db: PrismaClient): ProductRepository {
       }),
 
     async appendImageKey(productId, key, max) {
+      // A new product's imageKeys is NULL, not '{}': without coalesce its first photo looked "full".
       const updated = await db.$executeRaw`
         UPDATE "Product" SET "imageKeys" = array_append("imageKeys", ${key}), "updatedAt" = now()
-        WHERE id = ${productId} AND cardinality("imageKeys") < ${max}`;
+        WHERE id = ${productId} AND coalesce(cardinality("imageKeys"), 0) < ${max}`;
       return updated === 1;
     },
 

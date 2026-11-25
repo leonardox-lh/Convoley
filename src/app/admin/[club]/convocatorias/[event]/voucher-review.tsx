@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { fieldClass, FormMessage } from "@/components/form";
+import { Field, floatingFieldClass, FormMessage } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import { approveVoucherAction, rejectVoucherAction, type RegistrationActionState } from "./actions";
 
@@ -69,16 +69,15 @@ export function VoucherReview(props: {
       {rejecting ? (
         <form action={reject} className="flex flex-col gap-2">
           {hidden}
-          <label className="flex flex-col gap-1.5 text-sm font-medium">
-            Motivo del rechazo (lo verá el jugador)
+          <Field label="Motivo del rechazo (lo verá el jugador)">
             <input
               name="reason"
               required
               maxLength={props.reasonMaxLength}
               placeholder="El monto no coincide"
-              className={fieldClass}
+              className={floatingFieldClass}
             />
-          </label>
+          </Field>
           <div className="flex gap-2">
             <Button type="submit" variant="destructive" className="h-10 flex-1" disabled={pending}>
               Rechazar

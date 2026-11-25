@@ -39,10 +39,18 @@ export async function findClubNamesByIds(ids: string[]) {
   });
 }
 
-/** HU-36: every club, newest first, for the platform owner. */
+/** HU-36: every club, newest first, for the platform owner and the home page. */
 export async function listAllClubs() {
   return db.club.findMany({
     orderBy: { createdAt: "desc" },
-    select: { id: true, slug: true, name: true, createdAt: true },
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      createdAt: true,
+      description: true,
+      logoKey: true,
+      primaryColor: true,
+    },
   });
 }

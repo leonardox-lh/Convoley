@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { fieldClass, FormMessage } from "@/components/form";
+import { Field, fieldClass, FormMessage } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import {
   createInvitationAction,
@@ -19,13 +19,12 @@ export function InviteForm({ clubSlug }: { clubSlug: string }) {
   return (
     <form action={action} className="flex flex-col gap-3">
       <input type="hidden" name="clubSlug" value={clubSlug} />
-      <label className="flex flex-col gap-1.5 text-sm font-medium">
-        Rol
+      <Field label="Rol" float="always">
         <select name="role" defaultValue="helper" className={fieldClass}>
           <option value="helper">Ayudante: aprueba pagos y maneja el día de juego</option>
           <option value="admin">Administrador: todo, incluidas las finanzas</option>
         </select>
-      </label>
+      </Field>
       <Button type="submit" size="lg" className="h-11" disabled={pending}>
         Crear link de invitación
       </Button>

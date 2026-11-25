@@ -1,3 +1,4 @@
+import { Package } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -30,7 +31,7 @@ const filterSchema = z
 /** HU-25: the club's orders by status, with voucher review and "delivered". */
 export default function OrdersPage(props: Props) {
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-4 py-8">
+    <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
       <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
         <OrdersContent {...props} />
       </Suspense>
@@ -63,7 +64,12 @@ async function OrdersContent({ params, searchParams }: Props) {
         >
           Tienda
         </Link>
-        <h1 className="text-2xl font-semibold tracking-tight">Pedidos</h1>
+        <h1 className="flex items-center gap-3 text-2xl font-semibold tracking-tight">
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md">
+            <Package className="size-5" aria-hidden />
+          </span>
+          Pedidos
+        </h1>
       </div>
       <nav aria-label="Filtrar por estado" className="flex flex-wrap gap-2">
         <FilterLink href={basePath} active={!estado} label="Todos" />

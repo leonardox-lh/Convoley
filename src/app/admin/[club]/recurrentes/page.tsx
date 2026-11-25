@@ -1,7 +1,9 @@
-import Link from "next/link";
+import { Repeat } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { PageHeading, SectionCard } from "@/components/page-heading";
 import { formatSoles } from "@/lib/money";
+import { cn } from "@/lib/utils";
 import { findClubBySlug } from "@/modules/clubs";
 import { listRecurringEvents, MAX_PUBLISH_DAYS_BEFORE } from "@/modules/events";
 import { requireOrganizer } from "../require-organizer";
@@ -12,7 +14,7 @@ type Props = PageProps<"/admin/[club]/recurrentes">;
 
 export default function RecurringEventsPage({ params }: Props) {
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-4 py-8">
+    <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
       <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
         <RecurringEventsContent params={params} />
       </Suspense>
@@ -29,52 +31,83 @@ async function RecurringEventsContent({ params }: Pick<Props, "params">) {
   ]);
   if (!club) notFound();
 
+  const active = templates.filter((template) => !template.isPaused).length;
+
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <Link href={`/admin/${clubSlug}`} className="text-sm text-zinc-500 underline">
-          Volver al club
-        </Link>
-        <h1 className="text-2xl font-semibold tracking-tight">Convocatorias recurrentes</h1>
-        <p className="text-sm text-zinc-500">
-          Cada semana se publica una fecha nueva, los días antes que elijas. Para cambiar algo,
-          pausa la recurrente y crea otra.
-        </p>
-      </div>
+      <PageHeading icon={Repeat} title="Convocatorias recurrentes" eyebrow={club.name}>
+        Cada semana se publica una fecha nueva, los días antes que elijas. Para cambiar algo, pausa
+        la recurrente y crea otra.
+      </PageHeading>
       {templates.length > 0 && (
-        <ul className="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-800">
-          {templates.map((template) => (
-            <li key={template.id} className="flex items-start justify-between gap-3 py-3">
-              <div className="flex flex-col">
-                <span className="font-medium">{template.title}</span>
-                <span className="text-sm text-zinc-500">
-                  {WEEKDAY_LABELS[template.weekday]} {startMinuteToTime(template.startMinute)} ·{" "}
-                  {template.communityName} · {formatSoles(template.priceCents)} ·{" "}
-                  {template.capacity} cupos
+        <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+          <div className="flex items-center justify-between border-b bg-secondary/40 px-4 py-3">
+            <h2 className="text-sm font-semibold">Tus recurrentes</h2>
+            <span className="text-xs text-muted-foreground">
+              {active} activa{active === 1 ? "" : "s"} · {templates.length} en total
+            </span>
+          </div>
+          <ul className="divide-y">
+            {templates.map((template) => (
+              <li
+                key={template.id}
+                className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-secondary/30"
+              >
+                <span
+                  className={cn(
+                    "flex size-12 shrink-0 flex-col items-center justify-center rounded-xl text-xs leading-tight font-semibold",
+                    template.isPaused
+                      ? "bg-muted text-muted-foreground"
+                      : "bg-primary text-primary-foreground",
+                  )}
+                >
+                  {WEEKDAY_LABELS[template.weekday].slice(0, 3)}
+                  <span className="text-[11px] font-medium opacity-80">
+                    {startMinuteToTime(template.startMinute)}
+                  </span>
                 </span>
-                <span className="text-sm text-zinc-500">
-                  {template.isPaused
-                    ? "Pausada"
-                    : `Se publica ${template.publishDaysBefore} días antes`}
-                </span>
-              </div>
-              <PauseForm
-                clubSlug={clubSlug}
-                recurringEventId={template.id}
-                isPaused={template.isPaused}
-              />
-            </li>
-          ))}
-        </ul>
+                <div className="flex min-w-0 flex-1 flex-col gap-1">
+                  <span className="flex items-center gap-2">
+                    <span className="truncate font-medium">{template.title}</span>
+                    <span
+                      className={cn(
+                        "shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium",
+                        template.isPaused
+                          ? "bg-muted text-muted-foreground"
+                          : "bg-emerald-50 text-emerald-700",
+                      )}
+                    >
+                      {template.isPaused ? "Pausada" : "Activa"}
+                    </span>
+                  </span>
+                  <span className="flex flex-wrap gap-1.5 text-xs text-muted-foreground">
+                    <Chip>{template.communityName}</Chip>
+                    <Chip>{formatSoles(template.priceCents)}</Chip>
+                    <Chip>{template.capacity} cupos</Chip>
+                    {!template.isPaused && <Chip>{template.publishDaysBefore} días antes</Chip>}
+                  </span>
+                </div>
+                <PauseForm
+                  clubSlug={clubSlug}
+                  recurringEventId={template.id}
+                  isPaused={template.isPaused}
+                />
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
-      <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-medium">Nueva recurrente</h2>
+      <SectionCard title="Nueva recurrente" description="Llena los datos una vez y olvídate.">
         <NewRecurringEventForm
           clubSlug={clubSlug}
           communities={club.communities}
           maxPublishDaysBefore={MAX_PUBLISH_DAYS_BEFORE}
         />
-      </section>
+      </SectionCard>
     </div>
   );
+}
+
+function Chip({ children }: { children: React.ReactNode }) {
+  return <span className="rounded-md border bg-background px-1.5 py-0.5">{children}</span>;
 }

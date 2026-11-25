@@ -1,11 +1,10 @@
 "use client";
 
 import { useActionState } from "react";
-import { fieldClass, FormMessage } from "@/components/form";
+import { Field, floatingFieldClass, FormMessage } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import { buildTeamsAction, moveToTeamAction, type TeamsState } from "./actions";
 
-const labelClass = "flex flex-col gap-1.5 text-sm font-medium";
 const DEFAULT_TEAM_COUNT = 2;
 const DEFAULT_MIN_WOMEN = 2;
 
@@ -24,31 +23,29 @@ export function BuildTeamsForm(props: {
       <input type="hidden" name="clubSlug" value={props.clubSlug} />
       <input type="hidden" name="eventId" value={props.eventId} />
       <div className="grid grid-cols-2 gap-3">
-        <label className={labelClass}>
-          Equipos
-          <input
+        <Field label="Equipos">
+          <input placeholder=" "
             type="number"
             name="teamCount"
             min={2}
             max={props.maxTeams}
             defaultValue={DEFAULT_TEAM_COUNT}
             inputMode="numeric"
-            className={fieldClass}
+            className={floatingFieldClass}
           />
-        </label>
+        </Field>
         {props.isMixed && (
-          <label className={labelClass}>
-            Mínimo de chicas
-            <input
+          <Field label="Mínimo de chicas">
+            <input placeholder=" "
               type="number"
               name="minWomenPerTeam"
               min={0}
               max={6}
               defaultValue={DEFAULT_MIN_WOMEN}
               inputMode="numeric"
-              className={fieldClass}
+              className={floatingFieldClass}
             />
-          </label>
+          </Field>
         )}
       </div>
       {state.status === "error" && <FormMessage tone="error">{state.message}</FormMessage>}

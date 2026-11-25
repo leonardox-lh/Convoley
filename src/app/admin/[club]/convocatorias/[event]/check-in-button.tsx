@@ -26,10 +26,18 @@ export function CheckInButton(props: {
         type="submit"
         size={props.size}
         variant={props.checkedIn ? "ghost" : "outline"}
-        className={props.size === "lg" ? "h-12" : "h-10"}
+        className={props.size === "lg" ? "h-12" : "h-9"}
         disabled={pending}
+        aria-label={props.checkedIn ? "Deshacer asistencia" : "Marcar asistencia"}
       >
-        {props.checkedIn ? "Deshacer asistencia" : "Marcar asistencia"}
+        {/* The list row is narrow on a phone; the QR page has room for the full label. */}
+        {props.size === "lg"
+          ? props.checkedIn
+            ? "Deshacer asistencia"
+            : "Marcar asistencia"
+          : props.checkedIn
+            ? "Deshacer"
+            : "Asistencia"}
       </Button>
       {state.status === "error" && <FormMessage tone="error">{state.message}</FormMessage>}
     </form>

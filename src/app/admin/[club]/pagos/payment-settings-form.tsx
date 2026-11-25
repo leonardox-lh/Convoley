@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { fieldClass, FormMessage, submitKeepingValues, TextField } from "@/components/form";
+import { Field, fieldClass, FormMessage, submitKeepingValues, TextField } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import { updatePaymentSettingsAction, type PaymentSettingsState } from "./actions";
 
@@ -32,18 +32,18 @@ export function PaymentSettingsForm(props: {
         placeholder="Como aparece en Yape"
         defaultValue={props.defaults.paymentHolderName ?? ""}
       />
-      <label className="flex flex-col gap-1.5 text-sm font-medium">
-        {props.hasQr ? "Cambiar imagen del QR (opcional)" : "Imagen del QR (opcional)"}
+      <Field
+        label={props.hasQr ? "Cambiar imagen del QR (opcional)" : "Imagen del QR (opcional)"}
+        float="always"
+        hint="Captura del QR de tu Yape o Plin. JPG, PNG o WebP de hasta 2 MB."
+      >
         <input
           type="file"
           name="qr"
           accept="image/jpeg,image/png,image/webp"
           className={fieldClass}
         />
-        <span className="text-xs font-normal text-zinc-500">
-          Captura del QR de tu Yape o Plin. JPG, PNG o WebP de hasta 2 MB.
-        </span>
-      </label>
+      </Field>
       {state.status === "error" && <FormMessage tone="error">{state.message}</FormMessage>}
       <Button type="submit" size="lg" disabled={pending}>
         {pending ? "Guardando…" : "Guardar"}

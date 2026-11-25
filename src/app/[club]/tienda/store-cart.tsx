@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { fieldClass, FormMessage, submitKeepingValues, TextField } from "@/components/form";
+import { Field, fieldClass, FormMessage, submitKeepingValues, TextField } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import { formatSoles } from "@/lib/money";
 import { placeOrderAction, type OrderState } from "./actions";
@@ -135,8 +135,7 @@ export function StoreCart(props: {
                 lines.map(([variantId, quantity]) => ({ variantId, quantity })),
               )}
             />
-            <label className="flex flex-col gap-1.5 text-sm font-medium">
-              ¿En qué convocatoria lo recoges?
+            <Field label="¿En qué convocatoria lo recoges?" float="always">
               <select name="pickupEventId" required defaultValue="" className={fieldClass}>
                 <option value="" disabled>
                   Elige una convocatoria
@@ -147,7 +146,7 @@ export function StoreCart(props: {
                   </option>
                 ))}
               </select>
-            </label>
+            </Field>
             <TextField label="Nombre" name="firstName" autoComplete="given-name" />
             <TextField label="Apellido" name="lastName" autoComplete="family-name" />
             <TextField

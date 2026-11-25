@@ -28,6 +28,8 @@ const profile = {
   secondaryColor: "#facc15",
   instagramUrl: "https://instagram.com/hu02",
   tiktokUrl: null,
+  whatsappUrl: null,
+  contactPhone: null,
 };
 
 let db: PrismaClient;

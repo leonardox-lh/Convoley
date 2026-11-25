@@ -39,18 +39,20 @@ export function ListSharing(props: { imagePath: string; fileName: string; listTe
         Compartir la lista
       </h2>
       {FORMATS.map((format) => (
-        <div key={format.value} className="flex items-center gap-2">
-          <span className="flex-1 text-sm">{format.label}</span>
-          <a
-            href={`${props.imagePath}?formato=${format.value}`}
-            download={`${props.fileName}-${format.value}.png`}
-            className={buttonVariants({ variant: "outline", className: "h-10" })}
-          >
-            Descargar PNG
-          </a>
-          <Button type="button" className="h-10" onClick={() => share(format.value)}>
-            Compartir
-          </Button>
+        <div key={format.value} className="flex flex-col gap-1.5">
+          <span className="text-sm font-medium">{format.label}</span>
+          <div className="grid grid-cols-2 gap-2">
+            <a
+              href={`${props.imagePath}?formato=${format.value}`}
+              download={`${props.fileName}-${format.value}.png`}
+              className={buttonVariants({ variant: "outline", className: "h-10" })}
+            >
+              Descargar PNG
+            </a>
+            <Button type="button" className="h-10" onClick={() => share(format.value)}>
+              Compartir
+            </Button>
+          </div>
         </div>
       ))}
       <Button type="button" variant="outline" className="h-10" onClick={copyText}>

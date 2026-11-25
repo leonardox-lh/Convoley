@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { fieldClass, FormMessage } from "@/components/form";
+import { Field, fieldClass, floatingFieldClass, FormMessage } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import {
   createCommunityAction,
@@ -17,15 +17,14 @@ export function NewCommunityForm({ clubSlug }: { clubSlug: string }) {
   return (
     <form action={action} className="flex flex-col gap-2">
       <input type="hidden" name="clubSlug" value={clubSlug} />
-      <label className="flex flex-col gap-1.5 text-sm font-medium">
-        Nueva comunidad o nivel
-        <div className="flex gap-2">
-          <input name="name" required placeholder="Amateur, Competitivo…" className={fieldClass} />
-          <Button type="submit" className="h-11" disabled={pending}>
-            Crear
-          </Button>
-        </div>
-      </label>
+      <div className="flex gap-2">
+        <Field label="Nueva comunidad o nivel" className="flex-1">
+          <input name="name" required placeholder="Amateur, Competitivo…" className={floatingFieldClass} />
+        </Field>
+        <Button type="submit" className="h-11" disabled={pending}>
+          Crear
+        </Button>
+      </div>
       {state.status === "error" && <FormMessage tone="error">{state.message}</FormMessage>}
     </form>
   );

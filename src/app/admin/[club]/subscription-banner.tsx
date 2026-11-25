@@ -18,6 +18,8 @@ export function SubscriptionBanner({ clubSlug, access }: { clubSlug: string; acc
       </Link>
     );
   }
+  // Hidden for now: the free trial isn't announced until the club is about to lose access.
+  if (access.status === "trial" && !access.warn) return null;
   const text =
     access.status === "trial"
       ? `Prueba gratis: te quedan ${access.daysLeft} días.`

@@ -26,3 +26,24 @@ export function makeListOpenEvents(deps: {
     }));
   };
 }
+
+/** Upcoming published or full events of every club, for the home page. */
+export function makeListUpcomingEvents(deps: {
+  events: EventRepository;
+  registrations: ConfirmedCountsReader;
+  now: () => Date;
+}) {
+  return async function listUpcomingEvents(limit: number) {
+    const events = await deps.events.listUpcoming({
+      statuses: LISTED_STATUSES,
+      from: deps.now(),
+      limit,
+    });
+    if (events.length === 0) return [];
+    const confirmed = await deps.registrations.countConfirmedByEvent(events.map((e) => e.id));
+    return events.map((event) => ({
+      ...event,
+      remainingSpots: remainingSpots(event.capacity, confirmed.get(event.id) ?? 0),
+    }));
+  };
+}

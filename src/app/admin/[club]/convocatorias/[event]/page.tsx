@@ -1,8 +1,10 @@
+import { CalendarDays, MapPin, Pencil, Users } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { z } from "zod";
-import { formatInLima } from "@/lib/lima-time";
+import { buttonVariants } from "@/components/ui/button";
+import { formatEventTimeInLima } from "@/lib/lima-time";
 import { cn } from "@/lib/utils";
 import { can } from "@/modules/clubs";
 import { getOrganizerEvent } from "@/modules/events";
@@ -51,7 +53,7 @@ const registeredAtFormatter = new Intl.DateTimeFormat("es-PE", {
 
 export default function EventRegistrationsPage({ params, searchParams }: Props) {
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-4 py-8">
+    <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
       <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
         <EventRegistrationsContent params={params} searchParams={searchParams} />
       </Suspense>
@@ -93,32 +95,62 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
   const seated = listed.filter((r) => r.status !== "waitlisted" && r.status !== "cancelled");
   const present = seated.filter((r) => r.checkedInAt !== null).length;
 
+  const canManage = can(organizer.role, "manage_club");
+
   return (
     <div className="flex flex-col gap-6">
       <AutoRefresh />
-      <div>
-        <p className="text-sm text-zinc-500">{event.club.name}</p>
-        <h1 className="text-2xl font-semibold tracking-tight">{event.title}</h1>
-        <div className="flex gap-4">
-          {can(organizer.role, "manage_club") && (
-            <Link href={`${basePath}/editar`} className="text-sm underline underline-offset-4">
+      <header className="flex flex-col gap-3">
+        <div className="flex flex-col gap-0.5">
+          <p className="text-sm text-muted-foreground">{event.club.name}</p>
+          <h1 className="text-2xl leading-tight font-semibold tracking-tight">{event.title}</h1>
+          <p className="flex items-center gap-1.5 text-sm text-muted-foreground first-letter:uppercase">
+            <CalendarDays className="size-4 shrink-0" aria-hidden />
+            {formatEventTimeInLima(event)}
+          </p>
+          <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+            <MapPin className="size-4 shrink-0" aria-hidden />
+            {event.venueName}
+          </p>
+        </div>
+        <div className="flex gap-2">
+          {canManage && (
+            <Link
+              href={`${basePath}/editar`}
+              className={buttonVariants({ variant: "outline", className: "h-10 flex-1 gap-1.5" })}
+            >
+              <Pencil aria-hidden />
               Editar convocatoria
             </Link>
           )}
-          <Link href={`${basePath}/equipos`} className="text-sm underline underline-offset-4">
+          <Link
+            href={`${basePath}/equipos`}
+            className={buttonVariants({ variant: "outline", className: "h-10 flex-1 gap-1.5" })}
+          >
+            <Users aria-hidden />
             Armar equipos
           </Link>
         </div>
-      </div>
+      </header>
 
-      <p role="status" aria-label="Cupos" className="text-lg font-medium">
-        {seats.taken} ocupados · {seats.free} libres
-      </p>
-      {!status && present > 0 && (
-        <p className="text-sm text-zinc-500">
-          {present} de {seated.length} asistieron
-        </p>
-      )}
+      <section className="flex flex-col gap-2">
+        <div className="flex items-baseline justify-between gap-3">
+          <p role="status" aria-label="Cupos" className="text-lg font-semibold">
+            {seats.taken} ocupados · {seats.free} libres
+          </p>
+          {!status && present > 0 && (
+            <span className="shrink-0 text-sm text-muted-foreground">
+              {present} de {seated.length} asistieron
+            </span>
+          )}
+        </div>
+        <span aria-hidden className="h-2 overflow-hidden rounded-full bg-secondary">
+          <span
+            className="block h-full rounded-full bg-primary transition-all"
+            style={{ width: `${Math.min(100, (seats.taken / event.capacity) * 100)}%` }}
+          />
+        </span>
+      </section>
 
       {event.status === "published" && (
         <AddPlayerForm clubSlug={clubSlug} eventId={event.id} isMixed={event.isMixed} />
@@ -134,105 +166,118 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
           fileName={`lista-${event.id}`}
           listText={rosterText({
             title: event.title,
-            when: formatInLima(event.startsAt),
+            when: formatEventTimeInLima(event),
             roster: buildRoster(registrations),
           })}
         />
       )}
 
-      <nav aria-label="Filtrar por estado de pago" className="flex flex-wrap gap-2">
-        <FilterLink href={basePath} active={!status} label="Todos" />
-        {(Object.keys(STATUS_LABELS) as RegistrationStatus[]).map((value) => (
-          <FilterLink
-            key={value}
-            href={`${basePath}?estado=${value}`}
-            active={status === value}
-            label={STATUS_LABELS[value]}
-          />
-        ))}
-      </nav>
-
-      {registrations.length === 0 ? (
-        <p className="text-sm text-zinc-500">
-          {status ? "No hay inscritos con este estado." : "Todavía no hay inscritos."}
-        </p>
-      ) : (
-        <ol
-          aria-label="Inscritos"
-          className="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-800"
+      <section className="flex flex-col gap-3">
+        <h2 className="text-lg font-semibold">Inscritos</h2>
+        <nav
+          aria-label="Filtrar por estado de pago"
+          className="-mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none]"
         >
-          {registrations.map((registration, index) => (
-            <li key={registration.id} className="flex flex-wrap items-center gap-3 py-3">
-              <span className="w-6 text-sm text-zinc-500">
-                {registration.status === "waitlisted" ? `E${index - waitlistStart + 1}` : index + 1}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-medium">
-                  {registration.firstName} {registration.lastName}
-                </p>
-                <p className="text-sm text-zinc-500">
-                  {registration.phone.replace(/^\+51/, "")} ·{" "}
-                  {registeredAtFormatter.format(registration.createdAt)}
-                </p>
-                {(registration.position || registration.level) && (
-                  <p className="text-sm text-zinc-500">
-                    {[
-                      registration.position && POSITION_LABELS[registration.position],
-                      registration.level && LEVEL_LABELS[registration.level],
-                    ]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </p>
-                )}
-              </div>
-              <span
-                className={cn(
-                  "rounded-full px-2 py-0.5 text-xs font-medium",
-                  REGISTRATION_STATUS_BADGE_CLASSES[registration.status],
-                )}
+          <FilterLink href={basePath} active={!status} label="Todos" />
+          {(Object.keys(STATUS_LABELS) as RegistrationStatus[]).map((value) => (
+            <FilterLink
+              key={value}
+              href={`${basePath}?estado=${value}`}
+              active={status === value}
+              label={STATUS_LABELS[value]}
+            />
+          ))}
+        </nav>
+
+        {registrations.length === 0 ? (
+          <p className="rounded-2xl border border-dashed p-6 text-center text-sm text-muted-foreground">
+            {status ? "No hay inscritos con este estado." : "Todavía no hay inscritos."}
+          </p>
+        ) : (
+          <ol aria-label="Inscritos" className="flex flex-col gap-2">
+            {registrations.map((registration, index) => (
+              <li
+                key={registration.id}
+                className="flex flex-col gap-3 rounded-2xl border bg-card p-3 shadow-xs"
               >
-                {STATUS_LABELS[registration.status]}
-              </span>
-              {registration.checkedInAt && (
-                <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                  Asistió
-                </span>
-              )}
-              {listEditable && voucherViews.has(registration.id) && (
-                <VoucherReview
-                  clubSlug={clubSlug}
-                  eventId={event.id}
-                  registrationId={registration.id}
-                  playerName={registration.firstName}
-                  reasonMaxLength={REJECTION_REASON_MAX_LENGTH}
-                  {...voucherViews.get(registration.id)!}
-                />
-              )}
-              {listEditable &&
-                registration.status !== "cancelled" &&
-                registration.status !== "waitlisted" && (
-                  <CheckInButton
+                <div className="flex items-start gap-3">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">
+                    {registration.status === "waitlisted"
+                      ? `E${index - waitlistStart + 1}`
+                      : index + 1}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium">
+                      {registration.firstName} {registration.lastName}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {registration.phone.replace(/^\+51/, "")} ·{" "}
+                      {registeredAtFormatter.format(registration.createdAt)}
+                    </p>
+                    {(registration.position || registration.level) && (
+                      <p className="text-sm text-muted-foreground">
+                        {[
+                          registration.position && POSITION_LABELS[registration.position],
+                          registration.level && LEVEL_LABELS[registration.level],
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex shrink-0 flex-col items-end gap-1">
+                    <span
+                      className={cn(
+                        "rounded-full px-2 py-0.5 text-xs font-medium",
+                        REGISTRATION_STATUS_BADGE_CLASSES[registration.status],
+                      )}
+                    >
+                      {STATUS_LABELS[registration.status]}
+                    </span>
+                    {registration.checkedInAt && (
+                      <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                        Asistió
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {listEditable && voucherViews.has(registration.id) && (
+                  <VoucherReview
                     clubSlug={clubSlug}
                     eventId={event.id}
                     registrationId={registration.id}
-                    checkedIn={registration.checkedInAt !== null}
+                    playerName={registration.firstName}
+                    reasonMaxLength={REJECTION_REASON_MAX_LENGTH}
+                    {...voucherViews.get(registration.id)!}
                   />
                 )}
-              {listEditable && registration.status !== "cancelled" && (
-                <RegistrationActions
-                  clubSlug={clubSlug}
-                  eventId={event.id}
-                  registrationId={registration.id}
-                  playerName={registration.firstName}
-                  canMarkPaid={
-                    registration.status === "pending_payment" || registration.status === "in_review"
-                  }
-                />
-              )}
-            </li>
-          ))}
-        </ol>
-      )}
+                {listEditable && registration.status !== "cancelled" && (
+                  <div className="flex flex-wrap gap-2 border-t pt-3">
+                    {registration.status !== "waitlisted" && (
+                      <CheckInButton
+                        clubSlug={clubSlug}
+                        eventId={event.id}
+                        registrationId={registration.id}
+                        checkedIn={registration.checkedInAt !== null}
+                      />
+                    )}
+                    <RegistrationActions
+                      clubSlug={clubSlug}
+                      eventId={event.id}
+                      registrationId={registration.id}
+                      playerName={registration.firstName}
+                      canMarkPaid={
+                        registration.status === "pending_payment" ||
+                        registration.status === "in_review"
+                      }
+                    />
+                  </div>
+                )}
+              </li>
+            ))}
+          </ol>
+        )}
+      </section>
     </div>
   );
 }
@@ -243,10 +288,10 @@ function FilterLink({ href, active, label }: { href: string; active: boolean; la
       href={href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "rounded-full border px-3 py-1.5 text-sm",
+        "shrink-0 rounded-full px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors",
         active
-          ? "border-zinc-900 bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-zinc-900"
-          : "border-zinc-300 dark:border-zinc-700",
+          ? "bg-primary text-primary-foreground"
+          : "bg-secondary text-secondary-foreground hover:bg-primary/15",
       )}
     >
       {label}

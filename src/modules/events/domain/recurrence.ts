@@ -12,11 +12,13 @@ const MS_PER_WEEK = DAYS_PER_WEEK * MS_PER_DAY;
 const OFFSET_MS = LIMA_UTC_OFFSET_MINUTES * MS_PER_MINUTE;
 
 /** HU-28: a weekly event, "todos los martes 8 p. m.", published some days before each date. */
-export interface RecurrenceProps extends Omit<EventDetailsProps, "startsAt"> {
+export interface RecurrenceProps extends Omit<EventDetailsProps, "startsAt" | "endsAt"> {
   /** 0 = Sunday … 6 = Saturday, in Lima. */
   weekday: number;
   /** Minutes after 00:00 in Lima. */
   startMinute: number;
+  /** Minutes after 00:00 in Lima, same day; null on templates created before end times existed. */
+  endMinute?: number | null;
   publishDaysBefore: number;
 }
 
@@ -29,8 +31,18 @@ export function validateRecurrence(props: RecurrenceProps, now: Date): void {
   if (!isIntBetween(props.publishDaysBefore, 0, MAX_PUBLISH_DAYS_BEFORE)) {
     throw new InvalidRecurrenceError();
   }
-  // Same rules as a single event (price, capacity, Maps link) on its next date.
-  validateEventDetails({ ...props, startsAt: nextOccurrence(props, now) }, now);
+  // Same rules as a single event (price, capacity, Maps link, end after start) on its next date.
+  const startsAt = nextOccurrence(props, now);
+  validateEventDetails({ ...props, startsAt, endsAt: occurrenceEndsAt(props, startsAt) }, now);
+}
+
+/** When a date of the schedule ends: same length as the template's start-to-end span. */
+export function occurrenceEndsAt(
+  schedule: Pick<RecurrenceProps, "startMinute" | "endMinute">,
+  startsAt: Date,
+): Date | null {
+  if (schedule.endMinute == null) return null;
+  return new Date(startsAt.getTime() + (schedule.endMinute - schedule.startMinute) * MS_PER_MINUTE);
 }
 
 /** The first date of the schedule strictly after `after`. */

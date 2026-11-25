@@ -12,7 +12,7 @@ type Props = PageProps<"/admin/[club]/convocatorias/[event]/equipos">;
 /** HU-31: balanced teams for game day; admin and helper. */
 export default function TeamsPage({ params }: Props) {
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-4 py-8">
+    <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
       <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
         <TeamsContent params={params} />
       </Suspense>

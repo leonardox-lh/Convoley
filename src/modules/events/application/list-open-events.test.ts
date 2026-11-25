@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { LISTED_STATUSES } from "../domain/event";
 import { CLUB, eventDetails, fakeEventRepository } from "./fakes";
-import { makeListOpenEvents } from "./list-open-events";
+import { makeListOpenEvents, makeListUpcomingEvents } from "./list-open-events";
 
 const NOW = new Date("2026-12-01T12:00:00.000Z");
 
@@ -77,5 +77,19 @@ describe("HU-03: listar convocatorias abiertas del club", () => {
     const { listOpenEvents, countConfirmedByEvent } = build();
     expect(await listOpenEvents(CLUB.slug)).toEqual([]);
     expect(countConfirmedByEvent).not.toHaveBeenCalled();
+  });
+});
+
+describe("inicio: próximas convocatorias de todos los clubes", () => {
+  it("pide published y full desde ahora con límite, y calcula los cupos", async () => {
+    const listUpcoming = vi.fn(async () => [eventDetails({ id: "a", capacity: 12 })]);
+    const listUpcomingEvents = makeListUpcomingEvents({
+      events: fakeEventRepository({ listUpcoming }),
+      registrations: { countConfirmedByEvent: async () => new Map([["a", 5]]) },
+      now: () => NOW,
+    });
+    const [event] = await listUpcomingEvents(6);
+    expect(listUpcoming).toHaveBeenCalledWith({ statuses: LISTED_STATUSES, from: NOW, limit: 6 });
+    expect(event.remainingSpots).toBe(7);
   });
 });

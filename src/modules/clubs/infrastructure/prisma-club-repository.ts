@@ -39,6 +39,8 @@ export function prismaClubRepository(db: PrismaClient): ClubRepository {
           secondaryColor: true,
           instagramUrl: true,
           tiktokUrl: true,
+          whatsappUrl: true,
+          contactPhone: true,
         },
       });
     },

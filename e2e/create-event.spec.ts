@@ -1,20 +1,18 @@
 import { expect, test, type Page } from "@playwright/test";
 
 import { signInAsOrganizer } from "./helpers/login";
+import { fillEventSchedule } from "./helpers/event-form";
 
 test.beforeEach(async ({ page }) => {
   await signInAsOrganizer(page);
 });
 
 const FORM_URL = "/admin/voley-miraflores/convocatorias/nueva";
-const DAYS_AHEAD_MS = 7 * 24 * 3600 * 1000;
 
 async function fillForm(page: Page, title: string, capacity: string) {
-  const future = new Date(Date.now() + DAYS_AHEAD_MS).toISOString().slice(0, 10);
   await page.goto(FORM_URL);
   await page.getByLabel("Nombre").fill(title);
-  await page.getByLabel("Fecha").fill(future);
-  await page.getByLabel("Hora").fill("19:00");
+  await fillEventSchedule(page);
   await page.getByLabel("Lugar").fill("Coliseo E2E");
   await page.getByLabel("Precio (S/)").fill("12.50");
   await page.getByLabel("Cupos").fill(capacity);

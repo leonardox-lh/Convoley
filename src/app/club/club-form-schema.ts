@@ -4,17 +4,20 @@ import {
   ClubSlugTakenError,
   InvalidClubSlugError,
   InvalidColorError,
+  InvalidContactPhoneError,
   InvalidLogoTypeError,
   InvalidSocialLinkError,
   LogoTooLargeError,
   ReservedClubSlugError,
 } from "@/modules/clubs";
+import { PhoneNumber } from "@/modules/registrations";
 
 const NAME_MAX_LENGTH = 60;
 const DESCRIPTION_MAX_LENGTH = 500;
 const LINK_MAX_LENGTH = 200;
 // "#rrggbb"; the domain checks the format.
 const COLOR_MAX_LENGTH = 7;
+const PHONE_MESSAGE = "Escribe el WhatsApp del administrador: 9 dígitos que empiezan con 9.";
 
 /** Empty inputs arrive as "": store them as null. */
 const optionalText = (maxLength: number, tooLongMessage: string) =>
@@ -39,6 +42,20 @@ export const clubProfileSchema = z.object({
   secondaryColor: optionalText(COLOR_MAX_LENGTH, "Elige un color válido."),
   instagramUrl: optionalText(LINK_MAX_LENGTH, "El link de Instagram es demasiado largo."),
   tiktokUrl: optionalText(LINK_MAX_LENGTH, "El link de TikTok es demasiado largo."),
+  whatsappUrl: optionalText(LINK_MAX_LENGTH, "El link de WhatsApp es demasiado largo."),
+  contactPhone: z
+    .string()
+    .trim()
+    .default("")
+    .transform((value, ctx) => {
+      if (!value) return null;
+      try {
+        return PhoneNumber.parse(value).value;
+      } catch {
+        ctx.addIssue({ code: "custom", message: PHONE_MESSAGE });
+        return z.NEVER;
+      }
+    }),
 });
 
 export const newClubSchema = clubProfileSchema.extend({
@@ -61,9 +78,10 @@ const DOMAIN_ERROR_MESSAGES: [new (...args: never[]) => Error, string][] = [
   [ReservedClubSlugError, "Ese link está reservado. Prueba con otro."],
   [ClubSlugTakenError, "Ese link ya lo usa otro club. Prueba con otro."],
   [InvalidColorError, "Elige un color válido."],
+  [InvalidContactPhoneError, PHONE_MESSAGE],
   [
     InvalidSocialLinkError,
-    "Pega el link de tu perfil de Instagram o TikTok (por ejemplo, instagram.com/tuclub).",
+    "Revisa tus links: Instagram (instagram.com/tuclub), TikTok (tiktok.com/@tuclub) o WhatsApp (chat.whatsapp.com/…).",
   ],
   [LogoTooLargeError, "El logo debe pesar hasta 2 MB."],
   [InvalidLogoTypeError, "El logo debe ser una imagen JPG, PNG o WEBP."],

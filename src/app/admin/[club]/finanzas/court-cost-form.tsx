@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { fieldClass, FormMessage } from "@/components/form";
+import { Field, floatingFieldClass, FormMessage } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import { setCourtCostAction, type CourtCostState } from "./actions";
 
@@ -15,16 +15,15 @@ export function CourtCostForm(props: { clubSlug: string; eventId: string; defaul
       <input type="hidden" name="clubSlug" value={props.clubSlug} />
       <input type="hidden" name="eventId" value={props.eventId} />
       <div className="flex items-end gap-2">
-        <label className="flex flex-1 flex-col gap-1 text-sm font-medium">
-          Costo de cancha (S/)
+        <Field label="Costo de cancha (S/)" className="flex-1">
           <input
             name="courtCost"
             inputMode="decimal"
             defaultValue={props.defaultValue}
             placeholder="0.00"
-            className={fieldClass}
+            className={floatingFieldClass}
           />
-        </label>
+        </Field>
         <Button type="submit" variant="outline" className="h-11" disabled={pending}>
           Guardar
         </Button>
