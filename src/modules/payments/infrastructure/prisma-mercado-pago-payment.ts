@@ -1,11 +1,12 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
+import type { PaymentOwner } from "../domain/payment";
 
 type Client = Prisma.TransactionClient;
 
 /** One row per attempt, created before charging so its id can be the idempotency key. */
 export async function recordMercadoPagoPayment(
-  input: { clubId: string; registrationId: string; amountCents: number; serviceFeeCents: number },
+  input: { clubId: string; amountCents: number; serviceFeeCents: number } & PaymentOwner,
   tx: Client,
 ): Promise<{ id: string }> {
   return tx.payment.create({
@@ -22,6 +23,7 @@ const SETTLEMENT_FIELDS = {
   id: true,
   clubId: true,
   registrationId: true,
+  orderId: true,
   amountCents: true,
   status: true,
   providerPaymentId: true,
@@ -55,6 +57,13 @@ export async function setMercadoPagoPaymentStatus(
       ...(input.providerPaymentId && { providerPaymentId: input.providerPaymentId }),
     },
   });
+}
+
+/** Who a Mercado Pago payment of ours belongs to, so the webhook reaches the right module. */
+export async function findMercadoPagoPaymentOwner(providerPaymentId: string) {
+  const payment = await findMercadoPagoPayment({ providerPaymentId });
+  if (!payment) return null;
+  return payment.orderId ? ("order" as const) : ("registration" as const);
 }
 
 /** The club whose connected Mercado Pago account is this one (webhooks carry user_id). */

@@ -6,7 +6,21 @@ import {
   makeSetProductActive,
   makeUpdateProduct,
 } from "./application/products";
-import { productImagesAdapter } from "./infrastructure/clubs-adapter";
+import {
+  makeCreateOrder,
+  makeSettleOrderNotification,
+  makeSettleOrderPayment,
+  makeStartOrderMercadoPagoPayment,
+  makeSubmitOrderVoucher,
+} from "./application/orders";
+import { productImagesAdapter, serviceFeesAdapter } from "./infrastructure/clubs-adapter";
+import { pickupEventsAdapter } from "./infrastructure/events-adapter";
+import { gatewayAdapter, orderPaymentsAdapter } from "./infrastructure/payments-adapter";
+import {
+  findOrders,
+  prismaOrderRepository,
+  prismaTransactions,
+} from "./infrastructure/prisma-order-repository";
 import {
   listClubProducts,
   prismaProductRepository,
@@ -35,4 +49,40 @@ export {
   ProductNotFoundError,
   TooManyPhotosError,
   type InvalidProductReason,
+} from "./domain/errors";
+
+// ─── Orders (HU-24, HU-25) ───
+const orders = prismaOrderRepository(db);
+const transactions = prismaTransactions(db);
+const orderPaymentDeps = {
+  orders,
+  gateway: gatewayAdapter,
+  payments: orderPaymentsAdapter,
+  transactions,
+};
+const settleOrderPayment = makeSettleOrderPayment(orderPaymentDeps);
+
+export const createOrder = makeCreateOrder({ orders, pickupEvents: pickupEventsAdapter });
+export const startOrderMercadoPagoPayment = makeStartOrderMercadoPagoPayment(
+  { ...orderPaymentDeps, serviceFees: serviceFeesAdapter },
+  settleOrderPayment,
+);
+export const settleOrderNotification = makeSettleOrderNotification(
+  orderPaymentDeps,
+  settleOrderPayment,
+);
+export const submitOrderVoucher = makeSubmitOrderVoucher(orderPaymentDeps);
+export const findOrder = async (orderId: string) =>
+  (await findOrders(db, { id: orderId }))[0] ?? null;
+export type { OrderListItem } from "./infrastructure/prisma-order-repository";
+export { MAX_QUANTITY_PER_ITEM } from "./domain/cart";
+export { ORDER_STATUSES, type OrderStatus } from "./domain/order";
+export {
+  InvalidCartError,
+  MercadoPagoUnavailableError,
+  NothingToReviewError,
+  OrderNotFoundError,
+  OrderStatusError,
+  OutOfStockError,
+  PickupEventNotAvailableError,
 } from "./domain/errors";

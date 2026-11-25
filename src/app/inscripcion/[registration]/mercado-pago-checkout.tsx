@@ -5,7 +5,7 @@ import { startTransition, useActionState, useEffect, useRef, useState } from "re
 import { FormMessage, TextField } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { payWithMercadoPagoAction, type MercadoPagoPayState } from "./actions";
+import type { MercadoPagoPayState } from "./actions";
 
 // Mercado Pago's official browser SDK: card data and the Yape code never touch our server,
 // only the one-time token it returns.
@@ -47,23 +47,26 @@ declare global {
 
 type Method = "yape" | "card";
 
-/** HU-19: pay with Yape (phone + approval code) or card without leaving the page. */
+/**
+ * HU-19: pay with Yape (phone + approval code) or card without leaving the page. The server
+ * action and its hidden fields say what is paid: a registration, an order (HU-24) or a plan.
+ */
 export function MercadoPagoCheckout(props: {
-  registrationId: string;
+  action: (state: MercadoPagoPayState, formData: FormData) => Promise<MercadoPagoPayState>;
+  hidden: Record<string, string>;
   publicKey: string;
   amountCents: number;
 }) {
   const [method, setMethod] = useState<Method>("yape");
   const [sdkReady, setSdkReady] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
-  const [state, formAction, pending] = useActionState<MercadoPagoPayState, FormData>(
-    payWithMercadoPagoAction,
-    { status: "idle" },
-  );
+  const [state, formAction, pending] = useActionState<MercadoPagoPayState, FormData>(props.action, {
+    status: "idle",
+  });
 
   function pay(fields: Record<string, string>) {
     const formData = new FormData();
-    formData.set("registrationId", props.registrationId);
+    for (const [key, value] of Object.entries(props.hidden)) formData.set(key, value);
     for (const [key, value] of Object.entries(fields)) formData.set(key, value);
     startTransition(() => formAction(formData));
   }

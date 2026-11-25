@@ -3,12 +3,17 @@
 import { useActionState, useState, type FormEvent } from "react";
 import { fieldClass, FormMessage, submitKeepingValues } from "@/components/form";
 import { Button } from "@/components/ui/button";
-import { submitVoucherAction, type VoucherState } from "./actions";
+import type { VoucherState } from "./actions";
 
 const BYTES_PER_MB = 1024 * 1024;
 
-export function VoucherForm(props: { registrationId: string; maxBytes: number }) {
-  const [state, formAction, pending] = useActionState<VoucherState, FormData>(submitVoucherAction, {
+/** The voucher upload; the action and hidden fields say what it pays for (HU-14, HU-24). */
+export function VoucherForm(props: {
+  action: (state: VoucherState, formData: FormData) => Promise<VoucherState>;
+  hidden: Record<string, string>;
+  maxBytes: number;
+}) {
+  const [state, formAction, pending] = useActionState<VoucherState, FormData>(props.action, {
     status: "idle",
   });
   const [sizeError, setSizeError] = useState<string | null>(null);
@@ -29,7 +34,9 @@ export function VoucherForm(props: { registrationId: string; maxBytes: number })
   const error = sizeError ?? (state.status === "error" ? state.message : null);
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-3">
-      <input type="hidden" name="registrationId" value={props.registrationId} />
+      {Object.entries(props.hidden).map(([name, value]) => (
+        <input key={name} type="hidden" name={name} value={value} />
+      ))}
       <label className="flex flex-col gap-1.5 text-sm font-medium">
         Captura de tu pago
         {/* image/* opens the phone's gallery (and camera) picker. */}

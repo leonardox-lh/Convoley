@@ -1,13 +1,13 @@
 import type { Prisma } from "@/generated/prisma/client";
+import type { PaymentOwner } from "../domain/payment";
 import { parseSecurityCode } from "../domain/voucher";
 
-export interface VoucherPaymentInput {
+export type VoucherPaymentInput = {
   clubId: string;
-  registrationId: string;
   amountCents: number;
   proofFileKey: string;
   yapeSecurityCode: string | null;
-}
+} & PaymentOwner;
 
 /** A screenshot the player uploaded (HU-14): waits for the organizer's review. */
 export async function recordVoucherPayment(

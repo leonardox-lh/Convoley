@@ -91,6 +91,12 @@ async function PublicClubContent({ params }: { params: Params }) {
               TikTok
             </a>
           )}
+          <Link href={`/${slug}/tienda`} className="underline">
+            Tienda
+          </Link>
+          <Link href={`/${slug}/planes`} className="underline">
+            Planes
+          </Link>
         </div>
       </section>
       <section aria-labelledby="events-heading" className="flex flex-col gap-3 px-4 pb-8">

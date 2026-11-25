@@ -6,7 +6,7 @@ import {
   makeGetMercadoPagoAccess,
 } from "./application/mercado-pago-connection";
 import { mercadoPagoOAuth } from "./infrastructure/mercado-pago-api";
-import { mercadoPagoCharges } from "./infrastructure/mercado-pago-charges";
+import { mercadoPagoGateway as makeMercadoPagoGateway } from "./infrastructure/mercado-pago-gateway";
 import {
   findMercadoPagoStatus,
   prismaMercadoPagoConnections,
@@ -16,6 +16,7 @@ export {
   CANCELLATION_OUTCOMES,
   PAYMENT_STATUSES_WITH_MONEY,
   type CancellationOutcome,
+  type PaymentOwner,
 } from "./domain/payment";
 export { markPaymentsForCancellation } from "./infrastructure/prisma-payment-marker";
 export {
@@ -59,6 +60,12 @@ export const getMercadoPagoAccess = makeGetMercadoPagoAccess({
   now: () => new Date(),
 });
 export const getMercadoPagoStatus = (clubId: string) => findMercadoPagoStatus(db, clubId);
+/** Charges, lookups and refunds on the club's own Mercado Pago account. */
+export const mercadoPagoGateway = makeMercadoPagoGateway({
+  accessToken: getMercadoPagoAccess,
+  isConnected: async (clubId) => (await getMercadoPagoStatus(clubId)) !== null,
+});
+export type { ChargeReport } from "./infrastructure/mercado-pago-gateway";
 export {
   isMercadoPagoConfigured,
   mercadoPagoAuthorizationUrl,
@@ -69,14 +76,13 @@ export {
   MercadoPagoAuthorizationError,
   MercadoPagoNotConnectedError,
 } from "./domain/errors";
-export const mercadoPagoChargesClient = mercadoPagoCharges();
 export type { MercadoPagoCharge, NewMercadoPagoCharge } from "./application/ports";
-export { chargeOutcome, type ChargeOutcome } from "./domain/mercado-pago-status";
 export { MercadoPagoChargeError } from "./domain/errors";
 export {
   attachProviderPaymentId,
   findClubIdByMercadoPagoAccount,
   findMercadoPagoPayment,
+  findMercadoPagoPaymentOwner,
   recordMercadoPagoPayment,
   setMercadoPagoPaymentStatus,
 } from "./infrastructure/prisma-mercado-pago-payment";

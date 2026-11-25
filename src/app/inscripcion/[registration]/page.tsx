@@ -21,6 +21,7 @@ import {
   REGISTRATION_STATUS_BADGE_CLASSES,
   REGISTRATION_STATUS_LABELS,
 } from "../../registration-status";
+import { payWithMercadoPagoAction, submitVoucherAction } from "./actions";
 import { MercadoPagoCheckout } from "./mercado-pago-checkout";
 import { VoucherForm } from "./voucher-form";
 
@@ -133,7 +134,8 @@ async function RegistrationContent({ params, searchParams }: Props) {
             </dl>
           )}
           <MercadoPagoCheckout
-            registrationId={registration.id}
+            action={payWithMercadoPagoAction}
+            hidden={{ registrationId: registration.id }}
             publicKey={mercadoPago.publicKey}
             amountCents={event.priceCents + mercadoPago.serviceFeeCents}
           />
@@ -144,7 +146,11 @@ async function RegistrationContent({ params, searchParams }: Props) {
             <div className="mt-3 flex flex-col gap-4">
               <RejectionNotice registrationId={registration.id} />
               <PaymentInstructions info={await loadPaymentInfo(event.clubSlug, event.priceCents)} />
-              <VoucherForm registrationId={registration.id} maxBytes={MAX_VOUCHER_BYTES} />
+              <VoucherForm
+                action={submitVoucherAction}
+                hidden={{ registrationId: registration.id }}
+                maxBytes={MAX_VOUCHER_BYTES}
+              />
             </div>
           </details>
         </section>
@@ -154,7 +160,11 @@ async function RegistrationContent({ params, searchParams }: Props) {
           <h2 className="text-lg font-semibold">Paga y sube tu captura</h2>
           <RejectionNotice registrationId={registration.id} />
           <PaymentInstructions info={await loadPaymentInfo(event.clubSlug, event.priceCents)} />
-          <VoucherForm registrationId={registration.id} maxBytes={MAX_VOUCHER_BYTES} />
+          <VoucherForm
+            action={submitVoucherAction}
+            hidden={{ registrationId: registration.id }}
+            maxBytes={MAX_VOUCHER_BYTES}
+          />
         </section>
       )}
     </>
@@ -173,7 +183,7 @@ async function mercadoPagoCheckout(clubSlug: string, priceCents: number) {
 
 /** After a rejection the player is back to "pending payment": tell them why (HU-15). */
 async function RejectionNotice({ registrationId }: { registrationId: string }) {
-  const reason = await findLastVoucherRejection(registrationId);
+  const reason = await findLastVoucherRejection({ registrationId });
   if (!reason) return null;
   return <FormMessage tone="error">{`Tu captura anterior fue rechazada: ${reason}`}</FormMessage>;
 }

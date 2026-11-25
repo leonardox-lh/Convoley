@@ -171,7 +171,7 @@ describe("HU-15: aprobar o rechazar (Postgres)", () => {
       (await db.registration.findUniqueOrThrow({ where: { id: registrationId } })).status,
     ).toBe("pending_payment");
     const { findLastVoucherRejection } = await import("@/modules/payments");
-    expect(await findLastVoucherRejection(registrationId)).toBe("El monto no coincide");
+    expect(await findLastVoucherRejection({ registrationId })).toBe("El monto no coincide");
     await db.payment.updateMany({
       where: { reviewedByUserId: organizer.id },
       data: { reviewedByUserId: null },
