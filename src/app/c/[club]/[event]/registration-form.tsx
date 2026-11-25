@@ -19,6 +19,7 @@ export function RegistrationForm({
   waitlistOnly,
   paymentInfo,
   isMixed,
+  lastChoices,
 }: {
   /** HU-31: mixed events ask the gender, for the minimum of women per team. */
   isMixed: boolean;
@@ -30,6 +31,8 @@ export function RegistrationForm({
   /** The Google player's account; null for guests. */
   profile: PlayerProfile | null;
   googleEnabled: boolean;
+  /** Position and level from the player's last sign-up, to prefill the form. */
+  lastChoices: { position: string | null; level: string | null } | null;
 }) {
   const [state, formAction, pending] = useActionState<RegisterState, FormData>(registerAction, {
     status: "idle",
@@ -121,12 +124,12 @@ export function RegistrationForm({
       <h2 className="text-lg font-semibold">{heading}</h2>
       <form onSubmit={submitKeepingValues(formAction)} className="flex flex-col gap-3">
         <input type="hidden" name="eventId" value={eventId} />
-        {profile?.firstName && profile.lastName ? (
+        {profile?.firstName ? (
           <>
             <p className="text-sm">
               Te inscribes como{" "}
               <span className="font-medium">
-                {profile.firstName} {profile.lastName}
+                {`${profile.firstName} ${profile.lastName}`.trim()}
               </span>
               {profile.phone && ` · ${profile.phone.replace(/^\+51/, "")}`}
             </p>
@@ -142,7 +145,7 @@ export function RegistrationForm({
               defaultValue={profile?.firstName}
             />
             <TextField
-              label="Apellido"
+              label="Apellido (opcional)"
               name="lastName"
               autoComplete="family-name"
               defaultValue={profile?.lastName}
@@ -153,7 +156,7 @@ export function RegistrationForm({
           <input type="hidden" name="phone" value={profile.phone} />
         ) : (
           <TextField
-            label="Celular"
+            label="Celular (opcional)"
             name="phone"
             type="tel"
             inputMode="numeric"
@@ -162,8 +165,18 @@ export function RegistrationForm({
           />
         )}
         <div className="grid grid-cols-2 gap-3">
-          <OptionalSelect label="Posición" name="position" options={POSITION_LABELS} />
-          <OptionalSelect label="Nivel" name="level" options={LEVEL_LABELS} />
+          <OptionalSelect
+            label="Posición"
+            name="position"
+            options={POSITION_LABELS}
+            defaultValue={lastChoices?.position}
+          />
+          <OptionalSelect
+            label="Nivel"
+            name="level"
+            options={LEVEL_LABELS}
+            defaultValue={lastChoices?.level}
+          />
         </div>
         {isMixed && <GenderSelect />}
         {state.status === "error" && <FormMessage tone="error">{state.message}</FormMessage>}
@@ -175,10 +188,15 @@ export function RegistrationForm({
   );
 }
 
-function OptionalSelect(props: { label: string; name: string; options: Record<string, string> }) {
+function OptionalSelect(props: {
+  label: string;
+  name: string;
+  options: Record<string, string>;
+  defaultValue?: string | null;
+}) {
   return (
     <Field label={<>{props.label} (opcional)</>} float="always">
-      <select name={props.name} defaultValue="" className={fieldClass}>
+      <select name={props.name} defaultValue={props.defaultValue ?? ""} className={fieldClass}>
         <option value="">—</option>
         {Object.entries(props.options).map(([value, label]) => (
           <option key={value} value={value}>

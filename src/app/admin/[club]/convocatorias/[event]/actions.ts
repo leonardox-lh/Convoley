@@ -15,7 +15,9 @@ import {
   InvalidPhoneNumberError,
   markPaidManually,
   RegistrationNotFoundError,
+  RegistrationNotPaidError,
   removeRegistration,
+  revertToPending,
   setCheckIn,
 } from "@/modules/registrations";
 import { genderField, nameField, PHONE_FORMAT_MESSAGE } from "../../../../player-schema";
@@ -48,6 +50,7 @@ const ERROR_MESSAGES: [new (...args: never[]) => Error, string][] = [
   [RegistrationNotFoundError, "No encontramos esa inscripción. Recarga la lista."],
   [NothingToReviewError, "Esa captura ya fue revisada. Recarga la lista."],
   [InvalidRejectionReasonError, "Escribe el motivo del rechazo (hasta 200 letras)."],
+  [RegistrationNotPaidError, "Esa inscripción ya no está pagada. Recarga la lista."],
 ];
 
 /** The organizer's user id, only if they manage the club and the event belongs to it. */
@@ -99,6 +102,21 @@ export async function markPaidManuallyAction(
   return run(parsed.data, async (reviewedByUserId) => {
     await markPaidManually({ ...parsed.data, reviewedByUserId });
     return "Marcado como pagado.";
+  });
+}
+
+export async function revertToPendingAction(
+  _previous: RegistrationActionState,
+  formData: FormData,
+): Promise<RegistrationActionState> {
+  const parsed = registrationSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { status: "error", message: "No encontramos esa inscripción." };
+
+  return run(parsed.data, async (reviewedByUserId) => {
+    const { chargedByMercadoPago } = await revertToPending({ ...parsed.data, reviewedByUserId });
+    return chargedByMercadoPago
+      ? "Volvió a pendiente. Pagó por Mercado Pago: devuélvele el dinero desde tu cuenta de Mercado Pago."
+      : "Volvió a pendiente de pago.";
   });
 }
 

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
   markPaidManuallyAction,
   removeRegistrationAction,
+  revertToPendingAction,
   type RegistrationActionState,
 } from "./actions";
 
@@ -18,12 +19,14 @@ export function RegistrationActions(props: {
   registrationId: string;
   playerName: string;
   canMarkPaid: boolean;
+  canRevertToPending: boolean;
 }) {
   const [confirming, setConfirming] = useState(false);
   const [paidState, markPaid, markingPaid] = useActionState(markPaidManuallyAction, IDLE);
   const [removeState, remove, removing] = useActionState(removeRegistrationAction, IDLE);
-  const error = [paidState, removeState].find((state) => state.status === "error");
-  const pending = markingPaid || removing;
+  const [revertState, revert, reverting] = useActionState(revertToPendingAction, IDLE);
+  const error = [paidState, removeState, revertState].find((state) => state.status === "error");
+  const pending = markingPaid || removing || reverting;
 
   const hidden = (
     <>
@@ -76,6 +79,14 @@ export function RegistrationActions(props: {
             </Button>
           </form>
         )}
+        {props.canRevertToPending && (
+          <form action={revert} className="flex-1">
+            {hidden}
+            <Button type="submit" variant="outline" className="h-10 w-full" disabled={pending}>
+              Volver a pendiente
+            </Button>
+          </form>
+        )}
         <Button
           type="button"
           variant="ghost"
@@ -89,6 +100,7 @@ export function RegistrationActions(props: {
         </Button>
       </div>
       {error?.status === "error" && <FormMessage tone="error">{error.message}</FormMessage>}
+      {revertState.status === "done" && <FormMessage tone="ok">{revertState.message}</FormMessage>}
     </div>
   );
 }

@@ -102,6 +102,8 @@ export {
   type CancellationOutcome,
   type EventStatus,
   type InitialEventStatus,
+  spotsLevel,
+  type SpotsLevel,
 } from "./domain/event";
 export {
   CapacityBelowConfirmedError,

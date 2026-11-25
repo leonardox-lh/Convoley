@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
@@ -6,9 +7,11 @@ import { cache, Suspense } from "react";
 import { VolleyballLoader } from "@/components/volleyball";
 import { formatEventTimeInLima } from "@/lib/lima-time";
 import { formatSoles } from "@/lib/money";
-import { getClubProfile as readClubProfile } from "@/modules/clubs";
+import { clubLogoPath, getClubProfile as readClubProfile } from "@/modules/clubs";
 import { listOpenEvents } from "@/modules/events";
+import { SpotsBadge } from "../spots-badge";
 
+const CARD_LOGO_PX = 48;
 
 type Params = PageProps<"/[club]">["params"];
 
@@ -68,7 +71,11 @@ async function PublicClubContent({ params }: { params: Params }) {
           <ul className="flex flex-col gap-3">
             {events.map((event) => (
               <li key={event.id}>
-                <EventCard clubSlug={slug} event={event} />
+                <EventCard
+                  clubSlug={slug}
+                  event={event}
+                  logoSrc={club.logoKey ? clubLogoPath(club.logoKey) : null}
+                />
               </li>
             ))}
           </ul>
@@ -78,32 +85,43 @@ async function PublicClubContent({ params }: { params: Params }) {
   );
 }
 
-function EventCard({ clubSlug, event }: { clubSlug: string; event: OpenEvent }) {
-  const isFull = event.remainingSpots === 0;
+function EventCard({
+  clubSlug,
+  event,
+  logoSrc,
+}: {
+  clubSlug: string;
+  event: OpenEvent;
+  logoSrc: string | null;
+}) {
   return (
     <Link
       href={`/c/${clubSlug}/${event.id}`}
-      className="card-interactive flex flex-col gap-1 p-4"
+      className="card-interactive flex flex-col gap-3 p-4"
     >
-      <span className="flex items-start justify-between gap-3">
-        <span className="font-medium">{event.title}</span>
-        <span
-          className={
-            isFull
-              ? "shrink-0 rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
-              : "shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
-          }
-        >
-          {isFull ? "Llena" : spotsLabel(event.remainingSpots)}
+      <span className="flex items-center gap-3">
+        {logoSrc && (
+          <Image
+            src={logoSrc}
+            alt=""
+            width={CARD_LOGO_PX}
+            height={CARD_LOGO_PX}
+            unoptimized
+            className="size-12 shrink-0 rounded-full border border-zinc-200 bg-white object-cover dark:border-zinc-700"
+          />
+        )}
+        <span className="flex min-w-0 flex-col">
+          <span className="font-semibold leading-tight">{event.title}</span>
+          <span className="text-sm text-zinc-600 first-letter:uppercase dark:text-zinc-400">
+            {formatEventTimeInLima(event)}
+          </span>
         </span>
       </span>
-      <span className="text-sm first-letter:uppercase">{formatEventTimeInLima(event)}</span>
       <span className="text-sm text-zinc-600 dark:text-zinc-400">{event.venueName}</span>
-      <span className="text-sm font-medium">{formatSoles(event.priceCents)}</span>
+      <span className="flex items-center justify-between gap-3">
+        <span className="text-sm font-semibold">{formatSoles(event.priceCents)}</span>
+        <SpotsBadge free={event.remainingSpots} capacity={event.capacity} />
+      </span>
     </Link>
   );
-}
-
-function spotsLabel(spots: number): string {
-  return spots === 1 ? "Queda 1 cupo" : `Quedan ${spots} cupos`;
 }

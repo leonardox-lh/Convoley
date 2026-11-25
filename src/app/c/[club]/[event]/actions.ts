@@ -21,6 +21,7 @@ import {
   genderField,
   levelField,
   nameField,
+  optionalNameField,
   PHONE_FORMAT_MESSAGE,
   positionField,
 } from "../../../player-schema";
@@ -39,8 +40,8 @@ export type RegisterState =
 const registerSchema = z.object({
   eventId: z.string().min(1),
   firstName: nameField("Escribe tu nombre."),
-  lastName: nameField("Escribe tu apellido."),
-  phone: z.string().trim().min(1, "Escribe tu celular."),
+  lastName: optionalNameField,
+  phone: z.string().trim().default(""),
   position: positionField,
   level: levelField,
   gender: genderField,
@@ -67,7 +68,7 @@ export async function registerAction(
     ...parsed.data,
     firstName: profile?.firstName || parsed.data.firstName,
     lastName: profile?.lastName || parsed.data.lastName,
-    phone: profile?.phone ?? parsed.data.phone,
+    phone: profile?.phone ?? (parsed.data.phone || null),
   };
 
   let registrationId: string;
@@ -79,7 +80,9 @@ export async function registerAction(
     if (known) return { status: "error", message: known[1] };
     throw error;
   }
-  if (userId && profile && !profile.phone) await rememberPhone(userId, player.phone);
+  if (userId && profile && !profile.phone && player.phone) {
+    await rememberPhone(userId, player.phone);
+  }
   return { status: "registered", registrationId, firstName: player.firstName, waitlistPosition };
 }
 

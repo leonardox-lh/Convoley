@@ -9,10 +9,12 @@ import {
   recordManualPayment,
   recordVoucherPayment,
   rejectVoucher,
+  revertApprovedPayments,
   saveVoucherImage,
 } from "@/modules/payments";
 import type {
   ManualPayments,
+  PaymentReversals,
   MercadoPagoGateway,
   MercadoPagoPaymentRecords,
   VoucherPayments,
@@ -22,6 +24,10 @@ import { toPrismaTx } from "./prisma-registration-repository";
 
 export const paymentsAdapter: ManualPayments = {
   record: (payment, tx) => recordManualPayment(payment, toPrismaTx(tx)),
+};
+
+export const paymentReversalsAdapter: PaymentReversals = {
+  revertApproved: (input, tx) => revertApprovedPayments(input, toPrismaTx(tx)),
 };
 
 export const voucherPaymentsAdapter: VoucherPayments = {

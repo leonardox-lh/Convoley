@@ -102,6 +102,20 @@ export function remainingSpots(capacity: number, confirmed: number): number {
   return Math.max(0, capacity - confirmed);
 }
 
+// Share of free spots above which an event still reads as "plenty" or "filling up".
+const PLENTY_FREE_SHARE = 0.5;
+const FILLING_FREE_SHARE = 0.2;
+
+export type SpotsLevel = "plenty" | "filling" | "almost";
+
+/** How urgent the free spots look to a player: green, yellow or red in the UI. */
+export function spotsLevel(free: number, capacity: number): SpotsLevel {
+  const share = capacity > 0 ? free / capacity : 0;
+  if (share > PLENTY_FREE_SHARE) return "plenty";
+  if (share > FILLING_FREE_SHARE) return "filling";
+  return "almost";
+}
+
 /** An open event becomes full when every spot is taken, and reopens when spots are added. */
 export function statusAfterCapacityChange(
   status: EventStatus,

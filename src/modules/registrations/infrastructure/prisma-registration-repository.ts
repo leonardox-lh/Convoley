@@ -31,6 +31,12 @@ export const prismaRegistrationRepository: RegistrationRepository = {
       select: { id: true, status: true },
     }),
 
+  findByUser: (eventId, userId, tx) =>
+    toPrismaTx(tx).registration.findFirst({
+      where: { eventId, userId },
+      select: { id: true, status: true },
+    }),
+
   async create(eventId, player, status, tx) {
     try {
       return await toPrismaTx(tx).registration.create({

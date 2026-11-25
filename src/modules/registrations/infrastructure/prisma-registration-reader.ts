@@ -169,3 +169,12 @@ export function listRegistrationEventIds(eventIds: string[]) {
     select: { id: true, eventId: true },
   });
 }
+
+/** Position and level the player gave last time, to prefill their next sign-up. */
+export async function findLastPlayerChoices(userId: string) {
+  return db.registration.findFirst({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    select: { position: true, level: true },
+  });
+}

@@ -7,6 +7,13 @@ const NAME_MAX_LENGTH = 60;
 export const nameField = (missing: string) =>
   z.string().trim().min(1, missing).max(NAME_MAX_LENGTH, "Ese nombre es muy largo.");
 
+/** Optional name part (the last name in public sign-ups); empty is stored as "". */
+export const optionalNameField = z
+  .string()
+  .trim()
+  .max(NAME_MAX_LENGTH, "Ese nombre es muy largo.")
+  .default("");
+
 export const PHONE_FORMAT_MESSAGE = "Escribe un celular peruano de 9 dígitos que empiece con 9.";
 
 // An empty <select> sends "": that means "no answer", not an invalid value.

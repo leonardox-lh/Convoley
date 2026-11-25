@@ -353,7 +353,8 @@ model Registration {
   userId        String?
   firstName     String
   lastName      String
-  phone         String
+  // Optional: a first name is enough to sign up. Unique per event only when given.
+  phone         String?
   position      PlayerPosition?
   level         PlayerLevel?
   gender        PlayerGender?

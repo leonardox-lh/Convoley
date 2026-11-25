@@ -211,8 +211,12 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
                       {registration.firstName} {registration.lastName}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {registration.phone.replace(/^\+51/, "")} ·{" "}
-                      {registeredAtFormatter.format(registration.createdAt)}
+                      {[
+                        registration.phone?.replace(/^\+51/, ""),
+                        registeredAtFormatter.format(registration.createdAt),
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
                     </p>
                     {(registration.position || registration.level) && (
                       <p className="text-sm text-muted-foreground">
@@ -270,6 +274,7 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
                         registration.status === "pending_payment" ||
                         registration.status === "in_review"
                       }
+                      canRevertToPending={registration.status === "paid"}
                     />
                   </div>
                 )}

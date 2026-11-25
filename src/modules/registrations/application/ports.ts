@@ -28,7 +28,8 @@ export interface EventSeats {
 export interface PlayerDetails {
   firstName: string;
   lastName: string;
-  phone: string;
+  /** Normalized +519XXXXXXXX; null when the player signed up with just a name. */
+  phone: string | null;
   /** Null for guests; set when the player signed in with Google. */
   userId: string | null;
   /** Optional, for balanced teams later (HU-10). */
@@ -43,6 +44,12 @@ export interface RegistrationRepository {
   findByPhone(
     eventId: string,
     phone: string,
+    tx: TransactionContext,
+  ): Promise<{ id: string; status: RegistrationStatus } | null>;
+  /** A Google player's sign-up to the event, for players who gave no phone. */
+  findByUser(
+    eventId: string,
+    userId: string,
     tx: TransactionContext,
   ): Promise<{ id: string; status: RegistrationStatus } | null>;
   create(
@@ -74,7 +81,7 @@ export interface RegistrationRepository {
     id: string;
     eventId: string;
     status: RegistrationStatus;
-    phone: string;
+    phone: string | null;
     userId: string | null;
   } | null>;
   /** Any status change also ends a reservation (HU-21). */
@@ -135,11 +142,19 @@ export interface ManualPayments {
   ): Promise<void>;
 }
 
+/** Approved payments taken back when the organizer reverts a "paid" (owned by `payments`). */
+export interface PaymentReversals {
+  revertApproved(
+    input: { registrationId: string; reviewedByUserId: string },
+    tx: TransactionContext,
+  ): Promise<{ chargedByMercadoPago: boolean }>;
+}
+
 export interface RegistrationListItem {
   id: string;
   firstName: string;
   lastName: string;
-  phone: string;
+  phone: string | null;
   position: PlayerPosition | null;
   level: PlayerLevel | null;
   gender: PlayerGender | null;

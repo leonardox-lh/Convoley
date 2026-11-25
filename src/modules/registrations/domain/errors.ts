@@ -120,3 +120,11 @@ export class NotEnoughWomenError extends Error {
     this.name = "NotEnoughWomenError";
   }
 }
+
+/** Only a paid registration can go back to pending payment. */
+export class RegistrationNotPaidError extends Error {
+  constructor(readonly registrationId: string) {
+    super(`Registration ${registrationId} is not paid`);
+    this.name = "RegistrationNotPaidError";
+  }
+}

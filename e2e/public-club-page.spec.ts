@@ -18,7 +18,7 @@ test("HU-03: sin cuenta se ven las convocatorias con fecha, lugar, precio y cupo
   await expect(card).toBeVisible();
   await expect(card).toContainText("Coliseo Manuel Bonilla");
   await expect(card).toContainText(/S\/\s?15/);
-  await expect(card).toContainText(/Quedan \d+ cupos|Queda 1 cupo|Llena/);
+  await expect(card).toContainText(/\d+ cupos? libres? de \d+|Llena/);
   await expect(card).toContainText(/\d{1,2} de \p{L}+ de \d{4}/u);
 });
 

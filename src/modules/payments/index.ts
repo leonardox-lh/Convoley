@@ -19,6 +19,7 @@ export {
   type PaymentOwner,
 } from "./domain/payment";
 export { markPaymentsForCancellation } from "./infrastructure/prisma-payment-marker";
+export { revertApprovedPayments } from "./infrastructure/prisma-payment-reversal";
 export {
   sumApprovedPaymentsByOwner,
   sumApprovedPlanPayments,

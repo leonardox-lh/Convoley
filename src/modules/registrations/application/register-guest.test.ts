@@ -210,3 +210,29 @@ describe("HU-10: posición y nivel opcionales al inscribirse", () => {
     expect(rows[0]).toMatchObject({ position: null, level: null });
   });
 });
+
+describe("inscripción solo con el nombre", () => {
+  it("se inscribe sin celular ni apellido", async () => {
+    const { registerGuest, rows } = setup(seatInfo());
+    await registerGuest({ eventId: "evt-1", firstName: "Ana", lastName: "", userId: null });
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ firstName: "Ana", lastName: "", phone: null });
+  });
+
+  it("dos invitados sin celular pueden inscribirse a la misma convocatoria", async () => {
+    const { registerGuest, rows } = setup(seatInfo());
+    const guest = { eventId: "evt-1", lastName: "", userId: null };
+    await registerGuest({ ...guest, firstName: "Ana" });
+    await registerGuest({ ...guest, firstName: "Luz" });
+    expect(rows).toHaveLength(2);
+  });
+
+  it("una cuenta de Google sin celular no se inscribe dos veces", async () => {
+    const { registerGuest } = setup(seatInfo(), [
+      stored({ phone: null, userId: "user-1", firstName: "Ana" }),
+    ]);
+    await expect(
+      registerGuest({ eventId: "evt-1", firstName: "Ana", lastName: "", userId: "user-1" }),
+    ).rejects.toThrow(DuplicateRegistrationError);
+  });
+});

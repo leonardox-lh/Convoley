@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { formatInLima, formatEventTimeInLima } from "@/lib/lima-time";
 import { formatSoles } from "@/lib/money";
+import { clubLogoPath, getClubProfile } from "@/modules/clubs";
 import { type CancellationOutcome, type EventStatus } from "@/modules/events";
 import { getPaymentSettings } from "@/modules/clubs";
 import { currentUserId, getPlayerProfile, isGoogleSignInEnabled } from "@/modules/identity";
@@ -10,12 +12,16 @@ import {
   acceptsWaitlist,
   buildRoster,
   cancellationDeadline,
+  findLastPlayerChoices,
   isOpenForRegistration,
   listEventRegistrations,
 } from "@/modules/registrations";
 import { loadEventPreview, seatsText, shareDescription } from "./event-preview";
 import { loadPaymentInfo } from "../../../payment-info";
 import { RegistrationForm } from "./registration-form";
+import { SpotsBadge } from "../../../spots-badge";
+
+const HEADER_LOGO_PX = 64;
 
 const STATUS_NOTICES: Partial<Record<EventStatus, string>> = {
   full: "Convocatoria llena",
@@ -54,12 +60,18 @@ export default function PublicEventPage({ params }: PageProps<"/c/[club]/[event]
 
 async function PublicEventContent({ params }: { params: Params }) {
   const { club, event: eventId } = await params;
-  const event = await loadEventPreview(club, eventId);
+  const [event, clubProfile] = await Promise.all([
+    loadEventPreview(club, eventId),
+    getClubProfile(club),
+  ]);
   if (!event) notFound();
   const now = new Date();
   const waitlistOnly = acceptsWaitlist(event, now);
   const userId = await currentUserId();
-  const profile = userId ? await getPlayerProfile(userId) : null;
+  const [profile, lastChoices] = userId
+    ? await Promise.all([getPlayerProfile(userId), findLastPlayerChoices(userId)])
+    : [null, null];
+  const seatsAreOpen = event.status === "published" || event.status === "full";
   const notice = STATUS_NOTICES[event.status];
   const cancellationNote =
     event.status === "cancelled" && event.cancellationOutcome
@@ -68,12 +80,31 @@ async function PublicEventContent({ params }: { params: Params }) {
 
   return (
     <>
-      <div>
-        <p className="text-sm text-zinc-500">
-          {event.clubName} · {event.communityName}
-        </p>
-        <h1 className="text-2xl font-semibold tracking-tight">{event.title}</h1>
-      </div>
+      <header
+        className="-mx-4 -mt-8 flex items-center gap-4 bg-zinc-900 px-4 py-6 text-white"
+        style={{ backgroundColor: clubProfile?.primaryColor ?? undefined }}
+      >
+        {clubProfile?.logoKey && (
+          <Image
+            src={clubLogoPath(clubProfile.logoKey)}
+            alt={`Logo de ${event.clubName}`}
+            width={HEADER_LOGO_PX}
+            height={HEADER_LOGO_PX}
+            unoptimized
+            className="size-16 shrink-0 rounded-full bg-white object-cover ring-2 ring-white/70"
+          />
+        )}
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <p
+            className="text-sm font-semibold uppercase tracking-wide opacity-90"
+            style={{ color: clubProfile?.secondaryColor ?? undefined }}
+          >
+            {event.clubName}
+          </p>
+          <h1 className="text-2xl leading-tight font-bold tracking-tight">{event.title}</h1>
+          <p className="text-sm opacity-80">{event.communityName}</p>
+        </div>
+      </header>
       {notice && (
         <div
           role="status"
@@ -83,9 +114,9 @@ async function PublicEventContent({ params }: { params: Params }) {
           {cancellationNote && <p>{cancellationNote}</p>}
         </div>
       )}
-      <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
+      <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-3 rounded-xl border border-zinc-200 p-4 text-sm dark:border-zinc-800">
         <dt className="text-zinc-500">Cuándo</dt>
-        <dd className="first-letter:uppercase">{formatEventTimeInLima(event)}</dd>
+        <dd className="font-medium first-letter:uppercase">{formatEventTimeInLima(event)}</dd>
         <dt className="text-zinc-500">Dónde</dt>
         <dd>
           {event.venueName}
@@ -104,10 +135,14 @@ async function PublicEventContent({ params }: { params: Params }) {
           )}
         </dd>
         <dt className="text-zinc-500">Precio</dt>
-        <dd>{formatSoles(event.priceCents)}</dd>
+        <dd className="font-semibold">{formatSoles(event.priceCents)}</dd>
         <dt className="text-zinc-500">Cupos</dt>
         <dd>
-          {event.capacity} · {seatsText(event)}
+          {seatsAreOpen ? (
+            <SpotsBadge free={event.freeSeats} capacity={event.capacity} />
+          ) : (
+            seatsText(event)
+          )}
         </dd>
         {event.isMixed && (
           <>
@@ -130,6 +165,7 @@ async function PublicEventContent({ params }: { params: Params }) {
           club={club}
           eventId={event.id}
           profile={profile}
+          lastChoices={lastChoices}
           googleEnabled={isGoogleSignInEnabled}
           isMixed={event.isMixed}
         />

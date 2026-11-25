@@ -17,6 +17,7 @@ import {
   eventSharePath,
   newEvent,
   remainingSpots,
+  spotsLevel,
   statusAfterCapacityChange,
   type EventStatus,
   type NewEventProps,
@@ -209,5 +210,18 @@ describe("HU-03: remainingSpots", () => {
 
   it("HU-03: nunca es negativo si hay más confirmados que la capacidad", () => {
     expect(remainingSpots(10, 14)).toBe(0);
+  });
+});
+
+describe("spotsLevel", () => {
+  it.each([
+    [17, 18, "plenty"],
+    [9, 18, "filling"],
+    [4, 18, "filling"],
+    [3, 18, "almost"],
+    [0, 18, "almost"],
+    [0, 0, "almost"],
+  ])("%i libres de %i → %s", (free, capacity, expected) => {
+    expect(spotsLevel(free, capacity)).toBe(expected);
   });
 });

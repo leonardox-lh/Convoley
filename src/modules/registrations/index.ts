@@ -22,12 +22,14 @@ import { makeApproveVoucher, makeRejectVoucher } from "./application/review-vouc
 import { makeSubmitVoucher } from "./application/submit-voucher";
 import { makeRegisterGuest } from "./application/register-guest";
 import { makeRemoveRegistration } from "./application/remove-registration";
+import { makeRevertToPending } from "./application/revert-to-pending";
 import { cancellationPoliciesAdapter, serviceFeesAdapter } from "./infrastructure/clubs-adapter";
 import { eventsAdapter } from "./infrastructure/events-adapter";
 import { creditsAdapter } from "./infrastructure/plans-adapter";
 import {
   mercadoPagoGatewayAdapter,
   mercadoPagoRecordsAdapter,
+  paymentReversalsAdapter,
   paymentsAdapter,
   voucherPaymentsAdapter,
   voucherReviewsAdapter,
@@ -72,6 +74,14 @@ export const markPaidManually = makeMarkPaidManually({
 export const removeRegistration = makeRemoveRegistration({
   events: eventsAdapter,
   registrations: prismaRegistrationRepository,
+  credits: creditsAdapter,
+  transactions,
+});
+
+export const revertToPending = makeRevertToPending({
+  events: eventsAdapter,
+  registrations: prismaRegistrationRepository,
+  payments: paymentReversalsAdapter,
   credits: creditsAdapter,
   transactions,
 });
@@ -168,8 +178,10 @@ export {
   NothingToReviewError,
   PaymentNotExpectedError,
   RegistrationNotFoundError,
+  RegistrationNotPaidError,
 } from "./domain/errors";
 export {
+  findLastPlayerChoices,
   findRegistrationOverview,
   promoteWaitlisted,
   countConfirmedRegistrations,

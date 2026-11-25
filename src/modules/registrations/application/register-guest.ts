@@ -21,7 +21,8 @@ export interface RegisterGuestInput {
   eventId: string;
   firstName: string;
   lastName: string;
-  phone: string;
+  /** Optional: a first name is enough to sign up. */
+  phone?: string | null;
   userId: string | null;
   position?: PlayerPosition | null;
   level?: PlayerLevel | null;
@@ -44,7 +45,7 @@ export async function registerPlayer(
   input: RegisterGuestInput & { allowWaitlist: boolean },
   tx: TransactionContext,
 ) {
-  const phone = PhoneNumber.parse(input.phone).value;
+  const phone = input.phone ? PhoneNumber.parse(input.phone).value : null;
   const player = {
     firstName: input.firstName,
     lastName: input.lastName,
@@ -60,7 +61,7 @@ export async function registerPlayer(
   if (!locked) throw new EventNotOpenError(input.eventId);
   const event = await releaseExpiredReservations(deps, locked, deps.now(), tx);
 
-  const existing = await deps.registrations.findByPhone(event.id, phone, tx);
+  const existing = await findExisting(deps.registrations, event.id, player, tx);
   if (existing && existing.status !== "cancelled") throw new DuplicateRegistrationError(event.id);
 
   const confirmed = await deps.registrations.countConfirmed(event.id, tx);
@@ -105,4 +106,16 @@ export function makeRegisterGuest(
       return { id, status, waitlistPosition, reservedUntil };
     });
   };
+}
+
+/** The same player's earlier sign-up: by phone, else by Google account (the phone may differ). */
+async function findExisting(
+  registrations: RegistrationRepository,
+  eventId: string,
+  player: { phone: string | null; userId: string | null },
+  tx: TransactionContext,
+) {
+  const byPhone = player.phone ? await registrations.findByPhone(eventId, player.phone, tx) : null;
+  if (byPhone || !player.userId) return byPhone;
+  return registrations.findByUser(eventId, player.userId, tx);
 }
