@@ -85,7 +85,7 @@ async function ClubAdminHome({ params }: Pick<Props, "params">) {
     <div className="flex flex-col gap-6">
       <section
         data-club-hero
-        className="relative -mx-4 -mt-8 overflow-hidden rounded-b-[2rem] px-5 pt-20 pb-7 text-white shadow-lg sm:mx-0 sm:mt-0 sm:rounded-3xl sm:p-5"
+        className="relative -mx-4 -mt-8 overflow-hidden rounded-b-[2rem] px-5 pt-17 pb-5 text-white shadow-lg sm:mx-0 sm:mt-0 sm:rounded-3xl sm:p-5"
         style={heroBackground(club.primaryColor)}
       >
         <VolleyballIcon className="pointer-events-none absolute -top-10 -right-12 size-48 opacity-15" />
@@ -107,7 +107,7 @@ async function ClubAdminHome({ params }: Pick<Props, "params">) {
             </h1>
           </div>
         </div>
-        <dl className="relative mt-5 grid grid-cols-2 gap-3">
+        <dl className="relative mt-4 grid grid-cols-2 gap-3">
           <Stat label="Convocatorias abiertas" value={events.length} />
           <Stat label="Cupos libres" value={freeSpots} />
         </dl>
@@ -217,7 +217,7 @@ async function ClubAdminHome({ params }: Pick<Props, "params">) {
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="flex flex-col rounded-2xl bg-white/12 px-4 py-3 backdrop-blur-sm">
+    <div className="flex flex-col rounded-2xl bg-white/12 px-4 py-2.5 backdrop-blur-sm">
       <dt className="text-xs text-white/75">{label}</dt>
       <dd className="text-2xl font-extrabold">{value}</dd>
     </div>

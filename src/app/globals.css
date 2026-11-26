@@ -181,7 +181,7 @@ select.peer {
   }
   /* The quick tabs make the see-through header taller; keep the hero's content below them. */
   body:has([data-admin-tabs]) [data-club-hero]:not([style*="display: none"] [data-club-hero]) {
-    @apply pt-32;
+    @apply pt-28;
   }
 }
 

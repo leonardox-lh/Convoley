@@ -77,12 +77,12 @@ export default function Home() {
         {/* data-club-hero: on phones the color runs up under the see-through top bar (globals.css). */}
         <section
           data-club-hero
-          className="relative -mx-4 -mt-8 overflow-hidden rounded-b-[2rem] px-6 pt-24 pb-10 text-white shadow-lg sm:mx-0 sm:mt-0 sm:rounded-3xl sm:pt-10"
+          className="relative -mx-4 -mt-8 overflow-hidden rounded-b-[2rem] px-6 pt-18 pb-8 text-white shadow-lg sm:mx-0 sm:mt-0 sm:rounded-3xl sm:pt-10"
           style={heroBackground(null)}
         >
           <VolleyballIcon className="pointer-events-none absolute -top-10 -right-12 size-48 opacity-15" />
-          <div className="relative flex max-w-xl flex-col gap-4">
-            <h1 className="text-3xl font-extrabold tracking-tight text-balance sm:text-4xl">
+          <div className="relative flex max-w-xl flex-col gap-3">
+            <h1 className="text-3xl leading-tight font-extrabold tracking-tight text-balance sm:text-4xl">
               Encuentra tu próximo partido de vóley en Lima
             </h1>
             <p className="text-white/80">

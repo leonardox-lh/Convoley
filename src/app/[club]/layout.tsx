@@ -79,12 +79,12 @@ async function ClubHeader({ params }: Pick<LayoutProps<"/[club]">, "params">) {
   return (
     <section
       data-club-hero
-      className="relative -mx-4 -mt-6 mb-5 flex flex-col gap-4 overflow-hidden rounded-b-[2rem] px-5 pt-20 pb-6 text-white shadow-lg sm:mx-0 sm:mt-0 sm:rounded-3xl sm:p-5"
+      className="relative -mx-4 -mt-6 mb-5 flex flex-col gap-3 overflow-hidden rounded-b-[2rem] px-5 pt-17 pb-5 text-white shadow-lg sm:mx-0 sm:mt-0 sm:rounded-3xl sm:p-5"
       style={heroBackground(club.primaryColor)}
     >
       <VolleyballIcon className="pointer-events-none absolute -bottom-12 -left-12 size-44 opacity-15" />
       <div className="relative flex items-start gap-4">
-        <div className="flex min-h-24 min-w-0 flex-1 flex-col gap-1">
+        <div className="flex min-h-20 min-w-0 flex-1 flex-col gap-1">
           <p
             className="text-xs font-semibold tracking-wide uppercase"
             style={{ color: club.secondaryColor ?? undefined }}
@@ -103,12 +103,12 @@ async function ClubHeader({ params }: Pick<LayoutProps<"/[club]">, "params">) {
             width={LOGO_PX}
             height={LOGO_PX}
             unoptimized
-            className="size-24 shrink-0 rounded-2xl bg-white object-cover shadow-md ring-4 ring-white/30"
+            className="size-20 shrink-0 rounded-2xl bg-white object-cover shadow-md ring-4 ring-white/30"
           />
         ) : (
           <span
             aria-hidden
-            className="flex size-24 shrink-0 items-center justify-center rounded-2xl bg-white/20 text-4xl font-semibold ring-4 ring-white/20"
+            className="flex size-20 shrink-0 items-center justify-center rounded-2xl bg-white/20 text-4xl font-semibold ring-4 ring-white/20"
           >
             {club.name.charAt(0).toUpperCase()}
           </span>

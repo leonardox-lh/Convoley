@@ -44,18 +44,18 @@ export function PageHeading({
   return (
     <header
       data-club-hero
-      className="relative -mx-4 -mt-4 overflow-hidden rounded-b-[2rem] px-5 pt-20 pb-6 text-white shadow-lg sm:mx-0 sm:mt-0 sm:rounded-3xl sm:p-5"
+      className="relative -mx-4 -mt-4 overflow-hidden rounded-b-[2rem] px-5 pt-17 pb-5 text-white shadow-lg sm:mx-0 sm:mt-0 sm:rounded-3xl sm:p-5"
       style={heroBackground(primaryColor)}
     >
       <VolleyballIcon className="pointer-events-none absolute -top-10 -right-12 size-44 opacity-15" />
       <div className="relative flex items-center gap-3">
         {media ??
           (Icon && (
-            <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/25">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/25">
               <Icon className="size-6" aria-hidden />
             </span>
           ))}
-        <div className="flex min-w-0 flex-col gap-0.5">
+        <div className="flex min-w-0 flex-col">
           {eyebrow &&
             (eyebrowHref ? (
               <Link
@@ -69,13 +69,13 @@ export function PageHeading({
                 {eyebrow}
               </p>
             ))}
-          <h1 className="text-2xl leading-tight font-extrabold tracking-tight text-balance first-letter:uppercase">
+          <h1 className="text-xl leading-tight font-extrabold tracking-tight text-balance first-letter:uppercase sm:text-2xl">
             {title}
           </h1>
         </div>
       </div>
-      {children && <p className="relative mt-3 text-sm text-white/80">{children}</p>}
-      {footer && <div className="relative mt-3 text-sm">{footer}</div>}
+      {children && <p className="relative mt-2 text-sm leading-snug text-white/80">{children}</p>}
+      {footer && <div className="relative mt-2 text-sm">{footer}</div>}
     </header>
   );
 }

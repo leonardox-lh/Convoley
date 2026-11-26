@@ -107,7 +107,7 @@ async function RegistrationContent({ params, searchParams }: Props) {
           <ClubLogo
             name={event.clubName}
             src={club?.logoKey ? clubLogoPath(club.logoKey) : null}
-            className="size-14 rounded-xl"
+            className="size-11 rounded-xl"
           />
         }
         title={

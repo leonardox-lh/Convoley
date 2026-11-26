@@ -39,7 +39,7 @@ async function ClubProfileContent({ params, searchParams }: Props) {
           <ClubLogo
             name={club.name}
             src={club.logoKey ? clubLogoPath(club.logoKey) : null}
-            className="size-14 rounded-xl"
+            className="size-11 rounded-xl"
           />
         }
       />

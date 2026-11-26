@@ -51,7 +51,7 @@ export function EventHero(props: {
 
   const clubLine = (
     <>
-      <ClubLogo name={event.clubName} src={event.logoSrc} className="size-12 rounded-xl" />
+      <ClubLogo name={event.clubName} src={event.logoSrc} className="size-10 rounded-xl" />
       {/* "/ Convocatoria" never splits: a long club name pushes it whole to the second line. */}
       <span className="line-clamp-2 min-w-0 text-sm font-semibold tracking-wide uppercase">
         <span style={{ color: event.secondaryColor ?? undefined }}>{event.clubName}</span>
@@ -67,7 +67,7 @@ export function EventHero(props: {
       {/* data-club-hero: on phones the color runs up under the see-through top bar (globals.css). */}
       <header
         data-club-hero
-        className="relative -mx-4 overflow-hidden rounded-b-[2rem] px-5 pt-6 pb-14 text-white max-sm:pt-20"
+        className="relative -mx-4 overflow-hidden rounded-b-[2rem] px-5 pt-6 pb-14 text-white max-sm:pt-17"
         style={heroBackground(event.primaryColor)}
       >
         <VolleyballIcon className="pointer-events-none absolute -top-10 -right-12 size-48 opacity-15" />
@@ -82,13 +82,13 @@ export function EventHero(props: {
         ) : (
           <div className="relative flex items-center gap-3">{clubLine}</div>
         )}
-        <div className="relative mt-5 flex items-start gap-3">
+        <div className="relative mt-3 flex items-start gap-3">
           <h1 className="min-w-0 flex-1 text-3xl leading-tight font-extrabold tracking-tight text-balance first-letter:uppercase">
             {event.title}
           </h1>
           {props.action}
         </div>
-        <div className="relative mt-3 flex flex-wrap gap-2 text-xs font-medium">
+        <div className="relative mt-2 flex flex-wrap gap-2 text-xs font-medium">
           <span className="rounded-full bg-white/15 px-3 py-1">{event.communityName}</span>
           {event.isMixed && <span className="rounded-full bg-white/15 px-3 py-1">Mixto</span>}
         </div>
