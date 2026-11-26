@@ -1,3 +1,4 @@
+import { SelectPicker } from "./date-time-pickers";
 import { startTransition, type FormEvent } from "react";
 import { Toast } from "./toast";
 
@@ -99,15 +100,15 @@ export function OptionalSelect(props: {
   defaultValue?: string | null;
 }) {
   return (
-    <Field label={<>{props.label} (opcional)</>} float="always">
-      <select name={props.name} defaultValue={props.defaultValue ?? ""} className={fieldClass}>
-        <option value="">—</option>
-        {Object.entries(props.options).map(([value, label]) => (
-          <option key={value} value={value}>
-            {label}
-          </option>
-        ))}
-      </select>
-    </Field>
+    <SelectPicker
+      label={`${props.label} (opcional)`}
+      name={props.name}
+      defaultValue={props.defaultValue ?? ""}
+      required={false}
+      options={[
+        { value: "", label: "—" },
+        ...Object.entries(props.options).map(([value, label]) => ({ value, label })),
+      ]}
+    />
   );
 }

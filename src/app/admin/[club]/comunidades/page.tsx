@@ -1,3 +1,4 @@
+import { PageHeading } from "@/components/page-heading";
 import { Users } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -25,23 +26,23 @@ async function CommunitiesContent({ params }: Pick<Props, "params">) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <Link
-          href={`/admin/${clubSlug}/convocatorias/nueva`}
-          className="text-sm text-zinc-500 underline-offset-4 hover:underline"
-        >
-          Nueva convocatoria
-        </Link>
-        <h1 className="flex items-center gap-3 text-2xl font-semibold tracking-tight">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md">
-            <Users className="size-5" aria-hidden />
-          </span>
-          Comunidades
-        </h1>
-        <p className="text-sm text-zinc-500">
-          Separa tus convocatorias como en tus grupos de WhatsApp: General, Amateur, Competitivo…
-        </p>
-      </div>
+      <PageHeading
+        footer={
+          <>
+            <Link
+              href={`/admin/${clubSlug}/convocatorias/nueva`}
+              className="font-semibold text-white underline-offset-4 hover:underline"
+            >
+              Nueva convocatoria
+            </Link>
+          </>
+        }
+        icon={Users}
+        eyebrow="Gestiona tu club"
+        title="Comunidades"
+      >
+        Separa tus convocatorias como en tus grupos de WhatsApp: General, Amateur, Competitivo…
+      </PageHeading>
       <NewCommunityForm clubSlug={clubSlug} />
       <ul
         aria-label="Comunidades"

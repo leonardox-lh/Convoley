@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { CalendarCheck } from "lucide-react";
+import { PageHeading } from "@/components/page-heading";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
@@ -17,8 +19,8 @@ export const metadata: Metadata = { title: "Mis inscripciones · Convoley" };
 
 export default function MyRegistrationsPage() {
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 py-8">
-      <h1 className="text-2xl font-semibold tracking-tight">Mis inscripciones</h1>
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pt-4 pb-8">
+      <PageHeading icon={CalendarCheck} eyebrow="Convoley" title="Mis inscripciones" />
       <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
         <MyRegistrations />
       </Suspense>

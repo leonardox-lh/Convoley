@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { ShoppingBag } from "lucide-react";
+import { PageHeading } from "@/components/page-heading";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { centsToSolesText } from "@/lib/money";
@@ -30,15 +31,12 @@ async function ProductContent({ params }: Pick<Props, "params">) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <Link
-          href={`/admin/${clubSlug}/tienda`}
-          className="text-sm text-zinc-500 underline-offset-4 hover:underline"
-        >
-          Tienda
-        </Link>
-        <h1 className="text-2xl font-semibold tracking-tight">{product.name}</h1>
-      </div>
+      <PageHeading
+        icon={ShoppingBag}
+        eyebrow="Tienda"
+        eyebrowHref={`/admin/${clubSlug}/tienda`}
+        title={product.name}
+      />
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-semibold">
           Fotos ({product.imageKeys.length}/{MAX_PRODUCT_PHOTOS})

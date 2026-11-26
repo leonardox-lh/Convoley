@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { SelectPicker } from "@/components/date-time-pickers";
+import { useActionState, useRef } from "react";
 import { Field, floatingFieldClass, FormMessage } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import { buildTeamsAction, moveToTeamAction, renameTeamAction, type TeamsState } from "./actions";
@@ -67,25 +68,25 @@ export function MoveToTeamSelect(props: {
   teamNumber: number | null;
   teams: { number: number; name: string }[];
 }) {
+  const formRef = useRef<HTMLFormElement>(null);
   return (
-    <form action={moveToTeamAction}>
+    <form ref={formRef} action={moveToTeamAction}>
       <input type="hidden" name="clubSlug" value={props.clubSlug} />
       <input type="hidden" name="eventId" value={props.eventId} />
       <input type="hidden" name="registrationId" value={props.registrationId} />
-      <select
+      <SelectPicker
+        label={`Mover a ${props.playerName}`}
         name="teamNumber"
-        defaultValue={props.teamNumber ?? ""}
-        aria-label={`Mover a ${props.playerName}`}
-        onChange={(event) => event.currentTarget.form?.requestSubmit()}
-        className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-      >
-        <option value="">Sin equipo</option>
-        {props.teams.map((team) => (
-          <option key={team.number} value={team.number}>
-            {team.name}
-          </option>
-        ))}
-      </select>
+        defaultValue={props.teamNumber?.toString() ?? ""}
+        required={false}
+        className="w-40"
+        // Send once React has put the chosen team in the hidden field.
+        onChange={() => requestAnimationFrame(() => formRef.current?.requestSubmit())}
+        options={[
+          { value: "", label: "Sin equipo" },
+          ...props.teams.map((team) => ({ value: String(team.number), label: team.name })),
+        ]}
+      />
     </form>
   );
 }

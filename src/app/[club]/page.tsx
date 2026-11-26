@@ -95,10 +95,7 @@ function EventCard({
   logoSrc: string | null;
 }) {
   return (
-    <Link
-      href={`/c/${clubSlug}/${event.id}`}
-      className="card-interactive flex flex-col gap-3 p-4"
-    >
+    <Link href={`/c/${clubSlug}/${event.id}`} className="card-interactive flex flex-col gap-3 p-4">
       <span className="flex items-center gap-3">
         {logoSrc && (
           <Image

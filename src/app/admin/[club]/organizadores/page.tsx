@@ -1,5 +1,5 @@
+import { PageHeading } from "@/components/page-heading";
 import { UserCog } from "lucide-react";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { listClubMembers } from "@/modules/clubs";
@@ -26,20 +26,9 @@ async function OrganizersContent({ params }: Pick<Props, "params">) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <Link href={`/admin/${clubSlug}`} className="text-sm text-zinc-500 underline">
-          Volver al club
-        </Link>
-        <h1 className="flex items-center gap-3 text-2xl font-semibold tracking-tight">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md">
-            <UserCog className="size-5" aria-hidden />
-          </span>
-          Organizadores
-        </h1>
-        <p className="text-sm text-zinc-500">
-          Invita a quien te ayuda sin darle tu cuenta. El ayudante no ve cobros ni finanzas.
-        </p>
-      </div>
+      <PageHeading icon={UserCog} eyebrow="Gestiona tu club" title="Organizadores">
+        Invita a quien te ayuda sin darle tu cuenta. El ayudante no ve cobros ni finanzas.
+      </PageHeading>
       <ul className="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-800">
         {members.map((member) => (
           <li key={member.userId} className="flex items-start justify-between gap-3 py-3">

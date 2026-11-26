@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Logo } from "@/components/logo";
 import { VolleyballIcon } from "@/components/volleyball";
-import { heroBackground } from "../event-hero";
+import { heroBackground } from "@/components/page-heading";
 import { clubLogoPath, getClubProfile } from "@/modules/clubs";
 import { ClubDescription } from "./club-description";
 import { ClubTabs } from "./club-tabs";

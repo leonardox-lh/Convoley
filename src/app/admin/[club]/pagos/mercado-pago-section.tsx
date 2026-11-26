@@ -37,8 +37,8 @@ export async function MercadoPagoSection(props: {
   const message = RESULT_MESSAGES[props.result as keyof typeof RESULT_MESSAGES];
 
   return (
-    <section className="flex flex-col gap-3 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
-      <h2 className="font-semibold">Cobro automático con Mercado Pago</h2>
+    <section className="flex flex-col gap-3">
+      <h2 className="text-lg font-semibold">Cobro automático con Mercado Pago</h2>
       {message && <FormMessage tone={message.tone}>{message.text}</FormMessage>}
       {status ? (
         <>

@@ -3,20 +3,10 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { ClubLogo } from "@/components/club-logo";
 import { buttonVariants } from "@/components/ui/button";
+import { heroBackground } from "@/components/page-heading";
 import { VolleyballIcon } from "@/components/volleyball";
 import { formatTimeInLima, limaDateParts } from "@/lib/lima-time";
 import { formatSoles } from "@/lib/money";
-
-// The app's blue when the club has no color of its own; the hero fades into night blue.
-const DEFAULT_BRAND_COLOR = "#1d4ed8";
-const HERO_NIGHT = "#0a1a4a";
-
-/** The heroes' background: the club color fading into night blue. */
-export function heroBackground(primaryColor: string | null) {
-  return {
-    backgroundImage: `linear-gradient(140deg, ${primaryColor ?? DEFAULT_BRAND_COLOR} 0%, ${HERO_NIGHT} 100%)`,
-  };
-}
 
 export interface EventHeroData {
   clubName: string;

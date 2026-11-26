@@ -1,7 +1,13 @@
 "use client";
 
 import { useActionState, useState, type FormEvent } from "react";
-import { Field, fieldClass, floatingFieldClass, FormMessage, submitKeepingValues } from "@/components/form";
+import {
+  Field,
+  floatingFieldClass,
+  FormMessage,
+  submitKeepingValues,
+} from "@/components/form";
+import { FileField } from "@/components/file-field";
 import { Button } from "@/components/ui/button";
 import type { VoucherState } from "./actions";
 
@@ -37,10 +43,8 @@ export function VoucherForm(props: {
       {Object.entries(props.hidden).map(([name, value]) => (
         <input key={name} type="hidden" name={name} value={value} />
       ))}
-      <Field label="Captura de tu pago" float="always">
-        {/* image/* opens the phone's gallery (and camera) picker. */}
-        <input type="file" name="voucher" accept="image/*" required className={fieldClass} />
-      </Field>
+      {/* image/* opens the phone's gallery (and camera) picker. */}
+      <FileField label="Captura de tu pago" name="voucher" accept="image/*" required />
       <Field label="Código de seguridad de Yape (opcional)">
         <input
           name="yapeSecurityCode"

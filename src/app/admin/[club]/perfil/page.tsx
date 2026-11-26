@@ -1,5 +1,5 @@
-import { Store } from "lucide-react";
-import Image from "next/image";
+import { ClubLogo } from "@/components/club-logo";
+import { PageHeading } from "@/components/page-heading";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { CopyButton } from "@/components/copy-button";
@@ -9,8 +9,6 @@ import { clubLogoPath, getClubProfile, MAX_LOGO_BYTES } from "@/modules/clubs";
 import { ClubProfileForm } from "@/app/club/club-profile-form";
 import { requireOrganizer } from "../require-organizer";
 import { updateClubProfileAction } from "./actions";
-
-const LOGO_PREVIEW_PX = 64;
 
 type Props = PageProps<"/admin/[club]/perfil">;
 
@@ -34,33 +32,26 @@ async function ClubProfileContent({ params, searchParams }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-3">
-        {club.logoKey && (
-          <Image
-            src={clubLogoPath(club.logoKey)}
-            alt={`Logo de ${club.name}`}
-            width={LOGO_PREVIEW_PX}
-            height={LOGO_PREVIEW_PX}
-            unoptimized
-            className="size-16 rounded-full object-cover"
+      <PageHeading
+        eyebrow={club.name}
+        title="Perfil del club"
+        media={
+          <ClubLogo
+            name={club.name}
+            src={club.logoKey ? clubLogoPath(club.logoKey) : null}
+            className="size-14 rounded-xl"
           />
-        )}
-        <div>
-          <p className="text-sm text-zinc-500">{club.name}</p>
-          <h1 className="flex items-center gap-3 text-2xl font-semibold tracking-tight">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md">
-            <Store className="size-5" aria-hidden />
-          </span>
-          Perfil del club
-        </h1>
-        </div>
-      </div>
+        }
+      />
       {query.creado && <FormMessage tone="ok">¡Tu club está listo!</FormMessage>}
       {query.guardado && <FormMessage tone="ok">Cambios guardados.</FormMessage>}
       <div className="flex flex-col gap-0.5">
         <p className="text-sm font-medium">Link de tu club</p>
         <div className="flex items-center gap-1">
-          <a href={publicUrl} className="min-w-0 flex-1 text-sm break-all text-primary underline-offset-4 hover:underline">
+          <a
+            href={publicUrl}
+            className="min-w-0 flex-1 text-sm break-all text-primary underline-offset-4 hover:underline"
+          >
             {publicUrl}
           </a>
           <CopyButton text={publicUrl} label="Copiar link del club" />

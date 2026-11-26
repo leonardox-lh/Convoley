@@ -1,3 +1,4 @@
+import { PageHeading } from "@/components/page-heading";
 import { Package } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -57,20 +58,21 @@ async function OrdersContent({ params, searchParams }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <Link
-          href={`/admin/${clubSlug}/tienda`}
-          className="text-sm text-zinc-500 underline-offset-4 hover:underline"
-        >
-          Tienda
-        </Link>
-        <h1 className="flex items-center gap-3 text-2xl font-semibold tracking-tight">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md">
-            <Package className="size-5" aria-hidden />
-          </span>
-          Pedidos
-        </h1>
-      </div>
+      <PageHeading
+        footer={
+          <>
+            <Link
+              href={`/admin/${clubSlug}/tienda`}
+              className="font-semibold text-white underline-offset-4 hover:underline"
+            >
+              Tienda
+            </Link>
+          </>
+        }
+        icon={Package}
+        eyebrow="Gestiona tu club"
+        title="Pedidos"
+      />
       <nav aria-label="Filtrar por estado" className="flex flex-wrap gap-2">
         <FilterLink href={basePath} active={!estado} label="Todos" />
         {Object.entries(FILTERS).map(([value, { label }]) => (

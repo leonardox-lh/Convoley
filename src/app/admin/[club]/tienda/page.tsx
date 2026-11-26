@@ -1,3 +1,4 @@
+import { PageHeading } from "@/components/page-heading";
 import { ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -31,27 +32,28 @@ async function StoreContent({ params }: Pick<Props, "params">) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <Link
-          href={`/admin/${clubSlug}/pedidos`}
-          className="text-sm text-zinc-500 underline-offset-4 hover:underline"
-        >
-          Pedidos
-        </Link>
-        {" · "}
-        <Link
-          href={`/${clubSlug}/tienda`}
-          className="text-sm text-zinc-500 underline-offset-4 hover:underline"
-        >
-          Ver tienda pública
-        </Link>
-        <h1 className="flex items-center gap-3 text-2xl font-semibold tracking-tight">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md">
-            <ShoppingBag className="size-5" aria-hidden />
-          </span>
-          Tienda
-        </h1>
-      </div>
+      <PageHeading
+        footer={
+          <>
+            <Link
+              href={`/admin/${clubSlug}/pedidos`}
+              className="font-semibold text-white underline-offset-4 hover:underline"
+            >
+              Pedidos
+            </Link>
+            {" · "}
+            <Link
+              href={`/${clubSlug}/tienda`}
+              className="font-semibold text-white underline-offset-4 hover:underline"
+            >
+              Ver tienda pública
+            </Link>
+          </>
+        }
+        icon={ShoppingBag}
+        eyebrow="Gestiona tu club"
+        title="Tienda"
+      />
       <ul
         aria-label="Productos"
         className="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-800"

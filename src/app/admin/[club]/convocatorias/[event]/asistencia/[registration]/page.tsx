@@ -1,3 +1,5 @@
+import { ScanLine } from "lucide-react";
+import { PageHeading } from "@/components/page-heading";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -43,12 +45,15 @@ async function AttendanceContent({ params }: Props) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <p className="text-sm text-zinc-500">{event.title}</p>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {registration.firstName} {registration.lastName}
-        </h1>
-      </div>
+      <PageHeading
+        icon={ScanLine}
+        eyebrow={event.title}
+        title={
+          <>
+            {registration.firstName} {registration.lastName}
+          </>
+        }
+      />
       <p>
         <span
           className={cn(

@@ -14,7 +14,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { Logo } from "@/components/logo";
 import { VolleyballIcon } from "@/components/volleyball";
-import { heroBackground } from "./event-hero";
+import { heroBackground } from "@/components/page-heading";
 import { buttonVariants } from "@/components/ui/button";
 import { formatTimeRangeInLima } from "@/lib/lima-time";
 import { formatSoles } from "@/lib/money";

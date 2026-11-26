@@ -1,3 +1,5 @@
+import { Pencil } from "lucide-react";
+import { PageHeading } from "@/components/page-heading";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -35,23 +37,29 @@ async function EditEventContent({ params }: { params: Props["params"] }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <p className="text-sm text-zinc-500">{event.club.name}</p>
-        <h1 className="text-2xl font-semibold tracking-tight">Editar convocatoria</h1>
-        <div className="flex gap-4">
-          <Link
-            href={`/admin/${clubSlug}/convocatorias/${event.id}`}
-            className="text-sm underline underline-offset-4"
-          >
-            Ver inscritos
-          </Link>
-          {event.status !== "draft" && (
-            <Link href={event.sharePath} className="text-sm underline underline-offset-4">
-              Ver link público
+      <PageHeading
+        icon={Pencil}
+        eyebrow={event.club.name}
+        title="Editar convocatoria"
+        footer={
+          <div className="flex gap-4">
+            <Link
+              href={`/admin/${clubSlug}/convocatorias/${event.id}`}
+              className="font-semibold text-white underline-offset-4 hover:underline"
+            >
+              Ver inscritos
             </Link>
-          )}
-        </div>
-      </div>
+            {event.status !== "draft" && (
+              <Link
+                href={event.sharePath}
+                className="font-semibold text-white underline-offset-4 hover:underline"
+              >
+                Ver link público
+              </Link>
+            )}
+          </div>
+        }
+      />
 
       {event.status === "cancelled" && (
         <p

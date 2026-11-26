@@ -1,7 +1,8 @@
 "use client";
 
+import { SelectPicker } from "@/components/date-time-pickers";
 import { useActionState, useState } from "react";
-import { Field, fieldClass, FormMessage } from "@/components/form";
+import { fieldClass, FormMessage } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import {
   createInvitationAction,
@@ -19,12 +20,15 @@ export function InviteForm({ clubSlug }: { clubSlug: string }) {
   return (
     <form action={action} className="flex flex-col gap-3">
       <input type="hidden" name="clubSlug" value={clubSlug} />
-      <Field label="Rol" float="always">
-        <select name="role" defaultValue="helper" className={fieldClass}>
-          <option value="helper">Ayudante: aprueba pagos y maneja el día de juego</option>
-          <option value="admin">Administrador: todo, incluidas las finanzas</option>
-        </select>
-      </Field>
+      <SelectPicker
+        label="Rol"
+        name="role"
+        defaultValue="helper"
+        options={[
+          { value: "helper", label: "Ayudante: aprueba pagos y maneja el día de juego" },
+          { value: "admin", label: "Administrador: todo, incluidas las finanzas" },
+        ]}
+      />
       <Button type="submit" size="lg" className="h-11" disabled={pending}>
         Crear link de invitación
       </Button>

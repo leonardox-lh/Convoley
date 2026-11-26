@@ -1,7 +1,8 @@
 "use client";
 
+import { SelectPicker } from "@/components/date-time-pickers";
 import { useActionState, useState } from "react";
-import { Field, fieldClass, FormMessage, submitKeepingValues, TextField } from "@/components/form";
+import { FormMessage, submitKeepingValues, TextField } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import { updateServiceFeeAction, type ServiceFeeState } from "./actions";
 
@@ -18,22 +19,23 @@ export function ServiceFeeForm(props: { clubSlug: string; kind: Kind; amount: st
   return (
     <form onSubmit={submitKeepingValues(formAction)} className="flex flex-col gap-3">
       <input type="hidden" name="clubSlug" value={props.clubSlug} />
-      <Field
-        label="Cargo por servicio (opcional)"
-        float="always"
-        hint="Para trasladar la comisión de Mercado Pago al jugador. Lo ve antes de pagar. Hasta S/ 50 o 20 %."
-      >
-        <select
+      <div className="flex flex-col gap-1">
+        <SelectPicker
+          label="Cargo por servicio (opcional)"
           name="kind"
-          value={kind}
-          onChange={(event) => setKind(event.target.value as Kind)}
-          className={fieldClass}
-        >
-          <option value="none">Sin cargo</option>
-          <option value="fixed">Monto fijo (S/)</option>
-          <option value="percent">Porcentaje del precio (%)</option>
-        </select>
-      </Field>
+          defaultValue={kind}
+          onChange={(value) => setKind(value as Kind)}
+          options={[
+            { value: "none", label: "Sin cargo" },
+            { value: "fixed", label: "Monto fijo (S/)" },
+            { value: "percent", label: "Porcentaje del precio (%)" },
+          ]}
+        />
+        <span className="px-1 text-xs text-muted-foreground">
+          Para trasladar la comisión de Mercado Pago al jugador. Lo ve antes de pagar. Hasta S/ 50 o
+          20 %.
+        </span>
+      </div>
       {kind !== "none" && (
         <TextField
           label={kind === "fixed" ? "Monto en soles" : "Porcentaje"}

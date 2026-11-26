@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Package } from "lucide-react";
+import { PageHeading } from "@/components/page-heading";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { FormMessage } from "@/components/form";
@@ -32,7 +33,7 @@ type Props = PageProps<"/pedido/[order]">;
 /** HU-24: the player's order, where to pick it up and how to pay it. */
 export default function OrderPage(props: Props) {
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 py-8">
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pt-4 pb-8">
       <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
         <OrderContent {...props} />
       </Suspense>
@@ -70,15 +71,14 @@ async function OrderContent({ params, searchParams }: Props) {
 
   return (
     <>
-      <div>
-        <Link href={`/${club.slug}/tienda`} className="text-sm text-zinc-500 hover:underline">
-          {club.name} · Tienda
-        </Link>
-        <h1 className="text-2xl font-semibold tracking-tight">Tu pedido</h1>
-        <p className="text-sm">
-          {order.firstName} {order.lastName} · {ORDER_STATUS_LABELS[order.status]}
-        </p>
-      </div>
+      <PageHeading
+        icon={Package}
+        eyebrow={`${club.name} · Tienda`}
+        eyebrowHref={`/${club.slug}/tienda`}
+        title="Tu pedido"
+      >
+        {order.firstName} {order.lastName} · {ORDER_STATUS_LABELS[order.status]}
+      </PageHeading>
       <ul className="flex flex-col gap-1 text-sm">
         {order.items.map((item, index) => (
           <li key={index}>
@@ -106,7 +106,7 @@ async function OrderContent({ params, searchParams }: Props) {
         <p className="text-sm text-zinc-500">El organizador está revisando tu pago.</p>
       )}
       {awaitingPayment && mercadoPago && (
-        <section className="flex flex-col gap-4 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+        <section className="flex flex-col gap-4">
           <h2 className="text-lg font-semibold">Paga con Yape o tarjeta</h2>
           {mercadoPago.serviceFeeCents > 0 && (
             <p className="text-sm">
@@ -131,7 +131,7 @@ async function OrderContent({ params, searchParams }: Props) {
         </section>
       )}
       {awaitingPayment && !mercadoPago && (
-        <section className="flex flex-col gap-4 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+        <section className="flex flex-col gap-4">
           <h2 className="text-lg font-semibold">Paga y sube tu captura</h2>
           {voucher}
         </section>

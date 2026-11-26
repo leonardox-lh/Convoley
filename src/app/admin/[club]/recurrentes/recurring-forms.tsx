@@ -1,15 +1,11 @@
 "use client";
 
+import { SelectPicker } from "@/components/date-time-pickers";
 import { useActionState } from "react";
 import { TimePicker } from "@/components/date-time-pickers";
 import { Button } from "@/components/ui/button";
 import { Field, floatingFieldClass } from "@/components/form";
-import {
-  EventFields,
-  fieldClass,
-  FormMessage,
-  submitKeepingValues,
-} from "../convocatorias/event-fields";
+import { EventFields, FormMessage, submitKeepingValues } from "../convocatorias/event-fields";
 import { WEEKDAY_LABELS } from "./weekdays";
 import { createRecurringEventAction, setPausedAction, type RecurringEventState } from "./actions";
 
@@ -26,21 +22,19 @@ export function NewRecurringEventForm(props: {
   );
   const schedule = (
     <>
-      <Field label="Día" float="always">
-        <select name="weekday" required defaultValue="2" className={fieldClass}>
-          {WEEKDAY_LABELS.map((label, weekday) => (
-            <option key={label} value={weekday}>
-              {label}
-            </option>
-          ))}
-        </select>
-      </Field>
+      <SelectPicker
+        label="Día"
+        name="weekday"
+        defaultValue="2"
+        options={WEEKDAY_LABELS.map((label, weekday) => ({ value: String(weekday), label }))}
+      />
       <div className="grid grid-cols-2 gap-3">
         <TimePicker label="Hora de inicio" name="time" />
         <TimePicker label="Hora de fin" name="endTime" />
       </div>
       <Field label="Publicar cuántos días antes">
-        <input placeholder=" "
+        <input
+          placeholder=" "
           type="number"
           name="publishDaysBefore"
           required

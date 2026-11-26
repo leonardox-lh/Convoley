@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageHeading } from "@/components/page-heading";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -54,7 +55,7 @@ type Props = PageProps<"/inscripcion/[registration]">;
 /** The player's own sign-up (HU-14): status, waitlist place, how to pay and the voucher upload. */
 export default function RegistrationPage(props: Props) {
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 py-8">
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pt-4 pb-8">
       <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
         <RegistrationContent {...props} />
       </Suspense>
@@ -99,24 +100,24 @@ async function RegistrationContent({ params, searchParams }: Props) {
 
   return (
     <>
-      <div className="flex items-start gap-3">
-        <ClubLogo
-          name={event.clubName}
-          src={club?.logoKey ? clubLogoPath(club.logoKey) : null}
-          className="size-12 bg-primary"
-        />
-        <div className="min-w-0">
-          <p className="text-sm text-zinc-500">{event.clubName}</p>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            <Link href={`/c/${event.clubSlug}/${event.id}`} className="hover:underline">
-              {event.title}
-            </Link>
-          </h1>
-          <p className="text-sm text-zinc-500 first-letter:uppercase">
-            {formatEventTimeInLima(event)}
-          </p>
-        </div>
-      </div>
+      <PageHeading
+        eyebrow={event.clubName}
+        primaryColor={club?.primaryColor ?? null}
+        media={
+          <ClubLogo
+            name={event.clubName}
+            src={club?.logoKey ? clubLogoPath(club.logoKey) : null}
+            className="size-14 rounded-xl"
+          />
+        }
+        title={
+          <Link href={`/c/${event.clubSlug}/${event.id}`} className="hover:underline">
+            {event.title}
+          </Link>
+        }
+      >
+        <span className="first-letter:uppercase">{formatEventTimeInLima(event)}</span>
+      </PageHeading>
       <p className="text-sm">
         {registration.firstName} {registration.lastName} ·{" "}
         <span
@@ -213,7 +214,7 @@ async function RegistrationContent({ params, searchParams }: Props) {
         </section>
       )}
       {awaitingPayment && mercadoPago && (
-        <section className="flex flex-col gap-4 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+        <section className="flex flex-col gap-4">
           <h2 className="text-lg font-semibold">Paga con Yape o tarjeta</h2>
           {registration.reservedUntil && (
             <p className="text-sm">
@@ -257,7 +258,7 @@ async function RegistrationContent({ params, searchParams }: Props) {
         </section>
       )}
       {awaitingPayment && !mercadoPago && (
-        <section className="flex flex-col gap-4 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+        <section className="flex flex-col gap-4">
           <h2 className="text-lg font-semibold">Paga y sube tu captura</h2>
           <RejectionNotice registrationId={registration.id} />
           <PaymentInstructions info={await loadPaymentInfo(event.clubSlug, event.priceCents)} />

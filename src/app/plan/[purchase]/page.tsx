@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Ticket } from "lucide-react";
+import { PageHeading } from "@/components/page-heading";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { FormMessage } from "@/components/form";
@@ -31,7 +32,7 @@ type Props = PageProps<"/plan/[purchase]">;
 /** HU-27: the player's plan: how to pay it and, once active, the dates left. */
 export default function PlanPurchasePage(props: Props) {
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 py-8">
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pt-4 pb-8">
       <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
         <PurchaseContent {...props} />
       </Suspense>
@@ -67,18 +68,19 @@ async function PurchaseContent({ params, searchParams }: Props) {
 
   return (
     <>
-      <div>
-        <Link href={`/${club.slug}/planes`} className="text-sm text-zinc-500 hover:underline">
-          {club.name} · Planes
-        </Link>
-        <h1 className="text-2xl font-semibold tracking-tight">{purchase.plan.name}</h1>
-        <p className="text-sm">
-          {purchase.firstName} {purchase.lastName} · {PLAN_PURCHASE_STATUS_LABELS[purchase.status]}
-        </p>
-        <p className="text-sm text-zinc-500">
-          {formatSoles(priceCents)} · {planTermsText(purchase.plan)}
-        </p>
-      </div>
+      <PageHeading
+        icon={Ticket}
+        eyebrow={`${club.name} · Planes`}
+        eyebrowHref={`/${club.slug}/planes`}
+        title={purchase.plan.name}
+        footer={
+          <p className="text-white/80">
+            {formatSoles(priceCents)} · {planTermsText(purchase.plan)}
+          </p>
+        }
+      >
+        {purchase.firstName} {purchase.lastName} · {PLAN_PURCHASE_STATUS_LABELS[purchase.status]}
+      </PageHeading>
       {purchase.status === "active" && (
         <p className="text-sm">
           {purchase.creditsRemaining === null
@@ -100,7 +102,7 @@ async function PurchaseContent({ params, searchParams }: Props) {
         <p className="text-sm text-zinc-500">El organizador está revisando tu pago.</p>
       )}
       {awaitingPayment && mercadoPago && (
-        <section className="flex flex-col gap-4 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+        <section className="flex flex-col gap-4">
           <h2 className="text-lg font-semibold">Paga con Yape o tarjeta</h2>
           {mercadoPago.serviceFeeCents > 0 && (
             <p className="text-sm">
@@ -125,7 +127,7 @@ async function PurchaseContent({ params, searchParams }: Props) {
         </section>
       )}
       {awaitingPayment && !mercadoPago && (
-        <section className="flex flex-col gap-4 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+        <section className="flex flex-col gap-4">
           <h2 className="text-lg font-semibold">Paga y sube tu captura</h2>
           {voucher}
         </section>

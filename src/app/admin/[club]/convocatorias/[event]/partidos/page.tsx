@@ -1,5 +1,5 @@
-import { Trophy } from "lucide-react";
-import Link from "next/link";
+import { PageHeading } from "@/components/page-heading";
+import { Trophy, Swords } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getOrganizerEvent } from "@/modules/events";
@@ -103,15 +103,14 @@ async function GameDayContent({ params }: Pick<Props, "params">) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <Link href={`${basePath}/equipos`} className="text-sm text-zinc-500 underline">
-          Volver a los equipos
-        </Link>
-        <h1 className="text-2xl font-semibold tracking-tight">Partidos · {event.title}</h1>
-        <p className="text-sm text-zinc-500">
-          Todos contra todos y, al final, una final entre el 1.º y el 2.º de la tabla.
-        </p>
-      </div>
+      <PageHeading
+        icon={Swords}
+        eyebrow={event.title}
+        eyebrowHref={`${basePath}/equipos`}
+        title="Partidos"
+      >
+        Todos contra todos y, al final, una final entre el 1.º y el 2.º de la tabla.
+      </PageHeading>
 
       {gameDay.champion && (
         <section className="flex items-center gap-3 rounded-xl bg-amber-50 p-4 text-amber-900 dark:bg-amber-950 dark:text-amber-100">

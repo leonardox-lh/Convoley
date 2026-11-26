@@ -1,3 +1,4 @@
+import { PageHeading } from "@/components/page-heading";
 import { CalendarPlus } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -25,18 +26,13 @@ async function NewEventContent({ params }: { params: Params }) {
   if (!club) notFound();
 
   return (
-    <>
-      <h1 className="mb-6 flex items-center gap-3 text-2xl font-semibold tracking-tight">
-        <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md">
-          <CalendarPlus className="size-5" aria-hidden />
-        </span>
-        Nueva convocatoria
-      </h1>
+    <div className="flex flex-col gap-6">
+      <PageHeading icon={CalendarPlus} eyebrow="Gestiona tu club" title="Nueva convocatoria" />
       <CreateEventForm
         clubSlug={club.slug}
         communities={club.communities}
         minDate={todayInLima()}
       />
-    </>
+    </div>
   );
 }

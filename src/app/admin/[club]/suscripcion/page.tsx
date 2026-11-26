@@ -1,3 +1,4 @@
+import { PageHeading } from "@/components/page-heading";
 import { BadgeCheck } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -29,12 +30,7 @@ async function SubscriptionContent({ params }: Props) {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="flex items-center gap-3 text-2xl font-semibold tracking-tight">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md">
-            <BadgeCheck className="size-5" aria-hidden />
-          </span>
-          Suscripción a Convoley
-        </h1>
+      <PageHeading icon={BadgeCheck} eyebrow="Gestiona tu club" title="Suscripción a Convoley" />
       <SubscriptionBanner clubSlug={clubSlug} access={access} />
       <p className="text-sm">
         {formatSoles(MONTHLY_PRICE_CENTS)} al mes, con {TRIAL_DAYS} días de prueba gratis. Puedes

@@ -1,3 +1,5 @@
+import { Users } from "lucide-react";
+import { PageHeading } from "@/components/page-heading";
 import Link from "next/link";
 import { GenderIcon } from "@/components/gender-icon";
 import { notFound } from "next/navigation";
@@ -73,15 +75,9 @@ async function TeamsContent({ params }: Pick<Props, "params">) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <Link href={basePath} className="text-sm text-zinc-500 underline">
-          Volver a la lista
-        </Link>
-        <h1 className="text-2xl font-semibold tracking-tight">Equipos · {event.title}</h1>
-        <p className="text-sm text-zinc-500">
-          Se arman con los inscritos que tienen cupo, parejos por nivel y posición.
-        </p>
-      </div>
+      <PageHeading icon={Users} eyebrow={event.title} eyebrowHref={basePath} title="Equipos">
+        Se arman con los inscritos que tienen cupo, parejos por nivel y posición.
+      </PageHeading>
       <BuildTeamsForm
         clubSlug={clubSlug}
         eventId={event.id}

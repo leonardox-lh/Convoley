@@ -1,7 +1,15 @@
 "use client";
 
 import { useActionState } from "react";
-import { Field, fieldClass, floatingFieldClass, FormMessage, submitKeepingValues, TextField } from "@/components/form";
+import {
+  Field,
+  fieldClass,
+  floatingFieldClass,
+  FormMessage,
+  submitKeepingValues,
+  TextField,
+} from "@/components/form";
+import { FileField } from "@/components/file-field";
 import { Button } from "@/components/ui/button";
 import {
   addPhotoAction,
@@ -52,7 +60,10 @@ export function ProductForm(props: { clubSlug: string; values?: ProductFormValue
       {values?.stock !== undefined && (
         <input type="hidden" name="loadedStock" value={values.stock} />
       )}
-      <Field label="Stock" hint={<>Por talla: &quot;S:3, M:5&quot;. Si no tiene tallas, solo el número.</>}>
+      <Field
+        label="Stock"
+        hint={<>Por talla: &quot;S:3, M:5&quot;. Si no tiene tallas, solo el número.</>}
+      >
         <input
           name="stock"
           required
@@ -62,15 +73,13 @@ export function ProductForm(props: { clubSlug: string; values?: ProductFormValue
         />
       </Field>
       {!values?.productId && (
-        <Field label="Fotos (opcional)" float="always" hint="Hasta 5 fotos de 2 MB cada una. JPG, PNG o WebP.">
-          <input
-            type="file"
-            name="photos"
-            multiple
-            accept="image/jpeg,image/png,image/webp"
-            className={fieldClass}
-          />
-        </Field>
+        <FileField
+          label="Fotos (opcional)"
+          name="photos"
+          multiple
+          accept="image/jpeg,image/png,image/webp"
+          hint="Hasta 5 fotos de 2 MB cada una. JPG, PNG o WebP."
+        />
       )}
       {state.status === "error" && <FormMessage tone="error">{state.message}</FormMessage>}
       <Button type="submit" size="lg" className="h-11" disabled={pending}>
@@ -105,15 +114,12 @@ export function AddPhotoForm(props: { clubSlug: string; productId: string }) {
     <form action={action} className="flex flex-col gap-2">
       <input type="hidden" name="clubSlug" value={props.clubSlug} />
       <input type="hidden" name="productId" value={props.productId} />
-      <Field label="Agregar foto (hasta 2 MB)" float="always">
-        <input
-          type="file"
-          name="photo"
-          accept="image/jpeg,image/png,image/webp"
-          required
-          className={fieldClass}
-        />
-      </Field>
+      <FileField
+        label="Agregar foto (hasta 2 MB)"
+        name="photo"
+        accept="image/jpeg,image/png,image/webp"
+        required
+      />
       {state.status === "error" && <FormMessage tone="error">{state.message}</FormMessage>}
       <Button type="submit" variant="outline" className="h-11" disabled={pending}>
         {pending ? "Subiendo…" : "Subir foto"}

@@ -132,7 +132,7 @@ export function StoreCart(props: {
       <section
         id="carrito"
         aria-labelledby="cart-heading"
-        className="flex scroll-mt-4 flex-col gap-4 rounded-2xl border bg-card p-4 shadow-sm"
+        className="flex scroll-mt-4 flex-col gap-4"
       >
         <h2 id="cart-heading" className="flex items-center gap-2 text-lg font-semibold">
           <ShoppingCart className="size-5 text-primary" aria-hidden />

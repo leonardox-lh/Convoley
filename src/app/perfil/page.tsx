@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { UserRound } from "lucide-react";
+import { PageHeading } from "@/components/page-heading";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { currentUserId, getPlayerProfile, SIGN_IN_PATH } from "@/modules/identity";
@@ -11,11 +13,10 @@ const PROFILE_PATH = "/perfil";
 
 export default function ProfilePage() {
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 py-8">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Mi perfil</h1>
-        <p className="text-sm text-zinc-500">Con estos datos te inscribes a las convocatorias.</p>
-      </div>
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 pt-4 pb-8">
+      <PageHeading icon={UserRound} eyebrow="Convoley" title="Mi perfil">
+        Con estos datos te inscribes a las convocatorias.
+      </PageHeading>
       <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
         <Profile />
       </Suspense>

@@ -17,7 +17,11 @@ const longDate = new Intl.DateTimeFormat("es-PE", {
   month: "short",
   year: "numeric",
 });
-const monthTitle = new Intl.DateTimeFormat("es-PE", { timeZone: "UTC", month: "long", year: "numeric" });
+const monthTitle = new Intl.DateTimeFormat("es-PE", {
+  timeZone: "UTC",
+  month: "long",
+  year: "numeric",
+});
 
 function usePopover() {
   const [open, setOpen] = useState(false);
@@ -25,7 +29,11 @@ function usePopover() {
   useEffect(() => {
     if (!open) return;
     const close = (event: MouseEvent | KeyboardEvent) => {
-      if (event instanceof KeyboardEvent ? event.key === "Escape" : !ref.current?.contains(event.target as Node)) {
+      if (
+        event instanceof KeyboardEvent
+          ? event.key === "Escape"
+          : !ref.current?.contains(event.target as Node)
+      ) {
         setOpen(false);
       }
     };
@@ -47,12 +55,20 @@ const panelClass =
   "absolute top-full left-0 z-20 mt-2 w-72 rounded-2xl border bg-card p-3 shadow-xl animate-in fade-in zoom-in-95 duration-150";
 
 // Keeps the browser's "required" check: an invisible input that holds the chosen value.
-function RequiredValue({ name, value }: { name: string; value: string }) {
+function RequiredValue({
+  name,
+  value,
+  required = true,
+}: {
+  name: string;
+  value: string;
+  required?: boolean;
+}) {
   return (
     <input
       name={name}
       value={value}
-      required
+      required={required}
       onChange={() => undefined}
       tabIndex={-1}
       aria-hidden
@@ -61,12 +77,20 @@ function RequiredValue({ name, value }: { name: string; value: string }) {
   );
 }
 
-export function DatePicker(props: { label: string; name: string; defaultValue?: string; min?: string }) {
+export function DatePicker(props: {
+  label: string;
+  name: string;
+  defaultValue?: string;
+  min?: string;
+}) {
   const { open, setOpen, ref } = usePopover();
   const id = useId();
   const [value, setValue] = useState(props.defaultValue ?? "");
   const start = value || props.min || new Date().toISOString().slice(0, 10);
-  const [view, setView] = useState(() => ({ year: Number(start.slice(0, 4)), month: Number(start.slice(5, 7)) - 1 }));
+  const [view, setView] = useState(() => ({
+    year: Number(start.slice(0, 4)),
+    month: Number(start.slice(5, 7)) - 1,
+  }));
 
   const firstWeekday = (new Date(Date.UTC(view.year, view.month, 1)).getUTCDay() + 6) % 7; // Monday first
   const daysInMonth = new Date(Date.UTC(view.year, view.month + 1, 0)).getUTCDate();
@@ -83,7 +107,11 @@ export function DatePicker(props: { label: string; name: string; defaultValue?: 
         aria-expanded={open}
         aria-labelledby={`${id}-label ${id}-value`}
         onClick={() => setOpen(!open)}
-        className={cn(fieldClass, "flex items-center gap-2 text-left", !value && "text-muted-foreground/70")}
+        className={cn(
+          fieldClass,
+          "flex items-center gap-2 text-left",
+          !value && "text-muted-foreground/70",
+        )}
       >
         <CalendarDays className="size-4 shrink-0 text-primary" aria-hidden />
         <span id={`${id}-value`} className="truncate first-letter:uppercase">
@@ -97,13 +125,23 @@ export function DatePicker(props: { label: string; name: string; defaultValue?: 
       {open && (
         <div role="dialog" aria-label={props.label} className={panelClass}>
           <div className="mb-2 flex items-center justify-between">
-            <button type="button" onClick={() => shiftMonth(-1)} className="rounded-full p-1.5 hover:bg-secondary" aria-label="Mes anterior">
+            <button
+              type="button"
+              onClick={() => shiftMonth(-1)}
+              className="rounded-full p-1.5 hover:bg-secondary"
+              aria-label="Mes anterior"
+            >
               <ChevronLeft className="size-4" />
             </button>
             <span className="font-semibold first-letter:uppercase">
               {monthTitle.format(new Date(Date.UTC(view.year, view.month, 1)))}
             </span>
-            <button type="button" onClick={() => shiftMonth(1)} className="rounded-full p-1.5 hover:bg-secondary" aria-label="Mes siguiente">
+            <button
+              type="button"
+              onClick={() => shiftMonth(1)}
+              className="rounded-full p-1.5 hover:bg-secondary"
+              aria-label="Mes siguiente"
+            >
               <ChevronRight className="size-4" />
             </button>
           </div>
@@ -157,7 +195,10 @@ const DEGREES_PER_POSITION = 30;
 
 const facePosition = (index: number) => {
   const angle = (index / 12) * 2 * Math.PI;
-  return { left: FACE_PX / 2 + RADIUS_PX * Math.sin(angle), top: FACE_PX / 2 - RADIUS_PX * Math.cos(angle) };
+  return {
+    left: FACE_PX / 2 + RADIUS_PX * Math.sin(angle),
+    top: FACE_PX / 2 - RADIUS_PX * Math.cos(angle),
+  };
 };
 const toHour12 = (hour: number) => hour % 12 || 12;
 const timeText = (value: string) => {
@@ -187,10 +228,14 @@ export function TimePicker(props: { label: string; name: string; defaultValue?: 
     setOpen(true);
   };
   const isPm = draft.hour >= 12;
-  const setPm = (pm: boolean) => setDraft(({ hour, minute }) => ({ hour: (hour % 12) + (pm ? 12 : 0), minute }));
+  const setPm = (pm: boolean) =>
+    setDraft(({ hour, minute }) => ({ hour: (hour % 12) + (pm ? 12 : 0), minute }));
   const selectedIndex = step === "hour" ? draft.hour % 12 : Math.round(draft.minute / 5) % 12;
   const segmentClass = (active: boolean) =>
-    cn("rounded-xl px-2 transition-colors", active ? "bg-secondary text-primary" : "text-muted-foreground hover:bg-secondary/60");
+    cn(
+      "rounded-xl px-2 transition-colors",
+      active ? "bg-secondary text-primary" : "text-muted-foreground hover:bg-secondary/60",
+    );
 
   return (
     <div className="relative">
@@ -199,7 +244,11 @@ export function TimePicker(props: { label: string; name: string; defaultValue?: 
         aria-haspopup="dialog"
         aria-labelledby={`${id}-label ${id}-value`}
         onClick={openClock}
-        className={cn(fieldClass, "flex items-center gap-2 text-left", !value && "text-muted-foreground/70")}
+        className={cn(
+          fieldClass,
+          "flex items-center gap-2 text-left",
+          !value && "text-muted-foreground/70",
+        )}
       >
         <Clock className="size-4 shrink-0 text-primary" aria-hidden />
         <span id={`${id}-value`}>{value ? timeText(value) : "Elige la hora"}</span>
@@ -221,11 +270,19 @@ export function TimePicker(props: { label: string; name: string; defaultValue?: 
           >
             <p className="text-xs font-medium text-muted-foreground">{props.label}</p>
             <div className="mt-2 flex items-center justify-center gap-1 text-5xl font-semibold tabular-nums">
-              <button type="button" onClick={() => setStep("hour")} className={segmentClass(step === "hour")}>
+              <button
+                type="button"
+                onClick={() => setStep("hour")}
+                className={segmentClass(step === "hour")}
+              >
                 {toHour12(draft.hour)}
               </button>
               <span className="text-muted-foreground">:</span>
-              <button type="button" onClick={() => setStep("minute")} className={segmentClass(step === "minute")}>
+              <button
+                type="button"
+                onClick={() => setStep("minute")}
+                className={segmentClass(step === "minute")}
+              >
                 {pad(draft.minute)}
               </button>
               <span className="ml-2 flex flex-col gap-1 text-sm font-medium">
@@ -237,7 +294,10 @@ export function TimePicker(props: { label: string; name: string; defaultValue?: 
                 </button>
               </span>
             </div>
-            <div className="relative mx-auto mt-5 rounded-full bg-secondary" style={{ width: FACE_PX, height: FACE_PX }}>
+            <div
+              className="relative mx-auto mt-5 rounded-full bg-secondary"
+              style={{ width: FACE_PX, height: FACE_PX }}
+            >
               <span
                 aria-hidden
                 className="absolute top-1/2 left-1/2 w-0.5 origin-bottom bg-primary transition-transform duration-200"
@@ -246,20 +306,26 @@ export function TimePicker(props: { label: string; name: string; defaultValue?: 
                   transform: `translate(-50%, -100%) rotate(${selectedIndex * DEGREES_PER_POSITION}deg)`,
                 }}
               />
-              <span aria-hidden className="absolute top-1/2 left-1/2 size-2 -translate-1/2 rounded-full bg-primary" />
+              <span
+                aria-hidden
+                className="absolute top-1/2 left-1/2 size-2 -translate-1/2 rounded-full bg-primary"
+              />
               {(step === "hour" ? HOUR_FACE : MINUTE_FACE).map((number, index) => (
                 <button
                   key={number}
                   type="button"
                   aria-label={step === "hour" ? `${number} horas` : `${number} minutos`}
                   onClick={() => {
-                    if (step === "minute") return setDraft((current) => ({ ...current, minute: number }));
+                    if (step === "minute")
+                      return setDraft((current) => ({ ...current, minute: number }));
                     setDraft((current) => ({ ...current, hour: (number % 12) + (isPm ? 12 : 0) }));
                     setStep("minute");
                   }}
                   className={cn(
                     "absolute flex size-10 -translate-1/2 items-center justify-center rounded-full text-sm font-medium transition-colors",
-                    index === selectedIndex ? "bg-primary text-primary-foreground" : "hover:bg-card",
+                    index === selectedIndex
+                      ? "bg-primary text-primary-foreground"
+                      : "hover:bg-card",
                   )}
                   style={facePosition(index)}
                 >
@@ -299,6 +365,10 @@ export function SelectPicker(props: {
   name: string;
   options: { value: string; label: string }[];
   defaultValue?: string;
+  /** False for an optional choice, e.g. one whose first option is "—". */
+  required?: boolean;
+  onChange?: (value: string) => void;
+  className?: string;
 }) {
   const { open, setOpen, ref } = usePopover();
   const id = useId();
@@ -306,26 +376,37 @@ export function SelectPicker(props: {
   const selected = props.options.find((option) => option.value === value);
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className={cn("relative", props.className)}>
       <button
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-labelledby={`${id}-label ${id}-value`}
         onClick={() => setOpen(!open)}
-        className={cn(fieldClass, "flex items-center gap-2 text-left", !selected && "text-muted-foreground/70")}
+        className={cn(
+          fieldClass,
+          "flex items-center gap-2 text-left",
+          !selected && "text-muted-foreground/70",
+        )}
       >
         <span id={`${id}-value`} className="flex-1 truncate">
           {selected?.label ?? "Elige una opción"}
         </span>
-        <ChevronDown className={cn("size-4 shrink-0 text-primary transition-transform", open && "rotate-180")} aria-hidden />
+        <ChevronDown
+          className={cn("size-4 shrink-0 text-primary transition-transform", open && "rotate-180")}
+          aria-hidden
+        />
       </button>
       <span id={`${id}-label`} className={pickerLabelClass}>
         {props.label}
       </span>
-      <RequiredValue name={props.name} value={value} />
+      <RequiredValue name={props.name} value={value} required={props.required} />
       {open && (
-        <ul role="listbox" aria-label={props.label} className={cn(panelClass, "w-full p-1.5")}>
+        <ul
+          role="listbox"
+          aria-label={props.label}
+          className={cn(panelClass, "w-full min-w-48 p-1.5")}
+        >
           {props.options.map((option) => {
             const isSelected = option.value === value;
             return (
@@ -335,6 +416,7 @@ export function SelectPicker(props: {
                   onClick={() => {
                     setValue(option.value);
                     setOpen(false);
+                    props.onChange?.(option.value);
                   }}
                   className={cn(
                     "flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors hover:bg-secondary",

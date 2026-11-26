@@ -44,7 +44,7 @@ export function RegistrationForm({
     return (
       <section
         aria-labelledby="registered-title"
-        className="flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800"
+        className="flex flex-col gap-2 rounded-2xl bg-primary/5 p-4"
       >
         <Toast>Inscripción enviada: estás en la lista de espera.</Toast>
         <h2 id="registered-title" className="text-lg font-semibold">
@@ -70,7 +70,7 @@ export function RegistrationForm({
     return (
       <section
         aria-labelledby="registered-title"
-        className="flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800"
+        className="flex flex-col gap-2 rounded-2xl bg-primary/5 p-4"
       >
         <Toast>¡Inscripción enviada! Ya estás en la lista.</Toast>
         <h2 id="registered-title" className="text-lg font-semibold">

@@ -1,3 +1,4 @@
+import { PageHeading } from "@/components/page-heading";
 import { Ticket } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -42,23 +43,23 @@ async function PlansContent({ params }: Pick<Props, "params">) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <Link
-          href={`/${clubSlug}/planes`}
-          className="text-sm text-zinc-500 underline-offset-4 hover:underline"
-        >
-          Ver planes públicos
-        </Link>
-        <h1 className="flex items-center gap-3 text-2xl font-semibold tracking-tight">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md">
-            <Ticket className="size-5" aria-hidden />
-          </span>
-          Planes
-        </h1>
-        <p className="text-sm text-zinc-500">
-          Paquetes de fechas o mensualidades para asegurar ingresos fijos.
-        </p>
-      </div>
+      <PageHeading
+        footer={
+          <>
+            <Link
+              href={`/${clubSlug}/planes`}
+              className="font-semibold text-white underline-offset-4 hover:underline"
+            >
+              Ver planes públicos
+            </Link>
+          </>
+        }
+        icon={Ticket}
+        eyebrow="Gestiona tu club"
+        title="Planes"
+      >
+        Paquetes de fechas o mensualidades para asegurar ingresos fijos.
+      </PageHeading>
       <ul
         aria-label="Planes"
         className="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-800"

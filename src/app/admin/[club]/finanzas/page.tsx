@@ -1,3 +1,4 @@
+import { PageHeading } from "@/components/page-heading";
 import { ChartColumn } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -31,12 +32,7 @@ async function FinanceContent({ params, searchParams }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="flex items-center gap-3 text-2xl font-semibold tracking-tight">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md">
-            <ChartColumn className="size-5" aria-hidden />
-          </span>
-          Finanzas
-        </h1>
+      <PageHeading icon={ChartColumn} eyebrow="Gestiona tu club" title="Finanzas" />
       <form className="flex items-end gap-2">
         <Field label="Mes" float="always" className="flex-1">
           <input type="month" name="mes" defaultValue={month} className={fieldClass} />

@@ -28,7 +28,7 @@ import { can, clubLogoPath, getClubProfile } from "@/modules/clubs";
 import { listOpenEvents } from "@/modules/events";
 import { requireOrganizer } from "./require-organizer";
 import { SubscriptionBanner } from "./subscription-banner";
-import { heroBackground } from "../../event-hero";
+import { heroBackground } from "@/components/page-heading";
 
 type Props = PageProps<"/admin/[club]">;
 
