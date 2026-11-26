@@ -1,5 +1,6 @@
 import { LayoutGrid } from "lucide-react";
 import Link from "next/link";
+import { BackButton } from "@/components/back-button";
 import { Suspense } from "react";
 import { Logo } from "@/components/logo";
 import { can } from "@/modules/clubs";
@@ -10,11 +11,18 @@ import { requireOrganizer } from "./require-organizer";
 export default function ClubAdminLayout({ children, params }: LayoutProps<"/admin/[club]">) {
   return (
     <>
-      <header data-site-header className="sticky top-0 z-10 border-b bg-background/85 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-md items-center justify-between gap-3 px-4 py-3">
-          <Link href="/" aria-label="Convoley, inicio">
-            <Logo />
-          </Link>
+      <header
+        data-site-header
+        data-has-back
+        className="sticky top-0 z-10 border-b bg-background/85 backdrop-blur"
+      >
+        <div className="mx-auto flex w-full max-w-md items-center justify-between gap-3 py-3 pr-4 pl-2">
+          <div className="flex items-center gap-1">
+            <BackButton />
+            <Link href="/" aria-label="Convoley, inicio">
+              <Logo />
+            </Link>
+          </div>
           <Suspense>
             <PanelLink params={params} />
           </Suspense>

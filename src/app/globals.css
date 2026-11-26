@@ -180,3 +180,8 @@ select.peer {
     transform: scaleX(0);
   }
 }
+
+/* Screens with their own header (club, panel, sign-in) carry the back button there. */
+body:has([data-has-back]) [data-app-bar] {
+  display: none;
+}

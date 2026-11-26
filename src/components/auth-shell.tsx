@@ -1,5 +1,6 @@
 import { CalendarCheck, Image as ImageIcon, Wallet } from "lucide-react";
 import Link from "next/link";
+import { BackButton } from "./back-button";
 import { Logo } from "./logo";
 import { VolleyballIcon } from "./volleyball";
 
@@ -23,7 +24,7 @@ export function AuthShell({
   children: React.ReactNode;
 }) {
   return (
-    <main className="flex flex-1 flex-col bg-card lg:grid lg:grid-cols-2">
+    <main data-has-back className="flex flex-1 flex-col bg-card lg:grid lg:grid-cols-2">
       <BrandPanel />
       <div className="relative -mt-8 flex flex-1 flex-col items-center rounded-t-[2rem] bg-card px-6 pt-8 pb-10 lg:mt-0 lg:justify-center lg:rounded-none">
         <div className="flex w-full max-w-sm flex-col gap-5 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -42,21 +43,22 @@ function BrandPanel() {
   return (
     <div className="relative isolate flex min-h-[34vh] flex-col justify-between overflow-hidden bg-gradient-to-br from-primary via-primary to-blue-900 px-6 pt-8 pb-14 text-primary-foreground lg:min-h-full lg:p-12">
       {/* Decorative balls and glow: depth without competing with the text. */}
-      <VolleyballIcon
-        className="pointer-events-none absolute -right-16 -bottom-10 -z-10 size-64 opacity-15 lg:size-[28rem]"
-      />
+      <VolleyballIcon className="pointer-events-none absolute -right-16 -bottom-10 -z-10 size-64 opacity-15 lg:size-[28rem]" />
       <div
         aria-hidden
         className="pointer-events-none absolute -top-24 -left-24 -z-10 size-72 rounded-full bg-white/10 blur-3xl"
       />
 
-      <Link
-        href="/"
-        aria-label="Convoley, ir al inicio"
-        className="self-start [&_[data-logo-accent]]:text-sky-200"
-      >
-        <Logo />
-      </Link>
+      <div className="-ml-2 flex items-center gap-1 self-start">
+        <BackButton />
+        <Link
+          href="/"
+          aria-label="Convoley, ir al inicio"
+          className="[&_[data-logo-accent]]:text-sky-200"
+        >
+          <Logo />
+        </Link>
+      </div>
 
       <div className="flex flex-col gap-3">
         <p className="max-w-md text-2xl leading-tight font-semibold tracking-tight lg:text-4xl">
