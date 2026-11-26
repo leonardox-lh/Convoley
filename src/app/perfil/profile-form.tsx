@@ -4,7 +4,8 @@ import { useActionState } from "react";
 import { FormMessage, OptionalSelect, submitKeepingValues, TextField } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import type { PlayerProfile } from "@/modules/identity";
-import { GENDER_LABELS, LEVEL_LABELS, POSITION_LABELS } from "../player-labels";
+import { GenderSelect } from "../gender-select";
+import { LEVEL_LABELS, POSITION_LABELS } from "../player-labels";
 import { type ProfileState, updateProfileAction } from "./actions";
 
 const LOCAL_PHONE = /^\+51/;
@@ -52,12 +53,7 @@ export function ProfileForm({ profile }: { profile: PlayerProfile }) {
           defaultValue={profile.level}
         />
       </div>
-      <OptionalSelect
-        label="Juegas como"
-        name="gender"
-        options={GENDER_LABELS}
-        defaultValue={profile.gender}
-      />
+      <GenderSelect defaultValue={profile.gender} />
       {state.status === "error" && <FormMessage tone="error">{state.message}</FormMessage>}
       {state.status === "saved" && <FormMessage tone="ok">Guardamos tus datos.</FormMessage>}
       <Button type="submit" size="lg" className="h-11" disabled={pending}>

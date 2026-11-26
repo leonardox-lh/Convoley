@@ -1,20 +1,19 @@
-import { Field, fieldClass } from "@/components/form";
+import { SelectPicker } from "@/components/date-time-pickers";
 import { GENDER_LABELS } from "./player-labels";
 
-/** HU-31: required in mixed events so teams can include the minimum of women. */
+const GENDER_OPTIONS = [
+  { value: "male", label: GENDER_LABELS.male },
+  { value: "female", label: GENDER_LABELS.female },
+];
+
+/** HU-31: required in mixed events so teams can include the minimum of women; "Chico" by default. */
 export function GenderSelect({ defaultValue }: { defaultValue?: string | null }) {
   return (
-    <Field label="Juegas como" float="always">
-      <select name="gender" required defaultValue={defaultValue ?? ""} className={fieldClass}>
-        <option value="" disabled>
-          Elige
-        </option>
-        {Object.entries(GENDER_LABELS).map(([value, label]) => (
-          <option key={value} value={value}>
-            {label}
-          </option>
-        ))}
-      </select>
-    </Field>
+    <SelectPicker
+      label="Juegas como"
+      name="gender"
+      options={GENDER_OPTIONS}
+      defaultValue={defaultValue ?? "male"}
+    />
   );
 }
