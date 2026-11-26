@@ -266,7 +266,6 @@ async function PublicEventContent({ params }: { params: Params }) {
 /** Who signed up, when the organizer made the list public. First name and initial only. */
 async function PublicRoster({ eventId, capacity }: { eventId: string; capacity: number }) {
   const roster = buildRoster(await listEventRegistrations({ eventId }));
-  const shortName = (name: string) => name.replace(/^(\S+)\s+(\S).*$/, "$1 $2.");
   return (
     <section aria-labelledby="roster-heading" className="flex flex-col gap-2">
       <h2 id="roster-heading" className="flex items-center justify-between text-lg font-semibold">
@@ -278,26 +277,54 @@ async function PublicRoster({ eventId, capacity }: { eventId: string; capacity: 
       {roster.players.length === 0 ? (
         <p className="text-sm text-zinc-500">Todavía no hay inscritos. ¡Sé el primero!</p>
       ) : (
-        <ol className="grid grid-cols-2 gap-2">
-          {roster.players.map((player) => (
-            <li
-              key={player.number}
-              className="flex min-w-0 items-center gap-2 rounded-xl border bg-card px-2.5 py-2 text-sm"
-            >
-              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                {player.number}
-              </span>
-              <span className="truncate">{shortName(player.name)}</span>
-            </li>
-          ))}
-        </ol>
+        <RosterGrid players={roster.players} />
       )}
       {roster.waitlist.length > 0 && (
-        <p className="text-sm text-zinc-500">
-          En lista de espera: {roster.waitlist.map((player) => shortName(player.name)).join(", ")}
-        </p>
+        <>
+          <h3
+            id="waitlist-heading"
+            className="mt-2 flex items-center justify-between text-lg font-semibold"
+          >
+            En espera
+            <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-sm font-semibold text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+              {roster.waitlist.length}
+            </span>
+          </h3>
+          <RosterGrid players={roster.waitlist} waitlist aria-labelledby="waitlist-heading" />
+        </>
       )}
     </section>
+  );
+}
+
+const shortName = (name: string) => name.replace(/^(\S+)\s+(\S).*$/, "$1 $2.");
+
+/** Two-column tiles: number badge and short name. The waitlist is numbered E1, E2… in amber. */
+function RosterGrid(props: {
+  players: { number: number; name: string }[];
+  waitlist?: boolean;
+  "aria-labelledby"?: string;
+}) {
+  return (
+    <ol aria-labelledby={props["aria-labelledby"]} className="grid grid-cols-2 gap-2">
+      {props.players.map((player) => (
+        <li
+          key={player.number}
+          className="flex min-w-0 items-center gap-2 rounded-xl border bg-card px-2.5 py-2 text-sm"
+        >
+          <span
+            className={
+              props.waitlist
+                ? "flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full bg-amber-100 px-1 text-xs font-semibold text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                : "flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary"
+            }
+          >
+            {props.waitlist ? `E${player.number}` : player.number}
+          </span>
+          <span className="truncate">{shortName(player.name)}</span>
+        </li>
+      ))}
+    </ol>
   );
 }
 

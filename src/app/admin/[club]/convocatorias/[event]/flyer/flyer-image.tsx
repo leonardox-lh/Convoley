@@ -1,3 +1,5 @@
+import { heavy, NAVY, NIGHT, posterBackground, SOFT_BLUE } from "../imagen/poster-style";
+
 export interface FlyerDetails {
   title: string;
   /** "Viernes 27 de noviembre de 2026". */
@@ -16,33 +18,11 @@ export interface FlyerDetails {
   height: number;
 }
 
-const NIGHT = "#050b24";
-const NAVY = "#0a1a4a";
-const SOFT_BLUE = "#a5c0ff";
 const BALL_RATIO = 0.62;
 // Stories (9:16) have room for a bigger ball; anything taller than 4:5 counts as one.
 const TALL_RATIO = 1.4;
 const STORY_BALL_RATIO = 0.95;
 const TITLE_GLOW = "0 10px 30px rgba(0,0,0,0.6)";
-
-/**
- * Only Geist Regular ships with next/og and Satori ignores text strokes: shadows in the text
- * color, nudged around each glyph, thicken it like a bold. `glow` adds a drop shadow on top.
- */
-function heavy(color: string, px: number, glow?: string) {
-  const offsets = [
-    [px, 0],
-    [-px, 0],
-    [0, px],
-    [0, -px],
-    [px, px],
-    [-px, -px],
-    [px, -px],
-    [-px, px],
-  ];
-  const shadows = offsets.map(([x, y]) => `${x}px ${y}px 0 ${color}`);
-  return { color, textShadow: [...shadows, ...(glow ? [glow] : [])].join(", ") };
-}
 
 /** Title size by length, so short titles shout and long ones still fit in three lines. */
 function titleSize(title: string, width: number) {
@@ -146,8 +126,7 @@ export function FlyerImage(props: FlyerDetails) {
         position: "relative",
         overflow: "hidden",
         color: "white",
-        backgroundColor: NIGHT,
-        backgroundImage: `radial-gradient(circle at 85% 18%, ${props.primary} 0%, rgba(5,11,36,0) 52%), linear-gradient(165deg, ${NAVY} 0%, ${NIGHT} 70%)`,
+        ...posterBackground(props.primary),
       }}
     >
       <SpeedArcs width={width} height={height} primary={props.primary} />
