@@ -48,6 +48,7 @@ async function PanelLink({ params }: Pick<LayoutProps<"/admin/[club]">, "params"
   return (
     <Link
       href={`/admin/${(await params).club}`}
+      data-header-pill
       className="flex items-center gap-1.5 rounded-full bg-secondary px-3 py-2 text-sm font-medium text-secondary-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
     >
       <LayoutGrid className="size-4" aria-hidden />

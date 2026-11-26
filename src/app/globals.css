@@ -154,16 +154,31 @@ select.peer {
 /* Phones: the club hero paints up to the top edge, under a see-through site header. Pages
    visited before stay mounted but hidden (display: none); a hidden hero doesn't count. */
 @media (width < 40rem) {
-  body:has([data-club-hero]):not(:has([style*="display: none"] [data-club-hero])) [data-site-header] {
+  body:has([data-club-hero]):not(:has([style*="display: none"] [data-club-hero]))
+    [data-site-header],
+  body:has([data-club-hero]):not(:has([style*="display: none"] [data-club-hero])) [data-app-bar] {
     @apply absolute inset-x-0 top-0 z-10 border-transparent bg-transparent text-white backdrop-blur-none;
   }
-  body:has([data-club-hero]):not(:has([style*="display: none"] [data-club-hero])) [data-site-header] [data-logo-accent] {
+  body:has([data-club-hero]):not(:has([style*="display: none"] [data-club-hero]))
+    [data-site-header]
+    [data-logo-accent],
+  body:has([data-club-hero]):not(:has([style*="display: none"] [data-club-hero]))
+    [data-app-bar]
+    [data-logo-accent] {
     @apply text-white/80;
   }
-  body:has([data-club-hero]):not(:has([style*="display: none"] [data-club-hero])) [data-admin-tabs] a {
+  body:has([data-club-hero]):not(:has([style*="display: none"] [data-club-hero]))
+    [data-header-pill] {
     @apply bg-white/15 text-white;
   }
-  body:has([data-club-hero]):not(:has([style*="display: none"] [data-club-hero])) [data-admin-tabs] a[data-active] {
+  body:has([data-club-hero]):not(:has([style*="display: none"] [data-club-hero]))
+    [data-admin-tabs]
+    a {
+    @apply bg-white/15 text-white;
+  }
+  body:has([data-club-hero]):not(:has([style*="display: none"] [data-club-hero]))
+    [data-admin-tabs]
+    a[data-active] {
     @apply bg-white text-primary;
   }
   /* The quick tabs make the see-through header taller; keep the hero's content below them. */

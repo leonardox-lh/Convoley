@@ -68,8 +68,10 @@ export function EventHero(props: {
 
   return (
     <>
+      {/* data-club-hero: on phones the color runs up under the see-through top bar (globals.css). */}
       <header
-        className="relative -mx-4 overflow-hidden rounded-b-[2rem] px-5 pt-6 pb-14 text-white"
+        data-club-hero
+        className="relative -mx-4 overflow-hidden rounded-b-[2rem] px-5 pt-6 pb-14 text-white max-sm:pt-20"
         style={{ backgroundImage: `linear-gradient(140deg, ${brandColor} 0%, ${HERO_NIGHT} 100%)` }}
       >
         <VolleyballIcon className="pointer-events-none absolute -top-10 -right-12 size-48 opacity-15" />
