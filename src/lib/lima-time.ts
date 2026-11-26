@@ -107,3 +107,17 @@ export function formatTimeRangeInLima(event: { startsAt: Date; endsAt?: Date | n
   const start = formatTimeInLima(event.startsAt);
   return event.endsAt ? `${start} – ${formatTimeInLima(event.endsAt)}` : start;
 }
+
+const limaWeekdayDateFormatter = new Intl.DateTimeFormat("es-PE", {
+  timeZone: LIMA_TIME_ZONE,
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
+
+/** Weekday and date in Lima, like "Viernes 27 de noviembre de 2026" (for flyers). */
+export function formatWeekdayDateInLima(date: Date): string {
+  const text = limaWeekdayDateFormatter.format(date).replace(",", "");
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
