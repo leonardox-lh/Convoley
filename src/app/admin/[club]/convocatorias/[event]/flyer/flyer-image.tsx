@@ -14,6 +14,9 @@ export interface FlyerDetails {
   /** Club colors: electric accent and highlight. */
   primary: string;
   secondary: string;
+  clubName: string;
+  /** Data URL of the club logo (PNG/JPEG), or null to show only the name. */
+  logo: string | null;
   width: number;
   height: number;
 }
@@ -107,6 +110,55 @@ function SpeedArcs(props: { width: number; height: number; primary: string }) {
   );
 }
 
+/** Top-left corner, opposite the ball: the club's logo in a white ring and its name. */
+function ClubBadge(props: {
+  clubName: string;
+  logo: string | null;
+  unit: number;
+  padding: number;
+  secondary: string;
+}) {
+  const { unit } = props;
+  const logoPx = 132 * unit;
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: props.padding,
+        left: props.padding,
+        display: "flex",
+        alignItems: "center",
+        gap: 22 * unit,
+      }}
+    >
+      {props.logo && (
+        // eslint-disable-next-line @next/next/no-img-element -- rendered by Satori, not the browser
+        <img
+          src={props.logo}
+          alt=""
+          width={logoPx}
+          height={logoPx}
+          style={{
+            borderRadius: 9999,
+            border: `${5 * unit}px solid white`,
+            boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+          }}
+        />
+      )}
+      <span
+        style={{
+          display: "flex",
+          fontSize: 30 * unit,
+          letterSpacing: 5 * unit,
+          ...heavy("white", 0.8 * unit, "0 4px 14px rgba(0,0,0,0.6)"),
+        }}
+      >
+        {props.clubName.toUpperCase()}
+      </span>
+    </div>
+  );
+}
+
 /** HU-37: the event flyer, a sports-campaign poster drawn by Satori (next/og). */
 export function FlyerImage(props: FlyerDetails) {
   const { width, height } = props;
@@ -133,6 +185,14 @@ export function FlyerImage(props: FlyerDetails) {
       <Ball
         size={width * (height > width * TALL_RATIO ? STORY_BALL_RATIO : BALL_RATIO)}
         primary={props.primary}
+        secondary={props.secondary}
+      />
+
+      <ClubBadge
+        clubName={props.clubName}
+        logo={props.logo}
+        unit={unit}
+        padding={padding}
         secondary={props.secondary}
       />
 

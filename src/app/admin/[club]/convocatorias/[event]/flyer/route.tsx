@@ -52,6 +52,8 @@ export async function GET(
       callToAction={isFull ? "Reserva tu lugar en espera" : "¡Inscríbete ahora!"}
       primary={brand.primary}
       secondary={brand.secondary}
+      clubName={brand.clubName}
+      logo={brand.logo}
     />,
     size,
   );

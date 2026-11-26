@@ -3,7 +3,7 @@ import { ImageFooter, ImageHeader, type ImageBrand } from "../../imagen/image-he
 import { LIST_IMAGE_FORMATS, type ListImageFormat } from "../../imagen/image-layout";
 import { heavy, posterBackground, SOFT_BLUE } from "../../imagen/poster-style";
 
-const HEADER_PX = 260;
+const HEADER_PX = 330;
 const FOOTER_PX = 80;
 const OUTER_PADDING_PX = 48;
 const CARD_PADDING_PX = 28;

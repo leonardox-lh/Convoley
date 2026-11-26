@@ -11,7 +11,8 @@ export interface ImageBrand {
 }
 
 const TITLE_GLOW = "0 8px 24px rgba(0,0,0,0.6)";
-const LONG_TITLE_CHARS = 22;
+// Past this the title drops to the smaller size so it stays on one or two short lines.
+const LONG_TITLE_CHARS = 14;
 
 /**
  * The flyer's look in a ~260px band: club, title with the last word in the accent, date, and an
@@ -27,7 +28,13 @@ export function ImageHeader(props: ImageBrand & { badge?: { value: string; label
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           {props.logo && (
             // eslint-disable-next-line @next/next/no-img-element -- rendered by Satori, not the browser
-            <img src={props.logo} alt="" width={56} height={56} style={{ borderRadius: 999 }} />
+            <img
+              src={props.logo}
+              alt=""
+              width={76}
+              height={76}
+              style={{ borderRadius: 999, border: "4px solid white" }}
+            />
           )}
           <span style={{ display: "flex", fontSize: 26, letterSpacing: 4, color: SOFT_BLUE }}>
             {props.clubName.toUpperCase()}

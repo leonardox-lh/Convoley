@@ -8,15 +8,12 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { z } from "zod";
 import { buttonVariants } from "@/components/ui/button";
-import { formatEventTimeInLima } from "@/lib/lima-time";
 import { cn } from "@/lib/utils";
 import { can, clubLogoPath, getClubProfile } from "@/modules/clubs";
 import { getOrganizerEvent } from "@/modules/events";
 import { listVouchersInReview, signVoucherPath } from "@/modules/payments";
 import {
-  buildRoster,
   REJECTION_REASON_MAX_LENGTH,
-  rosterText,
   listEventRegistrations,
   seatSummary,
   type RegistrationStatus,
@@ -28,8 +25,7 @@ import { EventHero } from "../../../../event-hero";
 import { AddPlayerForm } from "./add-player-form";
 import { CheckInButton } from "./check-in-button";
 import { RegistrationActions } from "./registration-actions";
-import { FlyerSharing } from "./flyer-sharing";
-import { ListSharing } from "./list-sharing";
+import { ShareImageSection } from "./share-image-section";
 import { VoucherReview } from "./voucher-review";
 
 type Props = PageProps<"/admin/[club]/convocatorias/[event]">;
@@ -65,7 +61,19 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
   if (!event) notFound();
 
   const status = statusFilterSchema.parse((await searchParams).estado);
-  const listed = await listEventRegistrations({ eventId: event.id, status });
+  const [active, cancelled] = await Promise.all([
+    listEventRegistrations({ eventId: event.id }),
+    listEventRegistrations({ eventId: event.id, status: "cancelled" }),
+  ]);
+  const listed =
+    status === "cancelled"
+      ? cancelled
+      : status
+        ? active.filter((r) => r.status === status)
+        : active;
+  // Tab counts, so the organizer sees at a glance how many are in each state.
+  const countOf = (value: RegistrationStatus) =>
+    value === "cancelled" ? cancelled.length : active.filter((r) => r.status === value).length;
   // Seated players first, then the waitlist in arrival order, numbered separately (HU-12).
   const registrations = [
     ...listed.filter((registration) => registration.status !== "waitlisted"),
@@ -154,34 +162,36 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
       )}
 
       {!status && (event.status === "published" || event.status === "full") && (
-        <FlyerSharing flyerPath={`${basePath}/flyer`} fileName={`flyer-${event.id}.png`} />
+        <ShareImageSection
+          id="flyer-title"
+          title="Flyer de la convocatoria"
+          imagePath={`${basePath}/flyer`}
+          fileName={`flyer-${event.id}.png`}
+        />
       )}
 
       {!status && registrations.length > 0 && (
-        <ListSharing
-          imagePath={`${basePath}/imagen`}
-          fileName={`lista-${event.id}`}
-          listText={rosterText({
-            title: event.title,
-            when: formatEventTimeInLima(event),
-            roster: buildRoster(registrations),
-          })}
+        <ShareImageSection
+          id="list-title"
+          title="Lista de participantes"
+          imagePath={`${basePath}/imagen?formato=historia`}
+          fileName={`lista-${event.id}.png`}
         />
       )}
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold">Inscritos</h2>
+        <h2 className="text-lg font-semibold">Inscritos ({active.length})</h2>
         <nav
           aria-label="Filtrar por estado de pago"
           className="-mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none]"
         >
-          <FilterLink href={basePath} active={!status} label="Todos" />
+          <FilterLink href={basePath} active={!status} label={`Todos (${active.length})`} />
           {(Object.keys(STATUS_LABELS) as RegistrationStatus[]).map((value) => (
             <FilterLink
               key={value}
               href={`${basePath}?estado=${value}`}
               active={status === value}
-              label={STATUS_LABELS[value]}
+              label={`${STATUS_LABELS[value]} (${countOf(value)})`}
             />
           ))}
         </nav>
