@@ -200,7 +200,8 @@ select.peer {
   }
 }
 
-/* Screens with their own header (club, panel, sign-in) carry the back button there. */
-body:has([data-has-back]) [data-app-bar] {
+/* Screens with their own header (club, panel, sign-in) carry the back button there. Pages
+   visited before stay mounted but hidden (display: none): only a visible one counts. */
+body:has([data-has-back]:not([style*="display: none"] [data-has-back])) [data-app-bar] {
   display: none;
 }
