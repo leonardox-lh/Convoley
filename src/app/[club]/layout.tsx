@@ -32,7 +32,8 @@ export default function PublicClubLayout({ children, params }: LayoutProps<"/[cl
         <Suspense>
           <ClubTabsFor params={params} />
         </Suspense>
-        <div className="flex-1 rounded-2xl rounded-tl-none border bg-card shadow-sm">
+        {/* Phones: the section runs edge to edge with no card around it; wider screens keep the folder. */}
+        <div className="flex-1 max-sm:-mx-4 sm:rounded-2xl sm:rounded-tl-none sm:border sm:bg-card sm:shadow-sm">
           {children}
         </div>
       </div>
