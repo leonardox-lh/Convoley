@@ -5,6 +5,8 @@ import { BackButton } from "@/components/back-button";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Logo } from "@/components/logo";
+import { VolleyballIcon } from "@/components/volleyball";
+import { heroBackground } from "../event-hero";
 import { clubLogoPath, getClubProfile } from "@/modules/clubs";
 import { ClubDescription } from "./club-description";
 import { ClubTabs } from "./club-tabs";
@@ -50,15 +52,21 @@ async function ClubHeader({ params }: Pick<LayoutProps<"/[club]">, "params">) {
   return (
     <section
       data-club-hero
-      className="relative -mx-4 -mt-6 mb-5 flex flex-col gap-4 overflow-hidden rounded-none bg-gradient-to-br from-primary via-primary to-primary/60 px-5 pt-20 pb-6 text-white shadow-lg sm:mx-0 sm:mt-0 sm:rounded-3xl sm:p-5"
+      className="relative -mx-4 -mt-6 mb-5 flex flex-col gap-4 overflow-hidden rounded-b-[2rem] px-5 pt-20 pb-6 text-white shadow-lg sm:mx-0 sm:mt-0 sm:rounded-3xl sm:p-5"
+      style={heroBackground(club.primaryColor)}
     >
-      <div
-        aria-hidden
-        className="absolute -top-14 -left-14 size-44 rounded-full bg-white/10 blur-2xl"
-      />
+      <VolleyballIcon className="pointer-events-none absolute -bottom-12 -left-12 size-44 opacity-15" />
       <div className="relative flex items-start gap-4">
         <div className="flex min-h-24 min-w-0 flex-1 flex-col gap-1">
-          <h1 className="text-2xl leading-tight font-semibold tracking-tight">{club.name}</h1>
+          <p
+            className="text-xs font-semibold tracking-wide uppercase"
+            style={{ color: club.secondaryColor ?? undefined }}
+          >
+            Club de vóley
+          </p>
+          <h1 className="text-2xl leading-tight font-extrabold tracking-tight first-letter:uppercase">
+            {club.name}
+          </h1>
           {club.description && <ClubDescription clubName={club.name} text={club.description} />}
         </div>
         {club.logoKey ? (

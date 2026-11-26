@@ -13,6 +13,8 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { Logo } from "@/components/logo";
+import { VolleyballIcon } from "@/components/volleyball";
+import { heroBackground } from "./event-hero";
 import { buttonVariants } from "@/components/ui/button";
 import { formatTimeRangeInLima } from "@/lib/lima-time";
 import { formatSoles } from "@/lib/money";
@@ -44,7 +46,10 @@ type ProfileLink = { href: string; title: string; text: string; icon: LucideIcon
 export default function Home() {
   return (
     <div className="flex flex-1 flex-col">
-      <header className="sticky top-0 z-10 border-b bg-background/85 backdrop-blur">
+      <header
+        data-site-header
+        className="sticky top-0 z-10 border-b bg-background/85 backdrop-blur"
+      >
         <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-3">
           <Link href="/" aria-label="Convoley, inicio">
             <Logo />
@@ -54,6 +59,7 @@ export default function Home() {
               <a
                 key={id}
                 href={`#${id}`}
+                data-header-pill
                 className="flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground"
               >
                 <Icon className="size-4" aria-hidden />
@@ -68,23 +74,29 @@ export default function Home() {
       </header>
 
       <main className="mx-auto flex w-full max-w-5xl flex-col gap-12 px-4 py-8">
-        <section className="relative overflow-hidden rounded-3xl bg-primary px-6 py-10 text-primary-foreground shadow-lg">
-          <div
-            aria-hidden
-            className="absolute -top-16 -right-16 size-56 rounded-full bg-white/15 blur-2xl"
-          />
+        {/* data-club-hero: on phones the color runs up under the see-through top bar (globals.css). */}
+        <section
+          data-club-hero
+          className="relative -mx-4 -mt-8 overflow-hidden rounded-b-[2rem] px-6 pt-24 pb-10 text-white shadow-lg sm:mx-0 sm:mt-0 sm:rounded-3xl sm:pt-10"
+          style={heroBackground(null)}
+        >
+          <VolleyballIcon className="pointer-events-none absolute -top-10 -right-12 size-48 opacity-15" />
           <div className="relative flex max-w-xl flex-col gap-4">
-            <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
+            <h1 className="text-3xl font-extrabold tracking-tight text-balance sm:text-4xl">
               Encuentra tu próximo partido de vóley en Lima
             </h1>
-            <p className="text-primary-foreground/80">
+            <p className="text-white/80">
               Inscríbete desde el celular, paga con Yape o tarjeta y llega a la cancha con tu cupo
               asegurado.
             </p>
             <div className="flex flex-wrap gap-2">
               <a
                 href="#convocatorias"
-                className={buttonVariants({ variant: "secondary", size: "lg", className: "h-11 px-4" })}
+                className={buttonVariants({
+                  variant: "secondary",
+                  size: "lg",
+                  className: "h-11 px-4",
+                })}
               >
                 Ver convocatorias
               </a>
@@ -104,7 +116,9 @@ export default function Home() {
         </section>
 
         <HomeSection id="clubes" title="Clubes" subtitle="Elige un club y mira sus convocatorias.">
-          <Suspense fallback={<CardSkeletons className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" />}>
+          <Suspense
+            fallback={<CardSkeletons className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" />}
+          >
             <ClubGrid />
           </Suspense>
         </HomeSection>
@@ -137,6 +151,7 @@ async function MyClubLink() {
   return (
     <Link
       href={`/admin/${clubSlug}`}
+      data-header-pill
       className="flex items-center gap-1.5 rounded-full bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/85"
     >
       <LayoutGrid className="size-4" aria-hidden />
@@ -195,7 +210,10 @@ async function ClubGrid() {
     <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {clubs.map((club) => (
         <li key={club.id}>
-          <Link href={`/${club.slug}`} className="card-interactive group flex items-center gap-3 p-4">
+          <Link
+            href={`/${club.slug}`}
+            className="card-interactive group flex items-center gap-3 p-4"
+          >
             {club.logoKey ? (
               <Image
                 src={clubLogoPath(club.logoKey)}
@@ -295,7 +313,12 @@ const SIGNED_IN_LINKS: ProfileLink[] = [
     text: "Tus partidos y el estado de tus pagos.",
     icon: Ticket,
   },
-  { href: "/admin", title: "Panel de mi club", text: "Convocatorias, cobros y jugadores.", icon: Trophy },
+  {
+    href: "/admin",
+    title: "Panel de mi club",
+    text: "Convocatorias, cobros y jugadores.",
+    icon: Trophy,
+  },
 ];
 const SIGNED_OUT_LINKS: ProfileLink[] = [
   {
@@ -304,7 +327,12 @@ const SIGNED_OUT_LINKS: ProfileLink[] = [
     text: "Ingresa con Google y mira tus inscripciones.",
     icon: Ticket,
   },
-  { href: "/ingresar", title: "Soy organizador", text: "Ingresa al panel de tu club.", icon: Trophy },
+  {
+    href: "/ingresar",
+    title: "Soy organizador",
+    text: "Ingresa al panel de tu club.",
+    icon: Trophy,
+  },
 ];
 
 async function ProfileLinks() {
