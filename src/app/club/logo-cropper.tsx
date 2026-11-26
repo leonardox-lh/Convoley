@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 const FRAME_PX = 256;
 const OUTPUT_PX = 512;
 const MAX_ZOOM = 3;
-const OUTPUT_TYPE = "image/webp";
-const OUTPUT_QUALITY = 0.9;
+// PNG, not WebP: the share images (Satori) can only draw PNG and JPEG.
+const OUTPUT_TYPE = "image/png";
 
 type Crop = { src: string; width: number; height: number; zoom: number; x: number; y: number };
 
@@ -29,7 +29,11 @@ export function LogoCropper(props: { hint: string; currentLogoUrl?: string }) {
     const scale = (FRAME_PX / Math.min(next.width, next.height)) * next.zoom;
     const minX = FRAME_PX - next.width * scale;
     const minY = FRAME_PX - next.height * scale;
-    return { ...next, x: Math.min(0, Math.max(minX, next.x)), y: Math.min(0, Math.max(minY, next.y)) };
+    return {
+      ...next,
+      x: Math.min(0, Math.max(minX, next.x)),
+      y: Math.min(0, Math.max(minY, next.y)),
+    };
   }
 
   function onFile(event: ChangeEvent<HTMLInputElement>) {
@@ -98,20 +102,18 @@ export function LogoCropper(props: { hint: string; currentLogoUrl?: string }) {
     canvas.width = OUTPUT_PX;
     canvas.height = OUTPUT_PX;
     const k = OUTPUT_PX / FRAME_PX;
-    canvas.getContext("2d")?.drawImage(image, crop.x * k, crop.y * k, shownWidth * k, shownHeight * k);
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) return;
-        const files = new DataTransfer();
-        files.items.add(new File([blob], "logo.webp", { type: OUTPUT_TYPE }));
-        input.files = files.files;
-        setPreview(canvas.toDataURL(OUTPUT_TYPE, OUTPUT_QUALITY));
-        URL.revokeObjectURL(crop.src);
-        setCrop(null);
-      },
-      OUTPUT_TYPE,
-      OUTPUT_QUALITY,
-    );
+    canvas
+      .getContext("2d")
+      ?.drawImage(image, crop.x * k, crop.y * k, shownWidth * k, shownHeight * k);
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const files = new DataTransfer();
+      files.items.add(new File([blob], "logo.png", { type: OUTPUT_TYPE }));
+      input.files = files.files;
+      setPreview(canvas.toDataURL(OUTPUT_TYPE));
+      URL.revokeObjectURL(crop.src);
+      setCrop(null);
+    }, OUTPUT_TYPE);
   }
 
   const shown = preview ?? props.currentLogoUrl;
@@ -132,7 +134,9 @@ export function LogoCropper(props: { hint: string; currentLogoUrl?: string }) {
           </span>
         </span>
         <span className="flex flex-col gap-0.5">
-          <span className="font-semibold text-primary">{shown ? "Cambiar logo" : "Subir logo"}</span>
+          <span className="font-semibold text-primary">
+            {shown ? "Cambiar logo" : "Subir logo"}
+          </span>
           <span className="text-xs font-normal text-muted-foreground">{props.hint}</span>
         </span>
         <input
@@ -165,7 +169,10 @@ export function LogoCropper(props: { hint: string; currentLogoUrl?: string }) {
               className="absolute max-w-none select-none"
               style={{ left: crop.x, top: crop.y, width: shownWidth, height: shownHeight }}
             />
-            <span aria-hidden className="pointer-events-none absolute inset-0 rounded-full ring-[999px] ring-black/30" />
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 rounded-full ring-[999px] ring-black/30"
+            />
           </div>
           <label className="flex w-full items-center gap-3 text-sm font-normal">
             Zoom
