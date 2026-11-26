@@ -3,98 +3,127 @@ import { ImageFooter, ImageHeader, type ImageBrand } from "../../imagen/image-he
 
 type Props = ImageBrand & { gameDay: GameDay };
 
-const ROW_PX = 96;
-const COLUMN_PX = 120;
-
-const frame = {
-  width: "100%",
-  height: "100%",
-  display: "flex",
-  flexDirection: "column",
-  background: "white",
-  color: "#18181b",
-} as const;
+const CANVAS = "#f4f4f5";
+const INK = "#18181b";
+const MUTED = "#71717a";
+const ROW_PX = 120;
+const STAT_PX = 150;
+const LONG_NAME_CHARS = 14;
 
 const signed = (value: number) => (value > 0 ? `+${value}` : `${value}`);
 
-/** The group table: one row per team, in order (Satori: flex everywhere). */
-export function StandingsImage(props: Props) {
-  const { gameDay } = props;
-  const nameOf = new Map(gameDay.teams.map((team) => [team.number, team.name]));
-  const cell = (text: string, bold = false) => (
-    <span
+function Frame(
+  props: ImageBrand & { background: string; color: string; children: React.ReactNode },
+) {
+  return (
+    <div
       style={{
+        width: "100%",
+        height: "100%",
         display: "flex",
-        justifyContent: "center",
-        width: COLUMN_PX,
-        fontWeight: bold ? 700 : 400,
+        flexDirection: "column",
+        background: props.background,
+        color: props.color,
       }}
     >
-      {text}
-    </span>
-  );
-  return (
-    <div style={frame}>
       <ImageHeader {...props} />
-      <div style={{ display: "flex", flexDirection: "column", flex: 1, padding: "24px 56px" }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            height: 64,
-            fontSize: 30,
-            color: "#71717a",
-            borderBottom: "2px solid #e4e4e7",
-          }}
-        >
-          <span style={{ display: "flex", flex: 1 }}>Tabla de posiciones</span>
-          {cell("PJ")}
-          {cell("PG")}
-          {cell("Dif")}
-        </div>
-        {gameDay.standings.map((row, index) => (
-          <div
-            key={row.teamNumber}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              height: ROW_PX,
-              fontSize: 44,
-              borderBottom: "2px solid #f4f4f5",
-            }}
-          >
-            <span
-              style={{
-                display: "block",
-                flex: 1,
-                overflow: "hidden",
-                whiteSpace: "nowrap",
-                textOverflow: "ellipsis",
-                fontWeight: 700,
-                color: index === 0 ? props.primary : "#18181b",
-              }}
-            >
-              {index + 1}. {nameOf.get(row.teamNumber)}
-            </span>
-            {cell(String(row.played))}
-            {cell(String(row.won), true)}
-            {cell(signed(pointDifference(row)))}
-          </div>
-        ))}
-      </div>
+      {props.children}
       <ImageFooter />
     </div>
   );
 }
 
-/** The champion, big, with the final's score. */
-export function ChampionImage(props: Props) {
+/** The group table: leader in the club color, few columns, lots of air (Satori: flex everywhere). */
+export function StandingsImage(props: Props) {
+  const { gameDay } = props;
+  const nameOf = new Map(gameDay.teams.map((team) => [team.number, team.name]));
+  const stat = (text: string, style: React.CSSProperties = {}) => (
+    <span style={{ display: "flex", justifyContent: "center", width: STAT_PX, ...style }}>
+      {text}
+    </span>
+  );
+  return (
+    <Frame {...props} background={CANVAS} color={INK}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          flex: 1,
+          justifyContent: "center",
+          gap: 20,
+          padding: "40px 64px",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", padding: "0 40px" }}>
+          <span style={{ display: "flex", flex: 1, fontSize: 30, letterSpacing: 6, color: MUTED }}>
+            TABLA DE POSICIONES
+          </span>
+          {stat("GAN.", { fontSize: 26, color: MUTED })}
+          {stat("DIF.", { fontSize: 26, color: MUTED })}
+        </div>
+        {gameDay.standings.map((row, index) => {
+          const leader = index === 0;
+          return (
+            <div
+              key={row.teamNumber}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 28,
+                height: ROW_PX,
+                padding: "0 40px",
+                borderRadius: 28,
+                background: leader ? props.primary : "white",
+                color: leader ? "white" : INK,
+              }}
+            >
+              <span
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 64,
+                  height: 64,
+                  borderRadius: 999,
+                  fontSize: 34,
+                  fontWeight: 700,
+                  background: leader ? props.secondary : CANVAS,
+                  color: leader ? INK : MUTED,
+                }}
+              >
+                {index + 1}
+              </span>
+              <span
+                style={{
+                  display: "block",
+                  flex: 1,
+                  fontSize: 48,
+                  fontWeight: 700,
+                  overflow: "hidden",
+                  whiteSpace: "nowrap",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {nameOf.get(row.teamNumber)}
+              </span>
+              {stat(String(row.won), { fontSize: 52, fontWeight: 800 })}
+              {stat(signed(pointDifference(row)), { fontSize: 40, opacity: 0.8 })}
+            </div>
+          );
+        })}
+      </div>
+    </Frame>
+  );
+}
+
+/** The champion on the club color: trophy, name, its players and the final's score. */
+export function ChampionImage(props: Props & { players: string[] }) {
   const { gameDay } = props;
   const final = gameDay.matches.find((match) => match.isFinal);
   const nameOf = new Map(gameDay.teams.map((team) => [team.number, team.name]));
+  const name = gameDay.champion?.name ?? "";
   return (
-    <div style={frame}>
-      <ImageHeader {...props} />
+    <Frame {...props} background={props.primary} color="white">
       <div
         style={{
           display: "flex",
@@ -102,24 +131,46 @@ export function ChampionImage(props: Props) {
           flex: 1,
           alignItems: "center",
           justifyContent: "center",
-          gap: 24,
-          padding: "24px 56px",
+          gap: 28,
+          padding: "40px 64px",
           textAlign: "center",
         }}
       >
-        <span style={{ fontSize: 140 }}>🏆</span>
-        <span style={{ fontSize: 40, letterSpacing: 8, color: "#71717a" }}>CAMPEÓN</span>
-        <span style={{ fontSize: 96, fontWeight: 800, color: props.primary }}>
-          {gameDay.champion?.name}
+        <span style={{ fontSize: 170 }}>🏆</span>
+        <span style={{ fontSize: 38, letterSpacing: 14, color: props.secondary, fontWeight: 700 }}>
+          CAMPEÓN
         </span>
+        <span
+          style={{
+            display: "flex",
+            fontSize: name.length > LONG_NAME_CHARS ? 88 : 124,
+            fontWeight: 800,
+            lineHeight: 1.05,
+          }}
+        >
+          {name}
+        </span>
+        {props.players.length > 0 && (
+          <span style={{ display: "flex", fontSize: 32, opacity: 0.85, maxWidth: 900 }}>
+            {props.players.join(" · ")}
+          </span>
+        )}
         {final && final.homeScore !== null && final.awayScore !== null && (
-          <span style={{ fontSize: 40, color: "#3f3f46" }}>
-            Final: {nameOf.get(final.homeTeam)} {final.homeScore} – {final.awayScore}{" "}
+          <span
+            style={{
+              display: "flex",
+              marginTop: 12,
+              padding: "14px 36px",
+              borderRadius: 999,
+              fontSize: 32,
+              background: "rgba(255,255,255,0.16)",
+            }}
+          >
+            Final · {nameOf.get(final.homeTeam)} {final.homeScore} – {final.awayScore}{" "}
             {nameOf.get(final.awayTeam)}
           </span>
         )}
       </div>
-      <ImageFooter />
-    </div>
+    </Frame>
   );
 }

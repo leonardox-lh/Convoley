@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { z } from "zod";
 import { getOrganizerEvent } from "@/modules/events";
-import { getGameDay } from "@/modules/registrations";
+import { getGameDay, listEventTeams } from "@/modules/registrations";
 import { requireOrganizer } from "../../../../require-organizer";
 import { loadImageBrand } from "../../imagen/image-assets";
 import { LIST_IMAGE_FORMATS, type ListImageFormat } from "../../imagen/image-layout";
@@ -35,10 +35,16 @@ export async function GET(
   const gameDay = await getGameDay(event.id);
   if (tipo === "campeon" && !gameDay.champion) return new Response(null, { status: 404 });
 
+  const championTeam =
+    gameDay.champion &&
+    (await listEventTeams(event.id)).teams.find((team) => team.number === gameDay.champion?.number);
+  const players = (championTeam?.players ?? []).map(
+    (player) => `${player.firstName} ${player.lastName.charAt(0)}.`,
+  );
   const size = LIST_IMAGE_FORMATS[formato];
   const image = new ImageResponse(
     tipo === "campeon" ? (
-      <ChampionImage {...brand} gameDay={gameDay} />
+      <ChampionImage {...brand} gameDay={gameDay} players={players} />
     ) : (
       <StandingsImage {...brand} gameDay={gameDay} />
     ),
