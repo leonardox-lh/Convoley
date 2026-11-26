@@ -5,7 +5,8 @@ export function VolleyballIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="2.25 2.25 19.5 19.5" aria-hidden className={className}>
       <circle cx="12" cy="12" r="9" className="fill-brand-ball" />
-      <g fill="none" className="stroke-zinc-400" strokeWidth="1.5" strokeLinecap="round">
+      {/* Seams: the app blue on light backgrounds, white on dark ones (--ball-seam, globals.css). */}
+      <g fill="none" strokeWidth="1.5" strokeLinecap="round" style={{ stroke: "var(--ball-seam)" }}>
         <path d="M12 12a8 8 0 0 0 8 4" />
         <path d="M7.5 13.5a12 12 0 0 0 8.5 6.5" />
         <path d="M12 12a8 8 0 0 0-7.464 4.928" />
@@ -19,9 +20,18 @@ export function VolleyballIcon({ className }: { className?: string }) {
 }
 
 /** Loading state: a volleyball spinning with a little bounce. */
-export function VolleyballLoader({ label = "Cargando…", className }: { label?: string; className?: string }) {
+export function VolleyballLoader({
+  label = "Cargando…",
+  className,
+}: {
+  label?: string;
+  className?: string;
+}) {
   return (
-    <div role="status" className={cn("flex flex-col items-center justify-center gap-3 py-12", className)}>
+    <div
+      role="status"
+      className={cn("flex flex-col items-center justify-center gap-3 py-12", className)}
+    >
       <span className="animate-bounce [animation-duration:900ms]">
         <VolleyballIcon className="size-12 animate-spin [animation-duration:1.2s] motion-reduce:animate-none" />
       </span>

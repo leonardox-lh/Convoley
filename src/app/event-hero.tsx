@@ -11,6 +11,13 @@ import { formatSoles } from "@/lib/money";
 const DEFAULT_BRAND_COLOR = "#1d4ed8";
 const HERO_NIGHT = "#0a1a4a";
 
+/** The heroes' background: the club color fading into night blue. */
+export function heroBackground(primaryColor: string | null) {
+  return {
+    backgroundImage: `linear-gradient(140deg, ${primaryColor ?? DEFAULT_BRAND_COLOR} 0%, ${HERO_NIGHT} 100%)`,
+  };
+}
+
 export interface EventHeroData {
   clubName: string;
   /** Public logo URL, or null for the initial. */
@@ -51,7 +58,6 @@ export function EventHero(props: {
   const time = event.endsAt
     ? `${formatTimeInLima(event.startsAt)} – ${formatTimeInLima(event.endsAt)}`
     : formatTimeInLima(event.startsAt);
-  const brandColor = event.primaryColor ?? DEFAULT_BRAND_COLOR;
 
   const clubLine = (
     <>
@@ -72,7 +78,7 @@ export function EventHero(props: {
       <header
         data-club-hero
         className="relative -mx-4 overflow-hidden rounded-b-[2rem] px-5 pt-6 pb-14 text-white max-sm:pt-20"
-        style={{ backgroundImage: `linear-gradient(140deg, ${brandColor} 0%, ${HERO_NIGHT} 100%)` }}
+        style={heroBackground(event.primaryColor)}
       >
         <VolleyballIcon className="pointer-events-none absolute -top-10 -right-12 size-48 opacity-15" />
         {props.clubHref ? (

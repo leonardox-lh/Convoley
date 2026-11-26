@@ -61,6 +61,7 @@
   --secondary: oklch(0.95 0.02 262);
   --secondary-foreground: oklch(0.3 0.12 262);
   --brand-ball: oklch(0.78 0.16 70);
+  --ball-seam: var(--primary);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
@@ -152,39 +153,42 @@ select.peer {
 }
 
 /* Phones: the club hero paints up to the top edge, under a see-through site header. Pages
-   visited before stay mounted but hidden (display: none); a hidden hero doesn't count. */
+   visited before stay mounted but hidden (display: none): only a hero outside those counts. */
 @media (width < 40rem) {
-  body:has([data-club-hero]):not(:has([style*="display: none"] [data-club-hero]))
-    [data-site-header],
-  body:has([data-club-hero]):not(:has([style*="display: none"] [data-club-hero])) [data-app-bar] {
+  body:has([data-club-hero]:not([style*="display: none"] [data-club-hero])) [data-site-header],
+  body:has([data-club-hero]:not([style*="display: none"] [data-club-hero])) [data-app-bar] {
     @apply absolute inset-x-0 top-0 z-10 border-transparent bg-transparent text-white backdrop-blur-none;
+    --ball-seam: white;
   }
-  body:has([data-club-hero]):not(:has([style*="display: none"] [data-club-hero]))
+  body:has([data-club-hero]:not([style*="display: none"] [data-club-hero]))
     [data-site-header]
     [data-logo-accent],
-  body:has([data-club-hero]):not(:has([style*="display: none"] [data-club-hero]))
+  body:has([data-club-hero]:not([style*="display: none"] [data-club-hero]))
     [data-app-bar]
     [data-logo-accent] {
     @apply text-white/80;
   }
-  body:has([data-club-hero]):not(:has([style*="display: none"] [data-club-hero]))
-    [data-header-pill] {
+  body:has([data-club-hero]:not([style*="display: none"] [data-club-hero])) [data-header-pill] {
     @apply bg-white/15 text-white;
   }
-  body:has([data-club-hero]):not(:has([style*="display: none"] [data-club-hero]))
-    [data-admin-tabs]
-    a {
+  body:has([data-club-hero]:not([style*="display: none"] [data-club-hero])) [data-admin-tabs] a {
     @apply bg-white/15 text-white;
   }
-  body:has([data-club-hero]):not(:has([style*="display: none"] [data-club-hero]))
+  body:has([data-club-hero]:not([style*="display: none"] [data-club-hero]))
     [data-admin-tabs]
     a[data-active] {
     @apply bg-white text-primary;
   }
   /* The quick tabs make the see-through header taller; keep the hero's content below them. */
-  body:has([data-admin-tabs]) [data-club-hero] {
+  body:has([data-admin-tabs]) [data-club-hero]:not([style*="display: none"] [data-club-hero]) {
     @apply pt-32;
   }
+}
+
+/* On dark backgrounds (colored heroes, the sign-in panel) the ball's seams turn white. */
+[data-club-hero],
+[data-ball-on-dark] {
+  --ball-seam: white;
 }
 
 @keyframes toast-timer {

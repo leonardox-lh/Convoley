@@ -54,6 +54,7 @@ function BrandPanel() {
         <Link
           href="/"
           aria-label="Convoley, ir al inicio"
+          data-ball-on-dark
           className="[&_[data-logo-accent]]:text-sky-200"
         >
           <Logo />
