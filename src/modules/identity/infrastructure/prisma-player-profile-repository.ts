@@ -1,4 +1,9 @@
-import { Prisma, type PrismaClient } from "@/generated/prisma/client";
+import {
+  Prisma,
+  type PlayerLevel,
+  type PlayerPosition,
+  type PrismaClient,
+} from "@/generated/prisma/client";
 import type { PlayerProfileRepository } from "../application/ports";
 import { PhoneLinkedToAnotherAccountError } from "../domain/errors";
 
@@ -9,7 +14,14 @@ export function prismaPlayerProfileRepository(db: PrismaClient): PlayerProfileRe
     async find(userId) {
       const user = await db.user.findUnique({
         where: { id: userId },
-        select: { firstName: true, lastName: true, name: true, phone: true },
+        select: {
+          firstName: true,
+          lastName: true,
+          name: true,
+          phone: true,
+          position: true,
+          level: true,
+        },
       });
       if (!user) return null;
       // Accounts created before HU-48 only have the full name.
@@ -18,6 +30,8 @@ export function prismaPlayerProfileRepository(db: PrismaClient): PlayerProfileRe
         firstName: user.firstName ?? first,
         lastName: user.lastName ?? rest.join(" "),
         phone: user.phone,
+        position: user.position,
+        level: user.level,
       };
     },
 
@@ -25,10 +39,18 @@ export function prismaPlayerProfileRepository(db: PrismaClient): PlayerProfileRe
       await updateUser(db, userId, { phone });
     },
 
-    async update(userId, { firstName, lastName, phone }) {
+    async update(userId, { firstName, lastName, phone, position, level }) {
       // `name` is what organizers see in lists; keep it in sync with the edited parts.
       const name = [firstName, lastName].filter(Boolean).join(" ");
-      await updateUser(db, userId, { firstName, lastName, name, phone });
+      // The app layer validates these against the same enums before calling.
+      await updateUser(db, userId, {
+        firstName,
+        lastName,
+        name,
+        phone,
+        position: position as PlayerPosition | null,
+        level: level as PlayerLevel | null,
+      });
     },
   };
 }

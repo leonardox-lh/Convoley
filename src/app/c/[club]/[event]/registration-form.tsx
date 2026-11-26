@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Toast } from "@/components/toast";
 import { useActionState, useState } from "react";
-import { Field, fieldClass, FormMessage, submitKeepingValues, TextField } from "@/components/form";
+import { FormMessage, OptionalSelect, submitKeepingValues, TextField } from "@/components/form";
 import { Button, buttonVariants } from "@/components/ui/button";
 import type { PlayerProfile } from "@/modules/identity";
 import { GenderSelect } from "../../../gender-select";
@@ -187,26 +187,6 @@ export function RegistrationForm({
         </Button>
       </form>
     </section>
-  );
-}
-
-function OptionalSelect(props: {
-  label: string;
-  name: string;
-  options: Record<string, string>;
-  defaultValue?: string | null;
-}) {
-  return (
-    <Field label={<>{props.label} (opcional)</>} float="always">
-      <select name={props.name} defaultValue={props.defaultValue ?? ""} className={fieldClass}>
-        <option value="">—</option>
-        {Object.entries(props.options).map(([value, label]) => (
-          <option key={value} value={value}>
-            {label}
-          </option>
-        ))}
-      </select>
-    </Field>
   );
 }
 

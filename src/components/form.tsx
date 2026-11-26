@@ -56,7 +56,9 @@ export function Field({
     <label className={`flex flex-col gap-1 ${className}`}>
       <span className="relative">
         {children}
-        <span className={`${floatingLabelClass} ${float === "auto" ? restingLabelClass : ""}`}>{label}</span>
+        <span className={`${floatingLabelClass} ${float === "auto" ? restingLabelClass : ""}`}>
+          {label}
+        </span>
       </span>
       {hint && <span className="px-1 text-xs text-muted-foreground">{hint}</span>}
     </label>
@@ -87,4 +89,25 @@ export function submitKeepingValues(formAction: (formData: FormData) => void) {
     const formData = new FormData(event.currentTarget, submitter);
     startTransition(() => formAction(formData));
   };
+}
+
+/** A select with an empty "—" first option; its label says it is optional. */
+export function OptionalSelect(props: {
+  label: string;
+  name: string;
+  options: Record<string, string>;
+  defaultValue?: string | null;
+}) {
+  return (
+    <Field label={<>{props.label} (opcional)</>} float="always">
+      <select name={props.name} defaultValue={props.defaultValue ?? ""} className={fieldClass}>
+        <option value="">—</option>
+        {Object.entries(props.options).map(([value, label]) => (
+          <option key={value} value={value}>
+            {label}
+          </option>
+        ))}
+      </select>
+    </Field>
+  );
 }

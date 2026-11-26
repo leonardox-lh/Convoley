@@ -56,6 +56,9 @@ export interface PlayerProfile {
   lastName: string;
   /** Normalized +519XXXXXXXX; null until the first registration asks for it. */
   phone: string | null;
+  /** Optional volleyball details, edited in Mi perfil; they prefill each sign-up. */
+  position: string | null;
+  level: string | null;
 }
 
 export interface PlayerProfileRepository {

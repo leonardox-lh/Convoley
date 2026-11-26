@@ -1,9 +1,10 @@
 "use client";
 
 import { useActionState } from "react";
-import { FormMessage, submitKeepingValues, TextField } from "@/components/form";
+import { FormMessage, OptionalSelect, submitKeepingValues, TextField } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import type { PlayerProfile } from "@/modules/identity";
+import { LEVEL_LABELS, POSITION_LABELS } from "../player-labels";
 import { type ProfileState, updateProfileAction } from "./actions";
 
 const LOCAL_PHONE = /^\+51/;
@@ -37,6 +38,20 @@ export function ProfileForm({ profile }: { profile: PlayerProfile }) {
         defaultValue={profile.phone?.replace(LOCAL_PHONE, "") ?? ""}
         required={false}
       />
+      <div className="grid grid-cols-2 gap-3">
+        <OptionalSelect
+          label="Posición"
+          name="position"
+          options={POSITION_LABELS}
+          defaultValue={profile.position}
+        />
+        <OptionalSelect
+          label="Nivel"
+          name="level"
+          options={LEVEL_LABELS}
+          defaultValue={profile.level}
+        />
+      </div>
       {state.status === "error" && <FormMessage tone="error">{state.message}</FormMessage>}
       {state.status === "saved" && <FormMessage tone="ok">Guardamos tus datos.</FormMessage>}
       <Button type="submit" size="lg" className="h-11" disabled={pending}>

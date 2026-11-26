@@ -68,9 +68,16 @@ async function PublicEventContent({ params }: { params: Params }) {
   const now = new Date();
   const waitlistOnly = acceptsWaitlist(event, now);
   const userId = await currentUserId();
-  const [profile, lastChoices] = userId
+  const [profile, lastSignUp] = userId
     ? await Promise.all([getPlayerProfile(userId), findLastPlayerChoices(userId)])
     : [null, null];
+  // Mi perfil wins; the last sign-up fills what the profile leaves empty.
+  const lastChoices = profile
+    ? {
+        position: profile.position ?? lastSignUp?.position ?? null,
+        level: profile.level ?? lastSignUp?.level ?? null,
+      }
+    : lastSignUp;
   const seatsAreOpen = event.status === "published" || event.status === "full";
   const notice = STATUS_NOTICES[event.status];
   const cancellationNote =

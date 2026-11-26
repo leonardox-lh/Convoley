@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { PhoneNumber } from "@/modules/registrations";
+import { LEVEL_LABELS, POSITION_LABELS } from "../player-labels";
 
 const NAME_MAX_LENGTH = 60;
 
@@ -17,6 +18,16 @@ const phoneField = z
     }
   });
 
+/** "—" in the select sends an empty string: that clears the value. */
+function optionalChoice(labels: Record<string, string>) {
+  const keys = Object.keys(labels) as [string, ...string[]];
+  return z
+    .enum(keys)
+    .or(z.literal(""))
+    .optional()
+    .transform((value) => value || null);
+}
+
 export const profileSchema = z.object({
   firstName: z
     .string()
@@ -25,4 +36,6 @@ export const profileSchema = z.object({
     .max(NAME_MAX_LENGTH, "Tu nombre es muy largo."),
   lastName: z.string().trim().max(NAME_MAX_LENGTH, "Tu apellido es muy largo."),
   phone: phoneField,
+  position: optionalChoice(POSITION_LABELS),
+  level: optionalChoice(LEVEL_LABELS),
 });

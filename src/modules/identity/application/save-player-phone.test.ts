@@ -14,7 +14,13 @@ function fakeProfiles(profile: PlayerProfile | null) {
 
 describe("HU-48 criterio 3: la primera vez solo pide el celular", () => {
   it("HU-48: guarda el celular en una cuenta que aún no lo tiene", async () => {
-    const { profiles, saved } = fakeProfiles({ firstName: "Ana", lastName: "Paz", phone: null });
+    const { profiles, saved } = fakeProfiles({
+      firstName: "Ana",
+      lastName: "Paz",
+      phone: null,
+      position: null,
+      level: null,
+    });
     await makeSavePlayerPhone({ profiles })({ userId: "u1", phone: "+51987654321" });
     expect(saved).toEqual(["+51987654321"]);
   });
@@ -24,6 +30,8 @@ describe("HU-48 criterio 3: la primera vez solo pide el celular", () => {
       firstName: "Ana",
       lastName: "Paz",
       phone: "+51911111111",
+      position: null,
+      level: null,
     });
     await makeSavePlayerPhone({ profiles })({ userId: "u1", phone: "+51987654321" });
     expect(saved).toEqual([]);

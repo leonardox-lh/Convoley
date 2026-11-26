@@ -13,7 +13,13 @@ describe("perfil: editar mis datos", () => {
       lastName: "Paz",
       phone: "987 654 321",
     });
-    expect(parsed).toEqual({ firstName: "Ana", lastName: "Paz", phone: "+51987654321" });
+    expect(parsed).toEqual({
+      firstName: "Ana",
+      lastName: "Paz",
+      phone: "+51987654321",
+      position: null,
+      level: null,
+    });
   });
 
   it("permite dejar el celular vacío", () => {
@@ -27,6 +33,28 @@ describe("perfil: editar mis datos", () => {
 
   it("pide el nombre", () => {
     const result = profileSchema.safeParse({ firstName: "  ", lastName: "Paz", phone: "" });
+    expect(result.success).toBe(false);
+  });
+
+  it("guarda posición y nivel, y '—' los borra", () => {
+    const base = { firstName: "Ana", lastName: "", phone: "" };
+    expect(profileSchema.parse({ ...base, position: "setter", level: "advanced" })).toMatchObject({
+      position: "setter",
+      level: "advanced",
+    });
+    expect(profileSchema.parse({ ...base, position: "", level: "" })).toMatchObject({
+      position: null,
+      level: null,
+    });
+  });
+
+  it("rechaza una posición que no existe", () => {
+    const result = profileSchema.safeParse({
+      firstName: "Ana",
+      lastName: "",
+      phone: "",
+      position: "goalkeeper",
+    });
     expect(result.success).toBe(false);
   });
 });
