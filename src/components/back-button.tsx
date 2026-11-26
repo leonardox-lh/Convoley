@@ -16,12 +16,15 @@ let firstPath: string | null = null;
 /** Round "←" button: browser back inside the app, otherwise the screen one level up. */
 export function BackButton({ className }: { className?: string }) {
   const router = useRouter();
-  const pathname = usePathname();
+  // Read on click, not with usePathname(): that hook makes every layout using this button
+  // a blocking route in Next 16.
   return (
     <button
       type="button"
       aria-label="Volver"
-      onClick={() => (movedInsideApp ? router.back() : router.push(parentPath(pathname)))}
+      onClick={() =>
+        movedInsideApp ? router.back() : router.push(parentPath(window.location.pathname))
+      }
       className={cn(
         "flex size-9 shrink-0 items-center justify-center rounded-full text-current transition-colors hover:bg-current/10 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
         className,

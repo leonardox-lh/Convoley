@@ -29,7 +29,7 @@ test("HU-04: publica una convocatoria y el link para compartir la muestra", asyn
   expect(url).toMatch(/\/c\/voley-miraflores\/.+/);
 
   await page.goto(url);
-  await expect(page.getByText(title)).toBeVisible();
+  await expect(page.getByRole("heading", { name: title })).toBeVisible();
   await expect(page.getByText(/12[.,]50/)).toBeVisible();
 });
 
