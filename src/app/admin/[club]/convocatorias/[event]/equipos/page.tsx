@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { GenderIcon } from "@/components/gender-icon";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getOrganizerEvent } from "@/modules/events";
@@ -50,9 +51,12 @@ async function TeamsContent({ params }: Pick<Props, "params">) {
 
   const playerRow = (player: Player) => (
     <li key={player.id} className="flex items-center justify-between gap-2 py-2">
-      <div className="flex flex-col">
-        <span className="text-sm font-medium">
-          {player.firstName} {player.lastName}
+      <div className="flex min-w-0 flex-col">
+        <span className="flex items-center gap-1.5 text-sm font-medium">
+          <span className="truncate">
+            {player.firstName} {player.lastName}
+          </span>
+          <GenderIcon gender={player.gender} />
         </span>
         <span className="text-xs text-zinc-500">{playerDetails(player)}</span>
       </div>

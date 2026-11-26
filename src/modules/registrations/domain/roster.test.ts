@@ -22,16 +22,16 @@ const registrations = [
 describe("HU-16 criterio 2: lista numerada que marca quién pagó", () => {
   it("HU-16: numera por orden de inscripción, sin cancelados, y marca a los que pagaron", () => {
     expect(buildRoster(registrations).players).toEqual([
-      { number: 1, name: "Ana Paz", paid: false },
-      { number: 2, name: "Leo Paz", paid: true },
-      { number: 3, name: "Sol Paz", paid: false },
+      { number: 1, name: "Ana Paz", paid: false, gender: null },
+      { number: 2, name: "Leo Paz", paid: true, gender: null },
+      { number: 3, name: "Sol Paz", paid: false, gender: null },
     ]);
   });
 
   it("HU-16: la lista de espera va aparte, por orden de llegada", () => {
     expect(buildRoster(registrations).waitlist).toEqual([
-      { number: 1, name: "Ivo Paz" },
-      { number: 2, name: "Max Paz" },
+      { number: 1, name: "Ivo Paz", gender: null },
+      { number: 2, name: "Max Paz", gender: null },
     ]);
   });
 });

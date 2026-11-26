@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { GenderIcon } from "@/components/gender-icon";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -263,7 +264,7 @@ async function PublicEventContent({ params }: { params: Params }) {
   );
 }
 
-/** Who signed up, when the organizer made the list public. First name and initial only. */
+/** Who signed up, when the organizer made the list public: full names, cut with … only if too long. */
 async function PublicRoster({ eventId, capacity }: { eventId: string; capacity: number }) {
   const roster = buildRoster(await listEventRegistrations({ eventId }));
   return (
@@ -297,11 +298,9 @@ async function PublicRoster({ eventId, capacity }: { eventId: string; capacity: 
   );
 }
 
-const shortName = (name: string) => name.replace(/^(\S+)\s+(\S).*$/, "$1 $2.");
-
 /** Two-column tiles: number badge and short name. The waitlist is numbered E1, E2… in amber. */
 function RosterGrid(props: {
-  players: { number: number; name: string }[];
+  players: { number: number; name: string; gender: string | null }[];
   waitlist?: boolean;
   "aria-labelledby"?: string;
 }) {
@@ -321,7 +320,10 @@ function RosterGrid(props: {
           >
             {props.waitlist ? `E${player.number}` : player.number}
           </span>
-          <span className="truncate">{shortName(player.name)}</span>
+          <span className="min-w-0 flex-1 truncate" title={player.name}>
+            {player.name}
+          </span>
+          <GenderIcon gender={player.gender} />
         </li>
       ))}
     </ol>

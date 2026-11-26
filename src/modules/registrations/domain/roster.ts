@@ -5,13 +5,15 @@ export interface RosterSource {
   lastName: string;
   status: RegistrationStatus;
   createdAt: Date;
+  /** Asked only in mixed events. */
+  gender?: string | null;
 }
 
 export interface Roster {
   /** Players with a seat, numbered from 1 in sign-up order. */
-  players: { number: number; name: string; paid: boolean }[];
+  players: { number: number; name: string; paid: boolean; gender: string | null }[];
   /** The waitlist, numbered from 1 in arrival order. */
-  waitlist: { number: number; name: string }[];
+  waitlist: { number: number; name: string; gender: string | null }[];
 }
 
 /**
@@ -24,10 +26,15 @@ export function buildRoster(registrations: RosterSource[]): Roster {
   return {
     players: ordered
       .filter((r) => holdsSeat(r.status))
-      .map((r, index) => ({ number: index + 1, name: name(r), paid: r.status === "paid" })),
+      .map((r, index) => ({
+        number: index + 1,
+        name: name(r),
+        paid: r.status === "paid",
+        gender: r.gender ?? null,
+      })),
     waitlist: ordered
       .filter((r) => r.status === "waitlisted")
-      .map((r, index) => ({ number: index + 1, name: name(r) })),
+      .map((r, index) => ({ number: index + 1, name: name(r), gender: r.gender ?? null })),
   };
 }
 

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { ClubLogo } from "@/components/club-logo";
 import { CopyButton } from "@/components/copy-button";
+import { GenderIcon } from "@/components/gender-icon";
 import { appUrl } from "@/lib/app-url";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -221,8 +222,11 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
                       : index + 1}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium">
-                      {registration.firstName} {registration.lastName}
+                    <p className="flex items-center gap-1.5 font-medium">
+                      <span className="truncate">
+                        {registration.firstName} {registration.lastName}
+                      </span>
+                      <GenderIcon gender={registration.gender} />
                     </p>
                     {(registration.position || registration.level) && (
                       <p className="text-xs text-muted-foreground">
