@@ -121,3 +121,18 @@ export function formatWeekdayDateInLima(date: Date): string {
   const text = limaWeekdayDateFormatter.format(date).replace(",", "");
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
+
+const limaDatePartsFormatter = new Intl.DateTimeFormat("es-PE", {
+  timeZone: LIMA_TIME_ZONE,
+  weekday: "long",
+  day: "numeric",
+  month: "short",
+});
+
+/** Pieces for a calendar tile in Lima: { weekday: "viernes", day: "27", month: "nov" }. */
+export function limaDateParts(date: Date): { weekday: string; day: string; month: string } {
+  const parts = Object.fromEntries(
+    limaDatePartsFormatter.formatToParts(date).map((part) => [part.type, part.value]),
+  );
+  return { weekday: parts.weekday, day: parts.day, month: parts.month.replace(".", "") };
+}

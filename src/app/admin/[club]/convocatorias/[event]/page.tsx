@@ -1,5 +1,6 @@
 import { CalendarDays, MapPin, Pencil, Users } from "lucide-react";
 import Link from "next/link";
+import { AutoRefresh } from "@/components/auto-refresh";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { z } from "zod";
@@ -21,7 +22,6 @@ import { LEVEL_LABELS, POSITION_LABELS } from "../../../../player-labels";
 import { REGISTRATION_STATUS_BADGE_CLASSES } from "../../../../registration-status";
 import { requireOrganizer } from "../../require-organizer";
 import { AddPlayerForm } from "./add-player-form";
-import { AutoRefresh } from "./auto-refresh";
 import { CheckInButton } from "./check-in-button";
 import { RegistrationActions } from "./registration-actions";
 import { FlyerSharing } from "./flyer-sharing";

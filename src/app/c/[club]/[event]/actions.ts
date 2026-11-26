@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
   currentUserId,
@@ -83,6 +84,8 @@ export async function registerAction(
   if (userId && profile && !profile.phone && player.phone) {
     await rememberPhone(userId, player.phone);
   }
+  // The list and spots on this page include the new sign-up right away.
+  revalidatePath("/c/[club]/[event]", "page");
   return { status: "registered", registrationId, firstName: player.firstName, waitlistPosition };
 }
 
