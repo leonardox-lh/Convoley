@@ -21,7 +21,12 @@ import {
   revertToPending,
   setCheckIn,
 } from "@/modules/registrations";
-import { genderField, nameField, optionalNameField, PHONE_FORMAT_MESSAGE } from "../../../../player-schema";
+import {
+  genderField,
+  nameField,
+  optionalNameField,
+  PHONE_FORMAT_MESSAGE,
+} from "../../../../player-schema";
 import { NOT_ALLOWED_MESSAGE } from "../event-form-schema";
 import { requireOrganizerToEdit } from "../../require-organizer";
 
@@ -92,7 +97,12 @@ export async function addPlayerAction(
   const { markPaid, ...player } = parsed.data;
 
   return run(parsed.data, async (organizerUserId) => {
-    await addPlayerManually({ ...player, phone: player.phone || null, markPaid: markPaid === "on", organizerUserId });
+    await addPlayerManually({
+      ...player,
+      phone: player.phone || null,
+      markPaid: markPaid === "on",
+      organizerUserId,
+    });
     return `${player.firstName} quedó inscrito.`;
   });
 }
