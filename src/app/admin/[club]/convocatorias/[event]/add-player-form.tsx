@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import { FormMessage, submitKeepingValues, TextField } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import { GenderSelect } from "../../../../gender-select";
+import { ToggleField } from "../event-fields";
 import { addPlayerAction, type RegistrationActionState } from "./actions";
 
 export function AddPlayerForm(props: { clubSlug: string; eventId: string; isMixed: boolean }) {
@@ -32,9 +33,15 @@ export function AddPlayerForm(props: { clubSlug: string; eventId: string; isMixe
         <input type="hidden" name="clubSlug" value={props.clubSlug} />
         <input type="hidden" name="eventId" value={props.eventId} />
         <TextField label="Nombre" name="firstName" autoComplete="off" />
-        <TextField label="Apellido" name="lastName" autoComplete="off" />
         <TextField
-          label="Celular"
+          label="Apellido (opcional)"
+          required={false}
+          name="lastName"
+          autoComplete="off"
+        />
+        <TextField
+          label="Celular (opcional)"
+          required={false}
           name="phone"
           type="tel"
           inputMode="numeric"
@@ -42,10 +49,11 @@ export function AddPlayerForm(props: { clubSlug: string; eventId: string; isMixe
           placeholder="987654321"
         />
         {props.isMixed && <GenderSelect />}
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" name="markPaid" className="size-5" />
-          Ya pagó (pagado manual)
-        </label>
+        <ToggleField
+          name="markPaid"
+          title="Pago manual"
+          text="Ya te pagó en efectivo o por transferencia."
+        />
         {state.status === "error" && <FormMessage tone="error">{state.message}</FormMessage>}
         {state.status === "done" && <FormMessage tone="ok">{state.message}</FormMessage>}
         <Button type="submit" size="lg" className="h-11" disabled={pending}>

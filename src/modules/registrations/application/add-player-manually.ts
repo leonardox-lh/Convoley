@@ -12,7 +12,7 @@ export interface AddPlayerManuallyInput {
   eventId: string;
   firstName: string;
   lastName: string;
-  phone: string;
+  phone?: string | null;
   /** HU-31: asked only in mixed events. */
   gender?: PlayerGender | null;
   /** The player already paid the organizer outside Convoley (cash, transfer). */

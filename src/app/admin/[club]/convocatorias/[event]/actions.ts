@@ -21,7 +21,7 @@ import {
   revertToPending,
   setCheckIn,
 } from "@/modules/registrations";
-import { genderField, nameField, PHONE_FORMAT_MESSAGE } from "../../../../player-schema";
+import { genderField, nameField, optionalNameField, PHONE_FORMAT_MESSAGE } from "../../../../player-schema";
 import { NOT_ALLOWED_MESSAGE } from "../event-form-schema";
 import { requireOrganizerToEdit } from "../../require-organizer";
 
@@ -35,8 +35,8 @@ const targetSchema = z.object({
 
 const addPlayerSchema = targetSchema.extend({
   firstName: nameField("Escribe el nombre."),
-  lastName: nameField("Escribe el apellido."),
-  phone: z.string().trim().min(1, "Escribe el celular."),
+  lastName: optionalNameField,
+  phone: z.string().trim().default(""),
   gender: genderField,
   markPaid: z.literal("on").optional(),
 });
@@ -92,7 +92,7 @@ export async function addPlayerAction(
   const { markPaid, ...player } = parsed.data;
 
   return run(parsed.data, async (organizerUserId) => {
-    await addPlayerManually({ ...player, markPaid: markPaid === "on", organizerUserId });
+    await addPlayerManually({ ...player, phone: player.phone || null, markPaid: markPaid === "on", organizerUserId });
     return `${player.firstName} quedó inscrito.`;
   });
 }

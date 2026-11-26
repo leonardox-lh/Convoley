@@ -115,7 +115,7 @@ export function EventFields(props: {
 }
 
 /** Checkbox drawn as a switch, with a line saying what it does. */
-function ToggleField(props: {
+export function ToggleField(props: {
   name: string;
   title: string;
   text: string;

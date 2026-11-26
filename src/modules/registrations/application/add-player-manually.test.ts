@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  DuplicatePlayerNameError,
   DuplicateRegistrationError,
   EventFullError,
   InvalidPhoneNumberError,
@@ -99,5 +100,31 @@ describe("HU-08 criterio 1: agregar jugador manualmente y marcar pagado", () => 
       InvalidPhoneNumberError,
     );
     expect(rows).toHaveLength(0);
+  });
+});
+
+describe("agregar jugador solo con el nombre", () => {
+  it("se agrega sin apellido ni celular", async () => {
+    const { addPlayerManually, rows } = setup(seatInfo());
+
+    await addPlayerManually({ ...input, lastName: "", phone: null });
+
+    expect(rows[0]).toMatchObject({ firstName: "Ana", lastName: "", phone: null });
+  });
+
+  it("rechaza un nombre que ya está en la lista, sin registrar pago", async () => {
+    const { addPlayerManually, rows, recorded } = setup(seatInfo(), [existingRow]);
+
+    await expect(
+      addPlayerManually({
+        ...input,
+        firstName: "otra",
+        lastName: "PERSONA",
+        phone: null,
+        markPaid: true,
+      }),
+    ).rejects.toThrow(DuplicatePlayerNameError);
+    expect(rows).toHaveLength(1);
+    expect(recorded).toHaveLength(0);
   });
 });

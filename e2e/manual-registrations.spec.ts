@@ -36,7 +36,7 @@ test("HU-08 criterios 1 y 2: agregar pagado, agregar y marcar pagado manual, y q
     await page.getByLabel("Nombre").fill(firstName);
     await page.getByLabel("Apellido").fill("Manual");
     await page.getByLabel("Celular").fill(randomPhone());
-    if (paid) await page.getByLabel("Ya pagó (pagado manual)").check();
+    if (paid) await page.getByText("Pago manual", { exact: true }).click();
     await page.getByRole("button", { name: "Agregar" }).click();
     await expect(page.getByText(`${firstName} quedó inscrito.`)).toBeVisible();
   }
