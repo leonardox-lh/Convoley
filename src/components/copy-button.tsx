@@ -2,6 +2,7 @@
 
 import { Check, Copy } from "lucide-react";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 const COPIED_FEEDBACK_MS = 2000;
 
@@ -10,10 +11,12 @@ export function CopyButton({
   text,
   label,
   showLabel = false,
+  className,
 }: {
   text: string;
   label: string;
   showLabel?: boolean;
+  className?: string;
 }) {
   const [copied, setCopied] = useState(false);
   return (
@@ -26,11 +29,12 @@ export function CopyButton({
         setCopied(true);
         setTimeout(() => setCopied(false), COPIED_FEEDBACK_MS);
       }}
-      className={
+      className={cn(
         showLabel
           ? "flex h-9 shrink-0 items-center gap-1.5 rounded-xl border px-3 text-sm font-medium transition-colors hover:bg-secondary hover:text-primary"
-          : "flex size-9 shrink-0 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-secondary hover:text-primary"
-      }
+          : "flex size-9 shrink-0 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-secondary hover:text-primary",
+        className,
+      )}
     >
       {copied ? (
         <Check className="size-4 text-emerald-600" aria-hidden />

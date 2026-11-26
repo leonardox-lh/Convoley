@@ -1,7 +1,6 @@
-import { CalendarDays, MapPin, Pencil, Users } from "lucide-react";
+import { Pencil, Users } from "lucide-react";
 import Link from "next/link";
 import { AutoRefresh } from "@/components/auto-refresh";
-import { ClubLogo } from "@/components/club-logo";
 import { CopyButton } from "@/components/copy-button";
 import { GenderIcon } from "@/components/gender-icon";
 import { appUrl } from "@/lib/app-url";
@@ -25,6 +24,7 @@ import {
 import { LEVEL_LABELS, POSITION_LABELS } from "../../../../player-labels";
 import { REGISTRATION_STATUS_BADGE_CLASSES } from "../../../../registration-status";
 import { requireOrganizer } from "../../require-organizer";
+import { EventHero } from "../../../../event-hero";
 import { AddPlayerForm } from "./add-player-form";
 import { CheckInButton } from "./check-in-button";
 import { RegistrationActions } from "./registration-actions";
@@ -49,7 +49,7 @@ const statusFilterSchema = z
 
 export default function EventRegistrationsPage({ params, searchParams }: Props) {
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
+    <main className="mx-auto w-full max-w-md flex-1 px-4 pb-8">
       <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
         <EventRegistrationsContent params={params} searchParams={searchParams} />
       </Suspense>
@@ -97,75 +97,57 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
   return (
     <div className="flex flex-col gap-6">
       <AutoRefresh />
-      <header className="flex flex-col gap-3">
-        <div className="flex items-center gap-3">
-          <ClubLogo
-            name={event.club.name}
-            src={clubProfile?.logoKey ? clubLogoPath(clubProfile.logoKey) : null}
-            className="size-12 rounded-xl bg-primary text-xl text-primary-foreground ring-0"
+      <EventHero
+        event={{
+          ...event,
+          clubName: event.club.name,
+          logoSrc: clubProfile?.logoKey ? clubLogoPath(clubProfile.logoKey) : null,
+          primaryColor: clubProfile?.primaryColor ?? null,
+          secondaryColor: clubProfile?.secondaryColor ?? null,
+          taken: seats.taken,
+        }}
+        clubSuffix="Convocatoria"
+        action={
+          <CopyButton
+            text={`${origin}/c/${clubSlug}/${event.id}`}
+            label="Copiar link"
+            showLabel
+            className="border-white/30 bg-white/15 text-white hover:bg-white/25 hover:text-white"
           />
-          {/* "/ Convocatoria" never splits: a long club name pushes it whole to the second line. */}
-          <p className="line-clamp-2 min-w-0 flex-1 text-sm leading-snug font-medium">
-            {event.club.name}{" "}
-            <span className="whitespace-nowrap text-muted-foreground">/ Convocatoria</span>
-          </p>
-        </div>
-        <div className="flex items-start gap-3">
-          <h1 className="min-w-0 flex-1 text-2xl leading-tight font-semibold tracking-tight first-letter:uppercase">
-            {event.title}
-          </h1>
-          <CopyButton text={`${origin}/c/${clubSlug}/${event.id}`} label="Copiar link" showLabel />
-        </div>
-        <div className="flex flex-col gap-0.5">
-          <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-            <CalendarDays className="size-4 shrink-0" aria-hidden />
-            <span className="inline-block first-letter:uppercase">
-              {formatEventTimeInLima(event)}
-            </span>
-          </p>
-          <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-            <MapPin className="size-4 shrink-0" aria-hidden />
-            {event.venueName}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          {canManage && (
-            <Link
-              href={`${basePath}/editar`}
-              className={buttonVariants({ variant: "outline", className: "h-10 flex-1 gap-1.5" })}
-            >
-              <Pencil aria-hidden />
-              Editar convocatoria
-            </Link>
-          )}
+        }
+        showSeatsBar
+        seats={
+          <>
+            <p role="status" aria-label="Cupos" className="mt-1 text-sm font-semibold">
+              {seats.taken} ocupados · {seats.free} libres
+            </p>
+            {!status && present > 0 && (
+              <span className="text-xs text-muted-foreground">
+                {present} de {seated.length} asistieron
+              </span>
+            )}
+          </>
+        }
+      />
+
+      <div className="flex gap-2">
+        {canManage && (
           <Link
-            href={`${basePath}/equipos`}
+            href={`${basePath}/editar`}
             className={buttonVariants({ variant: "outline", className: "h-10 flex-1 gap-1.5" })}
           >
-            <Users aria-hidden />
-            Armar equipos
+            <Pencil aria-hidden />
+            Editar convocatoria
           </Link>
-        </div>
-      </header>
-
-      <section className="flex flex-col gap-2">
-        <div className="flex items-baseline justify-between gap-3">
-          <p role="status" aria-label="Cupos" className="text-lg font-semibold">
-            {seats.taken} ocupados · {seats.free} libres
-          </p>
-          {!status && present > 0 && (
-            <span className="shrink-0 text-sm text-muted-foreground">
-              {present} de {seated.length} asistieron
-            </span>
-          )}
-        </div>
-        <span aria-hidden className="h-2 overflow-hidden rounded-full bg-secondary">
-          <span
-            className="block h-full rounded-full bg-primary transition-all"
-            style={{ width: `${Math.min(100, (seats.taken / event.capacity) * 100)}%` }}
-          />
-        </span>
-      </section>
+        )}
+        <Link
+          href={`${basePath}/equipos`}
+          className={buttonVariants({ variant: "outline", className: "h-10 flex-1 gap-1.5" })}
+        >
+          <Users aria-hidden />
+          Armar equipos
+        </Link>
+      </div>
 
       {event.status === "published" && (
         <AddPlayerForm clubSlug={clubSlug} eventId={event.id} isMixed={event.isMixed} />
