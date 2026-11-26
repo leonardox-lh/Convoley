@@ -37,7 +37,10 @@ export function ResetPasswordForm(props: { token: string; passwordMinLength: num
       <Button type="submit" size="lg" className="h-11" disabled={pending}>
         Guardar contraseña
       </Button>
-      <Link href="/recuperar" className="text-center text-sm underline underline-offset-4">
+      <Link
+        href="/recuperar"
+        className="text-center text-sm font-medium text-primary underline-offset-4 hover:underline"
+      >
         Pedir un link nuevo
       </Link>
     </form>

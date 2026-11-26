@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { Suspense } from "react";
+import { AuthLink, AuthShell } from "@/components/auth-shell";
 import { PASSWORD_MIN_LENGTH } from "@/modules/identity";
 import { GoogleSignInButton } from "../ingresar/google-sign-in-button";
 import { RETURN_PATH_PARAM, safeReturnPath } from "../ingresar/sign-in-with-password";
@@ -7,23 +7,17 @@ import { SignUpForm } from "./sign-up-form";
 
 export default function SignUpPage({ searchParams }: PageProps<"/registro">) {
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 py-8">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Crea tu cuenta de organizador</h1>
-        <p className="text-sm text-zinc-500">
-          Luego creas tu club y publicas tu primera convocatoria.
-        </p>
-      </div>
+    <AuthShell
+      title="Crea tu cuenta"
+      description="Luego creas tu club y publicas tu primera convocatoria."
+    >
       <Suspense>
         <SignUpWithReturn searchParams={searchParams} />
       </Suspense>
-      <p className="text-center text-sm">
-        ¿Ya tienes cuenta?{" "}
-        <Link href="/ingresar" className="underline underline-offset-4">
-          Ingresa
-        </Link>
+      <p className="border-t pt-4 text-center text-sm text-muted-foreground">
+        ¿Ya tienes cuenta? <AuthLink href="/ingresar">Ingresa</AuthLink>
       </p>
-    </main>
+    </AuthShell>
   );
 }
 

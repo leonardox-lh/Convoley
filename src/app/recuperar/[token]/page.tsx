@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { AuthShell } from "@/components/auth-shell";
 import { PASSWORD_MIN_LENGTH } from "@/modules/identity";
 import { ResetPasswordForm } from "./reset-password-form";
 
@@ -10,12 +11,11 @@ export const metadata: Metadata = { referrer: "no-referrer" };
 
 export default function ResetPasswordPage({ params }: Props) {
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 py-8">
-      <h1 className="text-2xl font-semibold tracking-tight">Crea una nueva contraseña</h1>
+    <AuthShell title="Crea una nueva contraseña" description="Elige una que no uses en otro sitio.">
       <Suspense>
         <ResetPasswordContent params={params} />
       </Suspense>
-    </main>
+    </AuthShell>
   );
 }
 

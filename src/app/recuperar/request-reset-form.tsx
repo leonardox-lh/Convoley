@@ -11,12 +11,16 @@ export function RequestResetForm() {
     { status: "idle" },
   );
 
+  // A toast would vanish and leave an empty card: the confirmation stays in place.
   if (state.status === "sent") {
     return (
-      <FormMessage tone="ok">
-        Si ese correo tiene cuenta, te enviamos un link para crear una nueva contraseña. Vence en 1
-        hora.
-      </FormMessage>
+      <p
+        role="status"
+        className="rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-3 text-sm text-emerald-800"
+      >
+        Si ese correo tiene cuenta, te enviamos un link para crear una nueva contraseña. Revisa tu
+        bandeja (y spam). Vence en 1 hora.
+      </p>
     );
   }
 
