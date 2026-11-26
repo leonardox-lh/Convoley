@@ -47,7 +47,7 @@ export interface RegistrationRepository {
     phone: string,
     tx: TransactionContext,
   ): Promise<{ id: string; status: RegistrationStatus } | null>;
-  /** A Google player's sign-up to the event, for players who gave no phone. */
+  /** A Google player's sign-up to the event; an active one before a cancelled one. */
   findByUser(
     eventId: string,
     userId: string,

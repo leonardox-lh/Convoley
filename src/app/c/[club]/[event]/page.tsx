@@ -20,9 +20,11 @@ import {
   findLastPlayerChoices,
   isOpenForRegistration,
   listEventRegistrations,
+  listPlayerRegistrations,
 } from "@/modules/registrations";
 import { loadEventPreview, seatsText, shareDescription } from "./event-preview";
 import { loadPaymentInfo } from "../../../payment-info";
+import { MyRegistration } from "./my-registration";
 import { RegistrationForm } from "./registration-form";
 import { SpotsBadge } from "../../../spots-badge";
 
@@ -77,9 +79,15 @@ async function PublicEventContent({ params }: { params: Params }) {
   const now = new Date();
   const waitlistOnly = acceptsWaitlist(event, now);
   const userId = await currentUserId();
-  const [profile, lastSignUp] = userId
-    ? await Promise.all([getPlayerProfile(userId), findLastPlayerChoices(userId)])
-    : [null, null];
+  const [profile, lastSignUp, ownRegistrations] = userId
+    ? await Promise.all([
+        getPlayerProfile(userId),
+        findLastPlayerChoices(userId),
+        listPlayerRegistrations(userId),
+      ])
+    : [null, null, []];
+  // Cancelled sign-ups are already left out: those players may sign up again.
+  const myRegistration = ownRegistrations.find((row) => row.eventId === event.id) ?? null;
   // Mi perfil wins; the last sign-up fills what the profile leaves empty.
   const lastChoices = profile
     ? {
@@ -231,17 +239,24 @@ async function PublicEventContent({ params }: { params: Params }) {
       {event.status !== "cancelled" && event.priceCents > 0 && (
         <CancellationPolicyNote clubSlug={club} startsAt={event.startsAt} />
       )}
-      {(isOpenForRegistration(event, now) || waitlistOnly) && (
-        <RegistrationForm
-          waitlistOnly={waitlistOnly}
+      {myRegistration ? (
+        <MyRegistration
+          registration={myRegistration}
           paymentInfo={await loadPaymentInfo(club, event.priceCents)}
-          club={club}
-          eventId={event.id}
-          profile={profile}
-          lastChoices={lastChoices}
-          googleEnabled={isGoogleSignInEnabled}
-          isMixed={event.isMixed}
         />
+      ) : (
+        (isOpenForRegistration(event, now) || waitlistOnly) && (
+          <RegistrationForm
+            waitlistOnly={waitlistOnly}
+            paymentInfo={await loadPaymentInfo(club, event.priceCents)}
+            club={club}
+            eventId={event.id}
+            profile={profile}
+            lastChoices={lastChoices}
+            googleEnabled={isGoogleSignInEnabled}
+            isMixed={event.isMixed}
+          />
+        )
       )}
     </>
   );

@@ -31,7 +31,12 @@ export const prismaRegistrationRepository: RegistrationRepository = {
       select: { id: true, status: true },
     }),
 
-  findByUser: (eventId, userId, tx) =>
+  // An active sign-up first; a cancelled one only when there is no other.
+  findByUser: async (eventId, userId, tx) =>
+    (await toPrismaTx(tx).registration.findFirst({
+      where: { eventId, userId, status: { not: "cancelled" } },
+      select: { id: true, status: true },
+    })) ??
     toPrismaTx(tx).registration.findFirst({
       where: { eventId, userId },
       select: { id: true, status: true },

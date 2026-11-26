@@ -67,8 +67,10 @@ export function fakeRegistrationRepository(initial: StoredRegistration[] = []) {
       rows.filter((row) => row.eventId === eventId && holdsSeat(row.status)).length,
     findByPhone: async (eventId, phone) =>
       rows.find((row) => row.eventId === eventId && row.phone === phone) ?? null,
-    findByUser: async (eventId, userId) =>
-      rows.find((row) => row.eventId === eventId && row.userId === userId) ?? null,
+    findByUser: async (eventId, userId) => {
+      const own = rows.filter((row) => row.eventId === eventId && row.userId === userId);
+      return own.find((row) => row.status !== "cancelled") ?? own[0] ?? null;
+    },
     create: async (eventId, player, status) => {
       const id = `reg-${rows.length + 1}`;
       rows.push({ id, eventId, status, ...player });

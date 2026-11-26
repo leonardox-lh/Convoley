@@ -108,7 +108,10 @@ export function makeRegisterGuest(
   };
 }
 
-/** The same player's earlier sign-up: by phone, else by Google account (the phone may differ). */
+/**
+ * The same player's earlier sign-up, by phone or by Google account. An active one wins, so a
+ * signed-in player can't sign up twice by typing another phone; else a cancelled one to reuse.
+ */
 async function findExisting(
   registrations: RegistrationRepository,
   eventId: string,
@@ -116,6 +119,7 @@ async function findExisting(
   tx: TransactionContext,
 ) {
   const byPhone = player.phone ? await registrations.findByPhone(eventId, player.phone, tx) : null;
-  if (byPhone || !player.userId) return byPhone;
-  return registrations.findByUser(eventId, player.userId, tx);
+  const byUser = player.userId ? await registrations.findByUser(eventId, player.userId, tx) : null;
+  const active = [byPhone, byUser].find((found) => found && found.status !== "cancelled");
+  return active ?? byPhone ?? byUser;
 }

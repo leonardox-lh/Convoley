@@ -110,6 +110,28 @@ describe("HU-06 criterio 3: el mismo celular no se repite en la convocatoria", (
     expect(rows[0]).toMatchObject({ status: "pending_payment", firstName: "Ana" });
   });
 
+  it("HU-48: la misma cuenta de Google no se inscribe dos veces aunque cambie el celular", async () => {
+    const { registerGuest, rows } = setup(seatInfo(), [
+      stored({ userId: "user-1", phone: "+51911111111" }),
+    ]);
+
+    await expect(
+      registerGuest({ ...input, userId: "user-1", phone: "922 222 222" }),
+    ).rejects.toThrow(DuplicateRegistrationError);
+    expect(rows).toHaveLength(1);
+  });
+
+  it("HU-48: si la cuenta canceló antes, puede volver a inscribirse", async () => {
+    const { registerGuest, rows } = setup(seatInfo(), [
+      stored({ userId: "user-1", phone: "+51911111111", status: "cancelled" }),
+    ]);
+
+    await registerGuest({ ...input, userId: "user-1", phone: "922 222 222" });
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0].status).toBe("pending_payment");
+  });
+
   it("HU-06: el mismo celular en otra convocatoria sí se permite", async () => {
     const { registerGuest, rows } = setup(seatInfo(), [stored({ eventId: "evt-2" })]);
 
