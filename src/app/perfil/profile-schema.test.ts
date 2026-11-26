@@ -19,6 +19,7 @@ describe("perfil: editar mis datos", () => {
       phone: "+51987654321",
       position: null,
       level: null,
+      gender: null,
     });
   });
 
@@ -45,7 +46,15 @@ describe("perfil: editar mis datos", () => {
     expect(profileSchema.parse({ ...base, position: "", level: "" })).toMatchObject({
       position: null,
       level: null,
+      gender: null,
     });
+  });
+
+  it("guarda si juega como chica o chico, y '—' lo borra", () => {
+    const base = { firstName: "Ana", lastName: "", phone: "" };
+    expect(profileSchema.parse({ ...base, gender: "female" }).gender).toBe("female");
+    expect(profileSchema.parse({ ...base, gender: "" }).gender).toBeNull();
+    expect(profileSchema.safeParse({ ...base, gender: "other" }).success).toBe(false);
   });
 
   it("rechaza una posición que no existe", () => {

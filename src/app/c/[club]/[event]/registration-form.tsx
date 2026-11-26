@@ -32,7 +32,7 @@ export function RegistrationForm({
   profile: PlayerProfile | null;
   googleEnabled: boolean;
   /** Position and level from the player's last sign-up, to prefill the form. */
-  lastChoices: { position: string | null; level: string | null } | null;
+  lastChoices: { position: string | null; level: string | null; gender: string | null } | null;
 }) {
   const [state, formAction, pending] = useActionState<RegisterState, FormData>(registerAction, {
     status: "idle",
@@ -180,7 +180,7 @@ export function RegistrationForm({
             defaultValue={lastChoices?.level}
           />
         </div>
-        {isMixed && <GenderSelect />}
+        {isMixed && <GenderSelect defaultValue={lastChoices?.gender} />}
         {state.status === "error" && <FormMessage tone="error">{state.message}</FormMessage>}
         <Button type="submit" size="lg" disabled={pending}>
           {pending ? "Inscribiendo…" : waitlistOnly ? "Anotarme en la espera" : "Inscribirme"}

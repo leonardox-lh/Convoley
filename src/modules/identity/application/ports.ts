@@ -59,6 +59,8 @@ export interface PlayerProfile {
   /** Optional volleyball details, edited in Mi perfil; they prefill each sign-up. */
   position: string | null;
   level: string | null;
+  /** "female" | "male": who they play as in mixed events. */
+  gender: string | null;
 }
 
 export interface PlayerProfileRepository {

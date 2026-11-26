@@ -93,6 +93,7 @@ async function PublicEventContent({ params }: { params: Params }) {
     ? {
         position: profile.position ?? lastSignUp?.position ?? null,
         level: profile.level ?? lastSignUp?.level ?? null,
+        gender: profile.gender ?? lastSignUp?.gender ?? null,
       }
     : lastSignUp;
   const seatsAreOpen = event.status === "published" || event.status === "full";

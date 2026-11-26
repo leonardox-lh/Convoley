@@ -20,6 +20,7 @@ describe("HU-48 criterio 3: la primera vez solo pide el celular", () => {
       phone: null,
       position: null,
       level: null,
+      gender: null,
     });
     await makeSavePlayerPhone({ profiles })({ userId: "u1", phone: "+51987654321" });
     expect(saved).toEqual(["+51987654321"]);
@@ -32,6 +33,7 @@ describe("HU-48 criterio 3: la primera vez solo pide el celular", () => {
       phone: "+51911111111",
       position: null,
       level: null,
+      gender: null,
     });
     await makeSavePlayerPhone({ profiles })({ userId: "u1", phone: "+51987654321" });
     expect(saved).toEqual([]);

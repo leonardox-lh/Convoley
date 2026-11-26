@@ -175,6 +175,6 @@ export async function findLastPlayerChoices(userId: string) {
   return db.registration.findFirst({
     where: { userId },
     orderBy: { createdAt: "desc" },
-    select: { position: true, level: true },
+    select: { position: true, level: true, gender: true },
   });
 }

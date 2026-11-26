@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { PhoneNumber } from "@/modules/registrations";
-import { LEVEL_LABELS, POSITION_LABELS } from "../player-labels";
+import { GENDER_LABELS, LEVEL_LABELS, POSITION_LABELS } from "../player-labels";
 
 const NAME_MAX_LENGTH = 60;
 
@@ -38,4 +38,5 @@ export const profileSchema = z.object({
   phone: phoneField,
   position: optionalChoice(POSITION_LABELS),
   level: optionalChoice(LEVEL_LABELS),
+  gender: optionalChoice(GENDER_LABELS),
 });

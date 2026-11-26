@@ -1,5 +1,6 @@
 import {
   Prisma,
+  type PlayerGender,
   type PlayerLevel,
   type PlayerPosition,
   type PrismaClient,
@@ -21,6 +22,7 @@ export function prismaPlayerProfileRepository(db: PrismaClient): PlayerProfileRe
           phone: true,
           position: true,
           level: true,
+          gender: true,
         },
       });
       if (!user) return null;
@@ -32,6 +34,7 @@ export function prismaPlayerProfileRepository(db: PrismaClient): PlayerProfileRe
         phone: user.phone,
         position: user.position,
         level: user.level,
+        gender: user.gender,
       };
     },
 
@@ -39,7 +42,7 @@ export function prismaPlayerProfileRepository(db: PrismaClient): PlayerProfileRe
       await updateUser(db, userId, { phone });
     },
 
-    async update(userId, { firstName, lastName, phone, position, level }) {
+    async update(userId, { firstName, lastName, phone, position, level, gender }) {
       // `name` is what organizers see in lists; keep it in sync with the edited parts.
       const name = [firstName, lastName].filter(Boolean).join(" ");
       // The app layer validates these against the same enums before calling.
@@ -50,6 +53,7 @@ export function prismaPlayerProfileRepository(db: PrismaClient): PlayerProfileRe
         phone,
         position: position as PlayerPosition | null,
         level: level as PlayerLevel | null,
+        gender: gender as PlayerGender | null,
       });
     },
   };
