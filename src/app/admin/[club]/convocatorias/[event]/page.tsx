@@ -103,16 +103,24 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
             src={clubProfile?.logoKey ? clubLogoPath(clubProfile.logoKey) : null}
             className="size-12 rounded-xl bg-primary text-xl text-primary-foreground ring-0"
           />
-          <h1 className="min-w-0 flex-1 text-xl leading-tight font-semibold tracking-tight">
-            <span className="text-muted-foreground">{event.club.name} / </span>
+          {/* "/ Convocatoria" never splits: a long club name pushes it whole to the second line. */}
+          <p className="line-clamp-2 min-w-0 flex-1 text-sm leading-snug font-medium">
+            {event.club.name}{" "}
+            <span className="whitespace-nowrap text-muted-foreground">/ Convocatoria</span>
+          </p>
+        </div>
+        <div className="flex items-start gap-3">
+          <h1 className="min-w-0 flex-1 text-2xl leading-tight font-semibold tracking-tight first-letter:uppercase">
             {event.title}
           </h1>
           <CopyButton text={`${origin}/c/${clubSlug}/${event.id}`} label="Copiar link" showLabel />
         </div>
         <div className="flex flex-col gap-0.5">
-          <p className="flex items-center gap-1.5 text-sm text-muted-foreground first-letter:uppercase">
+          <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
             <CalendarDays className="size-4 shrink-0" aria-hidden />
-            {formatEventTimeInLima(event)}
+            <span className="inline-block first-letter:uppercase">
+              {formatEventTimeInLima(event)}
+            </span>
           </p>
           <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
             <MapPin className="size-4 shrink-0" aria-hidden />

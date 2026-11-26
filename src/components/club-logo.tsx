@@ -14,7 +14,7 @@ export function ClubLogo({
   src: string | null;
   className?: string;
 }) {
-  const shape = cn("size-16 shrink-0 rounded-2xl", className);
+  const shape = "size-16 shrink-0 rounded-2xl";
   if (src) {
     return (
       <Image
@@ -23,7 +23,7 @@ export function ClubLogo({
         width={LOGO_PX}
         height={LOGO_PX}
         unoptimized
-        className={cn(shape, "bg-white object-cover shadow-md ring-2 ring-white/40")}
+        className={cn(shape, "bg-white object-cover shadow-md ring-2 ring-white/40", className)}
       />
     );
   }
@@ -33,6 +33,7 @@ export function ClubLogo({
       className={cn(
         shape,
         "flex items-center justify-center bg-white/20 text-2xl font-semibold text-white ring-2 ring-white/30",
+        className,
       )}
     >
       {name.charAt(0).toUpperCase()}
