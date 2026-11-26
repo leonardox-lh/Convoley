@@ -1,6 +1,7 @@
 import type { EventTeam } from "@/modules/registrations";
 import { ImageFooter, ImageHeader, type ImageBrand } from "../../imagen/image-header";
 import { LIST_IMAGE_FORMATS, type ListImageFormat } from "../../imagen/image-layout";
+import { heavy, posterBackground, SOFT_BLUE } from "../../imagen/poster-style";
 
 const HEADER_PX = 260;
 const FOOTER_PX = 80;
@@ -15,9 +16,8 @@ const ROW_TO_FONT = 0.62;
 /** The team name line is taller than a player line. */
 const TITLE_ROWS = 2;
 
-const CANVAS = "#f4f4f5";
-const INK = "#18181b";
-const MUTED = "#71717a";
+const CARD = "rgba(255,255,255,0.08)";
+const CARD_BORDER = "rgba(255,255,255,0.12)";
 
 /** One card per team, up to 3 per row, sized so every name fits (HU-32). */
 export function teamsImageLayout(format: ListImageFormat, teams: EventTeam[]) {
@@ -41,7 +41,7 @@ export function teamsImageLayout(format: ListImageFormat, teams: EventTeam[]) {
   return { width, height, perRow, rowPx, fontPx: Math.round(rowPx * ROW_TO_FONT) };
 }
 
-/** The teams image, in the same style as the list image (Satori: flex everywhere). */
+/** The teams image, in the flyer's poster style like the list image (Satori: flex everywhere). */
 export function TeamsImage(
   props: ImageBrand & { teams: EventTeam[]; layout: ReturnType<typeof teamsImageLayout> },
 ) {
@@ -56,11 +56,11 @@ export function TeamsImage(
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        background: CANVAS,
-        color: INK,
+        color: "white",
+        ...posterBackground(props.primary),
       }}
     >
-      <ImageHeader {...props} />
+      <ImageHeader {...props} badge={{ value: String(teams.length), label: "EQUIPOS" }} />
       <div
         style={{
           display: "flex",
@@ -83,16 +83,16 @@ export function TeamsImage(
                   minWidth: 0,
                   padding: CARD_PADDING_PX,
                   borderRadius: 28,
-                  background: "white",
-                  borderTop: `10px solid ${props.primary}`,
+                  background: CARD,
+                  border: `1px solid ${CARD_BORDER}`,
+                  borderTop: `10px solid ${props.secondary}`,
                 }}
               >
                 <span
                   style={{
                     display: "block",
                     fontSize: Math.round(layout.fontPx * 1.3),
-                    fontWeight: 800,
-                    color: props.primary,
+                    ...heavy(props.secondary, 1.2),
                     overflow: "hidden",
                     whiteSpace: "nowrap",
                     textOverflow: "ellipsis",
@@ -105,7 +105,7 @@ export function TeamsImage(
                     display: "flex",
                     marginBottom: Math.round(layout.rowPx * 0.4),
                     fontSize: Math.round(layout.fontPx * 0.75),
-                    color: MUTED,
+                    color: SOFT_BLUE,
                   }}
                 >
                   {team.players.length} jugadores

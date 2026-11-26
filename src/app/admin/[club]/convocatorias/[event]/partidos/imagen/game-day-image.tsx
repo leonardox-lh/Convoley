@@ -1,20 +1,19 @@
 import { pointDifference, type GameDay } from "@/modules/registrations";
 import { ImageFooter, ImageHeader, type ImageBrand } from "../../imagen/image-header";
+import { heavy, NIGHT, posterBackground, SOFT_BLUE } from "../../imagen/poster-style";
 
 type Props = ImageBrand & { gameDay: GameDay };
 
-const CANVAS = "#f4f4f5";
-const INK = "#18181b";
-const MUTED = "#71717a";
+const CARD = "rgba(255,255,255,0.08)";
+const CARD_BORDER = "rgba(255,255,255,0.12)";
 const ROW_PX = 120;
 const STAT_PX = 150;
 const LONG_NAME_CHARS = 14;
 
 const signed = (value: number) => (value > 0 ? `+${value}` : `${value}`);
 
-function Frame(
-  props: ImageBrand & { background: string; color: string; children: React.ReactNode },
-) {
+/** Night poster background lit by the club color, like the flyer. */
+function Frame(props: ImageBrand & { children: React.ReactNode }) {
   return (
     <div
       style={{
@@ -22,8 +21,8 @@ function Frame(
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        background: props.background,
-        color: props.color,
+        color: "white",
+        ...posterBackground(props.primary),
       }}
     >
       <ImageHeader {...props} />
@@ -43,7 +42,7 @@ export function StandingsImage(props: Props) {
     </span>
   );
   return (
-    <Frame {...props} background={CANVAS} color={INK}>
+    <Frame {...props}>
       <div
         style={{
           display: "flex",
@@ -55,11 +54,13 @@ export function StandingsImage(props: Props) {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", padding: "0 40px" }}>
-          <span style={{ display: "flex", flex: 1, fontSize: 30, letterSpacing: 6, color: MUTED }}>
+          <span
+            style={{ display: "flex", flex: 1, fontSize: 30, letterSpacing: 6, color: SOFT_BLUE }}
+          >
             TABLA DE POSICIONES
           </span>
-          {stat("GAN.", { fontSize: 26, color: MUTED })}
-          {stat("DIF.", { fontSize: 26, color: MUTED })}
+          {stat("GAN.", { fontSize: 26, color: SOFT_BLUE })}
+          {stat("DIF.", { fontSize: 26, color: SOFT_BLUE })}
         </div>
         {gameDay.standings.map((row, index) => {
           const leader = index === 0;
@@ -73,8 +74,9 @@ export function StandingsImage(props: Props) {
                 height: ROW_PX,
                 padding: "0 40px",
                 borderRadius: 28,
-                background: leader ? props.primary : "white",
-                color: leader ? "white" : INK,
+                background: leader ? props.primary : CARD,
+                border: `1px solid ${leader ? props.primary : CARD_BORDER}`,
+                boxShadow: leader ? `0 0 40px ${props.primary}` : "none",
               }}
             >
               <span
@@ -86,9 +88,8 @@ export function StandingsImage(props: Props) {
                   height: 64,
                   borderRadius: 999,
                   fontSize: 34,
-                  fontWeight: 700,
-                  background: leader ? props.secondary : CANVAS,
-                  color: leader ? INK : MUTED,
+                  background: leader ? props.secondary : "rgba(255,255,255,0.12)",
+                  color: leader ? NIGHT : SOFT_BLUE,
                 }}
               >
                 {index + 1}
@@ -98,7 +99,7 @@ export function StandingsImage(props: Props) {
                   display: "block",
                   flex: 1,
                   fontSize: 48,
-                  fontWeight: 700,
+                  ...heavy("white", 1.2),
                   overflow: "hidden",
                   whiteSpace: "nowrap",
                   textOverflow: "ellipsis",
@@ -106,7 +107,7 @@ export function StandingsImage(props: Props) {
               >
                 {nameOf.get(row.teamNumber)}
               </span>
-              {stat(String(row.won), { fontSize: 52, fontWeight: 800 })}
+              {stat(String(row.won), { fontSize: 52, ...heavy("white", 1.5) })}
               {stat(signed(pointDifference(row)), { fontSize: 40, opacity: 0.8 })}
             </div>
           );
@@ -123,7 +124,7 @@ export function ChampionImage(props: Props & { players: string[] }) {
   const nameOf = new Map(gameDay.teams.map((team) => [team.number, team.name]));
   const name = gameDay.champion?.name ?? "";
   return (
-    <Frame {...props} background={props.primary} color="white">
+    <Frame {...props}>
       <div
         style={{
           display: "flex",
@@ -137,15 +138,16 @@ export function ChampionImage(props: Props & { players: string[] }) {
         }}
       >
         <span style={{ fontSize: 170 }}>🏆</span>
-        <span style={{ fontSize: 38, letterSpacing: 14, color: props.secondary, fontWeight: 700 }}>
+        <span style={{ fontSize: 38, letterSpacing: 14, ...heavy(props.secondary, 1) }}>
           CAMPEÓN
         </span>
         <span
           style={{
             display: "flex",
             fontSize: name.length > LONG_NAME_CHARS ? 88 : 124,
-            fontWeight: 800,
             lineHeight: 1.05,
+            transform: "skewX(-8deg)",
+            ...heavy("white", 3, "0 10px 30px rgba(0,0,0,0.6)"),
           }}
         >
           {name}
@@ -163,7 +165,8 @@ export function ChampionImage(props: Props & { players: string[] }) {
               padding: "14px 36px",
               borderRadius: 999,
               fontSize: 32,
-              background: "rgba(255,255,255,0.16)",
+              background: props.secondary,
+              color: NIGHT,
             }}
           >
             Final · {nameOf.get(final.homeTeam)} {final.homeScore} – {final.awayScore}{" "}

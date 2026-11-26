@@ -1,13 +1,12 @@
 import type { Roster } from "@/modules/registrations";
-import type { ImageBrand } from "./image-header";
+import { ImageFooter, ImageHeader, type ImageBrand } from "./image-header";
 import type { listImageLayout } from "./image-layout";
-import { heavy, NIGHT, posterBackground, SOFT_BLUE } from "./poster-style";
+import { heavy, NIGHT, posterBackground } from "./poster-style";
 
 const PAID_GREEN = "#22c55e";
 const TILE = "rgba(255,255,255,0.08)";
 const TILE_BORDER = "rgba(255,255,255,0.12)";
 const ROW_GAP_PX = 8;
-const TITLE_GLOW = "0 8px 24px rgba(0,0,0,0.6)";
 
 interface Line {
   label: string;
@@ -58,7 +57,10 @@ export function ListImage(props: ImageBrand & { roster: Roster; layout: Layout }
         ...posterBackground(props.primary),
       }}
     >
-      <ListHeader {...props} count={roster.players.length} />
+      <ImageHeader
+        {...props}
+        badge={{ value: String(roster.players.length), label: "INSCRITOS" }}
+      />
       <div style={{ display: "flex", flex: 1, padding: "8px 56px", gap: 20 }}>
         {columns.map((column, index) => (
           <div key={index} style={{ display: "flex", flexDirection: "column", flex: 1 }}>
@@ -74,77 +76,7 @@ export function ListImage(props: ImageBrand & { roster: Roster; layout: Layout }
           </div>
         ))}
       </div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          padding: "0 56px 28px",
-          fontSize: 22,
-          letterSpacing: 4,
-          color: SOFT_BLUE,
-          opacity: 0.6,
-        }}
-      >
-        CONVOLEY
-      </div>
-    </div>
-  );
-}
-
-/** Fits the layout's 260px header band: club, title with the last word in the accent, date. */
-function ListHeader(props: ImageBrand & { count: number }) {
-  const words = props.title.toUpperCase().split(/\s+/).filter(Boolean);
-  const lastWord = words.pop() ?? "";
-  const titlePx = props.title.length <= 22 ? 64 : 50;
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 28, padding: "48px 56px 28px" }}>
-      <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: 10 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          {props.logo && (
-            // eslint-disable-next-line @next/next/no-img-element -- rendered by Satori, not the browser
-            <img src={props.logo} alt="" width={56} height={56} style={{ borderRadius: 999 }} />
-          )}
-          <span style={{ display: "flex", fontSize: 26, letterSpacing: 4, color: SOFT_BLUE }}>
-            {props.clubName.toUpperCase()}
-          </span>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            columnGap: titlePx * 0.22,
-            fontSize: titlePx,
-            lineHeight: 1,
-            transform: "skewX(-8deg)",
-          }}
-        >
-          {words.map((word, index) => (
-            <span key={index} style={{ display: "flex", ...heavy("white", 2, TITLE_GLOW) }}>
-              {word}
-            </span>
-          ))}
-          <span style={{ display: "flex", ...heavy(props.secondary, 2, TITLE_GLOW) }}>
-            {lastWord}
-          </span>
-        </div>
-        <span style={{ display: "flex", fontSize: 26, color: SOFT_BLUE }}>{props.when}</span>
-      </div>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          padding: "14px 24px",
-          borderRadius: 24,
-          background: props.secondary,
-          color: NIGHT,
-        }}
-      >
-        <span style={{ display: "flex", fontSize: 60, lineHeight: 1, ...heavy(NIGHT, 1.5) }}>
-          {props.count}
-        </span>
-        <span style={{ display: "flex", fontSize: 18, letterSpacing: 3 }}>INSCRITOS</span>
-      </div>
+      <ImageFooter />
     </div>
   );
 }
