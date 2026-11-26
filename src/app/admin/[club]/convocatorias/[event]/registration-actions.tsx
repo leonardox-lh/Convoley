@@ -82,7 +82,7 @@ export function RegistrationActions(props: {
         {props.canRevertToPending && (
           <form action={revert} className="flex-1">
             {hidden}
-            <Button type="submit" variant="outline" className="h-10 w-full" disabled={pending}>
+            <Button type="submit" variant="outline" className="h-9 w-full" disabled={pending}>
               Volver a pendiente
             </Button>
           </form>

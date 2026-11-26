@@ -1,13 +1,16 @@
 import { CalendarDays, MapPin, Pencil, Users } from "lucide-react";
 import Link from "next/link";
 import { AutoRefresh } from "@/components/auto-refresh";
+import { ClubLogo } from "@/components/club-logo";
+import { CopyButton } from "@/components/copy-button";
+import { appUrl } from "@/lib/app-url";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { z } from "zod";
 import { buttonVariants } from "@/components/ui/button";
 import { formatEventTimeInLima } from "@/lib/lima-time";
 import { cn } from "@/lib/utils";
-import { can } from "@/modules/clubs";
+import { can, clubLogoPath, getClubProfile } from "@/modules/clubs";
 import { getOrganizerEvent } from "@/modules/events";
 import { listVouchersInReview, signVoucherPath } from "@/modules/payments";
 import {
@@ -42,14 +45,6 @@ const statusFilterSchema = z
   .enum(["pending_payment", "in_review", "paid", "waitlisted", "cancelled"])
   .optional()
   .catch(undefined);
-
-const registeredAtFormatter = new Intl.DateTimeFormat("es-PE", {
-  timeZone: "America/Lima",
-  day: "numeric",
-  month: "short",
-  hour: "2-digit",
-  minute: "2-digit",
-});
 
 export default function EventRegistrationsPage({ params, searchParams }: Props) {
   return (
@@ -96,14 +91,25 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
   const present = seated.filter((r) => r.checkedInAt !== null).length;
 
   const canManage = can(organizer.role, "manage_club");
+  const [clubProfile, origin] = await Promise.all([getClubProfile(clubSlug), appUrl()]);
 
   return (
     <div className="flex flex-col gap-6">
       <AutoRefresh />
       <header className="flex flex-col gap-3">
+        <div className="flex items-center gap-3">
+          <ClubLogo
+            name={event.club.name}
+            src={clubProfile?.logoKey ? clubLogoPath(clubProfile.logoKey) : null}
+            className="size-12 rounded-xl bg-primary text-xl text-primary-foreground ring-0"
+          />
+          <h1 className="min-w-0 flex-1 text-xl leading-tight font-semibold tracking-tight">
+            <span className="text-muted-foreground">{event.club.name} / </span>
+            {event.title}
+          </h1>
+          <CopyButton text={`${origin}/c/${clubSlug}/${event.id}`} label="Copiar link" showLabel />
+        </div>
         <div className="flex flex-col gap-0.5">
-          <p className="text-sm text-muted-foreground">{event.club.name}</p>
-          <h1 className="text-2xl leading-tight font-semibold tracking-tight">{event.title}</h1>
           <p className="flex items-center gap-1.5 text-sm text-muted-foreground first-letter:uppercase">
             <CalendarDays className="size-4 shrink-0" aria-hidden />
             {formatEventTimeInLima(event)}
@@ -198,10 +204,10 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
             {registrations.map((registration, index) => (
               <li
                 key={registration.id}
-                className="flex flex-col gap-3 rounded-2xl border bg-card p-3 shadow-xs"
+                className="flex flex-col gap-2 rounded-2xl border bg-card px-3 py-2 shadow-xs"
               >
-                <div className="flex items-start gap-3">
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">
                     {registration.status === "waitlisted"
                       ? `E${index - waitlistStart + 1}`
                       : index + 1}
@@ -210,16 +216,8 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
                     <p className="truncate font-medium">
                       {registration.firstName} {registration.lastName}
                     </p>
-                    <p className="text-sm text-muted-foreground">
-                      {[
-                        registration.phone?.replace(/^\+51/, ""),
-                        registeredAtFormatter.format(registration.createdAt),
-                      ]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </p>
                     {(registration.position || registration.level) && (
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs text-muted-foreground">
                         {[
                           registration.position && POSITION_LABELS[registration.position],
                           registration.level && LEVEL_LABELS[registration.level],
@@ -256,7 +254,7 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
                   />
                 )}
                 {listEditable && registration.status !== "cancelled" && (
-                  <div className="flex flex-wrap gap-2 border-t pt-3">
+                  <div className="flex flex-wrap gap-2 border-t pt-2">
                     {registration.status !== "waitlisted" && (
                       <CheckInButton
                         clubSlug={clubSlug}
