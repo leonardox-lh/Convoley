@@ -48,7 +48,33 @@ async function ClubTabsFor({ params }: Pick<LayoutProps<"/[club]">, "params">) {
 async function ClubHeader({ params }: Pick<LayoutProps<"/[club]">, "params">) {
   const club = await getClubProfile((await params).club);
   if (!club) notFound();
-  const hasLinks = club.tiktokUrl || club.instagramUrl || club.whatsappUrl || club.contactPhone;
+  const links = [
+    club.whatsappUrl && {
+      href: club.whatsappUrl,
+      label: "Comunidad",
+      className: "bg-[#25d366] text-white hover:bg-[#1fbe5b]",
+      icon: <BrandIcon path={WHATSAPP_PATH} />,
+    },
+    club.contactPhone && {
+      href: `https://wa.me/${club.contactPhone.replace("+", "")}`,
+      label: "Organizador",
+      className: "bg-white text-primary hover:bg-white/90",
+      icon: <MessageCircle className="size-4" aria-hidden />,
+    },
+    club.instagramUrl && {
+      href: club.instagramUrl,
+      label: "Instagram",
+      className:
+        "bg-gradient-to-r from-[#f58529] via-[#dd2a7b] to-[#8134af] text-white hover:opacity-90",
+      icon: <BrandIcon path={INSTAGRAM_PATH} />,
+    },
+    club.tiktokUrl && {
+      href: club.tiktokUrl,
+      label: "TikTok",
+      className: "bg-black text-white hover:bg-black/80",
+      icon: <BrandIcon path={TIKTOK_PATH} />,
+    },
+  ].filter((link) => !!link);
 
   return (
     <section
@@ -88,44 +114,12 @@ async function ClubHeader({ params }: Pick<LayoutProps<"/[club]">, "params">) {
           </span>
         )}
       </div>
-      {hasLinks && (
-        <div className="relative flex flex-wrap gap-2">
-          {club.whatsappUrl && (
-            <LinkButton
-              href={club.whatsappUrl}
-              label="Comunidad"
-              className="bg-[#25d366] text-white hover:bg-[#1fbe5b]"
-            >
-              <BrandIcon path={WHATSAPP_PATH} />
-            </LinkButton>
-          )}
-          {club.contactPhone && (
-            <LinkButton
-              href={`https://wa.me/${club.contactPhone.replace("+", "")}`}
-              label="Organizador"
-              className="bg-white text-primary hover:bg-white/90"
-            >
-              <MessageCircle className="size-4" aria-hidden />
-            </LinkButton>
-          )}
-          {club.tiktokUrl && (
-            <LinkButton
-              href={club.tiktokUrl}
-              label="TikTok"
-              className="bg-black text-white hover:bg-black/80"
-            >
-              <BrandIcon path={TIKTOK_PATH} />
-            </LinkButton>
-          )}
-          {club.instagramUrl && (
-            <LinkButton
-              href={club.instagramUrl}
-              label="Instagram"
-              className="bg-gradient-to-r from-[#f58529] via-[#dd2a7b] to-[#8134af] text-white hover:opacity-90"
-            >
-              <BrandIcon path={INSTAGRAM_PATH} />
-            </LinkButton>
-          )}
+      {links.length > 0 && (
+        // One row whatever the count; with three or more only the icons fit on a phone.
+        <div className="relative flex gap-2">
+          {links.map((link) => (
+            <LinkButton key={link.label} {...link} iconOnly={links.length > 2} />
+          ))}
         </div>
       )}
     </section>
@@ -151,22 +145,26 @@ function LinkButton({
   href,
   label,
   className,
-  children,
+  icon,
+  iconOnly,
 }: {
   href: string;
   label: string;
   className: string;
-  children: React.ReactNode;
+  icon: React.ReactNode;
+  iconOnly: boolean;
 }) {
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className={`flex min-w-[calc(50%-0.25rem)] flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold shadow-sm transition-all hover:-translate-y-0.5 active:translate-y-0 ${className}`}
+      aria-label={iconOnly ? label : undefined}
+      title={label}
+      className={`flex h-11 min-w-0 flex-1 items-center justify-center gap-2 rounded-xl px-3 text-sm font-semibold shadow-sm transition-all hover:-translate-y-0.5 active:translate-y-0 [&_svg]:size-5 ${className}`}
     >
-      {children}
-      {label}
+      {icon}
+      {!iconOnly && <span className="truncate">{label}</span>}
     </a>
   );
 }
