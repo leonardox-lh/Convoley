@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { X } from "lucide-react";
+import { useActionState, useEffect, useState } from "react";
 import { Field, floatingFieldClass, FormMessage } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import { approveVoucherAction, rejectVoucherAction, type RegistrationActionState } from "./actions";
@@ -19,6 +20,14 @@ export function VoucherReview(props: {
   reasonMaxLength: number;
 }) {
   const [rejecting, setRejecting] = useState(false);
+  const [enlarged, setEnlarged] = useState(false);
+
+  useEffect(() => {
+    if (!enlarged) return;
+    const closeOnEscape = (event: KeyboardEvent) => event.key === "Escape" && setEnlarged(false);
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [enlarged]);
   const [approveState, approve, approving] = useActionState(approveVoucherAction, IDLE);
   const [rejectState, reject, rejectingNow] = useActionState(rejectVoucherAction, IDLE);
   const error = [approveState, rejectState].find((state) => state.status === "error");
@@ -36,10 +45,9 @@ export function VoucherReview(props: {
     <div className="flex w-full flex-col gap-2 rounded-lg bg-sky-50 p-3 dark:bg-sky-950/40">
       <div className="flex items-start gap-3">
         {props.imageUrl && (
-          <a
-            href={props.imageUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            type="button"
+            onClick={() => setEnlarged(true)}
             aria-label={`Ver captura ampliada de ${props.playerName}`}
           >
             {/* eslint-disable-next-line @next/next/no-img-element -- private signed URL, can't go through next/image */}
@@ -48,23 +56,44 @@ export function VoucherReview(props: {
               alt={`Captura de pago de ${props.playerName}`}
               className="h-24 w-16 rounded border border-zinc-200 object-cover dark:border-zinc-800"
             />
-          </a>
+          </button>
         )}
-        <div className="flex flex-col gap-1 text-sm">
+        <div className="flex flex-col items-start gap-1 text-sm">
           <p className="font-medium">Captura por revisar</p>
           {props.imageUrl && (
-            <a
-              href={props.imageUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
+              onClick={() => setEnlarged(true)}
               className="underline underline-offset-4"
             >
               Ver captura ampliada
-            </a>
+            </button>
           )}
           {props.securityCode && <p>Código de seguridad: {props.securityCode}</p>}
         </div>
       </div>
+
+      {enlarged && props.imageUrl && (
+        // Any click on the backdrop or the image closes it; Escape too.
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4"
+          onClick={() => setEnlarged(false)}
+        >
+          <button
+            type="button"
+            aria-label="Cerrar"
+            className="absolute top-3 right-3 flex size-10 items-center justify-center rounded-full bg-white/15 text-white"
+          >
+            <X className="size-6" aria-hidden />
+          </button>
+          {/* eslint-disable-next-line @next/next/no-img-element -- private signed URL, can't go through next/image */}
+          <img
+            src={props.imageUrl}
+            alt={`Captura de pago de ${props.playerName}`}
+            className="max-h-full max-w-full rounded-lg object-contain"
+          />
+        </div>
+      )}
 
       {rejecting ? (
         <form action={reject} className="flex flex-col gap-2">
