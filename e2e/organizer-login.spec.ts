@@ -22,7 +22,8 @@ test("HU-01: registro con correo nuevo termina en crear club", async ({ page }) 
 
 test("HU-01: login con correo y contraseña lleva al inicio de su club", async ({ page }) => {
   await signInAsOrganizer(page);
-  await expect(page.getByRole("link", { name: "Nueva convocatoria" })).toBeVisible();
+  // The panel shows it twice: in the quick tabs and as its main button.
+  await expect(page.getByRole("link", { name: "Nueva convocatoria" }).first()).toBeVisible();
 });
 
 test("HU-01: contraseña errada muestra el error y conserva el correo", async ({ page }) => {
@@ -47,7 +48,7 @@ test("HU-01: un usuario sin membresía en el club recibe 404", async ({ page }) 
   await expect(page).toHaveURL(/\/club\/nuevo/);
   await page.goto(NEW_EVENT_PATH);
   // The page streams inside Suspense, so the status is already 200 when notFound() fires.
-  await expect(page.getByText("This page could not be found.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "No encontramos esta página" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Nueva convocatoria" })).toHaveCount(0);
 });
 

@@ -27,11 +27,13 @@ test("HU-02: crear club con logo, ver su página pública y editarlo después", 
   const slug = clubName.toLowerCase().replace(/\s+/g, "-");
 
   await page.getByLabel("Nombre del club").fill(clubName);
-  await page.getByLabel(/^Logo/).setInputFiles({
+  // The visible control is "Subir logo"; the file goes to its hidden input, then the cropper.
+  await page.locator('input[name="logo"]').setInputFiles({
     name: "logo.png",
     mimeType: "image/png",
     buffer: TINY_PNG,
   });
+  await page.getByRole("button", { name: "Usar este recorte" }).click();
   await page.getByRole("button", { name: "Crear club" }).click();
 
   // Criterion 1: unique link.
@@ -54,13 +56,15 @@ test("HU-02: crear club con logo, ver su página pública y editarlo después", 
   await expect(page.getByText("Cambios guardados.")).toBeVisible();
 
   await page.goto(`/${slug}`);
-  await expect(page.getByText(description)).toBeVisible();
+  // The hero shows it, and its "ver más" sheet repeats it.
+  await expect(page.getByText(description).first()).toBeVisible();
 });
 
 test("HU-02: un logo de más de 2 MB muestra el error y no se envía", async ({ page }) => {
   await signUp(page);
   await page.getByLabel("Nombre del club").fill(`Club ${Date.now().toString(36)}`);
-  await page.getByLabel(/^Logo/).setInputFiles({
+  // Not a real image, so the cropper never opens and the file is sent as is.
+  await page.locator('input[name="logo"]').setInputFiles({
     name: "grande.png",
     mimeType: "image/png",
     buffer: Buffer.alloc(MAX_LOGO_BYTES + 1),
