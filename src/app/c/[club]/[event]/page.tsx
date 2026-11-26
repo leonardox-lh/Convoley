@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { formatInLima, formatEventTimeInLima } from "@/lib/lima-time";
 import { formatSoles } from "@/lib/money";
+import { ClubLogo } from "@/components/club-logo";
 import { clubLogoPath, getClubProfile } from "@/modules/clubs";
 import { type CancellationOutcome, type EventStatus } from "@/modules/events";
 import { getPaymentSettings } from "@/modules/clubs";
@@ -20,8 +21,6 @@ import { loadEventPreview, seatsText, shareDescription } from "./event-preview";
 import { loadPaymentInfo } from "../../../payment-info";
 import { RegistrationForm } from "./registration-form";
 import { SpotsBadge } from "../../../spots-badge";
-
-const HEADER_LOGO_PX = 64;
 
 const STATUS_NOTICES: Partial<Record<EventStatus, string>> = {
   full: "Convocatoria llena",
@@ -91,16 +90,12 @@ async function PublicEventContent({ params }: { params: Params }) {
         className="-mx-4 -mt-8 flex items-center gap-4 bg-zinc-900 px-4 py-6 text-white"
         style={{ backgroundColor: clubProfile?.primaryColor ?? undefined }}
       >
-        {clubProfile?.logoKey && (
-          <Image
-            src={clubLogoPath(clubProfile.logoKey)}
-            alt={`Logo de ${event.clubName}`}
-            width={HEADER_LOGO_PX}
-            height={HEADER_LOGO_PX}
-            unoptimized
-            className="size-16 shrink-0 rounded-full bg-white object-cover ring-2 ring-white/70"
+        <Link href={`/${club}`} aria-label={`Ver ${event.clubName}`}>
+          <ClubLogo
+            name={event.clubName}
+            src={clubProfile?.logoKey ? clubLogoPath(clubProfile.logoKey) : null}
           />
-        )}
+        </Link>
         <div className="flex min-w-0 flex-col gap-0.5">
           <p
             className="text-sm font-semibold uppercase tracking-wide opacity-90"

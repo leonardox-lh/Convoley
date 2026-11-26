@@ -7,7 +7,8 @@ import { formatTimeInLima, formatEventTimeInLima } from "@/lib/lima-time";
 import { formatSoles } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import { listEventSummaries } from "@/modules/events";
-import { findClubBySlug, serviceFeeFor } from "@/modules/clubs";
+import { clubLogoPath, findClubBySlug, getClubProfile, serviceFeeFor } from "@/modules/clubs";
+import { ClubLogo } from "@/components/club-logo";
 import { currentUserId, isGoogleSignInEnabled } from "@/modules/identity";
 import { Button } from "@/components/ui/button";
 import {
@@ -92,21 +93,29 @@ async function RegistrationContent({ params, searchParams }: Props) {
     awaitingPayment && ownerId && event.priceCents > 0
       ? await getBalance({ clubId: event.clubId, userId: ownerId })
       : 0;
+  const club = await getClubProfile(event.clubSlug);
   const canSignInForFunds =
     awaitingPayment && registration.userId !== null && !ownerId && isGoogleSignInEnabled;
 
   return (
     <>
-      <div>
-        <p className="text-sm text-zinc-500">{event.clubName}</p>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          <Link href={`/c/${event.clubSlug}/${event.id}`} className="hover:underline">
-            {event.title}
-          </Link>
-        </h1>
-        <p className="text-sm text-zinc-500 first-letter:uppercase">
-          {formatEventTimeInLima(event)}
-        </p>
+      <div className="flex items-start gap-3">
+        <ClubLogo
+          name={event.clubName}
+          src={club?.logoKey ? clubLogoPath(club.logoKey) : null}
+          className="size-12 bg-primary"
+        />
+        <div className="min-w-0">
+          <p className="text-sm text-zinc-500">{event.clubName}</p>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            <Link href={`/c/${event.clubSlug}/${event.id}`} className="hover:underline">
+              {event.title}
+            </Link>
+          </h1>
+          <p className="text-sm text-zinc-500 first-letter:uppercase">
+            {formatEventTimeInLima(event)}
+          </p>
+        </div>
       </div>
       <p className="text-sm">
         {registration.firstName} {registration.lastName} ·{" "}
