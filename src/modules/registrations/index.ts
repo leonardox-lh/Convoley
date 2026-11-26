@@ -177,6 +177,7 @@ export {
   type RegistrationStatus,
 } from "./domain/registration";
 export {
+  DuplicatePlayerNameError,
   DuplicateRegistrationError,
   EventFullError,
   EventNotOpenError,

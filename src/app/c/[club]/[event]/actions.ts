@@ -10,6 +10,7 @@ import {
   signIn,
 } from "@/modules/identity";
 import {
+  DuplicatePlayerNameError,
   DuplicateRegistrationError,
   EventFullError,
   EventNotOpenError,
@@ -51,6 +52,10 @@ const registerSchema = z.object({
 const ERROR_MESSAGES: [new (...args: never[]) => Error, string][] = [
   [InvalidPhoneNumberError, PHONE_FORMAT_MESSAGE],
   [DuplicateRegistrationError, "Ese celular ya está inscrito en esta convocatoria."],
+  [
+    DuplicatePlayerNameError,
+    "Ya hay alguien inscrito con ese nombre. Agrega tu apellido o un apodo para diferenciarte.",
+  ],
   [EventFullError, "Lo sentimos, ya no quedan cupos."],
   [EventNotOpenError, "Esta convocatoria ya no recibe inscripciones."],
 ];

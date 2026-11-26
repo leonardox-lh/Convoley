@@ -25,6 +25,12 @@ export function toPrismaTx(tx: TransactionContext): Prisma.TransactionClient {
 export const prismaRegistrationRepository: RegistrationRepository = {
   countConfirmed: (eventId, tx) => countConfirmedRegistrations(eventId, toPrismaTx(tx)),
 
+  listActiveNames: (eventId, tx) =>
+    toPrismaTx(tx).registration.findMany({
+      where: { eventId, status: { not: "cancelled" } },
+      select: { firstName: true, lastName: true },
+    }),
+
   findByPhone: (eventId, phone, tx) =>
     toPrismaTx(tx).registration.findUnique({
       where: { eventId_phone: { eventId, phone } },

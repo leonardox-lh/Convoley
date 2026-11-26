@@ -1,4 +1,9 @@
-import { DuplicateRegistrationError, EventNotOpenError } from "../domain/errors";
+import {
+  DuplicatePlayerNameError,
+  DuplicateRegistrationError,
+  EventNotOpenError,
+} from "../domain/errors";
+import { isNameTaken } from "../domain/player-name";
 import { PhoneNumber } from "../domain/phone-number";
 import {
   assertSpotAvailable,
@@ -63,6 +68,10 @@ export async function registerPlayer(
 
   const existing = await findExisting(deps.registrations, event.id, player, tx);
   if (existing && existing.status !== "cancelled") throw new DuplicateRegistrationError(event.id);
+  // Two players with the same name can't be told apart in the list or on the court.
+  if (isNameTaken(player, await deps.registrations.listActiveNames(event.id, tx))) {
+    throw new DuplicatePlayerNameError(event.id);
+  }
 
   const confirmed = await deps.registrations.countConfirmed(event.id, tx);
   let status: SignUpStatus = "pending_payment";

@@ -42,6 +42,11 @@ export interface PlayerDetails {
 
 export interface RegistrationRepository {
   countConfirmed(eventId: string, tx: TransactionContext): Promise<number>;
+  /** Names of the event's sign-ups that aren't cancelled (waitlist included). */
+  listActiveNames(
+    eventId: string,
+    tx: TransactionContext,
+  ): Promise<{ firstName: string; lastName: string }[]>;
   findByPhone(
     eventId: string,
     phone: string,

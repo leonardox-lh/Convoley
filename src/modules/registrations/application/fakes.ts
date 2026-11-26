@@ -65,6 +65,10 @@ export function fakeRegistrationRepository(initial: StoredRegistration[] = []) {
   const repository: RegistrationRepository = {
     countConfirmed: async (eventId) =>
       rows.filter((row) => row.eventId === eventId && holdsSeat(row.status)).length,
+    listActiveNames: async (eventId) =>
+      rows
+        .filter((row) => row.eventId === eventId && row.status !== "cancelled")
+        .map(({ firstName, lastName }) => ({ firstName, lastName })),
     findByPhone: async (eventId, phone) =>
       rows.find((row) => row.eventId === eventId && row.phone === phone) ?? null,
     findByUser: async (eventId, userId) => {

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  DuplicatePlayerNameError,
   DuplicateRegistrationError,
   EventNotOpenError,
   InvalidPhoneNumberError,
@@ -130,6 +131,27 @@ describe("HU-06 criterio 3: el mismo celular no se repite en la convocatoria", (
 
     expect(rows).toHaveLength(1);
     expect(rows[0].status).toBe("pending_payment");
+  });
+
+  it("no permite dos inscritos con el mismo nombre, aunque cambien mayúsculas o tildes", async () => {
+    const { registerGuest, rows } = setup(seatInfo(), [
+      stored({ firstName: "José", lastName: "Pérez", phone: "+51911111111" }),
+    ]);
+
+    await expect(
+      registerGuest({ ...input, firstName: "jose", lastName: "PEREZ", phone: "922 222 222" }),
+    ).rejects.toThrow(DuplicatePlayerNameError);
+    expect(rows).toHaveLength(1);
+  });
+
+  it("el nombre de alguien que canceló se puede volver a usar", async () => {
+    const { registerGuest, rows } = setup(seatInfo(), [
+      stored({ firstName: "Ana", lastName: "Perez", phone: "+51911111111", status: "cancelled" }),
+    ]);
+
+    await registerGuest({ ...input, phone: "922 222 222" });
+
+    expect(rows).toHaveLength(2);
   });
 
   it("HU-06: el mismo celular en otra convocatoria sí se permite", async () => {

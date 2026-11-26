@@ -155,3 +155,11 @@ export class MatchNotFoundError extends Error {
     this.name = "MatchNotFoundError";
   }
 }
+
+/** Someone active in the event already has this exact name (first + last). */
+export class DuplicatePlayerNameError extends Error {
+  constructor(readonly eventId: string) {
+    super(`This name is already registered for event ${eventId}`);
+    this.name = "DuplicatePlayerNameError";
+  }
+}
