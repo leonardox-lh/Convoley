@@ -2,10 +2,17 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getOrganizerEvent } from "@/modules/events";
-import { listEventTeams, MAX_TEAMS, type EventTeam } from "@/modules/registrations";
+import {
+  listEventTeams,
+  MAX_TEAMS,
+  MIN_TEAMS_TO_PLAY,
+  TEAM_NAME_MAX_LENGTH,
+  type EventTeam,
+} from "@/modules/registrations";
+import { buttonVariants } from "@/components/ui/button";
 import { GENDER_LABELS, LEVEL_LABELS, POSITION_LABELS } from "../../../../../player-labels";
 import { requireOrganizer } from "../../../require-organizer";
-import { BuildTeamsForm, MoveToTeamSelect } from "./team-forms";
+import { BuildTeamsForm, MoveToTeamSelect, RenameTeamForm } from "./team-forms";
 
 type Props = PageProps<"/admin/[club]/convocatorias/[event]/equipos">;
 
@@ -38,7 +45,7 @@ async function TeamsContent({ params }: Pick<Props, "params">) {
   const event = await getOrganizerEvent({ clubSlug, eventId });
   if (!event) notFound();
   const { teams, unassigned } = await listEventTeams(event.id);
-  const teamNumbers = teams.map((team) => team.number);
+  const teamOptions = teams.map(({ number, name }) => ({ number, name }));
   const basePath = `/admin/${clubSlug}/convocatorias/${event.id}`;
 
   const playerRow = (player: Player) => (
@@ -55,7 +62,7 @@ async function TeamsContent({ params }: Pick<Props, "params">) {
         registrationId={player.id}
         playerName={`${player.firstName} ${player.lastName}`}
         teamNumber={player.teamNumber}
-        teamNumbers={teamNumbers}
+        teams={teamOptions}
       />
     </li>
   );
@@ -78,6 +85,14 @@ async function TeamsContent({ params }: Pick<Props, "params">) {
         maxTeams={MAX_TEAMS}
         hasTeams={teams.length > 0}
       />
+      {teams.length >= MIN_TEAMS_TO_PLAY && (
+        <Link
+          href={`${basePath}/partidos`}
+          className={buttonVariants({ size: "lg", className: "h-11" })}
+        >
+          Ir a los partidos
+        </Link>
+      )}
       {teams.length > 0 && (
         <div className="grid grid-cols-2 gap-2">
           {[
@@ -97,12 +112,16 @@ async function TeamsContent({ params }: Pick<Props, "params">) {
       )}
       {teams.map((team) => (
         <section key={team.number} className="flex flex-col gap-1">
-          <h2 className="font-semibold">
-            Equipo {team.number}{" "}
-            <span className="text-sm font-normal text-zinc-500">
-              · {team.players.length} jugadores · nivel {team.score}
-            </span>
-          </h2>
+          <RenameTeamForm
+            clubSlug={clubSlug}
+            eventId={event.id}
+            teamNumber={team.number}
+            name={team.name}
+            maxLength={TEAM_NAME_MAX_LENGTH}
+          />
+          <p className="text-sm text-zinc-500">
+            {team.players.length} jugadores · nivel {team.score}
+          </p>
           <ul className="divide-y divide-zinc-200 dark:divide-zinc-800">
             {team.players.map(playerRow)}
           </ul>

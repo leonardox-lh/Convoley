@@ -97,9 +97,9 @@ enum OrderStatus {
 // ─── identity (Auth.js Prisma adapter tables) ──────────────────────────────
 
 model User {
-  id            String    @id @default(cuid())
+  id            String          @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String?         @unique
   emailVerified DateTime?
   image         String?
   // From the Google profile (HU-48): autocompletes the player's registrations.
@@ -108,12 +108,12 @@ model User {
   // Only organizers who sign up with email + password have one.
   passwordHash  String?
   // Links guest registrations to the account later (HU-48).
-  phone         String?   @unique
+  phone         String?         @unique
   // Optional, edited in Mi perfil: prefills the position and level of each sign-up.
   position      PlayerPosition?
   level         PlayerLevel?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 
   accounts                     Account[]
   sessions                     Session[]
@@ -308,6 +308,8 @@ model Event {
   recurringEvent RecurringEvent? @relation(fields: [recurringEventId], references: [id], onDelete: Restrict)
   registrations  Registration[]
   pickupOrders   Order[]
+  teamNames      TeamName[]
+  teamMatches    TeamMatch[]
 
   @@unique([recurringEventId, recurringSlot])
   @@index([clubId, startsAt])
@@ -384,6 +386,36 @@ model Registration {
   @@index([eventId, createdAt])
   @@index([phone])
   @@index([userId])
+}
+
+// ─── game day ──────────────────────────────────────────────────────────────
+
+// A custom team name; teams without a row show as "Equipo N".
+model TeamName {
+  eventId    String
+  teamNumber Int
+  name       String
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, teamNumber])
+}
+
+// One match of the game-day round robin, or its final. Scores stay null until played.
+model TeamMatch {
+  id        String  @id @default(cuid())
+  eventId   String
+  // Play order, 1-based; the final comes last.
+  position  Int
+  isFinal   Boolean @default(false)
+  homeTeam  Int
+  awayTeam  Int
+  homeScore Int?
+  awayScore Int?
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, position])
 }
 
 // ─── payments ──────────────────────────────────────────────────────────────

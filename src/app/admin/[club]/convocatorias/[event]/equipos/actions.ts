@@ -10,6 +10,8 @@ import {
   MIN_TEAMS,
   moveToTeam,
   NotEnoughWomenError,
+  renameTeam,
+  TEAM_NAME_MAX_LENGTH,
 } from "@/modules/registrations";
 import { NOT_ALLOWED_MESSAGE } from "../../event-form-schema";
 import { requireOrganizerToEdit } from "../../../require-organizer";
@@ -28,6 +30,11 @@ const moveSchema = targetSchema.extend({
     .string()
     .transform((value) => (value === "" ? null : Number(value)))
     .pipe(z.number().int().min(1).max(MAX_TEAMS).nullable()),
+});
+
+const renameSchema = targetSchema.extend({
+  teamNumber: z.coerce.number().int().min(1).max(MAX_TEAMS),
+  name: z.string().max(TEAM_NAME_MAX_LENGTH),
 });
 
 /** HU-31: admin and helper; only events of their club. */
@@ -71,4 +78,19 @@ export async function moveToTeamAction(formData: FormData): Promise<void> {
   if (!parsed.success || !(await authorize(parsed.data))) return;
   await moveToTeam(parsed.data);
   revalidatePath(teamsPath(parsed.data));
+}
+
+/** Game day: an empty name goes back to "Equipo N". */
+export async function renameTeamAction(
+  _previous: TeamsState,
+  formData: FormData,
+): Promise<TeamsState> {
+  const parsed = renameSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) {
+    return { status: "error", message: `Usa hasta ${TEAM_NAME_MAX_LENGTH} caracteres.` };
+  }
+  if (!(await authorize(parsed.data))) return { status: "error", message: NOT_ALLOWED_MESSAGE };
+  await renameTeam(parsed.data);
+  revalidatePath(teamsPath(parsed.data));
+  return { status: "idle" };
 }

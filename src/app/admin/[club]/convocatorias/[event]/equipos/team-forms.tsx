@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { Field, floatingFieldClass, FormMessage } from "@/components/form";
 import { Button } from "@/components/ui/button";
-import { buildTeamsAction, moveToTeamAction, type TeamsState } from "./actions";
+import { buildTeamsAction, moveToTeamAction, renameTeamAction, type TeamsState } from "./actions";
 
 const DEFAULT_TEAM_COUNT = 2;
 const DEFAULT_MIN_WOMEN = 2;
@@ -24,7 +24,8 @@ export function BuildTeamsForm(props: {
       <input type="hidden" name="eventId" value={props.eventId} />
       <div className="grid grid-cols-2 gap-3">
         <Field label="Equipos">
-          <input placeholder=" "
+          <input
+            placeholder=" "
             type="number"
             name="teamCount"
             min={2}
@@ -36,7 +37,8 @@ export function BuildTeamsForm(props: {
         </Field>
         {props.isMixed && (
           <Field label="Mínimo de chicas">
-            <input placeholder=" "
+            <input
+              placeholder=" "
               type="number"
               name="minWomenPerTeam"
               min={0}
@@ -63,7 +65,7 @@ export function MoveToTeamSelect(props: {
   registrationId: string;
   playerName: string;
   teamNumber: number | null;
-  teamNumbers: number[];
+  teams: { number: number; name: string }[];
 }) {
   return (
     <form action={moveToTeamAction}>
@@ -78,12 +80,45 @@ export function MoveToTeamSelect(props: {
         className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-sm dark:border-zinc-700 dark:bg-zinc-900"
       >
         <option value="">Sin equipo</option>
-        {props.teamNumbers.map((number) => (
-          <option key={number} value={number}>
-            Equipo {number}
+        {props.teams.map((team) => (
+          <option key={team.number} value={team.number}>
+            {team.name}
           </option>
         ))}
       </select>
+    </form>
+  );
+}
+
+/** Game day: the team's name, saved with its button; empty goes back to "Equipo N". */
+export function RenameTeamForm(props: {
+  clubSlug: string;
+  eventId: string;
+  teamNumber: number;
+  name: string;
+  maxLength: number;
+}) {
+  const [state, action, pending] = useActionState<TeamsState, FormData>(renameTeamAction, {
+    status: "idle",
+  });
+  return (
+    <form action={action} className="flex flex-col gap-1">
+      <input type="hidden" name="clubSlug" value={props.clubSlug} />
+      <input type="hidden" name="eventId" value={props.eventId} />
+      <input type="hidden" name="teamNumber" value={props.teamNumber} />
+      <div className="flex gap-2">
+        <input
+          name="name"
+          defaultValue={props.name}
+          maxLength={props.maxLength}
+          aria-label={`Nombre del equipo ${props.teamNumber}`}
+          className="min-w-0 flex-1 rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-base font-semibold dark:border-zinc-700 dark:bg-zinc-900"
+        />
+        <Button type="submit" variant="outline" className="h-9" disabled={pending}>
+          Guardar
+        </Button>
+      </div>
+      {state.status === "error" && <FormMessage tone="error">{state.message}</FormMessage>}
     </form>
   );
 }

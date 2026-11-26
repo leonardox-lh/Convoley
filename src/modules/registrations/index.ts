@@ -8,7 +8,19 @@ import {
 } from "./application/cancel-own-registration";
 import { makePayWithBalance, makePayWithCredit } from "./application/pay-with-credit";
 import { makeSetCheckIn } from "./application/check-in";
-import { makeBuildEventTeams, makeListEventTeams, makeMoveToTeam } from "./application/teams";
+import {
+  makeBuildEventTeams,
+  makeListEventTeams,
+  makeListTeamNumbers,
+  makeMoveToTeam,
+} from "./application/teams";
+import {
+  makeGetGameDay,
+  makeRecordMatchScore,
+  makeRenameTeam,
+  makeStartGameDay,
+} from "./application/game-day";
+import { prismaTeamMatches, prismaTeamNames } from "./infrastructure/prisma-game-day";
 import {
   makeSettleMercadoPagoNotification,
   makeSettleMercadoPagoPayment,
@@ -191,7 +203,12 @@ export {
 } from "./infrastructure/prisma-registration-reader";
 
 // HU-31: teams.
-const teamDeps = { registrations: prismaRegistrationListReader, teams: prismaTeamAssignments };
+const teamDeps = {
+  registrations: prismaRegistrationListReader,
+  teams: prismaTeamAssignments,
+  names: prismaTeamNames,
+  matches: prismaTeamMatches,
+};
 export const buildEventTeams = makeBuildEventTeams(teamDeps);
 export const moveToTeam = makeMoveToTeam(teamDeps);
 export const listEventTeams = makeListEventTeams(teamDeps);
@@ -199,6 +216,27 @@ export type { EventTeam } from "./application/teams";
 export { MAX_TEAMS, MIN_TEAMS } from "./domain/teams";
 export { InvalidTeamCountError, NotEnoughWomenError } from "./domain/errors";
 export { PLAYER_GENDERS, type PlayerGender } from "./domain/registration";
+
+// Game day: team names, round robin, final and champion.
+const gameDayDeps = {
+  names: prismaTeamNames,
+  matches: prismaTeamMatches,
+  teamNumbers: makeListTeamNumbers(teamDeps),
+};
+export const renameTeam = makeRenameTeam(gameDayDeps);
+export const startGameDay = makeStartGameDay(gameDayDeps);
+export const recordMatchScore = makeRecordMatchScore(gameDayDeps);
+export const getGameDay = makeGetGameDay(gameDayDeps);
+export type { GameDay, GameDayTeam } from "./application/game-day";
+export type { StoredMatch } from "./application/ports";
+export {
+  MAX_MATCH_SCORE,
+  MIN_TEAMS_TO_PLAY,
+  pointDifference,
+  TEAM_NAME_MAX_LENGTH,
+  type Standing,
+} from "./domain/game-day";
+export { InvalidMatchScoreError, InvalidTeamNameError, MatchNotFoundError } from "./domain/errors";
 
 // HU-38: check-in.
 export const setCheckIn = makeSetCheckIn({ checkIns: prismaCheckIns, now: () => new Date() });

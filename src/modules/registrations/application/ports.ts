@@ -1,3 +1,4 @@
+import type { Match, Pairing } from "../domain/game-day";
 import type {
   EventSeatInfo,
   PlayerGender,
@@ -294,4 +295,29 @@ export interface MercadoPagoPaymentRecords {
 export interface CheckIns {
   /** Sets or clears `checkedInAt` of a seat-holding registration; false if there is none. */
   set(eventId: string, registrationId: string, checkedInAt: Date | null): Promise<boolean>;
+}
+
+/** Game day: custom team names; a team without one shows its default name. */
+export interface TeamNames {
+  list(eventId: string): Promise<Map<number, string>>;
+  /** Null removes the custom name. */
+  set(eventId: string, teamNumber: number, name: string | null): Promise<void>;
+}
+
+export type StoredMatch = Match & { id: string };
+
+/** Game day: the round robin and its final. */
+export interface TeamMatches {
+  list(eventId: string): Promise<StoredMatch[]>;
+  /** Replaces every match of the event with these, in play order. */
+  replaceAll(eventId: string, pairings: Pairing[]): Promise<void>;
+  /** False when the match isn't in the event. */
+  setScore(input: {
+    eventId: string;
+    matchId: string;
+    homeScore: number;
+    awayScore: number;
+  }): Promise<boolean>;
+  /** Creates the final, or changes its teams while it hasn't been played. */
+  setFinal(eventId: string, pairing: Pairing): Promise<void>;
 }

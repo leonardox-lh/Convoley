@@ -128,3 +128,30 @@ export class RegistrationNotPaidError extends Error {
     this.name = "RegistrationNotPaidError";
   }
 }
+
+/** Game day: a team name longer than allowed. */
+export class InvalidTeamNameError extends Error {
+  constructor(readonly teamName: string) {
+    super(`Invalid team name: "${teamName}"`);
+    this.name = "InvalidTeamNameError";
+  }
+}
+
+/** Game day: scores must be whole numbers 0..99 and never a draw. */
+export class InvalidMatchScoreError extends Error {
+  constructor(
+    readonly homeScore: number,
+    readonly awayScore: number,
+  ) {
+    super(`Invalid match score ${homeScore}-${awayScore}`);
+    this.name = "InvalidMatchScoreError";
+  }
+}
+
+/** Game day: the match isn't in the event, or the final isn't due yet. */
+export class MatchNotFoundError extends Error {
+  constructor(readonly eventId: string) {
+    super(`No such match in event ${eventId}`);
+    this.name = "MatchNotFoundError";
+  }
+}

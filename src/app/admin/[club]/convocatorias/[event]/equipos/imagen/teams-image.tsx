@@ -59,7 +59,7 @@ export function TeamsImage(
                     color: props.primary,
                   }}
                 >
-                  Equipo {team.number}
+                  {team.name}
                 </div>
                 {team.players.map((player) => (
                   <span
