@@ -45,7 +45,7 @@ const paymentDeps = {
   now,
 };
 const settlePlanPurchasePayment = makeSettlePlanPurchasePayment(paymentDeps);
-export const buyPlan = makeBuyPlan({ plans, purchases });
+export const buyPlan = makeBuyPlan({ plans, purchases, now: () => new Date() });
 export const startPlanMercadoPagoPayment = makeStartPlanMercadoPagoPayment(
   { ...paymentDeps, serviceFees: serviceFeesAdapter },
   settlePlanPurchasePayment,
@@ -94,6 +94,7 @@ export {
   NoBalanceAvailableError,
   NoCreditAvailableError,
   NothingToReviewError,
+  PlanAlreadyOpenError,
   PlanNotFoundError,
   PlanPurchaseNotFoundError,
   PlanPurchaseStatusError,

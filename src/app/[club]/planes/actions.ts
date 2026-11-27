@@ -4,11 +4,15 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { findClubBySlug } from "@/modules/clubs";
 import { currentUserId, signIn } from "@/modules/identity";
-import { buyPlan, PlanNotFoundError } from "@/modules/plans";
+import { buyPlan, PlanAlreadyOpenError, PlanNotFoundError } from "@/modules/plans";
 import { InvalidPhoneNumberError, PhoneNumber } from "@/modules/registrations";
 import { nameField, PHONE_FORMAT_MESSAGE } from "../../player-schema";
 
-export type BuyPlanState = { status: "idle" } | { status: "error"; message: string };
+export type BuyPlanState =
+  | { status: "idle" }
+  | { status: "error"; message: string }
+  // Shown as a toast; `shownAt` makes a repeated attempt show it again.
+  | { status: "blocked"; message: string; shownAt: number };
 
 const buyPlanSchema = z.object({
   clubSlug: z.string().min(1),
@@ -47,6 +51,14 @@ export async function buyPlanAction(
   } catch (error) {
     if (error instanceof InvalidPhoneNumberError) {
       return { status: "error", message: PHONE_FORMAT_MESSAGE };
+    }
+    if (error instanceof PlanAlreadyOpenError) {
+      return {
+        status: "blocked",
+        message:
+          "Ya tienes un plan vigente o en revisión en este club. Solo puedes tener uno a la vez.",
+        shownAt: Date.now(),
+      };
     }
     if (error instanceof PlanNotFoundError) {
       return { status: "error", message: "Este plan ya no se ofrece. Recarga la página." };

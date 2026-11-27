@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import {
   NoCreditAvailableError,
+  PlanAlreadyOpenError,
   PlanNotFoundError,
   PlanPurchaseStatusError,
 } from "../domain/errors";
@@ -95,6 +96,8 @@ function fakePurchases(initial: Partial<Row>[] = []) {
         { status: "active", creditsRemaining: terms.creditsRemaining, expiresAt: terms.expiresAt },
       );
     },
+    listOpenForPlayer: async (player) =>
+      rows.filter((row) => row.clubId === player.clubId && row.userId === player.userId),
     listForPlayer: async (player) =>
       rows.filter((row) => row.clubId === player.clubId && row.userId === player.userId),
     useCredit: async (id, registrationId) => {
@@ -222,7 +225,7 @@ function setupPayments(
 describe("HU-27: comprar un plan", () => {
   test("solo planes activos del club; guarda celular y cuenta de Google", async () => {
     const { purchases, rows } = fakePurchases();
-    const buy = makeBuyPlan({ plans, purchases });
+    const buy = makeBuyPlan({ plans, purchases, now: () => NOW });
     await expect(buy({ clubId: "club-1", planId: "off", buyer })).rejects.toBeInstanceOf(
       PlanNotFoundError,
     );
@@ -235,6 +238,29 @@ describe("HU-27: comprar un plan", () => {
       userId: "user-1",
       status: "pending_payment",
     });
+  });
+
+  test("un plan a la vez: no compra otro si tiene uno en revisión o vigente con fechas", async () => {
+    const buyWith = (row: Partial<Row>) =>
+      makeBuyPlan({ plans, purchases: fakePurchases([row]).purchases, now: () => NOW })({
+        clubId: "club-1",
+        planId: "plan-1",
+        buyer,
+      });
+    const later = new Date("2026-12-20T00:00:00Z");
+    const earlier = new Date("2026-11-20T00:00:00Z");
+    await expect(buyWith({ status: "in_review" })).rejects.toBeInstanceOf(PlanAlreadyOpenError);
+    await expect(
+      buyWith({ status: "active", creditsRemaining: 2, expiresAt: later }),
+    ).rejects.toBeInstanceOf(PlanAlreadyOpenError);
+    // Used up or expired plans, and unpaid ones, don't stop a new purchase.
+    await expect(
+      buyWith({ status: "active", creditsRemaining: 0, expiresAt: later }),
+    ).resolves.toBeTruthy();
+    await expect(
+      buyWith({ status: "active", creditsRemaining: 2, expiresAt: earlier }),
+    ).resolves.toBeTruthy();
+    await expect(buyWith({ status: "pending_payment" })).resolves.toBeTruthy();
   });
 
   test("con Mercado Pago el plan se activa con sus 4 fechas y vence a los 30 días", async () => {

@@ -60,3 +60,11 @@ export class NoBalanceAvailableError extends Error {
     this.name = "NoBalanceAvailableError";
   }
 }
+
+/** The player already has a plan in review or still valid in this club. */
+export class PlanAlreadyOpenError extends Error {
+  constructor() {
+    super("The player already has an open plan in this club");
+    this.name = "PlanAlreadyOpenError";
+  }
+}

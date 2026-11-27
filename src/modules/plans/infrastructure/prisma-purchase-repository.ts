@@ -51,6 +51,19 @@ export function prismaPurchaseRepository(db: PrismaClient): PurchaseRepository {
       });
     },
 
+    async listOpenForPlayer({ clubId, userId }) {
+      const rows = await db.planPurchase.findMany({
+        where: { clubId, userId, status: { in: ["in_review", "active"] } },
+        select: {
+          id: true,
+          status: true,
+          creditsRemaining: true,
+          expiresAt: true,
+          plan: { select: { communityIds: true } },
+        },
+      });
+      return rows.map(({ plan, ...row }) => ({ ...row, communityIds: plan.communityIds }));
+    },
     async listForPlayer({ clubId, userId }, tx) {
       const client = tx ? toPrismaTx(tx) : db;
       if (tx) {

@@ -68,6 +68,8 @@ export interface PurchaseRepository {
     terms: { paidAt: Date; creditsRemaining: number | null; expiresAt: Date | null },
     tx: TransactionContext,
   ): Promise<void>;
+  /** The player's purchases in the club in review or active, whatever is left on them. */
+  listOpenForPlayer(player: PlayerKey): Promise<CreditSource[]>;
   /** The player's purchases in the club; with `tx`, their rows stay locked. */
   listForPlayer(player: PlayerKey, tx?: TransactionContext): Promise<CreditSource[]>;
   /** Spends one credit (none to count when unlimited) and records which registration used it. */

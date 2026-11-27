@@ -1,11 +1,17 @@
 import {
   MercadoPagoUnavailableError,
   NothingToReviewError,
+  PlanAlreadyOpenError,
   PlanNotFoundError,
   PlanPurchaseNotFoundError,
   PlanPurchaseStatusError,
 } from "../domain/errors";
-import { activation, purchaseSettlement, type PurchaseSettlement } from "../domain/purchase";
+import {
+  activation,
+  blocksNewPurchase,
+  purchaseSettlement,
+  type PurchaseSettlement,
+} from "../domain/purchase";
 import type {
   Buyer,
   ChargeReport,
@@ -23,12 +29,22 @@ const PERUVIAN_SOLES = "PEN";
 const SETTLEMENTS_THAT_REFUND: PurchaseSettlement[] = ["refund", "retry_refund"];
 
 /** HU-27: the player picks an active plan of the club; it waits for payment. */
-export function makeBuyPlan(deps: { plans: PlanRepository; purchases: PurchaseRepository }) {
+export function makeBuyPlan(deps: {
+  plans: PlanRepository;
+  purchases: PurchaseRepository;
+  now: () => Date;
+}) {
   return async function buyPlan(input: { clubId: string; planId: string; buyer: Buyer }) {
     const plan = await deps.plans.find(input.planId);
     if (!plan || plan.clubId !== input.clubId || !plan.isActive) {
       throw new PlanNotFoundError(input.planId);
     }
+    const open = await deps.purchases.listOpenForPlayer({
+      clubId: input.clubId,
+      userId: input.buyer.userId,
+    });
+    if (open.some((purchase) => blocksNewPurchase(purchase, deps.now())))
+      throw new PlanAlreadyOpenError();
     return deps.purchases.create({ clubId: plan.clubId, planId: plan.id, buyer: input.buyer });
   };
 }

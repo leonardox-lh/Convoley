@@ -1,8 +1,9 @@
 "use client";
 
-import { CircleCheck, X } from "lucide-react";
+import { CircleAlert, CircleCheck, X } from "lucide-react";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
+import { cn } from "@/lib/utils";
 
 const VISIBLE_MS = 4500;
 const STACK_ID = "toast-stack";
@@ -21,10 +22,21 @@ function toastStack(): HTMLElement {
 
 const noop = () => () => undefined;
 
-/** A success message that floats at the top for a few seconds, then leaves on its own. */
-export function Toast({ children }: { children: React.ReactNode }) {
+/** A message that floats at the top for a few seconds, then leaves on its own. */
+export function Toast({
+  children,
+  tone = "ok",
+}: {
+  children: React.ReactNode;
+  tone?: "ok" | "error";
+}) {
+  const error = tone === "error";
   const [open, setOpen] = useState(true);
-  const isClient = useSyncExternalStore(noop, () => true, () => false);
+  const isClient = useSyncExternalStore(
+    noop,
+    () => true,
+    () => false,
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => setOpen(false), VISIBLE_MS);
@@ -34,10 +46,17 @@ export function Toast({ children }: { children: React.ReactNode }) {
   if (!isClient || !open) return null;
   return createPortal(
     <div
-      role="status"
-      className="pointer-events-auto relative flex w-full max-w-sm items-start gap-3 overflow-hidden rounded-2xl border border-emerald-200 bg-card p-3.5 pr-10 text-sm shadow-xl animate-in fade-in slide-in-from-top-4 duration-300"
+      role={error ? "alert" : "status"}
+      className={cn(
+        "pointer-events-auto relative flex w-full max-w-sm items-start gap-3 overflow-hidden rounded-2xl border bg-card p-3.5 pr-10 text-sm shadow-xl animate-in fade-in slide-in-from-top-4 duration-300",
+        error ? "border-red-200" : "border-emerald-200",
+      )}
     >
-      <CircleCheck className="mt-0.5 size-5 shrink-0 text-emerald-600" aria-hidden />
+      {error ? (
+        <CircleAlert className="mt-0.5 size-5 shrink-0 text-red-600" aria-hidden />
+      ) : (
+        <CircleCheck className="mt-0.5 size-5 shrink-0 text-emerald-600" aria-hidden />
+      )}
       <div className="text-foreground">{children}</div>
       <button
         type="button"
@@ -49,7 +68,10 @@ export function Toast({ children }: { children: React.ReactNode }) {
       </button>
       <span
         aria-hidden
-        className="absolute bottom-0 left-0 h-1 w-full origin-left bg-emerald-500"
+        className={cn(
+          "absolute bottom-0 left-0 h-1 w-full origin-left",
+          error ? "bg-red-500" : "bg-emerald-500",
+        )}
         style={{ animation: `toast-timer ${VISIBLE_MS}ms linear forwards` }}
       />
     </div>,

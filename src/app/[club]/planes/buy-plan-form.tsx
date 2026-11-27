@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { FormMessage, submitKeepingValues, TextField } from "@/components/form";
+import { Toast } from "@/components/toast";
 import { Button } from "@/components/ui/button";
 import type { PlayerProfile } from "@/modules/identity";
 import { buyPlanAction, type BuyPlanState } from "./actions";
@@ -45,6 +46,11 @@ export function BuyPlanForm({
         defaultValue={profile?.phone?.replace(/^\+51/, "")}
       />
       {state.status === "error" && <FormMessage tone="error">{state.message}</FormMessage>}
+      {state.status === "blocked" && (
+        <Toast key={state.shownAt} tone="error">
+          {state.message}
+        </Toast>
+      )}
       <Button type="submit" size="lg" className="h-11" disabled={pending}>
         {pending ? "Un momento…" : "Comprar y pagar"}
       </Button>

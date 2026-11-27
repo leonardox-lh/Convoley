@@ -46,6 +46,22 @@ export function pickPurchaseForCredit<T extends CreditSource>(
   return usable.sort((a, b) => endsAt(a) - endsAt(b))[0] ?? null;
 }
 
+/**
+ * One plan at a time: a purchase in review, or an active one not expired and with dates left,
+ * stops the player from buying another in the same club.
+ */
+export function blocksNewPurchase(
+  purchase: Pick<CreditSource, "status" | "creditsRemaining" | "expiresAt">,
+  now: Date,
+): boolean {
+  if (purchase.status === "in_review") return true;
+  return (
+    purchase.status === "active" &&
+    (purchase.expiresAt === null || purchase.expiresAt > now) &&
+    (purchase.creditsRemaining === null || purchase.creditsRemaining > 0)
+  );
+}
+
 /** Credits the player can use for an event; null = unlimited, 0 = none. */
 export function availableCredits(
   purchases: CreditSource[],
