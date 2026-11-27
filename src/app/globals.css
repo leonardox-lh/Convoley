@@ -62,6 +62,7 @@
   --secondary-foreground: oklch(0.3 0.12 262);
   --brand-ball: oklch(0.78 0.16 70);
   --ball-seam: var(--primary);
+  --logo-ball-outline: #0a1a4a;
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
@@ -159,6 +160,7 @@ select.peer {
   body:has([data-club-hero]:not([style*="display: none"] [data-club-hero])) [data-app-bar] {
     @apply absolute inset-x-0 top-0 z-10 border-transparent bg-transparent text-white backdrop-blur-none;
     --ball-seam: white;
+    --logo-ball-outline: transparent;
   }
   body:has([data-club-hero]:not([style*="display: none"] [data-club-hero]))
     [data-site-header]
@@ -189,6 +191,7 @@ select.peer {
 [data-club-hero],
 [data-ball-on-dark] {
   --ball-seam: white;
+  --logo-ball-outline: transparent;
 }
 
 @keyframes toast-timer {

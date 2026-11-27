@@ -145,7 +145,7 @@ export function IntroSplash() {
       ref={stageRef}
       onClick={() => setDone(true)}
       aria-hidden
-      className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-[radial-gradient(70%_45%_at_50%_30%,oklch(0.62_0.17_255),oklch(0.47_0.2_262)_55%,oklch(0.27_0.13_262))] [--ball-seam:oklch(0.27_0.13_262)] motion-reduce:hidden [html[data-intro-seen]_&]:hidden"
+      className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-[radial-gradient(70%_45%_at_50%_30%,oklch(0.62_0.17_255),oklch(0.47_0.2_262)_55%,oklch(0.27_0.13_262))] [--ball-seam:oklch(0.27_0.13_262)] [--logo-ball-outline:transparent] motion-reduce:hidden [html[data-intro-seen]_&]:hidden"
     >
       <canvas
         ref={figRef}
