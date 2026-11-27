@@ -208,18 +208,13 @@ async function ClubGrid() {
 
   return (
     <ul className="grid grid-cols-2 gap-x-3 gap-y-8 pt-2 sm:grid-cols-3 lg:grid-cols-4">
-      {clubs.map((club, index) => (
+      {clubs.map((club) => (
         <li key={club.id}>
           <Link
             href={`/${club.slug}`}
             className="group flex flex-col items-center gap-2 rounded-2xl p-2 text-center"
           >
-            {/* Staggered so the logos don't bob in unison. */}
-            <span
-              data-club-float
-              className="relative"
-              style={{ animationDelay: `${-(index % 4) * 0.8}s` }}
-            >
+            <span className="relative">
               {club.logoKey ? (
                 <Image
                   src={clubLogoPath(club.logoKey)}
@@ -241,9 +236,7 @@ async function ClubGrid() {
             </span>
             <span
               aria-hidden
-              data-club-float-shadow
               className="-mt-1 h-2 w-16 rounded-full bg-black/20 blur-[3px]"
-              style={{ animationDelay: `${-(index % 4) * 0.8}s` }}
             />
             <span className="line-clamp-2 text-sm leading-snug font-semibold group-hover:text-primary">
               {club.name}
@@ -273,16 +266,16 @@ async function UpcomingEvents() {
         const isFull = event.remainingSpots === 0;
         return (
           <li key={event.id} className="min-w-0">
-            <Link href={`/c/${club.slug}/${event.id}`} className="card-interactive flex gap-4 p-4">
-              <span className="flex w-14 shrink-0 flex-col items-center justify-center rounded-xl bg-secondary py-2 text-secondary-foreground">
-                <span className="text-2xl leading-none font-semibold">
+            <Link href={`/c/${club.slug}/${event.id}`} className="card-interactive flex gap-3 p-3">
+              <span className="flex w-12 shrink-0 flex-col items-center justify-center rounded-xl bg-secondary py-1.5 text-secondary-foreground">
+                <span className="text-xl leading-none font-semibold">
                   {limaDay.format(event.startsAt)}
                 </span>
                 <span className="text-xs font-medium uppercase">
                   {limaMonth.format(event.startsAt).replace(".", "")}
                 </span>
               </span>
-              <span className="flex min-w-0 flex-1 flex-col gap-1">
+              <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                 <span className="flex items-start justify-between gap-2">
                   <span className="truncate font-medium">{event.title}</span>
                   <span
@@ -295,8 +288,9 @@ async function UpcomingEvents() {
                     {isFull ? "Llena" : `${event.remainingSpots} cupos`}
                   </span>
                 </span>
-                <span className="text-sm font-medium text-primary">{club.name}</span>
-                <span className="text-sm text-muted-foreground first-letter:uppercase">
+                <span className="truncate text-sm text-muted-foreground">
+                  <span className="font-medium text-primary">{club.name}</span>
+                  {" · "}
                   {limaWeekday.format(event.startsAt)} · {formatTimeRangeInLima(event)}
                 </span>
                 <span className="flex items-center justify-between gap-2 text-sm">
