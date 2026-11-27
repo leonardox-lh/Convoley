@@ -10,7 +10,6 @@ export interface FlyerDetails {
   price: string;
   /** "¡Quedan 6 cupos!", or the waitlist call when it's full. */
   spots: string;
-  callToAction: string;
   /** Club colors: electric accent and highlight. */
   primary: string;
   secondary: string;
@@ -301,24 +300,6 @@ export function FlyerImage(props: FlyerDetails) {
           >
             {props.spots}
           </div>
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 18 * unit,
-            padding: `${26 * unit}px`,
-            borderRadius: 9999,
-            backgroundImage: `linear-gradient(90deg, ${props.primary}, #3b82f6)`,
-            boxShadow: `0 0 ${50 * unit}px rgba(59,130,246,0.55)`,
-            fontSize: 44 * unit,
-            ...heavy("white"),
-          }}
-        >
-          <span style={{ display: "flex" }}>{props.callToAction}</span>
-          <span style={{ display: "flex" }}>→</span>
         </div>
       </div>
     </div>

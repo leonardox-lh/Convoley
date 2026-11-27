@@ -10,8 +10,9 @@ import { FlyerImage } from "./flyer-image";
 import { loadImageFonts } from "../imagen/image-fonts";
 
 const FLYER_FORMATS = {
-  // 4:5, the tallest the Instagram feed shows whole; also fine on WhatsApp.
-  post: { width: 1080, height: 1350 },
+  // 9:10: no call-to-action pill at the bottom (an image can't be tapped), so it's shorter than
+  // the 4:5 feed maximum; Instagram and WhatsApp show it whole.
+  post: { width: 1080, height: 1200 },
   // 9:16 for stories and TikTok (HU-37).
   historia: { width: 1080, height: 1920 },
 } as const;
@@ -50,7 +51,6 @@ export async function GET(
       venue={event.venueName}
       price={event.priceCents === 0 ? "Gratis" : formatSoles(event.priceCents)}
       spots={spots}
-      callToAction={isFull ? "Reserva tu lugar en espera" : "¡Inscríbete ahora!"}
       primary={brand.primary}
       secondary={brand.secondary}
       clubName={brand.clubName}
