@@ -1,19 +1,13 @@
 import { ImageResponse } from "next/og";
-import { z } from "zod";
 import { getOrganizerEvent } from "@/modules/events";
 import { listEventTeams } from "@/modules/registrations";
 import { requireOrganizer } from "../../../../require-organizer";
 import { loadImageBrand } from "../../imagen/image-assets";
-import { LIST_IMAGE_FORMATS, type ListImageFormat } from "../../imagen/image-layout";
 import { TeamsImage, teamsImageLayout } from "./teams-image";
-
-const formatSchema = z
-  .enum(Object.keys(LIST_IMAGE_FORMATS) as [ListImageFormat, ...ListImageFormat[]])
-  .catch("cuadrado");
 
 /** HU-32: PNG of the teams, in the same style as the list image, to send to the group. */
 export async function GET(
-  request: Request,
+  _request: Request,
   context: RouteContext<"/admin/[club]/convocatorias/[event]/equipos/imagen">,
 ) {
   const { club: clubSlug, event: eventId } = await context.params;
@@ -24,9 +18,8 @@ export async function GET(
   const brand = event && (await loadImageBrand(clubSlug, event));
   if (!event || !brand) return new Response(null, { status: 404 });
 
-  const format = formatSchema.parse(new URL(request.url).searchParams.get("formato"));
   const { teams } = await listEventTeams(event.id);
-  const layout = teamsImageLayout(format, teams);
+  const layout = teamsImageLayout(teams, brand);
   const image = new ImageResponse(<TeamsImage {...brand} teams={teams} layout={layout} />, {
     width: layout.width,
     height: layout.height,

@@ -96,7 +96,7 @@ async function TeamsContent({ params }: Pick<Props, "params">) {
         <ShareImageSection
           id="teams-image"
           title="Imagen de los equipos"
-          imagePath={`${basePath}/equipos/imagen?formato=cuadrado`}
+          imagePath={`${basePath}/equipos/imagen`}
           fileName={`equipos-${event.id}.png`}
         />
       )}
