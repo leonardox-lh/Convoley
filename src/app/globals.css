@@ -205,3 +205,24 @@ select.peer {
 body:has([data-has-back]:not([style*="display: none"] [data-has-back])) [data-app-bar] {
   display: none;
 }
+
+/* Home club logos bob gently, with their ground shadow shrinking as they rise. */
+@keyframes club-float {
+  50% {
+    transform: translateY(-6px);
+  }
+}
+@keyframes club-float-shadow {
+  50% {
+    transform: scaleX(0.75);
+    opacity: 0.5;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-club-float] {
+    animation: club-float 3.2s ease-in-out infinite;
+  }
+  [data-club-float-shadow] {
+    animation: club-float-shadow 3.2s ease-in-out infinite;
+  }
+}

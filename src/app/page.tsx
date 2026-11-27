@@ -28,7 +28,7 @@ import { listUpcomingEvents } from "@/modules/events";
 import { currentUserId } from "@/modules/identity";
 
 const UPCOMING_EVENTS_LIMIT = 8;
-const CLUB_LOGO_PX = 80;
+const CLUB_LOGO_PX = 96;
 const SECTIONS: [string, string, LucideIcon][] = [
   ["clubes", "Clubes", Trophy],
   ["convocatorias", "Convocatorias", CalendarDays],
@@ -207,40 +207,45 @@ async function ClubGrid() {
   if (clubs.length === 0) return <EmptyState>Todavía no hay clubes. ¡Crea el primero!</EmptyState>;
 
   return (
-    <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-      {clubs.map((club) => (
+    <ul className="grid grid-cols-2 gap-x-3 gap-y-8 pt-2 sm:grid-cols-3 lg:grid-cols-4">
+      {clubs.map((club, index) => (
         <li key={club.id}>
           <Link
             href={`/${club.slug}`}
-            className="card-interactive group flex h-full flex-col items-center overflow-hidden pb-4 text-center"
+            className="group flex flex-col items-center gap-2 rounded-2xl p-2 text-center"
           >
-            {/* Band in the club's own color, with the logo rising out of it. */}
+            {/* Staggered so the logos don't bob in unison. */}
+            <span
+              data-club-float
+              className="relative"
+              style={{ animationDelay: `${-(index % 4) * 0.8}s` }}
+            >
+              {club.logoKey ? (
+                <Image
+                  src={clubLogoPath(club.logoKey)}
+                  alt=""
+                  width={CLUB_LOGO_PX}
+                  height={CLUB_LOGO_PX}
+                  unoptimized
+                  className="size-24 rounded-full bg-card object-cover shadow-[0_10px_20px_-6px_rgb(0_0_0/0.35),inset_0_-4px_8px_rgb(0_0_0/0.15)] ring-4 ring-white transition-transform duration-300 group-hover:scale-110"
+                />
+              ) : (
+                <span
+                  aria-hidden
+                  className="flex size-24 items-center justify-center rounded-full text-4xl font-bold text-white shadow-[0_10px_20px_-6px_rgb(0_0_0/0.35),inset_0_-4px_8px_rgb(0_0_0/0.15)] ring-4 ring-white transition-transform duration-300 group-hover:scale-110"
+                  style={heroBackground(club.primaryColor)}
+                >
+                  {club.name.charAt(0).toUpperCase()}
+                </span>
+              )}
+            </span>
             <span
               aria-hidden
-              className="relative h-16 w-full overflow-hidden"
-              style={heroBackground(club.primaryColor)}
-            >
-              <VolleyballIcon className="absolute -top-4 -right-4 size-16 text-white opacity-20" />
-            </span>
-            {club.logoKey ? (
-              <Image
-                src={clubLogoPath(club.logoKey)}
-                alt=""
-                width={CLUB_LOGO_PX}
-                height={CLUB_LOGO_PX}
-                unoptimized
-                className="relative -mt-10 size-20 rounded-full bg-card object-cover shadow-md ring-4 ring-card transition-transform duration-300 group-hover:scale-105"
-              />
-            ) : (
-              <span
-                aria-hidden
-                className="relative -mt-10 flex size-20 items-center justify-center rounded-full text-3xl font-bold text-white shadow-md ring-4 ring-card transition-transform duration-300 group-hover:scale-105"
-                style={heroBackground(club.primaryColor)}
-              >
-                {club.name.charAt(0).toUpperCase()}
-              </span>
-            )}
-            <span className="mt-3 line-clamp-2 px-3 text-sm leading-snug font-semibold">
+              data-club-float-shadow
+              className="-mt-1 h-2 w-16 rounded-full bg-black/20 blur-[3px]"
+              style={{ animationDelay: `${-(index % 4) * 0.8}s` }}
+            />
+            <span className="line-clamp-2 text-sm leading-snug font-semibold group-hover:text-primary">
               {club.name}
             </span>
           </Link>
