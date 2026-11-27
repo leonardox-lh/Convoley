@@ -52,9 +52,8 @@ export function IntroSplash() {
     } catch {
       // Storage blocked (private mode): it just plays again next time.
     }
-    // The two "o" start empty: the spike fills them.
+    // The two "o" start empty (hidden by CSS from the first paint); the spike fills them.
     const [ball0, ball1] = wordRef.current!.querySelectorAll<SVGElement>("svg");
-    [ball0, ball1].forEach((ball) => (ball.style.opacity = "0"));
     let cancelled = false;
     let started = false;
     const finish = async () => {
@@ -146,7 +145,7 @@ export function IntroSplash() {
       />
       <div
         ref={wordRef}
-        className="relative z-[2] text-white [&_[data-logo-accent]]:text-[oklch(0.86_0.08_240)]"
+        className="relative z-[2] text-white [&_[data-logo-accent]]:text-[oklch(0.86_0.08_240)] [&_svg:has(circle)]:opacity-0"
       >
         <Logo className="text-[52px]" />
       </div>
