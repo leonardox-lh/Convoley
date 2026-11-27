@@ -12,6 +12,8 @@ export interface SubmitVoucherInput {
   image: { bytes: Uint8Array; contentType: string };
   /** Optional Yape security code, as typed. */
   yapeSecurityCode: string | null;
+  /** Optional message for the organizer: the Yape name, "I'm paying for two"… */
+  payerNote?: string | null;
 }
 
 /**
@@ -49,6 +51,7 @@ export function makeSubmitVoucher(deps: {
           amountCents: event.priceCents,
           proofFileKey,
           yapeSecurityCode: input.yapeSecurityCode,
+          payerNote: input.payerNote ?? null,
         },
         tx,
       );

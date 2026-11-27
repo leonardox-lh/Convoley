@@ -61,6 +61,7 @@ describe("HU-14 criterio 1: subir la captura del pago", () => {
         amountCents: 1500,
         proofFileKey: "voucher-1.jpg",
         yapeSecurityCode: null,
+        payerNote: null,
       },
     ]);
   });
@@ -71,6 +72,14 @@ describe("HU-14 criterio 2: código de seguridad opcional", () => {
     const { submitVoucher, recorded } = setup(seatInfo(), stored("pending_payment"));
     await submitVoucher({ ...input, yapeSecurityCode: "482" });
     expect(recorded[0]?.yapeSecurityCode).toBe("482");
+  });
+});
+
+describe("Mensaje opcional con la captura", () => {
+  it("guarda el mensaje del jugador para el organizador", async () => {
+    const { submitVoucher, recorded } = setup(seatInfo(), stored("pending_payment"));
+    await submitVoucher({ ...input, payerNote: "Yape a nombre de Rosa, pago por 2" });
+    expect(recorded[0]?.payerNote).toBe("Yape a nombre de Rosa, pago por 2");
   });
 });
 

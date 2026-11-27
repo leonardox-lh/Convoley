@@ -17,6 +17,8 @@ export function VoucherReview(props: {
   /** Signed, short-lived path to the private image. */
   imageUrl: string | null;
   securityCode: string | null;
+  /** What the player wrote with the screenshot: their Yape name, "pago por 2"… */
+  note: string | null;
   reasonMaxLength: number;
 }) {
   const [rejecting, setRejecting] = useState(false);
@@ -70,6 +72,11 @@ export function VoucherReview(props: {
             </button>
           )}
           {props.securityCode && <p>Código de seguridad: {props.securityCode}</p>}
+          {props.note && (
+            <p className="rounded-md bg-white px-2 py-1 italic break-words dark:bg-zinc-900">
+              “{props.note}”
+            </p>
+          )}
         </div>
       </div>
 

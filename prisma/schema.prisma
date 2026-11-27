@@ -439,6 +439,8 @@ model Payment {
   // Private voucher image: bucket key, read only through signed URLs.
   proofFileKey         String?
   yapeSecurityCode     String?
+  // Optional message sent with the voucher: the Yape name, "I'm paying for two"…
+  payerNote            String?
   rejectionReason      String?
   // Mercado Pago's status_detail (cc_rejected_insufficient_amount…), to explain a failure.
   providerStatusDetail String?

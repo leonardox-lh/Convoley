@@ -26,6 +26,7 @@ import {
   submitVoucher,
 } from "@/modules/registrations";
 import { rejectionMessage } from "./mercado-pago-messages";
+import { PAYER_NOTE_MAX_LENGTH } from "./payer-note";
 
 export type VoucherState = { status: "idle" } | { status: "error"; message: string };
 
@@ -38,6 +39,11 @@ const voucherSchema = z.object({
     .string()
     .trim()
     .regex(/^(\d{3,6})?$/, SECURITY_CODE_MESSAGE)
+    .optional(),
+  payerNote: z
+    .string()
+    .trim()
+    .max(PAYER_NOTE_MAX_LENGTH, `El mensaje puede tener hasta ${PAYER_NOTE_MAX_LENGTH} letras.`)
     .optional(),
 });
 
@@ -71,6 +77,7 @@ export async function submitVoucherAction(
       registrationId,
       image: { bytes: new Uint8Array(await file.arrayBuffer()), contentType: file.type },
       yapeSecurityCode: parsed.data.yapeSecurityCode || null,
+      payerNote: parsed.data.payerNote || null,
     });
   } catch (error) {
     const known = ERROR_MESSAGES.find(([type]) => error instanceof type);

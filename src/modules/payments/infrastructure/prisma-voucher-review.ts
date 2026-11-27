@@ -42,16 +42,25 @@ export async function rejectVoucher(
 export async function listVouchersInReview(
   ownerIds: string[],
   key: PaymentOwnerKey = "registrationId",
-): Promise<Map<string, { proofFileKey: string | null; yapeSecurityCode: string | null }>> {
+): Promise<
+  Map<
+    string,
+    { proofFileKey: string | null; yapeSecurityCode: string | null; payerNote: string | null }
+  >
+> {
   if (ownerIds.length === 0) return new Map();
   const rows = await db.payment.findMany({
     where: { [key]: { in: ownerIds }, method: "voucher", status: "in_review" },
-    select: { [key]: true, proofFileKey: true, yapeSecurityCode: true },
+    select: { [key]: true, proofFileKey: true, yapeSecurityCode: true, payerNote: true },
   });
   return new Map(
     rows.map((row) => [
       (row as unknown as Record<PaymentOwnerKey, string>)[key],
-      { proofFileKey: row.proofFileKey, yapeSecurityCode: row.yapeSecurityCode },
+      {
+        proofFileKey: row.proofFileKey,
+        yapeSecurityCode: row.yapeSecurityCode,
+        payerNote: row.payerNote,
+      },
     ]),
   );
 }

@@ -7,6 +7,7 @@ export type VoucherPaymentInput = {
   amountCents: number;
   proofFileKey: string;
   yapeSecurityCode: string | null;
+  payerNote?: string | null;
 } & PaymentOwner;
 
 /** A screenshot the player uploaded (HU-14): waits for the organizer's review. */

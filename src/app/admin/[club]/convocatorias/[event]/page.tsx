@@ -89,6 +89,7 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
       {
         imageUrl: voucher.proofFileKey ? signVoucherPath(voucher.proofFileKey) : null,
         securityCode: voucher.yapeSecurityCode,
+        note: voucher.payerNote,
       },
     ]),
   );

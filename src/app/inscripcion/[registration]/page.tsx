@@ -40,6 +40,7 @@ import {
 } from "./actions";
 import { CancelRegistrationForm, CopyLinkButton } from "./cancel-form";
 import { CheckInQr } from "./check-in-qr";
+import { PAYER_NOTE_MAX_LENGTH } from "./payer-note";
 import { PayWithCreditForm } from "./pay-with-credit-form";
 import { MercadoPagoCheckout } from "./mercado-pago-checkout";
 import { VoucherForm } from "./voucher-form";
@@ -252,6 +253,7 @@ async function RegistrationContent({ params, searchParams }: Props) {
                 action={submitVoucherAction}
                 hidden={{ registrationId: registration.id }}
                 maxBytes={MAX_VOUCHER_BYTES}
+                noteMaxLength={PAYER_NOTE_MAX_LENGTH}
               />
             </div>
           </details>
@@ -266,6 +268,7 @@ async function RegistrationContent({ params, searchParams }: Props) {
             action={submitVoucherAction}
             hidden={{ registrationId: registration.id }}
             maxBytes={MAX_VOUCHER_BYTES}
+            noteMaxLength={PAYER_NOTE_MAX_LENGTH}
           />
         </section>
       )}
