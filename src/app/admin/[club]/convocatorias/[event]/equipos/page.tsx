@@ -13,7 +13,7 @@ import {
   type EventTeam,
 } from "@/modules/registrations";
 import { buttonVariants } from "@/components/ui/button";
-import { GENDER_LABELS, LEVEL_LABELS, POSITION_LABELS } from "../../../../../player-labels";
+import { LEVEL_LABELS, POSITION_LABELS } from "../../../../../player-labels";
 import { requireOrganizer } from "../../../require-organizer";
 import { BuildTeamsForm, MoveToTeamSelect, RenameTeamForm } from "./team-forms";
 
@@ -36,7 +36,6 @@ function playerDetails(player: Player): string {
   return [
     player.position && POSITION_LABELS[player.position],
     player.level && LEVEL_LABELS[player.level],
-    player.gender && GENDER_LABELS[player.gender],
   ]
     .filter(Boolean)
     .join(" · ");
