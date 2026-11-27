@@ -1,6 +1,12 @@
 import type { EventTeam } from "@/modules/registrations";
 import { POSITION_LABELS } from "../../../../../../player-labels";
-import { ImageFooter, ImageHeader, type ImageBrand } from "../../imagen/image-header";
+import {
+  CLUB_LOGO_PX,
+  CLUB_NAME_PX,
+  ImageFooter,
+  ImageHeader,
+  type ImageBrand,
+} from "../../imagen/image-header";
 import { heavy, NAVY, posterBackground, SOFT_BLUE } from "../../imagen/poster-style";
 
 const WIDTH_PX = 1080;
@@ -30,8 +36,8 @@ const COUNT_GAP_PX = 14;
 // Mirrors ImageHeader's sizes, so the image is exactly as tall as its content.
 const HEADER_PADDING_PX = 48 + 28;
 const HEADER_GAPS_PX = 10 * 2;
-const HEADER_LOGO_PX = 76;
-const HEADER_CLUB_PX = 32;
+const HEADER_LOGO_PX = CLUB_LOGO_PX + 10;
+const HEADER_CLUB_PX = Math.ceil(CLUB_NAME_PX * 1.05);
 const HEADER_WHEN_PX = 32;
 const LONG_TITLE_CHARS = 14;
 const TITLE_LINE_CHARS = 23;

@@ -11,11 +11,14 @@ export interface ImageBrand {
 }
 
 const TITLE_GLOW = "0 8px 24px rgba(0,0,0,0.6)";
+const CLUB_GLOW = "0 4px 14px rgba(0,0,0,0.6)";
+export const CLUB_LOGO_PX = 120;
+export const CLUB_NAME_PX = 48;
 // Past this the title drops to the smaller size so it stays on one or two short lines.
 const LONG_TITLE_CHARS = 14;
 
 /**
- * The flyer's look in a ~260px band: club, title with the last word in the accent, date, and an
+ * The flyer's look in a ~310px band: club, title with the last word in the accent, date, and an
  * optional yellow badge on the right ("18 INSCRITOS").
  */
 export function ImageHeader(props: ImageBrand & { badge?: { value: string; label: string } }) {
@@ -25,18 +28,32 @@ export function ImageHeader(props: ImageBrand & { badge?: { value: string; label
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 28, padding: "48px 56px 28px" }}>
       <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: 10 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+        {/* Logo and name as big as the event flyer's badge: the club is who's inviting. */}
+        <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
           {props.logo && (
             // eslint-disable-next-line @next/next/no-img-element -- rendered by Satori, not the browser
             <img
               src={props.logo}
               alt=""
-              width={76}
-              height={76}
-              style={{ borderRadius: 999, border: "4px solid white" }}
+              width={CLUB_LOGO_PX}
+              height={CLUB_LOGO_PX}
+              style={{
+                borderRadius: 999,
+                border: "5px solid white",
+                boxShadow: "0 10px 28px rgba(0,0,0,0.45)",
+              }}
             />
           )}
-          <span style={{ display: "flex", fontSize: 26, letterSpacing: 4, color: SOFT_BLUE }}>
+          <span
+            style={{
+              display: "flex",
+              maxWidth: 620,
+              fontSize: CLUB_NAME_PX,
+              lineHeight: 1.05,
+              letterSpacing: 3,
+              ...heavy("white", CLUB_GLOW),
+            }}
+          >
             {props.clubName.toUpperCase()}
           </span>
         </div>

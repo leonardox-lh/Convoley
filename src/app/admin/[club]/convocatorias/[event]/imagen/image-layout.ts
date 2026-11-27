@@ -8,7 +8,7 @@ export const LIST_IMAGE_FORMATS = {
 export type ListImageFormat = keyof typeof LIST_IMAGE_FORMATS;
 
 // Logo row, a title of up to two lines and the date.
-const HEADER_PX = 330;
+const HEADER_PX = 380;
 const FOOTER_PX = 80;
 const MAX_ROW_PX = 64;
 const MIN_ROW_PX = 30;
