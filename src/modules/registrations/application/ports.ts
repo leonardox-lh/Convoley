@@ -90,6 +90,12 @@ export interface RegistrationRepository {
     phone: string | null;
     userId: string | null;
   } | null>;
+  /** The player's own position, level and gender; their place in the list doesn't move. */
+  updateDetails(
+    id: string,
+    details: Pick<PlayerDetails, "position" | "level" | "gender">,
+    tx: TransactionContext,
+  ): Promise<void>;
   /** Any status change also ends a reservation (HU-21). */
   setStatus(id: string, status: RegistrationStatus, tx: TransactionContext): Promise<void>;
   /** HU-21: holds the seat of a pending payment until `until`. */

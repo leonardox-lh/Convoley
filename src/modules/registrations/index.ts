@@ -32,6 +32,7 @@ import {
 } from "./application/player-registrations";
 import { makeApproveVoucher, makeRejectVoucher } from "./application/review-voucher";
 import { makeSubmitVoucher } from "./application/submit-voucher";
+import { makeEditOwnDetails, makeGetEditableOwnDetails } from "./application/edit-own-details";
 import { makeRegisterGuest } from "./application/register-guest";
 import { makeRemoveRegistration } from "./application/remove-registration";
 import { makeRevertToPending } from "./application/revert-to-pending";
@@ -111,6 +112,11 @@ const cancelDeps = { ...playerFundsDeps, policies: cancellationPoliciesAdapter }
 export const cancelOwnRegistration = makeCancelOwnRegistration(cancelDeps);
 export const getCancellationPreview = makeGetCancellationPreview(cancelDeps);
 export const payWithBalance = makePayWithBalance(playerFundsDeps);
+// The player fixes their position, level or gender until the teams are built.
+const ownDetailsDeps = { ...playerFundsDeps, list: prismaRegistrationListReader };
+export const getEditableOwnDetails = makeGetEditableOwnDetails(ownDetailsDeps);
+export const editOwnDetails = makeEditOwnDetails(ownDetailsDeps);
+export type { EditablePlayerDetails } from "./application/edit-own-details";
 
 export const submitVoucher = makeSubmitVoucher({
   events: eventsAdapter,
@@ -190,6 +196,7 @@ export {
   NoCreditError,
   NothingToReviewError,
   PaymentNotExpectedError,
+  PlayerDetailsLockedError,
   RegistrationNotFoundError,
   RegistrationNotPaidError,
 } from "./domain/errors";

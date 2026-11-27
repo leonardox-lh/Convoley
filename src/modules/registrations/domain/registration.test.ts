@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  canEditPlayerDetails,
   PLAYER_LEVELS,
   PLAYER_POSITIONS,
   SEAT_HOLDING_STATUSES,
@@ -48,5 +49,24 @@ describe("HU-10: posiciones y niveles", () => {
 
   it("HU-10 criterio 2: principiante, intermedio y avanzado", () => {
     expect([...PLAYER_LEVELS]).toEqual(["beginner", "intermediate", "advanced"]);
+  });
+});
+
+describe("canEditPlayerDetails", () => {
+  const now = new Date("2026-11-24T12:00:00Z");
+  const event = { status: "published", startsAt: new Date("2026-11-25T00:00:00Z") };
+  const editable = (overrides: Partial<Parameters<typeof canEditPlayerDetails>[0]> = {}) =>
+    canEditPlayerDetails({ status: "paid", event, teamsBuilt: false, now, ...overrides });
+
+  it("allows it before the teams are built and the event starts", () => {
+    expect(editable()).toBe(true);
+    expect(editable({ status: "waitlisted" })).toBe(true);
+  });
+
+  it("locks it once teams exist, the event started or the sign-up was cancelled", () => {
+    expect(editable({ teamsBuilt: true })).toBe(false);
+    expect(editable({ event: { ...event, startsAt: now } })).toBe(false);
+    expect(editable({ event: { ...event, status: "cancelled" } })).toBe(false);
+    expect(editable({ status: "cancelled" })).toBe(false);
   });
 });

@@ -113,3 +113,21 @@ export function parseRejectionReason(raw: string): string {
   }
   return reason;
 }
+
+/**
+ * A player fixes their position, level or gender until the teams are built (they're balanced
+ * with these), while the event is still ahead and they haven't cancelled.
+ */
+export function canEditPlayerDetails(input: {
+  status: RegistrationStatus;
+  event: Pick<EventSeatInfo, "status" | "startsAt">;
+  teamsBuilt: boolean;
+  now: Date;
+}): boolean {
+  return (
+    input.status !== "cancelled" &&
+    input.event.status !== "cancelled" &&
+    input.event.startsAt > input.now &&
+    !input.teamsBuilt
+  );
+}

@@ -163,3 +163,10 @@ export class DuplicatePlayerNameError extends Error {
     this.name = "DuplicatePlayerNameError";
   }
 }
+
+export class PlayerDetailsLockedError extends Error {
+  constructor(readonly registrationId: string) {
+    super(`Registration ${registrationId} can no longer change its player details`);
+    this.name = "PlayerDetailsLockedError";
+  }
+}

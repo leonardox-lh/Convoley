@@ -90,6 +90,10 @@ export const prismaRegistrationRepository: RegistrationRepository = {
       select: { id: true, eventId: true, status: true, phone: true, userId: true },
     }),
 
+  async updateDetails(id, details, tx) {
+    await toPrismaTx(tx).registration.update({ where: { id }, data: details });
+  },
+
   async setStatus(id, status, tx) {
     await toPrismaTx(tx).registration.update({
       where: { id },

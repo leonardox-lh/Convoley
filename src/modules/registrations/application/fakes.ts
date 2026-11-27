@@ -100,6 +100,12 @@ export function fakeRegistrationRepository(initial: StoredRegistration[] = []) {
     findInEvent: async (id, eventId) =>
       rows.find((row) => row.id === id && row.eventId === eventId) ?? null,
     findById: async (id) => rows.find((row) => row.id === id) ?? null,
+    updateDetails: async (id, details) => {
+      Object.assign(
+        rows.find((row) => row.id === id)!,
+        details,
+      );
+    },
     setStatus: async (id, status) => {
       Object.assign(
         rows.find((row) => row.id === id)!,
