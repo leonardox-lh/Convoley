@@ -1,10 +1,10 @@
 import type { EventTeam } from "@/modules/registrations";
 import { POSITION_LABELS } from "../../../../../../player-labels";
 import {
-  CLUB_LOGO_PX,
-  CLUB_NAME_PX,
   ImageFooter,
   ImageHeader,
+  IMAGE_FOOTER_PX,
+  imageHeaderHeight,
   type ImageBrand,
 } from "../../imagen/image-header";
 import { heavy, posterBackground, SOFT_BLUE } from "../../imagen/poster-style";
@@ -12,7 +12,6 @@ import { heavy, posterBackground, SOFT_BLUE } from "../../imagen/poster-style";
 const WIDTH_PX = 1080;
 const SIDE_PADDING_PX = 56;
 const CONTENT_PADDING_PX = 12;
-const FOOTER_PX = 56;
 const CARD_PADDING_PX = 24;
 const CARD_TOP_BORDER_PX = 10;
 const CARD_GAP_PX = 20;
@@ -34,15 +33,6 @@ const COUNT_SCALE = 0.7;
 const LINE_HEIGHT = 1.2;
 const PLAYER_GAP_PX = 10;
 const COUNT_GAP_PX = 14;
-
-// Mirrors ImageHeader's sizes, so the image is exactly as tall as its content.
-const HEADER_PADDING_PX = 48 + 28;
-const HEADER_GAPS_PX = 10 * 2;
-const HEADER_LOGO_PX = CLUB_LOGO_PX + 10;
-const HEADER_CLUB_PX = Math.ceil(CLUB_NAME_PX * 1.05);
-const HEADER_WHEN_PX = 32;
-const LONG_TITLE_CHARS = 14;
-const TITLE_LINE_CHARS = 23;
 
 const CARD = "rgba(255,255,255,0.08)";
 const CARD_BORDER = "rgba(255,255,255,0.12)";
@@ -85,25 +75,13 @@ export function teamsImageLayout(teams: EventTeam[], brand: Pick<ImageBrand, "ti
     0,
   );
   const height = Math.ceil(
-    headerPx(brand) +
+    imageHeaderHeight(brand) +
       CONTENT_PADDING_PX * 2 +
       rowsPx +
       Math.max(0, rows.length - 1) * CARD_GAP_PX +
-      FOOTER_PX,
+      IMAGE_FOOTER_PX,
   );
   return { width: WIDTH_PX, height, perRow, ...sizes };
-}
-
-function headerPx(brand: Pick<ImageBrand, "title" | "logo">) {
-  const titleLines = Math.max(1, Math.ceil(brand.title.length / TITLE_LINE_CHARS));
-  const titlePx = brand.title.length <= LONG_TITLE_CHARS ? 64 : 50 * titleLines;
-  return (
-    HEADER_PADDING_PX +
-    HEADER_GAPS_PX +
-    (brand.logo ? HEADER_LOGO_PX : HEADER_CLUB_PX) +
-    titlePx +
-    HEADER_WHEN_PX
-  );
 }
 
 function chunk<T>(items: T[], size: number): T[][] {
