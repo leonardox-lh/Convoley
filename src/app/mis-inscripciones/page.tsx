@@ -79,7 +79,9 @@ async function MyRegistrations() {
                   className="size-11 rounded-xl bg-primary/10 text-lg text-primary shadow-none ring-1 ring-border"
                 />
                 <div className="flex min-w-0 flex-1 flex-col">
-                  <span className="truncate text-xs text-muted-foreground">{event.clubName}</span>
+                  <span className="truncate text-sm font-medium text-muted-foreground">
+                    {event.clubName}
+                  </span>
                   <span className="font-semibold leading-tight">{event.title}</span>
                 </div>
                 <span
