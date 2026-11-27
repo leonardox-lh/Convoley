@@ -16,10 +16,10 @@ const FRAMES = 81;
 const FPS = 30;
 const CONTACT_FRAME = 54; // the hitting hand at its highest point: the ball leaves here
 const HAND = [207, 12]; // hitting hand in the contact frame, in cell pixels
-const RISE_FRAMES = 22; // he comes up from below the screen over these frames
+const START_FRAME = 10; // skip the standing start: he is already lifting his arms to jump
+const RISE_FRAMES = 12; // he comes up from below the screen over these frames
 const DROP_FROM_FRAME = 68; // he lands after the arm comes down: the shadow falls away from here
 const DROP_MS = 800;
-const START_DELAY_MS = 300;
 const SHADOW = "#0b1640";
 const SHADOW_OPACITY = 0.78; // half-transparent and blurred, it hides the small cutout errors
 const MAX_LOAD_MS = 2500; // on a slow connection, skip the intro rather than make people wait
@@ -52,8 +52,9 @@ export function IntroSplash() {
     } catch {
       // Storage blocked (private mode): it just plays again next time.
     }
-    // The two "o" start empty (hidden by CSS from the first paint); the spike fills them.
-    const [ball0, ball1] = wordRef.current!.querySelectorAll<SVGElement>("svg");
+    // The two "o" start empty (hidden by CSS from the first paint); the spike fills the right one
+    // first and the ball bounces back to the left one.
+    const [leftBall, rightBall] = wordRef.current!.querySelectorAll<SVGElement>("svg");
     let cancelled = false;
     let started = false;
     const finish = async () => {
@@ -96,22 +97,31 @@ export function IntroSplash() {
       };
 
       let spikeDone: Promise<void> = Promise.resolve();
-      const start = performance.now() + START_DELAY_MS;
+      const start = performance.now();
       await new Promise<void>((resolve) => {
         const frame = (now: number) => {
           if (isCancelled()) return resolve();
           const elapsed = Math.max(0, now - start);
-          const f = Math.min(FRAMES - 1, Math.floor((elapsed / 1000) * FPS));
+          const f = Math.min(FRAMES - 1, START_FRAME + Math.floor((elapsed / 1000) * FPS));
           drawFrame(ctx, sheet, f);
-          const rise = Math.min(1, f / RISE_FRAMES),
+          const rise = Math.min(1, (f - START_FRAME) / RISE_FRAMES),
             easeOut = 1 - (1 - rise) ** 3;
-          const after = Math.max(0, elapsed - (DROP_FROM_FRAME / FPS) * 1000) / DROP_MS;
+          const after =
+            Math.max(0, elapsed - ((DROP_FROM_FRAME - START_FRAME) / FPS) * 1000) / DROP_MS;
           const drop = Math.min(1, after) ** 2;
           fig.style.transform = `translateY(${(1 - easeOut) * 320 + drop * 380}px)`;
-          fig.style.opacity = String(Math.min(1, rise * 1.6) * (1 - drop) * SHADOW_OPACITY);
+          fig.style.opacity = String(Math.min(1, 0.35 + rise) * (1 - drop) * SHADOW_OPACITY);
           if (f >= CONTACT_FRAME && !spiked) {
             spiked = true;
-            spikeDone = spike({ from: handPoint(), ball0, ball1, fly, hit, word, relative });
+            spikeDone = spike({
+              from: handPoint(),
+              first: rightBall,
+              second: leftBall,
+              fly,
+              hit,
+              word,
+              relative,
+            });
           }
           if (after < 1) requestAnimationFrame(frame);
           else resolve();
@@ -180,27 +190,27 @@ function drawFrame(ctx: CanvasRenderingContext2D, sheet: ImageBitmap, index: num
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-/** The ball flies from his hand at the camera into the first "o", then bounces to the second. */
+/** The ball flies from his hand at the camera into one "o", then bounces to the other. */
 async function spike({
   from,
-  ball0,
-  ball1,
+  first,
+  second,
   fly,
   hit,
   word,
   relative,
 }: {
   from: Point;
-  ball0: SVGElement;
-  ball1: SVGElement;
+  first: SVGElement;
+  second: SVGElement;
   fly: HTMLElement;
   hit: HTMLElement;
   word: HTMLElement;
   relative: (rect: DOMRect) => Point;
 }) {
-  const r0 = ball0.getBoundingClientRect(),
+  const r0 = first.getBoundingClientRect(),
     o0 = relative(r0),
-    o1 = relative(ball1.getBoundingClientRect());
+    o1 = relative(second.getBoundingClientRect());
   const size = r0.width;
   const at = (p: Point, rest: string) =>
     `translate(${p.x - size / 2}px,${p.y - size / 2}px) ${rest}`;
@@ -231,7 +241,7 @@ async function spike({
     ],
     { duration: 380, easing: "cubic-bezier(.55,0,.85,.55)", fill: "forwards" },
   ).finished;
-  settle(ball0);
+  settle(first);
   hit.animate(
     [
       { opacity: 1, transform: `translate(${o0.x}px,${o0.y}px) scale(.4)` },
@@ -261,7 +271,7 @@ async function spike({
   // fill: "forwards" would keep the flying ball visible over the inline opacity.
   fly.getAnimations().forEach((animation) => animation.cancel());
   fly.style.opacity = "0";
-  settle(ball1);
+  settle(second);
   await word.animate(
     [{ transform: "scale(1)" }, { transform: "scale(1.05)" }, { transform: "scale(1)" }],
     {

@@ -21,7 +21,8 @@ export const metadata: Metadata = {
 };
 
 // Runs before paint so returning visitors never see the intro flash (key shared with IntroSplash).
-const INTRO_SEEN_SCRIPT = `try{localStorage.getItem("convoley:intro-seen")&&document.documentElement.setAttribute("data-intro-seen","")}catch(e){document.documentElement.setAttribute("data-intro-seen","")}`;
+// First-timers start downloading the intro's silhouette right away, so the player appears without a wait.
+const INTRO_SEEN_SCRIPT = `try{if(localStorage.getItem("convoley:intro-seen"))document.documentElement.setAttribute("data-intro-seen","");else if(!matchMedia("(prefers-reduced-motion: reduce)").matches){var l=document.createElement("link");l.rel="preload";l.as="fetch";l.crossOrigin="anonymous";l.href="/intro/spike.webp";document.head.appendChild(l)}}catch(e){document.documentElement.setAttribute("data-intro-seen","")}`;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
