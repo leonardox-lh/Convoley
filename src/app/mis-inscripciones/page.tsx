@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
-import { CalendarCheck } from "lucide-react";
+import { CalendarCheck, Clock } from "lucide-react";
 import { PageHeading } from "@/components/page-heading";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
-import { formatInLima } from "@/lib/lima-time";
+import { formatTimeRangeInLima, formatWeekdayDateInLima } from "@/lib/lima-time";
 import { cn } from "@/lib/utils";
+import { ClubLogo } from "@/components/club-logo";
+import { clubLogoPath } from "@/modules/clubs";
 import { listEventSummaries } from "@/modules/events";
 import { currentUserId, isGoogleSignInEnabled } from "@/modules/identity";
 import { listPlayerRegistrations } from "@/modules/registrations";
@@ -63,34 +65,37 @@ async function MyRegistrations() {
         const event = events.get(registration.eventId);
         if (!event) return null;
         return (
-          <li
-            key={registration.id}
-            className="flex flex-col gap-1 rounded-lg border border-zinc-200 p-3 dark:border-zinc-800"
-          >
+          <li key={registration.id}>
+            {/* The whole card opens the event: paying and the details live there. */}
             <Link
               href={`/c/${event.clubSlug}/${event.id}`}
-              className="font-medium underline-offset-4 hover:underline"
+              className="flex flex-col gap-2 rounded-2xl border bg-card p-3 transition-colors hover:border-primary/40"
             >
-              {event.title}
-            </Link>
-            <p className="text-sm text-zinc-500 first-letter:uppercase">
-              {event.clubName} · {formatInLima(event.startsAt)}
-            </p>
-            <span
-              className={cn(
-                "w-fit rounded-full px-2 py-0.5 text-xs font-medium",
-                REGISTRATION_STATUS_BADGE_CLASSES[registration.status],
-              )}
-            >
-              {REGISTRATION_STATUS_LABELS[registration.status]}
-              {registration.waitlistPosition !== null &&
-                ` · puesto ${registration.waitlistPosition}`}
-            </span>
-            <Link
-              href={`/inscripcion/${registration.id}`}
-              className="text-sm underline underline-offset-4"
-            >
-              {registration.status === "pending_payment" ? "Pagar y subir captura" : "Ver detalle"}
+              <div className="flex items-start gap-3">
+                <ClubLogo
+                  name={event.clubName}
+                  src={event.clubLogoKey ? clubLogoPath(event.clubLogoKey) : null}
+                  // Light card: the initial badge needs dark text instead of the hero's white.
+                  className="size-11 rounded-xl bg-primary/10 text-lg text-primary shadow-none ring-1 ring-border"
+                />
+                <div className="flex min-w-0 flex-1 flex-col">
+                  <span className="truncate text-xs text-muted-foreground">{event.clubName}</span>
+                  <span className="font-semibold leading-tight">{event.title}</span>
+                </div>
+                <span
+                  className={cn(
+                    "shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold",
+                    REGISTRATION_STATUS_BADGE_CLASSES[registration.status],
+                  )}
+                >
+                  {REGISTRATION_STATUS_LABELS[registration.status]}
+                  {registration.waitlistPosition !== null && ` · ${registration.waitlistPosition}`}
+                </span>
+              </div>
+              <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <Clock className="size-4 shrink-0" aria-hidden />
+                {formatWeekdayDateInLima(event.startsAt)} · {formatTimeRangeInLima(event)}
+              </p>
             </Link>
           </li>
         );

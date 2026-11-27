@@ -27,6 +27,7 @@ export async function listEventSummaries(eventIds: string[]) {
     ...event,
     clubSlug: clubs.get(event.clubId)?.slug ?? "",
     clubName: clubs.get(event.clubId)?.name ?? "",
+    clubLogoKey: clubs.get(event.clubId)?.logoKey ?? null,
   }));
 }
 
