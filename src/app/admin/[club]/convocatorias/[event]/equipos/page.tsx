@@ -13,6 +13,7 @@ import {
   type EventTeam,
 } from "@/modules/registrations";
 import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { LEVEL_LABELS, POSITION_LABELS } from "../../../../../player-labels";
 import { requireOrganizer } from "../../../require-organizer";
 import { ShareImageSection } from "../share-image-section";
@@ -87,9 +88,12 @@ async function TeamsContent({ params }: Pick<Props, "params">) {
       {teams.length >= MIN_TEAMS_TO_PLAY && (
         <Link
           href={`${basePath}/partidos`}
-          className={buttonVariants({ size: "lg", className: "h-11" })}
+          className={cn(
+            buttonVariants({ variant: "outline", size: "lg" }),
+            "h-11 border-primary text-primary hover:bg-primary/10 hover:text-primary",
+          )}
         >
-          Ir a los partidos
+          Gestionar el partido
         </Link>
       )}
       {teams.length > 0 && (

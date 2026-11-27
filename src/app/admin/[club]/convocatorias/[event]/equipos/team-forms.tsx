@@ -4,6 +4,7 @@ import { SelectPicker } from "@/components/date-time-pickers";
 import { useActionState, useRef } from "react";
 import { Field, floatingFieldClass, FormMessage } from "@/components/form";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { buildTeamsAction, moveToTeamAction, renameTeamAction, type TeamsState } from "./actions";
 
 const DEFAULT_TEAM_COUNT = 3;
@@ -34,7 +35,17 @@ export function BuildTeamsForm(props: {
             className={floatingFieldClass}
           />
         </Field>
-        <Button type="submit" size="lg" className="h-11 flex-1" disabled={pending}>
+        <Button
+          type="submit"
+          size="lg"
+          // Once teams exist, rebuilding is the secondary action.
+          variant={props.hasTeams ? "outline" : "default"}
+          className={cn(
+            "h-11 flex-1",
+            props.hasTeams && "border-primary text-primary hover:bg-primary/10 hover:text-primary",
+          )}
+          disabled={pending}
+        >
           {props.hasTeams ? "Volver a armar" : "Armar automáticamente"}
         </Button>
       </div>
