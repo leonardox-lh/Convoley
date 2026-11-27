@@ -81,7 +81,6 @@ async function TeamsContent({ params }: Pick<Props, "params">) {
       <BuildTeamsForm
         clubSlug={clubSlug}
         eventId={event.id}
-        isMixed={event.isMixed}
         maxTeams={MAX_TEAMS}
         hasTeams={teams.length > 0}
       />

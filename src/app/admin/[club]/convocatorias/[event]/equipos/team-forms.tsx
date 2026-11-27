@@ -6,13 +6,11 @@ import { Field, floatingFieldClass, FormMessage } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import { buildTeamsAction, moveToTeamAction, renameTeamAction, type TeamsState } from "./actions";
 
-const DEFAULT_TEAM_COUNT = 2;
-const DEFAULT_MIN_WOMEN = 2;
+const DEFAULT_TEAM_COUNT = 3;
 
 export function BuildTeamsForm(props: {
   clubSlug: string;
   eventId: string;
-  isMixed: boolean;
   maxTeams: number;
   hasTeams: boolean;
 }) {
@@ -23,8 +21,8 @@ export function BuildTeamsForm(props: {
     <form action={action} className="flex flex-col gap-3">
       <input type="hidden" name="clubSlug" value={props.clubSlug} />
       <input type="hidden" name="eventId" value={props.eventId} />
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Equipos">
+      <div className="flex items-end gap-3">
+        <Field label="Equipos" className="w-28 shrink-0">
           <input
             placeholder=" "
             type="number"
@@ -36,25 +34,14 @@ export function BuildTeamsForm(props: {
             className={floatingFieldClass}
           />
         </Field>
-        {props.isMixed && (
-          <Field label="Mínimo de chicas">
-            <input
-              placeholder=" "
-              type="number"
-              name="minWomenPerTeam"
-              min={0}
-              max={6}
-              defaultValue={DEFAULT_MIN_WOMEN}
-              inputMode="numeric"
-              className={floatingFieldClass}
-            />
-          </Field>
-        )}
+        <Button type="submit" size="lg" className="h-11 flex-1" disabled={pending}>
+          {props.hasTeams ? "Volver a armar" : "Armar automáticamente"}
+        </Button>
       </div>
+      {props.hasTeams && (
+        <p className="text-xs text-muted-foreground">Se borran los cambios que hiciste a mano.</p>
+      )}
       {state.status === "error" && <FormMessage tone="error">{state.message}</FormMessage>}
-      <Button type="submit" size="lg" className="h-11" disabled={pending}>
-        {props.hasTeams ? "Volver a armar (borra los cambios a mano)" : "Armar equipos"}
-      </Button>
     </form>
   );
 }

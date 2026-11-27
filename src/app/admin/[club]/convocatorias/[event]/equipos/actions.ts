@@ -9,7 +9,6 @@ import {
   MAX_TEAMS,
   MIN_TEAMS,
   moveToTeam,
-  NotEnoughWomenError,
   renameTeam,
   TEAM_NAME_MAX_LENGTH,
 } from "@/modules/registrations";
@@ -21,8 +20,6 @@ export type TeamsState = { status: "idle" } | { status: "error"; message: string
 const targetSchema = z.object({ clubSlug: z.string().min(1), eventId: z.string().min(1) });
 const buildSchema = targetSchema.extend({
   teamCount: z.coerce.number().int().min(MIN_TEAMS).max(MAX_TEAMS),
-  // Only sent for mixed events.
-  minWomenPerTeam: z.coerce.number().int().min(0).max(6).default(0),
 });
 const moveSchema = targetSchema.extend({
   registrationId: z.string().min(1),
@@ -56,14 +53,9 @@ export async function buildTeamsAction(
   }
   if (!(await authorize(parsed.data))) return { status: "error", message: NOT_ALLOWED_MESSAGE };
   try {
-    await buildEventTeams(parsed.data);
+    // The organizer no longer sets a minimum of women per team.
+    await buildEventTeams({ ...parsed.data, minWomenPerTeam: 0 });
   } catch (error) {
-    if (error instanceof NotEnoughWomenError) {
-      return {
-        status: "error",
-        message: `Hacen falta ${error.needed} chicas y hay ${error.available}. Baja el mínimo o el número de equipos.`,
-      };
-    }
     if (error instanceof InvalidTeamCountError) {
       return { status: "error", message: "No puede haber más equipos que jugadores." };
     }
