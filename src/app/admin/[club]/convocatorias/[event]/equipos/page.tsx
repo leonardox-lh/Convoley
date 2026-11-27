@@ -15,6 +15,7 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 import { LEVEL_LABELS, POSITION_LABELS } from "../../../../../player-labels";
 import { requireOrganizer } from "../../../require-organizer";
+import { ShareImageSection } from "../share-image-section";
 import { BuildTeamsForm, MoveToTeamSelect, RenameTeamForm } from "./team-forms";
 
 type Props = PageProps<"/admin/[club]/convocatorias/[event]/equipos">;
@@ -92,21 +93,12 @@ async function TeamsContent({ params }: Pick<Props, "params">) {
         </Link>
       )}
       {teams.length > 0 && (
-        <div className="grid grid-cols-2 gap-2">
-          {[
-            ["cuadrado", "Imagen cuadrada"],
-            ["historia", "Imagen para historia"],
-          ].map(([format, label]) => (
-            <a
-              key={format}
-              href={`${basePath}/equipos/imagen?formato=${format}`}
-              download={`equipos-${event.id}-${format}.png`}
-              className="rounded-lg border border-zinc-300 px-3 py-2.5 text-center text-sm font-medium dark:border-zinc-700"
-            >
-              {label}
-            </a>
-          ))}
-        </div>
+        <ShareImageSection
+          id="teams-image"
+          title="Imagen de los equipos"
+          imagePath={`${basePath}/equipos/imagen?formato=cuadrado`}
+          fileName={`equipos-${event.id}.png`}
+        />
       )}
       {teams.map((team) => (
         <section key={team.number} className="flex flex-col gap-1">
@@ -118,7 +110,8 @@ async function TeamsContent({ params }: Pick<Props, "params">) {
             maxLength={TEAM_NAME_MAX_LENGTH}
           />
           <p className="text-sm text-zinc-500">
-            {team.players.length} jugadores · nivel {team.score}
+            {team.players.length} {team.players.length === 1 ? "jugador" : "jugadores"} · nivel{" "}
+            {team.score}
           </p>
           <ul className="divide-y divide-zinc-200 dark:divide-zinc-800">
             {team.players.map(playerRow)}

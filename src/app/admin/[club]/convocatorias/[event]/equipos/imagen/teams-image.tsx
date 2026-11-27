@@ -1,18 +1,25 @@
 import type { EventTeam } from "@/modules/registrations";
 import { ImageFooter, ImageHeader, type ImageBrand } from "../../imagen/image-header";
 import { LIST_IMAGE_FORMATS, type ListImageFormat } from "../../imagen/image-layout";
-import { heavy, posterBackground, SOFT_BLUE } from "../../imagen/poster-style";
+import { heavy, NAVY, posterBackground, SOFT_BLUE } from "../../imagen/poster-style";
 
 const HEADER_PX = 330;
 const FOOTER_PX = 80;
 const OUTER_PADDING_PX = 48;
 const CARD_PADDING_PX = 28;
 const CARD_GAP_PX = 24;
+/** The "VS" badge between the teams of a row: a match-up poster, not just a list. */
+const VS_PX = 64;
 const MAX_TEAMS_PER_ROW = 3;
 const STACKED_MAX_TEAMS = 4;
 const MAX_ROW_PX = 60;
 const MIN_ROW_PX = 22;
 const ROW_TO_FONT = 0.62;
+const SIDE_PADDING_PX = 56;
+const TITLE_SCALE = 1.3;
+/** Geist's average glyph width, in em: used to shrink the text until full names fit one line. */
+const CHAR_EM = 0.56;
+const MIN_FONT_PX = 18;
 /** The team name line is taller than a player line. */
 const TITLE_ROWS = 2;
 
@@ -38,7 +45,18 @@ export function teamsImageLayout(format: ListImageFormat, teams: EventTeam[]) {
     MIN_ROW_PX,
     Math.min(MAX_ROW_PX, Math.floor(available / (teamRows * linesPerCard))),
   );
-  return { width, height, perRow, rowPx, fontPx: Math.round(rowPx * ROW_TO_FONT) };
+  // Full names on one line: shrink the font to the widest name (anything longer gets "…").
+  const cardTextPx =
+    (width - SIDE_PADDING_PX * 2 - (perRow - 1) * (VS_PX + CARD_GAP_PX * 2)) / perRow -
+    CARD_PADDING_PX * 2;
+  const longest = (texts: string[]) => Math.max(1, ...texts.map((text) => text.length));
+  const playerChars = longest(
+    teams.flatMap((team) => team.players.map((player) => fullName(player))),
+  );
+  const titleChars = longest(teams.map((team) => team.name)) * TITLE_SCALE;
+  const fitPx = Math.floor(cardTextPx / (Math.max(playerChars, titleChars) * CHAR_EM));
+  const fontPx = Math.max(MIN_FONT_PX, Math.min(Math.round(rowPx * ROW_TO_FONT), fitPx));
+  return { width, height, perRow, rowPx, fontPx };
 }
 
 /** The teams image, in the flyer's poster style like the list image (Satori: flex everywhere). */
@@ -68,12 +86,15 @@ export function TeamsImage(
           flex: 1,
           justifyContent: "center",
           gap: CARD_GAP_PX,
-          padding: `${OUTER_PADDING_PX}px 56px`,
+          padding: `${OUTER_PADDING_PX}px ${SIDE_PADDING_PX}px`,
         }}
       >
         {rows.map((row, rowIndex) => (
           <div key={rowIndex} style={{ display: "flex", gap: CARD_GAP_PX }}>
-            {row.map((team) => (
+            {row.flatMap((team, index) => [
+              ...(index > 0
+                ? [<VersusBadge key={`vs-${team.number}`} color={props.secondary} />]
+                : []),
               <div
                 key={team.number}
                 style={{
@@ -91,7 +112,7 @@ export function TeamsImage(
                 <span
                   style={{
                     display: "block",
-                    fontSize: Math.round(layout.fontPx * 1.3),
+                    fontSize: Math.round(layout.fontPx * TITLE_SCALE),
                     ...heavy(props.secondary, 1.2),
                     overflow: "hidden",
                     whiteSpace: "nowrap",
@@ -108,7 +129,7 @@ export function TeamsImage(
                     color: SOFT_BLUE,
                   }}
                 >
-                  {team.players.length} jugadores
+                  {`${team.players.length} ${team.players.length === 1 ? "jugador" : "jugadores"}`}
                 </span>
                 {team.players.map((player) => (
                   <span
@@ -123,15 +144,42 @@ export function TeamsImage(
                       textOverflow: "ellipsis",
                     }}
                   >
-                    {player.firstName} {player.lastName.charAt(0)}.
+                    {fullName(player)}
                   </span>
                 ))}
-              </div>
-            ))}
+              </div>,
+            ])}
           </div>
         ))}
       </div>
       <ImageFooter />
     </div>
   );
+}
+
+function VersusBadge(props: { color: string }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        alignSelf: "center",
+        flexShrink: 0,
+        width: VS_PX,
+        height: VS_PX,
+        borderRadius: VS_PX,
+        background: props.color,
+        boxShadow: `0 0 28px ${props.color}`,
+      }}
+    >
+      <span style={{ display: "flex", fontSize: Math.round(VS_PX * 0.4), ...heavy(NAVY, 1.4) }}>
+        VS
+      </span>
+    </div>
+  );
+}
+
+function fullName(player: EventTeam["players"][number]) {
+  return `${player.firstName} ${player.lastName}`;
 }
