@@ -41,9 +41,9 @@ export function AuthShell({
 
 function BrandPanel() {
   return (
-    <div className="relative isolate flex min-h-[34vh] flex-col justify-between overflow-hidden bg-gradient-to-br from-primary via-primary to-blue-900 px-6 pt-8 pb-14 text-primary-foreground lg:min-h-full lg:p-12">
+    <div className="relative isolate flex flex-col gap-5 overflow-hidden bg-gradient-to-br from-primary via-primary to-blue-900 px-6 pt-6 pb-12 text-primary-foreground lg:min-h-full lg:justify-between lg:p-12">
       {/* Decorative balls and glow: depth without competing with the text. */}
-      <VolleyballIcon className="pointer-events-none absolute -right-16 -bottom-10 -z-10 size-64 opacity-15 lg:size-[28rem]" />
+      <VolleyballIcon className="pointer-events-none absolute -top-6 -right-16 -z-10 size-56 opacity-15 lg:size-[28rem]" />
       <div
         aria-hidden
         className="pointer-events-none absolute -top-24 -left-24 -z-10 size-72 rounded-full bg-white/10 blur-3xl"
@@ -63,7 +63,7 @@ function BrandPanel() {
 
       <div className="flex flex-col gap-3">
         <p className="max-w-md text-2xl leading-tight font-semibold tracking-tight lg:text-4xl">
-          Tu vóley de la semana, sin el caos del chat.
+          Tu vóley de la semana, en un solo lugar.
         </p>
         <ul className="hidden flex-col gap-3 pt-4 lg:flex">
           {HIGHLIGHTS.map(({ icon: Icon, text }) => (
