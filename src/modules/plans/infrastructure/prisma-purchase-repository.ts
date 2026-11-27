@@ -104,7 +104,7 @@ export function prismaPurchaseRepository(db: PrismaClient): PurchaseRepository {
   };
 }
 
-/** The player's purchases in a club, newest first: which plans are waiting for review. */
+/** The player's purchases in a club, newest first: what's in review and what's left to use. */
 export function findPlayerPurchaseStatuses(
   db: PrismaClient,
   where: { clubId: string; userId: string },
@@ -112,7 +112,13 @@ export function findPlayerPurchaseStatuses(
   return db.planPurchase.findMany({
     where,
     orderBy: { createdAt: "desc" },
-    select: { planId: true, status: true },
+    select: {
+      planId: true,
+      status: true,
+      creditsRemaining: true,
+      expiresAt: true,
+      plan: { select: { name: true } },
+    },
   });
 }
 

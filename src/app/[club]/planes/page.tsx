@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { VolleyballLoader } from "@/components/volleyball";
+import { formatDateInLima } from "@/lib/lima-time";
 import { formatSoles } from "@/lib/money";
 import { Button } from "@/components/ui/button";
 import { findClubBySlug } from "@/modules/clubs";
@@ -39,13 +40,16 @@ async function PlansContent({ params, searchParams }: Props) {
   const signedIn = userId !== null;
   // Signed-in buyers get their name and phone already filled in from Mi perfil.
   const profile = userId ? await getPlayerProfile(userId) : null;
+  const purchases = userId ? await listPlayerPlanPurchases({ clubId: club.id, userId }) : [];
   // Plans whose screenshot the organizer still has to review: no second purchase meanwhile.
   const inReview = new Set(
-    userId
-      ? (await listPlayerPlanPurchases({ clubId: club.id, userId }))
-          .filter((purchase) => purchase.status === "in_review")
-          .map((purchase) => purchase.planId)
-      : [],
+    purchases.filter((purchase) => purchase.status === "in_review").map((p) => p.planId),
+  );
+  // What the player can still use: active and not expired (null means no limit).
+  const now = new Date();
+  const myPlans = purchases.filter(
+    (purchase) =>
+      purchase.status === "active" && (purchase.expiresAt === null || purchase.expiresAt > now),
   );
   const { enviado } = await searchParams;
 
@@ -53,6 +57,36 @@ async function PlansContent({ params, searchParams }: Props) {
     <>
       <h1 className="sr-only">Planes</h1>
       {enviado && <Toast>Solicitud enviada al organizador.</Toast>}
+      {myPlans.length > 0 && (
+        <section aria-labelledby="my-plan-title" className="flex flex-col gap-2">
+          <h2 id="my-plan-title" className="font-semibold">
+            Mi plan
+          </h2>
+          {myPlans.map((purchase, index) => (
+            <div
+              key={index}
+              className="flex flex-col gap-1 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm dark:border-emerald-900 dark:bg-emerald-950/40"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <p className="font-medium">{purchase.plan.name}</p>
+                <span className="shrink-0 rounded-full bg-emerald-600 px-2.5 py-0.5 text-xs font-semibold text-white">
+                  Activo
+                </span>
+              </div>
+              <p>
+                {purchase.creditsRemaining === null
+                  ? "Fechas ilimitadas"
+                  : `Te ${purchase.creditsRemaining === 1 ? "queda" : "quedan"} ${purchase.creditsRemaining} ${purchase.creditsRemaining === 1 ? "fecha" : "fechas"}`}
+              </p>
+              {purchase.expiresAt && (
+                <p className="text-muted-foreground">
+                  Vence el {formatDateInLima(purchase.expiresAt)}
+                </p>
+              )}
+            </div>
+          ))}
+        </section>
+      )}
       {plans.length > 0 && !signedIn && (
         <section className="flex flex-col gap-2 rounded-lg border border-zinc-200 p-3 text-sm dark:border-zinc-800">
           <p>
