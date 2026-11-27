@@ -16,6 +16,7 @@ import { clubCommunitiesAdapter, serviceFeesAdapter } from "./infrastructure/clu
 import { gatewayAdapter, purchasePaymentsAdapter } from "./infrastructure/payments-adapter";
 import { listClubPlans, prismaPlanRepository } from "./infrastructure/prisma-plan-repository";
 import {
+  findPlayerPurchaseStatuses,
   findPurchases,
   fromPrismaTx,
   prismaPurchaseRepository,
@@ -59,6 +60,8 @@ export const rejectPlanVoucher = makeRejectPlanVoucher(paymentDeps);
 export const findPlanPurchase = async (purchaseId: string) =>
   (await findPurchases(db, { id: purchaseId }))[0] ?? null;
 export const listPlanPurchases = (clubId: string) => findPurchases(db, { clubId });
+export const listPlayerPlanPurchases = (input: { clubId: string; userId: string }) =>
+  findPlayerPurchaseStatuses(db, input);
 
 // ─── Credits (HU-27): they run inside the registrations module's transaction ───
 type PrismaTransaction = Parameters<typeof fromPrismaTx>[0];

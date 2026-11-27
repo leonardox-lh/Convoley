@@ -116,6 +116,7 @@ async function PlansContent({ params }: Pick<Props, "params">) {
                     purchaseId={purchase.id}
                     imageUrl={voucher.proofFileKey ? signVoucherPath(voucher.proofFileKey) : null}
                     securityCode={voucher.yapeSecurityCode}
+                    note={voucher.payerNote}
                   />
                 )}
               </li>

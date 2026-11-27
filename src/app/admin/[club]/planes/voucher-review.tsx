@@ -17,6 +17,8 @@ export function PlanVoucherReview(props: {
   purchaseId: string;
   imageUrl: string | null;
   securityCode: string | null;
+  /** What the player wrote with the screenshot: their Yape name, "pago por 2"… */
+  note: string | null;
 }) {
   const [rejecting, setRejecting] = useState(false);
   const [approveState, approve, approving] = useActionState(approvePlanVoucherAction, IDLE);
@@ -44,6 +46,11 @@ export function PlanVoucherReview(props: {
         </a>
       )}
       {props.securityCode && <p>Código de seguridad: {props.securityCode}</p>}
+      {props.note && (
+        <p className="rounded-md bg-white px-2 py-1 italic break-words dark:bg-zinc-900">
+          “{props.note}”
+        </p>
+      )}
       {rejecting ? (
         <form action={reject} className="flex flex-col gap-2">
           {hidden}

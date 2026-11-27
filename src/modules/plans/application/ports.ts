@@ -152,6 +152,7 @@ export interface PurchasePayments {
       amountCents: number;
       proofFileKey: string;
       yapeSecurityCode: string | null;
+      payerNote: string | null;
     },
     tx: TransactionContext,
   ): Promise<void>;

@@ -16,6 +16,7 @@ import {
 import { findPlanPurchase } from "@/modules/plans";
 import { PaymentInstructions } from "../../c/[club]/[event]/payment-instructions";
 import { MercadoPagoCheckout } from "../../inscripcion/[registration]/mercado-pago-checkout";
+import { PAYER_NOTE_MAX_LENGTH } from "../../inscripcion/[registration]/payer-note";
 import { VoucherForm } from "../../inscripcion/[registration]/voucher-form";
 import { loadPaymentInfo } from "../../payment-info";
 import { PLAN_PURCHASE_STATUS_LABELS, planTermsText } from "../../plan-terms";
@@ -62,6 +63,7 @@ async function PurchaseContent({ params, searchParams }: Props) {
         action={submitPlanVoucherAction}
         hidden={{ purchaseId: purchase.id }}
         maxBytes={MAX_VOUCHER_BYTES}
+        noteMaxLength={PAYER_NOTE_MAX_LENGTH}
       />
     </>
   );

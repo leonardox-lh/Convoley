@@ -200,6 +200,8 @@ export function makeSubmitPlanVoucher(deps: VoucherDeps) {
     purchaseId: string;
     image: { bytes: Uint8Array; contentType: string };
     yapeSecurityCode: string | null;
+    /** Optional message for the organizer: the Yape name, "I'm paying for two"… */
+    payerNote?: string | null;
   }) {
     // Checked before uploading, so a double submit leaves no files behind.
     await deps.transactions.run(async (tx) =>
@@ -216,6 +218,7 @@ export function makeSubmitPlanVoucher(deps: VoucherDeps) {
           amountCents: purchase.priceCents,
           proofFileKey,
           yapeSecurityCode: input.yapeSecurityCode,
+          payerNote: input.payerNote ?? null,
         },
         tx,
       );

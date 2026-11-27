@@ -13,9 +13,12 @@ import {
   MercadoPagoUnavailableError,
   PlanPurchaseNotFoundError,
   PlanPurchaseStatusError,
+  findPlanPurchase,
   startPlanMercadoPagoPayment,
   submitPlanVoucher,
 } from "@/modules/plans";
+import { findClubNamesByIds } from "@/modules/clubs";
+import { PAYER_NOTE_MAX_LENGTH } from "../../inscripcion/[registration]/payer-note";
 import type { MercadoPagoPayState, VoucherState } from "../../inscripcion/[registration]/actions";
 import { rejectionMessage } from "../../inscripcion/[registration]/mercado-pago-messages";
 
@@ -82,6 +85,11 @@ const voucherSchema = z.object({
     .trim()
     .regex(/^(\d{3,6})?$/, "El código de seguridad son solo números (3 en Yape).")
     .optional(),
+  payerNote: z
+    .string()
+    .trim()
+    .max(PAYER_NOTE_MAX_LENGTH, `El mensaje puede tener hasta ${PAYER_NOTE_MAX_LENGTH} letras.`)
+    .optional(),
 });
 
 /** HU-27: the player paid by Yape/Plin outside Convoley and uploads the screenshot. */
@@ -103,9 +111,14 @@ export async function submitPlanVoucherAction(
       purchaseId: parsed.data.purchaseId,
       image: { bytes: new Uint8Array(await file.arrayBuffer()), contentType: file.type },
       yapeSecurityCode: parsed.data.yapeSecurityCode || null,
+      payerNote: parsed.data.payerNote || null,
     });
   } catch (error) {
     return knownError(error);
   }
-  redirect(`/plan/${encodeURIComponent(parsed.data.purchaseId)}?enviado=1`);
+  // Back to the club's plans, where the plan now shows "En revisión".
+  const purchase = await findPlanPurchase(parsed.data.purchaseId);
+  const [club] = purchase ? await findClubNamesByIds([purchase.clubId]) : [];
+  if (!club) redirect(`/plan/${encodeURIComponent(parsed.data.purchaseId)}?enviado=1`);
+  redirect(`/${club.slug}/planes?enviado=1`);
 }

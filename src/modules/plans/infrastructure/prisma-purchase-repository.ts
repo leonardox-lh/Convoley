@@ -104,6 +104,18 @@ export function prismaPurchaseRepository(db: PrismaClient): PurchaseRepository {
   };
 }
 
+/** The player's purchases in a club, newest first: which plans are waiting for review. */
+export function findPlayerPurchaseStatuses(
+  db: PrismaClient,
+  where: { clubId: string; userId: string },
+) {
+  return db.planPurchase.findMany({
+    where,
+    orderBy: { createdAt: "desc" },
+    select: { planId: true, status: true },
+  });
+}
+
 /** Purchases with their plan, for the player's page and the organizer's list. */
 export function findPurchases(db: PrismaClient, where: { id?: string; clubId?: string }) {
   return db.planPurchase.findMany({
