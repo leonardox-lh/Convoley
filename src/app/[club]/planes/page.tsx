@@ -5,7 +5,7 @@ import { VolleyballLoader } from "@/components/volleyball";
 import { formatSoles } from "@/lib/money";
 import { Button } from "@/components/ui/button";
 import { findClubBySlug } from "@/modules/clubs";
-import { currentUserId, isGoogleSignInEnabled } from "@/modules/identity";
+import { currentUserId, getPlayerProfile, isGoogleSignInEnabled } from "@/modules/identity";
 import { listPlans } from "@/modules/plans";
 import { planTermsText } from "../../plan-terms";
 import { signInToBuyPlanAction } from "./actions";
@@ -32,7 +32,10 @@ async function PlansContent({ params }: Pick<Props, "params">) {
   if (!club) notFound();
   const plans = await listPlans(club.id, { onlyActive: true });
   const communityName = new Map(club.communities.map((c) => [c.id, c.name]));
-  const signedIn = (await currentUserId()) !== null;
+  const userId = await currentUserId();
+  const signedIn = userId !== null;
+  // Signed-in buyers get their name and phone already filled in from Mi perfil.
+  const profile = userId ? await getPlayerProfile(userId) : null;
 
   return (
     <>
@@ -72,7 +75,7 @@ async function PlansContent({ params }: Pick<Props, "params">) {
               <details className="text-sm">
                 <summary className="cursor-pointer font-medium">Comprar este plan</summary>
                 <div className="mt-3">
-                  <BuyPlanForm clubSlug={slug} planId={plan.id} />
+                  <BuyPlanForm clubSlug={slug} planId={plan.id} profile={profile} />
                 </div>
               </details>
             )}
