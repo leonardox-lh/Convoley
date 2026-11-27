@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CalendarCheck, Clock } from "lucide-react";
+import { CalendarCheck, CalendarDays, Clock } from "lucide-react";
 import { PageHeading } from "@/components/page-heading";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -92,10 +92,16 @@ async function MyRegistrations() {
                   {registration.waitlistPosition !== null && ` · ${registration.waitlistPosition}`}
                 </span>
               </div>
-              <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <Clock className="size-4 shrink-0" aria-hidden />
-                {formatWeekdayDateInLima(event.startsAt)} · {formatTimeRangeInLima(event)}
-              </p>
+              <div className="flex flex-col gap-0.5 text-sm text-muted-foreground">
+                <p className="flex items-center gap-1.5">
+                  <CalendarDays className="size-4 shrink-0" aria-hidden />
+                  {formatWeekdayDateInLima(event.startsAt)}
+                </p>
+                <p className="flex items-center gap-1.5">
+                  <Clock className="size-4 shrink-0" aria-hidden />
+                  {formatTimeRangeInLima(event)}
+                </p>
+              </div>
             </Link>
           </li>
         );
