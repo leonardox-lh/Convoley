@@ -66,7 +66,8 @@ export function MoveToTeamSelect(props: {
         name="teamNumber"
         defaultValue={props.teamNumber?.toString() ?? ""}
         required={false}
-        className="w-40"
+        // The player's name is already beside it: the label stays only for screen readers.
+        className="w-40 [&>span]:sr-only"
         // Send once React has put the chosen team in the hidden field.
         onChange={() => requestAnimationFrame(() => formRef.current?.requestSubmit())}
         options={[
