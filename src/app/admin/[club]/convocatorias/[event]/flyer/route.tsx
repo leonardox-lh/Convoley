@@ -7,6 +7,7 @@ import { seatSummary } from "@/modules/registrations";
 import { requireOrganizer } from "../../../require-organizer";
 import { loadImageBrand } from "../imagen/image-assets";
 import { FlyerImage } from "./flyer-image";
+import { loadImageFonts } from "../imagen/image-fonts";
 
 const FLYER_FORMATS = {
   // 4:5, the tallest the Instagram feed shows whole; also fine on WhatsApp.
@@ -55,7 +56,7 @@ export async function GET(
       clubName={brand.clubName}
       logo={brand.logo}
     />,
-    size,
+    { ...size, fonts: await loadImageFonts() },
   );
   // Spots change with every sign-up: never serve a stale copy.
   image.headers.set("Cache-Control", "private, no-store");

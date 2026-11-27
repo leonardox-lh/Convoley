@@ -4,6 +4,7 @@ import { listEventTeams } from "@/modules/registrations";
 import { requireOrganizer } from "../../../../require-organizer";
 import { loadImageBrand } from "../../imagen/image-assets";
 import { TeamsImage, teamsImageLayout } from "./teams-image";
+import { loadImageFonts } from "../../imagen/image-fonts";
 
 /** HU-32: PNG of the teams, in the same style as the list image, to send to the group. */
 export async function GET(
@@ -21,6 +22,7 @@ export async function GET(
   const { teams } = await listEventTeams(event.id);
   const layout = teamsImageLayout(teams, brand);
   const image = new ImageResponse(<TeamsImage {...brand} teams={teams} layout={layout} />, {
+    fonts: await loadImageFonts(),
     width: layout.width,
     height: layout.height,
   });

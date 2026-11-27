@@ -18,6 +18,8 @@ const MAX_NAME_PX = 32;
 const MIN_NAME_PX = 18;
 /** Geist's average glyph width, in em: used to shrink the text until full names fit one line. */
 const CHAR_EM = 0.56;
+/** Team names are in Geist Bold, whose glyphs run wider. */
+const BOLD_CHAR_EM = 0.64;
 const TITLE_SCALE = 1.25;
 const POSITION_SCALE = 0.7;
 const COUNT_SCALE = 0.7;
@@ -51,7 +53,8 @@ export function teamsImageLayout(teams: EventTeam[], brand: Pick<ImageBrand, "ti
   // Full names on one line: shrink the font to the widest name (anything longer gets "…").
   const longest = (texts: string[]) => Math.max(1, ...texts.map((text) => text.length));
   const nameChars = longest(teams.flatMap((team) => team.players.map(fullName)));
-  const titleChars = longest(teams.map((team) => team.name)) * TITLE_SCALE;
+  const titleChars =
+    (longest(teams.map((team) => team.name)) * TITLE_SCALE * BOLD_CHAR_EM) / CHAR_EM;
   const fitPx = Math.floor(cardTextPx / (Math.max(nameChars, titleChars) * CHAR_EM));
   const namePx = Math.max(MIN_NAME_PX, Math.min(MAX_NAME_PX, fitPx));
 
@@ -162,9 +165,7 @@ export function TeamsImage(
                   borderTop: `${CARD_TOP_BORDER_PX}px solid ${props.secondary}`,
                 }}
               >
-                <span
-                  style={{ ...oneLine, ...line(layout.titlePx), ...heavy(props.secondary, 1.2) }}
-                >
+                <span style={{ ...oneLine, ...line(layout.titlePx), ...heavy(props.secondary) }}>
                   {team.name}
                 </span>
                 <span
@@ -218,9 +219,7 @@ function VersusBadge(props: { color: string }) {
         boxShadow: `0 0 28px ${props.color}`,
       }}
     >
-      <span style={{ display: "flex", fontSize: Math.round(VS_PX * 0.4), ...heavy(NAVY, 1.4) }}>
-        VS
-      </span>
+      <span style={{ display: "flex", fontSize: Math.round(VS_PX * 0.4), ...heavy(NAVY) }}>VS</span>
     </div>
   );
 }

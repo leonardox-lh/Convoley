@@ -51,13 +51,11 @@ export function ImageHeader(props: ImageBrand & { badge?: { value: string; label
           }}
         >
           {words.map((word, index) => (
-            <span key={index} style={{ display: "flex", ...heavy("white", 2, TITLE_GLOW) }}>
+            <span key={index} style={{ display: "flex", ...heavy("white", TITLE_GLOW) }}>
               {word}
             </span>
           ))}
-          <span style={{ display: "flex", ...heavy(props.secondary, 2, TITLE_GLOW) }}>
-            {lastWord}
-          </span>
+          <span style={{ display: "flex", ...heavy(props.secondary, TITLE_GLOW) }}>{lastWord}</span>
         </div>
         <span style={{ display: "flex", fontSize: 26, color: SOFT_BLUE }}>{props.when}</span>
       </div>
@@ -73,7 +71,7 @@ export function ImageHeader(props: ImageBrand & { badge?: { value: string; label
             color: NIGHT,
           }}
         >
-          <span style={{ display: "flex", fontSize: 60, lineHeight: 1, ...heavy(NIGHT, 1.5) }}>
+          <span style={{ display: "flex", fontSize: 60, lineHeight: 1, ...heavy(NIGHT) }}>
             {props.badge.value}
           </span>
           <span style={{ display: "flex", fontSize: 18, letterSpacing: 3 }}>

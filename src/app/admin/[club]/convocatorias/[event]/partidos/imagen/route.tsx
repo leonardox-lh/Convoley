@@ -6,6 +6,7 @@ import { requireOrganizer } from "../../../../require-organizer";
 import { loadImageBrand } from "../../imagen/image-assets";
 import { LIST_IMAGE_FORMATS, type ListImageFormat } from "../../imagen/image-layout";
 import { ChampionImage, StandingsImage } from "./game-day-image";
+import { loadImageFonts } from "../../imagen/image-fonts";
 
 const querySchema = z.object({
   formato: z
@@ -48,7 +49,7 @@ export async function GET(
     ) : (
       <StandingsImage {...brand} gameDay={gameDay} />
     ),
-    size,
+    { ...size, fonts: await loadImageFonts() },
   );
   // Scores change during the game: never serve a stale copy.
   image.headers.set("Cache-Control", "private, no-store");

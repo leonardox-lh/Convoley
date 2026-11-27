@@ -150,7 +150,7 @@ function ClubBadge(props: {
           display: "flex",
           fontSize: 30 * unit,
           letterSpacing: 5 * unit,
-          ...heavy("white", 0.8 * unit, "0 4px 14px rgba(0,0,0,0.6)"),
+          ...heavy("white", "0 4px 14px rgba(0,0,0,0.6)"),
         }}
       >
         {props.clubName.toUpperCase()}
@@ -218,13 +218,11 @@ export function FlyerImage(props: FlyerDetails) {
           }}
         >
           {words.map((word, index) => (
-            <span key={index} style={{ display: "flex", ...heavy("white", 3 * unit, TITLE_GLOW) }}>
+            <span key={index} style={{ display: "flex", ...heavy("white", TITLE_GLOW) }}>
               {word}
             </span>
           ))}
-          <span style={{ display: "flex", ...heavy(props.secondary, 3 * unit, TITLE_GLOW) }}>
-            {lastWord}
-          </span>
+          <span style={{ display: "flex", ...heavy(props.secondary, TITLE_GLOW) }}>{lastWord}</span>
         </div>
 
         <div
@@ -237,7 +235,7 @@ export function FlyerImage(props: FlyerDetails) {
         />
 
         <div style={{ display: "flex", flexDirection: "column", gap: 12 * unit }}>
-          <span style={{ display: "flex", fontSize: 50 * unit, ...heavy("white", 1.2 * unit) }}>
+          <span style={{ display: "flex", fontSize: 50 * unit, ...heavy("white") }}>
             {props.date}
           </span>
           <span style={{ display: "flex", fontSize: 40 * unit, color: SOFT_BLUE }}>
@@ -249,7 +247,7 @@ export function FlyerImage(props: FlyerDetails) {
               alignItems: "center",
               gap: 16 * unit,
               fontSize: 44 * unit,
-              ...heavy("white", 1 * unit),
+              ...heavy("white"),
             }}
           >
             <svg width={34 * unit} height={34 * unit} viewBox="0 0 24 24">
@@ -284,7 +282,7 @@ export function FlyerImage(props: FlyerDetails) {
             >
               PRECIO
             </span>
-            <span style={{ display: "flex", fontSize: 54 * unit, ...heavy(NIGHT, 1.5 * unit) }}>
+            <span style={{ display: "flex", fontSize: 54 * unit, ...heavy(NIGHT) }}>
               {props.price}
             </span>
           </div>
@@ -298,7 +296,7 @@ export function FlyerImage(props: FlyerDetails) {
               borderRadius: 24 * unit,
               background: props.secondary,
               fontSize: 46 * unit,
-              ...heavy(NIGHT, 1.5 * unit),
+              ...heavy(NIGHT),
             }}
           >
             {props.spots}
@@ -316,7 +314,7 @@ export function FlyerImage(props: FlyerDetails) {
             backgroundImage: `linear-gradient(90deg, ${props.primary}, #3b82f6)`,
             boxShadow: `0 0 ${50 * unit}px rgba(59,130,246,0.55)`,
             fontSize: 44 * unit,
-            ...heavy("white", 1.4 * unit),
+            ...heavy("white"),
           }}
         >
           <span style={{ display: "flex" }}>{props.callToAction}</span>

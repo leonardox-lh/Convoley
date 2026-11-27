@@ -11,20 +11,9 @@ export function posterBackground(primary: string) {
 }
 
 /**
- * Only Geist Regular ships with next/og and Satori ignores text strokes: shadows in the text
- * color, nudged around each glyph, thicken it like a bold. `glow` adds a drop shadow on top.
+ * The images' bold text: Geist Bold, loaded by every image route (image-fonts.ts). `glow` adds a
+ * drop shadow.
  */
-export function heavy(color: string, px: number, glow?: string) {
-  const offsets = [
-    [px, 0],
-    [-px, 0],
-    [0, px],
-    [0, -px],
-    [px, px],
-    [-px, -px],
-    [px, -px],
-    [-px, px],
-  ];
-  const shadows = offsets.map(([x, y]) => `${x}px ${y}px 0 ${color}`);
-  return { color, textShadow: [...shadows, ...(glow ? [glow] : [])].join(", ") };
+export function heavy(color: string, glow?: string) {
+  return { color, fontWeight: 700, ...(glow ? { textShadow: glow } : {}) } as const;
 }

@@ -6,6 +6,7 @@ import { requireOrganizer } from "../../../require-organizer";
 import { loadImageBrand } from "./image-assets";
 import { LIST_IMAGE_FORMATS, listImageLayout, type ListImageFormat } from "./image-layout";
 import { ListImage } from "./list-image";
+import { loadImageFonts } from "./image-fonts";
 
 const formatSchema = z
   .enum(Object.keys(LIST_IMAGE_FORMATS) as [ListImageFormat, ...ListImageFormat[]])
@@ -29,6 +30,7 @@ export async function GET(
   const layout = listImageLayout(format, rows);
 
   const image = new ImageResponse(<ListImage {...brand} roster={roster} layout={layout} />, {
+    fonts: await loadImageFonts(),
     width: layout.width,
     height: layout.height,
   });

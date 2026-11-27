@@ -93,7 +93,7 @@ function ListLine(props: { line: Line; layout: Layout; primary: string; secondar
           paddingBottom: ROW_GAP_PX + 4,
           fontSize: Math.round(layout.fontPx * 0.85),
           letterSpacing: 4,
-          ...heavy(props.secondary, 1),
+          ...heavy(props.secondary),
         }}
       >
         {line.name}

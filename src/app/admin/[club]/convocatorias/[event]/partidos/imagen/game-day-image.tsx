@@ -99,7 +99,7 @@ export function StandingsImage(props: Props) {
                   display: "block",
                   flex: 1,
                   fontSize: 48,
-                  ...heavy("white", 1.2),
+                  ...heavy("white"),
                   overflow: "hidden",
                   whiteSpace: "nowrap",
                   textOverflow: "ellipsis",
@@ -107,7 +107,7 @@ export function StandingsImage(props: Props) {
               >
                 {nameOf.get(row.teamNumber)}
               </span>
-              {stat(String(row.won), { fontSize: 52, ...heavy("white", 1.5) })}
+              {stat(String(row.won), { fontSize: 52, ...heavy("white") })}
               {stat(signed(pointDifference(row)), { fontSize: 40, opacity: 0.8 })}
             </div>
           );
@@ -138,16 +138,14 @@ export function ChampionImage(props: Props & { players: string[] }) {
         }}
       >
         <span style={{ fontSize: 170 }}>🏆</span>
-        <span style={{ fontSize: 38, letterSpacing: 14, ...heavy(props.secondary, 1) }}>
-          CAMPEÓN
-        </span>
+        <span style={{ fontSize: 38, letterSpacing: 14, ...heavy(props.secondary) }}>CAMPEÓN</span>
         <span
           style={{
             display: "flex",
             fontSize: name.length > LONG_NAME_CHARS ? 88 : 124,
             lineHeight: 1.05,
             transform: "skewX(-8deg)",
-            ...heavy("white", 3, "0 10px 30px rgba(0,0,0,0.6)"),
+            ...heavy("white", "0 10px 30px rgba(0,0,0,0.6)"),
           }}
         >
           {name}
