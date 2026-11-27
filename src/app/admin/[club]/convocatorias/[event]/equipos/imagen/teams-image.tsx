@@ -7,7 +7,7 @@ import {
   ImageHeader,
   type ImageBrand,
 } from "../../imagen/image-header";
-import { heavy, NAVY, posterBackground, SOFT_BLUE } from "../../imagen/poster-style";
+import { heavy, posterBackground, SOFT_BLUE } from "../../imagen/poster-style";
 
 const WIDTH_PX = 1080;
 const SIDE_PADDING_PX = 56;
@@ -17,8 +17,10 @@ const CARD_PADDING_PX = 24;
 const CARD_TOP_BORDER_PX = 10;
 const CARD_GAP_PX = 20;
 const MAX_TEAMS_PER_ROW = 3;
-/** The "VS" badge between the teams of a row: a match-up poster, not just a list. */
-const VS_PX = 64;
+/** The "VS" divider between the teams of a row: a match-up poster, not just a list. */
+const VS_PX = 48;
+const VS_FONT_PX = 30;
+const VS_LINE_PX = 3;
 
 const MAX_NAME_PX = 32;
 const MIN_NAME_PX = 18;
@@ -209,23 +211,43 @@ export function TeamsImage(
   );
 }
 
+/** A golden line that fades out at both ends, with "VS" glowing in the middle. */
 function VersusBadge(props: { color: string }) {
+  const line = (direction: "to top" | "to bottom") => (
+    <div
+      style={{
+        display: "flex",
+        flex: 1,
+        width: VS_LINE_PX,
+        borderRadius: VS_LINE_PX,
+        backgroundImage: `linear-gradient(${direction}, ${props.color}, rgba(0,0,0,0))`,
+      }}
+    />
+  );
   return (
     <div
       style={{
         display: "flex",
+        flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
-        alignSelf: "center",
+        alignSelf: "stretch",
         flexShrink: 0,
         width: VS_PX,
-        height: VS_PX,
-        borderRadius: VS_PX,
-        background: props.color,
-        boxShadow: `0 0 28px ${props.color}`,
       }}
     >
-      <span style={{ display: "flex", fontSize: Math.round(VS_PX * 0.4), ...heavy(NAVY) }}>VS</span>
+      {line("to top")}
+      <span
+        style={{
+          display: "flex",
+          padding: "12px 0",
+          fontSize: VS_FONT_PX,
+          transform: "skewX(-10deg)",
+          ...heavy(props.color, `0 0 18px ${props.color}`),
+        }}
+      >
+        VS
+      </span>
+      {line("to bottom")}
     </div>
   );
 }
