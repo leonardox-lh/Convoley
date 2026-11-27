@@ -28,7 +28,7 @@ import { listUpcomingEvents } from "@/modules/events";
 import { currentUserId } from "@/modules/identity";
 
 const UPCOMING_EVENTS_LIMIT = 8;
-const CLUB_LOGO_PX = 56;
+const CLUB_LOGO_PX = 80;
 const SECTIONS: [string, string, LucideIcon][] = [
   ["clubes", "Clubes", Trophy],
   ["convocatorias", "Convocatorias", CalendarDays],
@@ -207,13 +207,21 @@ async function ClubGrid() {
   if (clubs.length === 0) return <EmptyState>Todavía no hay clubes. ¡Crea el primero!</EmptyState>;
 
   return (
-    <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
       {clubs.map((club) => (
         <li key={club.id}>
           <Link
             href={`/${club.slug}`}
-            className="card-interactive group flex items-center gap-3 p-4"
+            className="card-interactive group flex h-full flex-col items-center overflow-hidden pb-4 text-center"
           >
+            {/* Band in the club's own color, with the logo rising out of it. */}
+            <span
+              aria-hidden
+              className="relative h-16 w-full overflow-hidden"
+              style={heroBackground(club.primaryColor)}
+            >
+              <VolleyballIcon className="absolute -top-4 -right-4 size-16 text-white opacity-20" />
+            </span>
             {club.logoKey ? (
               <Image
                 src={clubLogoPath(club.logoKey)}
@@ -221,23 +229,20 @@ async function ClubGrid() {
                 width={CLUB_LOGO_PX}
                 height={CLUB_LOGO_PX}
                 unoptimized
-                className="size-14 shrink-0 rounded-full object-cover"
+                className="relative -mt-10 size-20 rounded-full bg-card object-cover shadow-md ring-4 ring-card transition-transform duration-300 group-hover:scale-105"
               />
             ) : (
               <span
                 aria-hidden
-                className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary text-xl font-semibold text-primary-foreground"
+                className="relative -mt-10 flex size-20 items-center justify-center rounded-full text-3xl font-bold text-white shadow-md ring-4 ring-card transition-transform duration-300 group-hover:scale-105"
+                style={heroBackground(club.primaryColor)}
               >
                 {club.name.charAt(0).toUpperCase()}
               </span>
             )}
-            <span className="flex min-w-0 flex-1 flex-col">
-              <span className="truncate font-medium">{club.name}</span>
-              <span className="line-clamp-2 text-sm text-muted-foreground">
-                {club.description ?? `convoley.pe/${club.slug}`}
-              </span>
+            <span className="mt-3 line-clamp-2 px-3 text-sm leading-snug font-semibold">
+              {club.name}
             </span>
-            <Chevron />
           </Link>
         </li>
       ))}
