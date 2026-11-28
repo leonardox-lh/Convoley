@@ -1,6 +1,5 @@
-import { PageHeadingLoading } from "@/components/page-heading";
-import { PanelHeading } from "../panel-hero";
-import { Wallet } from "lucide-react";
+import { VolleyballLoader } from "@/components/volleyball";
+import { PanelIntro } from "../panel-hero";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { FormMessage } from "@/components/form";
@@ -15,7 +14,7 @@ type Props = PageProps<"/admin/[club]/pagos">;
 export default function PaymentSettingsPage(props: Props) {
   return (
     <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
-      <Suspense fallback={<PageHeadingLoading />}>
+      <Suspense fallback={<VolleyballLoader />}>
         <PaymentSettingsContent {...props} />
       </Suspense>
     </main>
@@ -34,9 +33,9 @@ async function PaymentSettingsContent({ params, searchParams }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PanelHeading clubSlug={clubSlug} icon={Wallet} title="Cobros por Yape o Plin">
+      <PanelIntro>
         Los jugadores te pagan directo a ti y suben su captura. Convoley nunca toca tu dinero.
-      </PanelHeading>
+      </PanelIntro>
       <MercadoPagoSection
         clubSlug={clubSlug}
         clubId={club.id}

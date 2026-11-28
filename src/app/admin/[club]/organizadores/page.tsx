@@ -1,6 +1,5 @@
-import { PageHeadingLoading } from "@/components/page-heading";
-import { PanelHeading } from "../panel-hero";
-import { UserCog } from "lucide-react";
+import { VolleyballLoader } from "@/components/volleyball";
+import { PanelIntro } from "../panel-hero";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { listClubMembers } from "@/modules/clubs";
@@ -13,7 +12,7 @@ type Props = PageProps<"/admin/[club]/organizadores">;
 export default function OrganizersPage({ params }: Props) {
   return (
     <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
-      <Suspense fallback={<PageHeadingLoading />}>
+      <Suspense fallback={<VolleyballLoader />}>
         <OrganizersContent params={params} />
       </Suspense>
     </main>
@@ -27,9 +26,9 @@ async function OrganizersContent({ params }: Pick<Props, "params">) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PanelHeading clubSlug={clubSlug} icon={UserCog} title="Organizadores">
+      <PanelIntro>
         Invita a quien te ayuda sin darle tu cuenta. El ayudante no ve cobros ni finanzas.
-      </PanelHeading>
+      </PanelIntro>
       <ul className="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-800">
         {members.map((member) => (
           <li key={member.userId} className="flex items-start justify-between gap-3 py-3">

@@ -1,4 +1,3 @@
-import { PageHeading, PageHeadingLoading } from "@/components/page-heading";
 import { ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -6,20 +5,19 @@ import { Suspense } from "react";
 import { formatSoles } from "@/lib/money";
 import { clubLogoPath, findClubBySlug } from "@/modules/clubs";
 import { listProducts } from "@/modules/store";
-import { requireOrganizer } from "../require-organizer";
-import { ProductForm } from "./product-forms";
-import { stockInputText } from "./stock-input";
+import { VolleyballLoader } from "@/components/volleyball";
+import { requireOrganizer } from "../../require-organizer";
+import { ProductForm } from "../../tienda/product-forms";
+import { stockInputText } from "../../tienda/stock-input";
 
 type Props = PageProps<"/admin/[club]/tienda">;
 
 /** HU-23: the club's products and the form to publish a new one. */
 export default function StorePage({ params }: Props) {
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
-      <Suspense fallback={<PageHeadingLoading />}>
-        <StoreContent params={params} />
-      </Suspense>
-    </main>
+    <Suspense fallback={<VolleyballLoader />}>
+      <StoreContent params={params} />
+    </Suspense>
   );
 }
 
@@ -32,28 +30,21 @@ async function StoreContent({ params }: Pick<Props, "params">) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeading
-        footer={
-          <>
-            <Link
-              href={`/admin/${clubSlug}/pedidos`}
-              className="font-semibold text-white underline-offset-4 hover:underline"
-            >
-              Pedidos
-            </Link>
-            {" · "}
-            <Link
-              href={`/${clubSlug}/tienda`}
-              className="font-semibold text-white underline-offset-4 hover:underline"
-            >
-              Ver tienda pública
-            </Link>
-          </>
-        }
-        icon={ShoppingBag}
-        eyebrow="Gestiona tu club"
-        title="Tienda"
-      />
+      <p className="text-sm text-muted-foreground">
+        <Link
+          href={`/admin/${clubSlug}/pedidos`}
+          className="font-semibold text-primary underline-offset-4 hover:underline"
+        >
+          Pedidos
+        </Link>
+        {" · "}
+        <Link
+          href={`/${clubSlug}/tienda`}
+          className="font-semibold text-primary underline-offset-4 hover:underline"
+        >
+          Ver tienda pública
+        </Link>
+      </p>
       <ul aria-label="Productos" className="flex flex-col gap-2">
         {products.map((product) => (
           <li key={product.id}>

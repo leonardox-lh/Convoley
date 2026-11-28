@@ -10,8 +10,8 @@ import {
   rejectPlanVoucher,
 } from "@/modules/plans";
 import { REJECTION_REASON_MAX_LENGTH } from "@/modules/registrations";
-import { NOT_ALLOWED_MESSAGE } from "../convocatorias/event-form-schema";
-import { requireOrganizerToEdit } from "../require-organizer";
+import { NOT_ALLOWED_MESSAGE } from "../../convocatorias/event-form-schema";
+import { requireOrganizerToEdit } from "../../require-organizer";
 
 export type PurchaseActionState = { status: "idle" } | { status: "error"; message: string };
 

@@ -48,17 +48,21 @@ export function PaymentSettingsForm(props: {
         placeholder="Como aparece en tu Yape o Plin"
         defaultValue={props.defaults.paymentHolderName ?? ""}
       />
-      <FileField
-        label="Imagen del QR (opcional)"
-        currentImage={props.qrUrl}
-        name="qr"
-        accept="image/jpeg,image/png,image/webp"
-        hint="Captura del QR de tu Yape o Plin. JPG, PNG o WebP de hasta 2 MB."
-      />
+      <div className="flex items-start gap-3">
+        <div className="min-w-0 flex-1">
+          <FileField
+            label="Imagen del QR (opcional)"
+            currentImage={props.qrUrl}
+            name="qr"
+            accept="image/jpeg,image/png,image/webp"
+            hint="Captura del QR de tu Yape o Plin. JPG, PNG o WebP de hasta 2 MB."
+          />
+        </div>
+        <Button type="submit" size="lg" disabled={pending} className="h-11 shrink-0 px-5">
+          {pending ? "Guardando…" : "Guardar"}
+        </Button>
+      </div>
       {state.status === "error" && <FormMessage tone="error">{state.message}</FormMessage>}
-      <Button type="submit" size="lg" disabled={pending}>
-        {pending ? "Guardando…" : "Guardar"}
-      </Button>
     </form>
   );
 }

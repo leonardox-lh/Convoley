@@ -1,6 +1,5 @@
-import { Store } from "lucide-react";
-import { PageHeadingLoading } from "@/components/page-heading";
-import { PanelHeading } from "../panel-hero";
+import { VolleyballLoader } from "@/components/volleyball";
+import { PanelIntro } from "../panel-hero";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { CopyButton } from "@/components/copy-button";
@@ -16,7 +15,7 @@ type Props = PageProps<"/admin/[club]/perfil">;
 export default function ClubProfilePage(props: Props) {
   return (
     <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
-      <Suspense fallback={<PageHeadingLoading />}>
+      <Suspense fallback={<VolleyballLoader />}>
         <ClubProfileContent {...props} />
       </Suspense>
     </main>
@@ -33,7 +32,7 @@ async function ClubProfileContent({ params, searchParams }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PanelHeading clubSlug={clubSlug} title="Perfil del club" icon={Store} />
+      <PanelIntro />
       {query.creado && <FormMessage tone="ok">¡Tu club está listo!</FormMessage>}
       {query.guardado && <FormMessage tone="ok">Cambios guardados.</FormMessage>}
       <div className="flex flex-col gap-0.5">

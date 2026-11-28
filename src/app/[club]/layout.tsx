@@ -77,19 +77,19 @@ async function ClubHeader({ params }: Pick<LayoutProps<"/[club]">, "params">) {
       className="relative -mx-4 -mt-6 mb-5 flex flex-col gap-3 overflow-hidden rounded-b-[2rem] px-5 pt-17 pb-5 text-white shadow-lg sm:mx-0 sm:mt-0 sm:rounded-3xl sm:p-5"
       style={heroBackground(club.primaryColor)}
     >
-      <VolleyballIcon className="pointer-events-none absolute -bottom-12 -left-12 size-44 opacity-15" />
+      <VolleyballIcon className="pointer-events-none absolute -top-12 -right-12 size-44 opacity-15" />
       <div className="relative flex items-start gap-4">
         <div className="flex min-h-20 min-w-0 flex-1 flex-col gap-1">
-          <p
-            className="text-xs font-semibold tracking-wide uppercase"
-            style={{ color: club.secondaryColor ?? undefined }}
-          >
-            Club de vóley
-          </p>
           <h1 className="text-2xl leading-tight font-extrabold tracking-tight first-letter:uppercase">
             {club.name}
           </h1>
-          {club.description && <ClubDescription clubName={club.name} text={club.description} />}
+          {club.description && (
+            <ClubDescription
+              clubName={club.name}
+              primaryColor={club.primaryColor}
+              text={club.description}
+            />
+          )}
         </div>
         {club.logoKey ? (
           <Image
@@ -142,7 +142,7 @@ function LinkButton({ href, label, icon }: { href: string; label: string; icon: 
       target="_blank"
       rel="noopener noreferrer"
       // Same glass style for every network: the icon and its name tell them apart.
-      className="flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl bg-white/15 px-2 py-2 text-xs font-medium text-white ring-1 ring-white/20 backdrop-blur-sm transition-colors hover:bg-white/25 [&_svg]:size-5"
+      className="flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-xl bg-white/15 px-2 py-1.5 text-xs font-medium text-white ring-1 ring-white/20 backdrop-blur-sm transition-colors hover:bg-white/25 [&_svg]:size-4"
     >
       {icon}
       <span className="max-w-full truncate">{label}</span>

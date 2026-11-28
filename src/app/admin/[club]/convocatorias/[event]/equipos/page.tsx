@@ -1,6 +1,5 @@
-import { Users } from "lucide-react";
-import { PageHeadingLoading } from "@/components/page-heading";
-import { PanelHeading } from "../../../panel-hero";
+import { VolleyballLoader } from "@/components/volleyball";
+import { PanelIntro } from "../../../panel-hero";
 import Link from "next/link";
 import { GenderIcon } from "@/components/gender-icon";
 import { notFound } from "next/navigation";
@@ -26,7 +25,7 @@ type Props = PageProps<"/admin/[club]/convocatorias/[event]/equipos">;
 export default function TeamsPage({ params }: Props) {
   return (
     <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
-      <Suspense fallback={<PageHeadingLoading />}>
+      <Suspense fallback={<VolleyballLoader />}>
         <TeamsContent params={params} />
       </Suspense>
     </main>
@@ -77,15 +76,9 @@ async function TeamsContent({ params }: Pick<Props, "params">) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PanelHeading
-        clubSlug={clubSlug}
-        icon={Users}
-        eyebrow={event.title}
-        eyebrowHref={basePath}
-        title="Equipos"
-      >
+      <PanelIntro eyebrow={event.title} eyebrowHref={basePath}>
         Se arman con los inscritos que tienen cupo, parejos por nivel y posición.
-      </PanelHeading>
+      </PanelIntro>
       <BuildTeamsForm
         clubSlug={clubSlug}
         eventId={event.id}

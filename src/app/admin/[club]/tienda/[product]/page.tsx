@@ -1,6 +1,5 @@
-import { ShoppingBag } from "lucide-react";
-import { PageHeadingLoading } from "@/components/page-heading";
-import { PanelHeading } from "../../panel-hero";
+import { VolleyballLoader } from "@/components/volleyball";
+import { PanelIntro } from "../../panel-hero";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { centsToSolesText } from "@/lib/money";
@@ -16,7 +15,7 @@ type Props = PageProps<"/admin/[club]/tienda/[product]">;
 export default function ProductPage({ params }: Props) {
   return (
     <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
-      <Suspense fallback={<PageHeadingLoading />}>
+      <Suspense fallback={<VolleyballLoader />}>
         <ProductContent params={params} />
       </Suspense>
     </main>
@@ -32,13 +31,7 @@ async function ProductContent({ params }: Pick<Props, "params">) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PanelHeading
-        clubSlug={clubSlug}
-        icon={ShoppingBag}
-        eyebrow="Tienda"
-        eyebrowHref={`/admin/${clubSlug}/tienda`}
-        title={product.name}
-      />
+      <PanelIntro eyebrow="Tienda" eyebrowHref={`/admin/${clubSlug}/tienda`} title={product.name} />
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-semibold">
           Fotos ({product.imageKeys.length}/{MAX_PRODUCT_PHOTOS})

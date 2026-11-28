@@ -1,6 +1,5 @@
-import { PageHeadingLoading } from "@/components/page-heading";
-import { PanelHeading } from "../panel-hero";
-import { BadgeCheck } from "lucide-react";
+import { VolleyballLoader } from "@/components/volleyball";
+import { PanelIntro } from "../panel-hero";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { env } from "@/lib/env";
@@ -15,7 +14,7 @@ type Props = PageProps<"/admin/[club]/suscripcion">;
 export default function SubscriptionPage(props: Props) {
   return (
     <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
-      <Suspense fallback={<PageHeadingLoading />}>
+      <Suspense fallback={<VolleyballLoader />}>
         <SubscriptionContent {...props} />
       </Suspense>
     </main>
@@ -31,7 +30,7 @@ async function SubscriptionContent({ params }: Props) {
 
   return (
     <div className="flex flex-col gap-4">
-      <PanelHeading clubSlug={clubSlug} icon={BadgeCheck} title="Suscripción a Convoley" />
+      <PanelIntro />
       <SubscriptionBanner clubSlug={clubSlug} access={access} />
       <p className="text-sm">
         {formatSoles(MONTHLY_PRICE_CENTS)} al mes, con {TRIAL_DAYS} días de prueba gratis. Puedes

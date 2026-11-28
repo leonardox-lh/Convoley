@@ -14,8 +14,8 @@ import {
   setPlanActive,
   type InvalidPlanReason,
 } from "@/modules/plans";
-import { NOT_ALLOWED_MESSAGE } from "../convocatorias/event-form-schema";
-import { requireOrganizerToEdit } from "../require-organizer";
+import { NOT_ALLOWED_MESSAGE } from "../../convocatorias/event-form-schema";
+import { requireOrganizerToEdit } from "../../require-organizer";
 
 export type PlanActionState = { status: "idle" | "created" } | { status: "error"; message: string };
 

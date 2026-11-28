@@ -1,15 +1,27 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#1f4fd6" />
-  <g transform="translate(12 12) scale(2.0513) translate(-2.25 -2.25)">
-    <circle cx="12" cy="12" r="9" fill="#f2a33a" />
-    <g fill="none" stroke="#1f4fd6" stroke-width="1.5" stroke-linecap="round">
-      <path d="M12 12a8 8 0 0 0 8 4" />
-      <path d="M7.5 13.5a12 12 0 0 0 8.5 6.5" />
-      <path d="M12 12a8 8 0 0 0-7.464 4.928" />
-      <path d="M12.951 7.353a12 12 0 0 0-9.88 4.111" />
-      <path d="M12 12a8 8 0 0 0-.536-8.928" />
-      <path d="M15.549 15.147a12 12 0 0 0 1.38-10.611" />
-      <circle cx="12" cy="12" r="9" stroke-width="1.6" />
-    </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="2.25 2.25 19.5 19.5">
+  <!-- The wordmark's glossy ball (components/logo.tsx). The dark outline keeps it visible on light
+       tabs; on dark tabs it turns light. -->
+  <style>
+    .outline { stroke: #0a1a4a; }
+    @media (prefers-color-scheme: dark) { .outline { stroke: #e6ecff; } }
+  </style>
+  <defs>
+    <radialGradient id="shine" cx="0.36" cy="0.3" r="0.8">
+      <stop offset="0" stop-color="#ffffff" />
+      <stop offset="0.55" stop-color="#e6ecff" />
+      <stop offset="1" stop-color="#8ea6e8" />
+    </radialGradient>
+  </defs>
+  <circle cx="12" cy="12" r="9.75" fill="url(#shine)" />
+  <path d="M12 12a8 8 0 0 0 8 4 9.75 9.75 0 0 1-4 4 12 12 0 0 1-8.5-6.5z" fill="#f2a33a" opacity="0.9" />
+  <path d="M12 12a8 8 0 0 0-.536-8.928 9.75 9.75 0 0 1 5.465 1.464 12 12 0 0 1-1.38 10.611z" fill="#1d4ed8" opacity="0.85" />
+  <g fill="none" stroke="#0a1a4a" stroke-width="0.9" stroke-linecap="round" opacity="0.8">
+    <path d="M12 12a8 8 0 0 0 8 4" />
+    <path d="M7.5 13.5a12 12 0 0 0 8.5 6.5" />
+    <path d="M12 12a8 8 0 0 0-7.464 4.928" />
+    <path d="M12.951 7.353a12 12 0 0 0-9.88 4.111" />
+    <path d="M12 12a8 8 0 0 0-.536-8.928" />
+    <path d="M15.549 15.147a12 12 0 0 0 1.38-10.611" />
   </g>
+  <circle class="outline" cx="12" cy="12" r="9.2" fill="none" stroke-width="1.1" />
 </svg>

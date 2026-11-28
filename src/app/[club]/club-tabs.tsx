@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDays, ShoppingBag, Ticket } from "lucide-react";
+import { CalendarDays, LayoutGrid, ShoppingBag, Ticket } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -10,15 +10,24 @@ import { cn } from "@/lib/utils";
  * Folder tabs whose active one joins the panel below. Phones have no panel box, so a line under
  * the tabs stands in for its top edge and the active tab opens into the content.
  */
-export function ClubTabs({ slug }: { slug: string }) {
+export function ClubTabs({
+  slug,
+  admin = false,
+}: {
+  slug: string;
+  /** The club panel's tabs. */ admin?: boolean;
+}) {
   const pathname = usePathname();
   // The tapped tab lights up at once, before the new section finishes loading.
   const [tapped, setTapped] = useState<{ from: string; href: string } | null>(null);
   const activeHref = tapped && tapped.from === pathname ? tapped.href : pathname;
+  const base = admin ? `/admin/${slug}` : `/${slug}`;
   const tabs = [
-    { href: `/${slug}`, label: "Convocatorias", icon: CalendarDays },
-    { href: `/${slug}/tienda`, label: "Tienda", icon: ShoppingBag },
-    { href: `/${slug}/planes`, label: "Planes", icon: Ticket },
+    admin
+      ? { href: base, label: "Mi club", icon: LayoutGrid }
+      : { href: base, label: "Convocatorias", icon: CalendarDays },
+    { href: `${base}/tienda`, label: "Tienda", icon: ShoppingBag },
+    { href: `${base}/planes`, label: "Planes", icon: Ticket },
   ];
 
   return (

@@ -1,6 +1,5 @@
-import { PageHeadingLoading } from "@/components/page-heading";
-import { PanelHeading } from "../../panel-hero";
-import { CalendarPlus } from "lucide-react";
+import { VolleyballLoader } from "@/components/volleyball";
+import { PanelIntro } from "../../panel-hero";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { defaultEventDateInLima, todayInLima } from "@/lib/lima-time";
@@ -14,7 +13,7 @@ type Params = PageProps<"/admin/[club]/convocatorias/nueva">["params"];
 export default function NewEventPage({ params }: PageProps<"/admin/[club]/convocatorias/nueva">) {
   return (
     <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
-      <Suspense fallback={<PageHeadingLoading />}>
+      <Suspense fallback={<VolleyballLoader />}>
         <NewEventContent params={params} />
       </Suspense>
     </main>
@@ -29,7 +28,7 @@ async function NewEventContent({ params }: { params: Params }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PanelHeading clubSlug={clubSlug} icon={CalendarPlus} title="Nueva convocatoria" />
+      <PanelIntro />
       <CreateEventForm
         clubSlug={club.slug}
         communities={club.communities}

@@ -1,6 +1,5 @@
-import { ScanLine } from "lucide-react";
-import { PageHeadingLoading } from "@/components/page-heading";
-import { PanelHeading } from "../../../../panel-hero";
+import { VolleyballLoader } from "@/components/volleyball";
+import { PanelIntro } from "../../../../panel-hero";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -19,7 +18,7 @@ type Props = PageProps<"/admin/[club]/convocatorias/[event]/asistencia/[registra
 export default function AttendancePage(props: Props) {
   return (
     <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
-      <Suspense fallback={<PageHeadingLoading />}>
+      <Suspense fallback={<VolleyballLoader />}>
         <AttendanceContent {...props} />
       </Suspense>
     </main>
@@ -46,9 +45,7 @@ async function AttendanceContent({ params }: Props) {
 
   return (
     <div className="flex flex-col gap-4">
-      <PanelHeading
-        clubSlug={clubSlug}
-        icon={ScanLine}
+      <PanelIntro
         eyebrow={event.title}
         eyebrowHref={`/admin/${clubSlug}/convocatorias/${eventId}`}
         title={

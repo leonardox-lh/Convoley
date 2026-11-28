@@ -1,8 +1,8 @@
-import { Repeat } from "lucide-react";
+import { VolleyballLoader } from "@/components/volleyball";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { PageHeadingLoading, SectionCard } from "@/components/page-heading";
-import { PanelHeading } from "../panel-hero";
+import { SectionCard } from "@/components/page-heading";
+import { PanelIntro } from "../panel-hero";
 import { formatSoles } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import { findClubBySlug } from "@/modules/clubs";
@@ -16,7 +16,7 @@ type Props = PageProps<"/admin/[club]/recurrentes">;
 export default function RecurringEventsPage({ params }: Props) {
   return (
     <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
-      <Suspense fallback={<PageHeadingLoading />}>
+      <Suspense fallback={<VolleyballLoader />}>
         <RecurringEventsContent params={params} />
       </Suspense>
     </main>
@@ -36,10 +36,10 @@ async function RecurringEventsContent({ params }: Pick<Props, "params">) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PanelHeading clubSlug={clubSlug} icon={Repeat} title="Convocatorias recurrentes">
+      <PanelIntro>
         Cada semana se publica una fecha nueva, los días antes que elijas. Para cambiar algo, pausa
         la recurrente y crea otra.
-      </PanelHeading>
+      </PanelIntro>
       {templates.length > 0 && (
         <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
           <div className="flex items-center justify-between border-b bg-secondary/40 px-4 py-3">

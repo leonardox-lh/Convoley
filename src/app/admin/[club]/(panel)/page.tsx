@@ -17,36 +17,25 @@ import {
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { ClubLogo } from "@/components/club-logo";
 import { buttonVariants } from "@/components/ui/button";
-import { VolleyballIcon } from "@/components/volleyball";
+import { cn } from "@/lib/utils";
 import { formatDayInLima, formatTimeRangeInLima } from "@/lib/lima-time";
 import { venueMapsUrl } from "@/lib/maps";
 import { getClubSubscription } from "@/modules/billing";
-import { can, clubLogoPath, getClubProfile } from "@/modules/clubs";
+import { can, getClubProfile } from "@/modules/clubs";
 import { listOpenEvents } from "@/modules/events";
-import { requireOrganizer } from "./require-organizer";
-import { SubscriptionBanner } from "./subscription-banner";
-import { heroBackground } from "@/components/page-heading";
+import { VolleyballLoader } from "@/components/volleyball";
+import { requireOrganizer } from "../require-organizer";
+import { SubscriptionBanner } from "../subscription-banner";
 
 type Props = PageProps<"/admin/[club]">;
 
 /** HU-33: the club's admin home; the menu shows only what the member's role can open. */
 export default function ClubAdminHomePage({ params }: Props) {
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-4 py-8">
-      <Suspense
-        fallback={
-          <div
-            className="h-40 animate-pulse rounded-3xl bg-secondary"
-            role="status"
-            aria-label="Cargando…"
-          />
-        }
-      >
-        <ClubAdminHome params={params} />
-      </Suspense>
-    </main>
+    <Suspense fallback={<VolleyballLoader />}>
+      <ClubAdminHome params={params} />
+    </Suspense>
   );
 }
 
@@ -77,51 +66,28 @@ async function ClubAdminHome({ params }: Pick<Props, "params">) {
     ["pedidos", "Pedidos", Package],
   ];
 
-  const freeSpots = events.reduce((total, event) => total + event.remainingSpots, 0);
-
   return (
     <div className="flex flex-col gap-6">
-      <section
-        data-club-hero
-        className="relative -mx-4 -mt-8 overflow-hidden rounded-b-[2rem] px-5 pt-17 pb-5 text-white shadow-lg sm:mx-0 sm:mt-0 sm:rounded-3xl sm:p-5"
-        style={heroBackground(club.primaryColor)}
-      >
-        <VolleyballIcon className="pointer-events-none absolute -top-10 -right-12 size-48 opacity-15" />
-        <div className="relative flex items-center gap-3">
-          <ClubLogo
-            name={club.name}
-            src={club.logoKey ? clubLogoPath(club.logoKey) : null}
-            className="size-14 rounded-xl"
-          />
-          <div className="min-w-0">
-            <p
-              className="text-xs font-semibold tracking-wide uppercase"
-              style={{ color: club.secondaryColor ?? undefined }}
-            >
-              Panel del club
-            </p>
-            <h1 className="truncate text-2xl font-extrabold tracking-tight first-letter:uppercase">
-              {club.name}
-            </h1>
-          </div>
-        </div>
-        <dl className="relative mt-4 grid grid-cols-2 gap-3">
-          <Stat label="Convocatorias abiertas" value={events.length} />
-          <Stat label="Cupos libres" value={freeSpots} />
-        </dl>
-      </section>
       <SubscriptionBanner clubSlug={clubSlug} access={access} />
-      {canManage && (
-        <Link
-          href={`/admin/${clubSlug}/convocatorias/nueva`}
-          className={buttonVariants({ size: "lg", className: "h-12 gap-2 text-base shadow-md" })}
-        >
-          <Plus aria-hidden />
-          Nueva convocatoria
-        </Link>
-      )}
       <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold">Próximas convocatorias</h2>
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold">Próximas convocatorias</h2>
+          {canManage && (
+            <Link
+              href={`/admin/${clubSlug}/convocatorias/nueva`}
+              aria-label="Nueva convocatoria"
+              // cn merges the classes, so the blue border wins over the variant's (buttonVariants only joins them).
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "gap-1.5 border-primary bg-transparent text-primary hover:bg-primary/10 hover:text-primary",
+              )}
+            >
+              <Plus aria-hidden />
+              {/* Trimmed to the letters' height so flex centers what you see, not Geist's line box. */}
+              <span className="[text-box:trim-both_cap_alphabetic]">Nueva</span>
+            </Link>
+          )}
+        </div>
         {events.length === 0 ? (
           <p className="rounded-2xl border border-dashed p-6 text-center text-sm text-muted-foreground">
             No hay convocatorias publicadas. Crea una y compártela por WhatsApp.
@@ -209,15 +175,6 @@ async function ClubAdminHome({ params }: Pick<Props, "params">) {
           ))}
         </ul>
       </nav>
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="flex flex-col rounded-2xl bg-white/12 px-4 py-2.5 backdrop-blur-sm">
-      <dt className="text-xs text-white/75">{label}</dt>
-      <dd className="text-2xl font-extrabold">{value}</dd>
     </div>
   );
 }

@@ -1,6 +1,5 @@
-import { PageHeadingLoading } from "@/components/page-heading";
-import { PanelHeading } from "../panel-hero";
-import { Package } from "lucide-react";
+import { VolleyballLoader } from "@/components/volleyball";
+import { PanelIntro } from "../panel-hero";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -34,7 +33,7 @@ const filterSchema = z
 export default function OrdersPage(props: Props) {
   return (
     <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
-      <Suspense fallback={<PageHeadingLoading />}>
+      <Suspense fallback={<VolleyballLoader />}>
         <OrdersContent {...props} />
       </Suspense>
     </main>
@@ -59,8 +58,7 @@ async function OrdersContent({ params, searchParams }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PanelHeading
-        clubSlug={clubSlug}
+      <PanelIntro
         footer={
           <>
             <Link
@@ -71,8 +69,6 @@ async function OrdersContent({ params, searchParams }: Props) {
             </Link>
           </>
         }
-        icon={Package}
-        title="Pedidos"
       />
       <nav aria-label="Filtrar por estado" className="flex flex-wrap gap-2">
         <FilterLink href={basePath} active={!estado} label="Todos" />

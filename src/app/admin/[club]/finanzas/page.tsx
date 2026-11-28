@@ -1,6 +1,5 @@
-import { PageHeadingLoading } from "@/components/page-heading";
-import { PanelHeading } from "../panel-hero";
-import { ChartColumn } from "lucide-react";
+import { VolleyballLoader } from "@/components/volleyball";
+import { PanelIntro } from "../panel-hero";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Field, fieldClass } from "@/components/form";
@@ -16,7 +15,7 @@ type Props = PageProps<"/admin/[club]/finanzas">;
 export default function FinancePage(props: Props) {
   return (
     <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
-      <Suspense fallback={<PageHeadingLoading />}>
+      <Suspense fallback={<VolleyballLoader />}>
         <FinanceContent {...props} />
       </Suspense>
     </main>
@@ -33,7 +32,7 @@ async function FinanceContent({ params, searchParams }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PanelHeading clubSlug={clubSlug} icon={ChartColumn} title="Finanzas" />
+      <PanelIntro />
       <form className="flex items-end gap-2">
         <Field label="Mes" float="always" className="flex-1">
           <input type="month" name="mes" defaultValue={month} className={fieldClass} />

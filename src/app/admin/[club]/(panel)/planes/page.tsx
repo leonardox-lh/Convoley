@@ -1,5 +1,3 @@
-import { PageHeading, PageHeadingLoading } from "@/components/page-heading";
-import { Ticket } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -8,8 +6,9 @@ import { formatSoles } from "@/lib/money";
 import { findClubBySlug } from "@/modules/clubs";
 import { listVouchersInReview, signVoucherPath } from "@/modules/payments";
 import { listPlanPurchases, listPlans } from "@/modules/plans";
-import { PLAN_PURCHASE_STATUS_LABELS, planTermsText } from "../../../plan-terms";
-import { requireOrganizer } from "../require-organizer";
+import { PLAN_PURCHASE_STATUS_LABELS, planTermsText } from "../../../../plan-terms";
+import { VolleyballLoader } from "@/components/volleyball";
+import { requireOrganizer } from "../../require-organizer";
 import { NewPlanForm, TogglePlanForm } from "./plan-forms";
 import { PlanVoucherReview } from "./voucher-review";
 
@@ -18,11 +17,9 @@ type Props = PageProps<"/admin/[club]/planes">;
 /** HU-26: the club's plans and the form to create one. HU-27: who bought them. */
 export default function PlansPage(props: Props) {
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
-      <Suspense fallback={<PageHeadingLoading />}>
-        <PlansContent {...props} />
-      </Suspense>
-    </main>
+    <Suspense fallback={<VolleyballLoader />}>
+      <PlansContent {...props} />
+    </Suspense>
   );
 }
 
@@ -43,23 +40,15 @@ async function PlansContent({ params }: Pick<Props, "params">) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeading
-        footer={
-          <>
-            <Link
-              href={`/${clubSlug}/planes`}
-              className="font-semibold text-white underline-offset-4 hover:underline"
-            >
-              Ver planes públicos
-            </Link>
-          </>
-        }
-        icon={Ticket}
-        eyebrow="Gestiona tu club"
-        title="Planes"
-      >
-        Paquetes de fechas o mensualidades para asegurar ingresos fijos.
-      </PageHeading>
+      <p className="text-sm text-muted-foreground">
+        Paquetes de fechas o mensualidades para asegurar ingresos fijos.{" "}
+        <Link
+          href={`/${clubSlug}/planes`}
+          className="font-semibold text-primary underline-offset-4 hover:underline"
+        >
+          Ver planes públicos
+        </Link>
+      </p>
       <ul
         aria-label="Planes"
         className="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-800"

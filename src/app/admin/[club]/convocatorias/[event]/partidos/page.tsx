@@ -1,6 +1,6 @@
-import { PageHeadingLoading } from "@/components/page-heading";
-import { PanelHeading } from "../../../panel-hero";
-import { Trophy, Swords } from "lucide-react";
+import { VolleyballLoader } from "@/components/volleyball";
+import { PanelIntro } from "../../../panel-hero";
+import { Trophy } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { clubLogoPath } from "@/modules/clubs";
@@ -24,7 +24,7 @@ type Props = PageProps<"/admin/[club]/convocatorias/[event]/partidos">;
 export default function GameDayPage({ params }: Props) {
   return (
     <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
-      <Suspense fallback={<PageHeadingLoading />}>
+      <Suspense fallback={<VolleyballLoader />}>
         <GameDayContent params={params} />
       </Suspense>
     </main>
@@ -180,16 +180,10 @@ async function GameDayContent({ params }: Pick<Props, "params">) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PanelHeading
-        clubSlug={clubSlug}
-        icon={Swords}
-        eyebrow={event.title}
-        eyebrowHref={`${basePath}/equipos`}
-        title="Partidos"
-      >
+      <PanelIntro eyebrow={event.title} eyebrowHref={`${basePath}/equipos`}>
         Te armamos todos contra todos. Agrega, cambia u ordena los partidos, y arma la final cuando
         quieras.
-      </PanelHeading>
+      </PanelIntro>
 
       {gameDay.champion && (
         <section className="flex flex-col gap-3">
