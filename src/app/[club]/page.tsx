@@ -1,26 +1,18 @@
-import { CalendarDays, Clock, MapPin } from "lucide-react";
+import { CalendarDays } from "lucide-react";
 import type { Metadata } from "next";
 import { EmptyTab } from "./empty-tab";
-import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { cache, Suspense } from "react";
 import { VolleyballLoader } from "@/components/volleyball";
-import { formatDayInLima, formatTimeRangeInLima } from "@/lib/lima-time";
-import { formatSoles } from "@/lib/money";
 import { clubLogoPath, getClubProfile as readClubProfile } from "@/modules/clubs";
 import { listOpenEvents } from "@/modules/events";
-import { SpotsBadge } from "../spots-badge";
-
-const CARD_LOGO_PX = 48;
+import { EVENT_LIST_CLASS, UpcomingEventCard } from "../upcoming-event-card";
 
 type Params = PageProps<"/[club]">["params"];
 
 // Metadata and page read the same profile in one request.
 const getClubProfile = cache(readClubProfile);
-
-type OpenEvent = NonNullable<Awaited<ReturnType<typeof listOpenEvents>>>[number];
 
 // Shown when the link is shared on WhatsApp or Instagram; the OG image comes with HU-17.
 export async function generateMetadata({ params }: PageProps<"/[club]">): Promise<Metadata> {
@@ -70,64 +62,23 @@ async function PublicClubContent({ params }: { params: Params }) {
             Este club no tiene convocatorias abiertas por ahora.
           </EmptyTab>
         ) : (
-          <ul className="flex flex-col gap-3">
+          // The same card as the home page's upcoming events.
+          <ul className={EVENT_LIST_CLASS}>
             {events.map((event) => (
-              <li key={event.id}>
-                <EventCard
-                  clubSlug={slug}
-                  event={event}
-                  logoSrc={club.logoKey ? clubLogoPath(club.logoKey) : null}
-                />
-              </li>
+              <UpcomingEventCard
+                key={event.id}
+                event={{
+                  ...event,
+                  endsAt: event.endsAt ?? null,
+                  href: `/c/${slug}/${event.id}`,
+                  clubName: club.name,
+                  clubLogoUrl: club.logoKey ? clubLogoPath(club.logoKey) : null,
+                }}
+              />
             ))}
           </ul>
         )}
       </section>
     </>
-  );
-}
-
-function EventCard({
-  clubSlug,
-  event,
-  logoSrc,
-}: {
-  clubSlug: string;
-  event: OpenEvent;
-  logoSrc: string | null;
-}) {
-  return (
-    <Link href={`/c/${clubSlug}/${event.id}`} className="card-interactive flex flex-col gap-3 p-4">
-      <span className="flex items-center gap-3">
-        {logoSrc && (
-          <Image
-            src={logoSrc}
-            alt=""
-            width={CARD_LOGO_PX}
-            height={CARD_LOGO_PX}
-            unoptimized
-            className="size-12 shrink-0 rounded-full border border-zinc-200 bg-white object-cover dark:border-zinc-700"
-          />
-        )}
-        <span className="flex min-w-0 flex-col">
-          <span className="font-semibold leading-tight">{event.title}</span>
-          <span className="text-sm text-muted-foreground first-letter:uppercase">
-            {formatDayInLima(event.startsAt)}
-          </span>
-          <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
-            <Clock className="size-3.5 shrink-0" aria-hidden />
-            {formatTimeRangeInLima(event)}
-          </span>
-        </span>
-      </span>
-      <span className="flex min-w-0 items-center gap-1.5 text-sm text-primary">
-        <MapPin className="size-3.5 shrink-0" aria-hidden />
-        <span className="truncate">{event.venueName}</span>
-      </span>
-      <span className="flex items-center justify-between gap-3">
-        <span className="text-sm font-semibold">{formatSoles(event.priceCents)}</span>
-        <SpotsBadge free={event.remainingSpots} capacity={event.capacity} />
-      </span>
-    </Link>
   );
 }
