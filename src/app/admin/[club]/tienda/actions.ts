@@ -129,7 +129,9 @@ export async function saveProductAction(
 
 /** The files picked in the form's photo input, leaving out the empty one browsers send. */
 function chosenPhotos(formData: FormData): File[] {
-  return formData.getAll("photos").filter((value) => value instanceof File && value.size > 0) as File[];
+  return formData
+    .getAll("photos")
+    .filter((value) => value instanceof File && value.size > 0) as File[];
 }
 
 const productRefSchema = z.object({ clubSlug: z.string().min(1), productId: z.string().min(1) });

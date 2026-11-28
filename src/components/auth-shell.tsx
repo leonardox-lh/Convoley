@@ -51,11 +51,7 @@ function BrandPanel() {
 
       <div className="-ml-2 flex items-center gap-1 self-start">
         <BackButton />
-        <Link
-          href="/"
-          aria-label="Convoley, ir al inicio"
-          data-ball-on-dark
-        >
+        <Link href="/" aria-label="Convoley, ir al inicio" data-ball-on-dark>
           <Logo />
         </Link>
       </div>

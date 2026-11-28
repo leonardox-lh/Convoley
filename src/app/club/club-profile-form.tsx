@@ -59,7 +59,11 @@ export function ClubProfileForm(props: {
           float="always"
           hint="Si lo dejas vacío, lo armamos con el nombre. Luego no se puede cambiar."
         >
-          <input name="slug" placeholder="voley-miraflores" className={cn(fieldClass, "pl-[6.75rem]")} />
+          <input
+            name="slug"
+            placeholder="voley-miraflores"
+            className={cn(fieldClass, "pl-[6.75rem]")}
+          />
           <span className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-base text-muted-foreground">
             convoley.pe/
           </span>

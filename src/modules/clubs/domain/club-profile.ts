@@ -40,7 +40,8 @@ export function validateClubProfile(props: ClubProfileProps): ClubProfileProps {
 }
 
 function validateContactPhone(phone: string | null): string | null {
-  if (phone !== null && !NORMALIZED_PERU_MOBILE.test(phone)) throw new InvalidContactPhoneError(phone);
+  if (phone !== null && !NORMALIZED_PERU_MOBILE.test(phone))
+    throw new InvalidContactPhoneError(phone);
   return phone;
 }
 

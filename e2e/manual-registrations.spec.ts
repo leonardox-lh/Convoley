@@ -32,7 +32,8 @@ test("HU-08 criterios 1 y 2: agregar pagado, agregar y marcar pagado manual, y q
   async function addPlayer(firstName: string, paid: boolean) {
     // The panel stays open after adding someone; clicking its summary again would close it.
     const panel = page.locator("details", { hasText: "Agregar jugador" });
-    if ((await panel.getAttribute("open")) === null) await page.getByText("Agregar jugador").click();
+    if ((await panel.getAttribute("open")) === null)
+      await page.getByText("Agregar jugador").click();
     await page.getByLabel("Nombre").fill(firstName);
     await page.getByLabel("Apellido").fill("Manual");
     await page.getByLabel("Celular").fill(randomPhone());

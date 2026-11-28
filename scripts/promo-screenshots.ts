@@ -35,13 +35,16 @@ async function capture(page: Page, name: string, fullPage = true) {
 async function saveImage(page: Page, name: string, path: string) {
   // A dev server in a bad state can drop image responses; scripts/promo-images.tsx renders them anyway.
   const response = await page.request.get(BASE + path).catch(() => null);
-  if (!response?.ok()) return console.warn(`! ${name}: ${path} failed, use scripts/promo-images.tsx`);
+  if (!response?.ok())
+    return console.warn(`! ${name}: ${path} failed, use scripts/promo-images.tsx`);
   writeFileSync(join(OUT, `${name}.png`), await response.body());
   console.info("✓", name);
 }
 
 async function eventIds() {
-  const db = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL! }) });
+  const db = new PrismaClient({
+    adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL! }),
+  });
   try {
     const idOf = async (title: string) => {
       const event = await db.event.findFirst({
@@ -61,7 +64,13 @@ async function main() {
   const browser = await chromium.launch();
   // Skips the first-visit intro animation, which would cover the page.
   const skipIntro = "localStorage.setItem('convoley:intro-seen', '1')";
-  const phone = await browser.newContext({ viewport: PHONE, deviceScaleFactor: 3, isMobile: true, hasTouch: true, locale: "es-PE" });
+  const phone = await browser.newContext({
+    viewport: PHONE,
+    deviceScaleFactor: 3,
+    isMobile: true,
+    hasTouch: true,
+    locale: "es-PE",
+  });
   await phone.addInitScript(skipIntro);
   const page = await phone.newPage();
 
@@ -77,7 +86,10 @@ async function main() {
 
   await shot(page, "admin-home", admin);
   await shot(page, "admin-event", event(ids.mixed));
-  await page.getByText(/^En revisión \(/).first().click();
+  await page
+    .getByText(/^En revisión \(/)
+    .first()
+    .click();
   await page.waitForTimeout(800);
   await page.waitForLoadState("networkidle");
   await capture(page, "admin-event-review");
@@ -94,7 +106,11 @@ async function main() {
   await saveImage(page, "image-list-post", `${event(ids.mixed)}/imagen?formato=post`);
   await saveImage(page, "image-flyer-story", `${event(ids.mixed)}/flyer?formato=historia`);
   await saveImage(page, "image-teams-story", `${event(ids.live)}/equipos/imagen?formato=historia`);
-  await saveImage(page, "image-matches-story", `${event(ids.live)}/partidos/imagen?formato=historia`);
+  await saveImage(
+    page,
+    "image-matches-story",
+    `${event(ids.live)}/partidos/imagen?formato=historia`,
+  );
 
   // The live event's list (check-in marks) and the check-in page of one player.
   await shot(page, "admin-live-event", event(ids.live));
@@ -105,7 +121,12 @@ async function main() {
   else console.warn("! no check-in link on the live event page");
 
   // Desktop: the same panel on a computer.
-  const desktop = await browser.newContext({ viewport: DESKTOP, deviceScaleFactor: 2, locale: "es-PE", storageState: await phone.storageState() });
+  const desktop = await browser.newContext({
+    viewport: DESKTOP,
+    deviceScaleFactor: 2,
+    locale: "es-PE",
+    storageState: await phone.storageState(),
+  });
   await desktop.addInitScript(skipIntro);
   const desk = await desktop.newPage();
   await shot(desk, "desktop-admin-home", admin, false);
@@ -114,7 +135,13 @@ async function main() {
   await shot(desk, "desktop-club", `/${CLUB}`, false);
 
   // Player side, signed out.
-  const player = await browser.newContext({ viewport: PHONE, deviceScaleFactor: 3, isMobile: true, hasTouch: true, locale: "es-PE" });
+  const player = await browser.newContext({
+    viewport: PHONE,
+    deviceScaleFactor: 3,
+    isMobile: true,
+    hasTouch: true,
+    locale: "es-PE",
+  });
   await player.addInitScript(skipIntro);
   const p = await player.newPage();
   await shot(p, "club-home", `/${CLUB}`);
