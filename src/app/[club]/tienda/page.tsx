@@ -1,3 +1,4 @@
+import { ShoppingBag } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -6,6 +7,7 @@ import { formatInLima } from "@/lib/lima-time";
 import { clubLogoPath, findClubBySlug } from "@/modules/clubs";
 import { listOpenEvents } from "@/modules/events";
 import { listProducts, MAX_QUANTITY_PER_ITEM } from "@/modules/store";
+import { EmptyTab } from "../empty-tab";
 import { StoreCart } from "./store-cart";
 
 type Props = PageProps<"/[club]/tienda">;
@@ -36,7 +38,7 @@ async function StoreContent({ params }: Pick<Props, "params">) {
     <>
       <h1 className="sr-only">Tienda</h1>
       {products.length === 0 ? (
-        <p className="text-sm text-zinc-500">Este club aún no tiene productos a la venta.</p>
+        <EmptyTab icon={ShoppingBag}>Este club aún no tiene productos a la venta.</EmptyTab>
       ) : !events?.length ? (
         <p className="text-sm text-zinc-500">
           Los pedidos se recogen en una convocatoria y ahora no hay ninguna abierta. Vuelve pronto.

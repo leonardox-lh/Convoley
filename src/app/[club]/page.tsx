@@ -1,4 +1,6 @@
+import { CalendarDays } from "lucide-react";
 import type { Metadata } from "next";
+import { EmptyTab } from "./empty-tab";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -64,9 +66,9 @@ async function PublicClubContent({ params }: { params: Params }) {
           Convocatorias
         </h2>
         {events.length === 0 ? (
-          <p className="text-sm text-zinc-500">
+          <EmptyTab icon={CalendarDays}>
             Este club no tiene convocatorias abiertas por ahora.
-          </p>
+          </EmptyTab>
         ) : (
           <ul className="flex flex-col gap-3">
             {events.map((event) => (

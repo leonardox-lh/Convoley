@@ -1,3 +1,4 @@
+import { Ticket } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -14,6 +15,7 @@ import { REGISTRATION_STATUS_BADGE_CLASSES } from "../../registration-status";
 import { planTermsText } from "../../plan-terms";
 import { signInToBuyPlanAction } from "./actions";
 import { BuyPlanForm } from "./buy-plan-form";
+import { EmptyTab } from "../empty-tab";
 
 type Props = PageProps<"/[club]/planes">;
 
@@ -102,9 +104,7 @@ async function PlansContent({ params, searchParams }: Props) {
           )}
         </section>
       )}
-      {plans.length === 0 && (
-        <p className="text-sm text-zinc-500">Este club aún no ofrece planes.</p>
-      )}
+      {plans.length === 0 && <EmptyTab icon={Ticket}>Este club aún no ofrece planes.</EmptyTab>}
       <ul className="flex flex-col gap-4">
         {plans.map((plan) => (
           <li
