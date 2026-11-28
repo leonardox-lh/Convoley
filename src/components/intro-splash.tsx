@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Logo } from "./logo";
-import { VolleyballIcon } from "./volleyball";
+import { Ball, Logo } from "./logo";
 
 /** Read by the inline script in the root layout too, so returning visitors never see a flash of it. */
 const SEEN_KEY = "convoley:intro-seen";
@@ -163,8 +162,13 @@ export function IntroSplash() {
         ref={hitRef}
         className="pointer-events-none absolute top-0 left-0 z-[3] -mt-5 -ml-5 size-10 rounded-full border-[3px] border-brand-ball opacity-0"
       />
-      <span ref={flyRef} className="pointer-events-none absolute top-0 left-0 z-[3] opacity-0">
-        <VolleyballIcon className="size-full" />
+      {/* The same glossy ball as the wordmark, so it lands as one of its "o". */}
+      <span
+        ref={flyRef}
+        data-ball-on-dark
+        className="pointer-events-none absolute top-0 left-0 z-[3] opacity-0"
+      >
+        <Ball className="size-full" />
       </span>
     </div>
   );

@@ -30,14 +30,14 @@ export function Logo({ className, size = "md" }: { className?: string; size?: "m
  * White shine with a blue and a gold panel. On white pages a thin dark outline keeps it visible;
  * on dark backgrounds the outline goes away (--logo-ball-outline, globals.css).
  */
-function Ball() {
+export function Ball({
+  className = "mx-[0.015em] size-[0.56em] shrink-0 translate-y-[0.02em]",
+}: {
+  className?: string;
+}) {
   const shineId = useId();
   return (
-    <svg
-      viewBox="2.25 2.25 19.5 19.5"
-      aria-hidden
-      className="mx-[0.015em] size-[0.56em] shrink-0 translate-y-[0.02em]"
-    >
+    <svg viewBox="2.25 2.25 19.5 19.5" aria-hidden className={className}>
       <defs>
         <radialGradient id={shineId} cx="0.36" cy="0.3" r="0.8">
           <stop offset="0" stopColor="#ffffff" />
