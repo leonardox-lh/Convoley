@@ -19,6 +19,7 @@ import {
   type RegistrationStatus,
 } from "@/modules/registrations";
 import { LEVEL_LABELS, POSITION_LABELS } from "../../../../player-labels";
+import { PlayerDetailsTrigger } from "../../../../player-details";
 import { REGISTRATION_STATUS_BADGE_CLASSES } from "../../../../registration-status";
 import { requireOrganizer } from "../../require-organizer";
 import { EventHero } from "../../../../event-hero";
@@ -119,7 +120,7 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
         action={
           <CopyButton
             text={`${origin}/c/${clubSlug}/${event.id}`}
-            label="Copiar link"
+            label="Link convocatoria"
             showLabel
             className="border-white/30 bg-white/15 text-white hover:bg-white/25 hover:text-white"
           />
@@ -143,7 +144,10 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
         {canManage && (
           <Link
             href={`${basePath}/editar`}
-            className={buttonVariants({ variant: "outline", className: "h-10 flex-1 gap-1.5" })}
+            className={cn(
+              buttonVariants({ variant: "outline" }),
+              "h-10 flex-1 gap-1.5 border-primary text-primary hover:bg-primary/10 hover:text-primary",
+            )}
           >
             <Pencil aria-hidden />
             Editar convocatoria
@@ -151,7 +155,10 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
         )}
         <Link
           href={`${basePath}/equipos`}
-          className={buttonVariants({ variant: "outline", className: "h-10 flex-1 gap-1.5" })}
+          className={cn(
+            buttonVariants({ variant: "outline" }),
+            "h-10 flex-1 gap-1.5 border-primary text-primary hover:bg-primary/10 hover:text-primary",
+          )}
         >
           <Users aria-hidden />
           Armar equipos
@@ -159,7 +166,11 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
       </div>
 
       {event.status === "published" && (
-        <AddPlayerForm clubSlug={clubSlug} eventId={event.id} isMixed={event.isMixed} />
+        <AddPlayerForm
+          clubSlug={clubSlug}
+          eventId={event.id}
+          isMixed={event.category === "mixed"}
+        />
       )}
 
       {!status && (event.status === "published" || event.status === "full") && (
@@ -214,7 +225,16 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
                       ? `E${index - waitlistStart + 1}`
                       : index + 1}
                   </span>
-                  <div className="min-w-0 flex-1">
+                  <PlayerDetailsTrigger
+                    player={{
+                      name: `${registration.firstName} ${registration.lastName}`.trim(),
+                      gender: registration.gender,
+                      position: registration.position,
+                      level: registration.level,
+                      phone: registration.phone,
+                    }}
+                    className="min-w-0 flex-1"
+                  >
                     <p className="flex items-center gap-1.5 font-medium">
                       <span className="truncate">
                         {registration.firstName} {registration.lastName}
@@ -231,7 +251,7 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
                           .join(" · ")}
                       </p>
                     )}
-                  </div>
+                  </PlayerDetailsTrigger>
                   <div className="flex shrink-0 flex-col items-end gap-1">
                     <span
                       className={cn(

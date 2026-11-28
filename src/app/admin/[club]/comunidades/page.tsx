@@ -1,6 +1,5 @@
 import { PageHeading } from "@/components/page-heading";
 import { Users } from "lucide-react";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { listCommunities } from "@/modules/clubs";
@@ -26,22 +25,8 @@ async function CommunitiesContent({ params }: Pick<Props, "params">) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeading
-        footer={
-          <>
-            <Link
-              href={`/admin/${clubSlug}/convocatorias/nueva`}
-              className="font-semibold text-white underline-offset-4 hover:underline"
-            >
-              Nueva convocatoria
-            </Link>
-          </>
-        }
-        icon={Users}
-        eyebrow="Gestiona tu club"
-        title="Comunidades"
-      >
-        Separa tus convocatorias como en tus grupos de WhatsApp: General, Amateur, Competitivo…
+      <PageHeading icon={Users} eyebrow="Gestiona tu club" title="Comunidades">
+        Configura los niveles que ofrece tu club: Básico, Intermedio, Avanzado…
       </PageHeading>
       <NewCommunityForm clubSlug={clubSlug} />
       <ul
@@ -49,7 +34,12 @@ async function CommunitiesContent({ params }: Pick<Props, "params">) {
         className="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-800"
       >
         {communities.map((community) => (
-          <CommunityRow key={community.id} clubSlug={clubSlug} {...community} />
+          <CommunityRow
+            key={community.id}
+            clubSlug={clubSlug}
+            isLast={communities.length === 1}
+            {...community}
+          />
         ))}
       </ul>
     </div>

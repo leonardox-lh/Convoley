@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ClubNotFoundError, CommunityNotInClubError, EventInPastError } from "../domain/errors";
 import type { NewEvent } from "../domain/event";
 import { makeCreateEvent, type CreateEventInput } from "./create-event";
-import { fakeEventRepository } from "./fakes";
+import { fakeEventRepository, fakeVenueBook } from "./fakes";
 import type { ClubReader, EventRepository } from "./ports";
 
 const NOW = new Date("2026-12-01T12:00:00.000Z");
@@ -22,7 +22,8 @@ function setup() {
       return { id: "evt-1" };
     },
   });
-  return { saved, createEvent: makeCreateEvent({ clubs, events, now: () => NOW }) };
+  const venues = fakeVenueBook();
+  return { saved, venues, createEvent: makeCreateEvent({ clubs, events, venues, now: () => NOW }) };
 }
 
 const input = (overrides: Partial<CreateEventInput> = {}): CreateEventInput => ({
@@ -34,7 +35,7 @@ const input = (overrides: Partial<CreateEventInput> = {}): CreateEventInput => (
   mapsUrl: null,
   priceCents: 1500,
   capacity: 18,
-  isMixed: false,
+  category: "men" as const,
   rules: null,
   status: "published",
   ...overrides,
@@ -74,5 +75,13 @@ describe("HU-04: createEvent", () => {
       EventInPastError,
     );
     expect(saved).toHaveLength(0);
+  });
+
+  it("guarda el lugar en la lista del club", async () => {
+    const { createEvent, venues } = setup();
+    await createEvent(input());
+    expect((await venues.listInClub(club.id)).map((venue) => venue.name)).toEqual([
+      input().venueName,
+    ]);
   });
 });

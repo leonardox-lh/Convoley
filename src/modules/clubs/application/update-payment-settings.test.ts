@@ -21,6 +21,7 @@ function fakeSettings(initial: ClubPaymentSettings | null) {
 }
 
 const empty = {
+  paymentApp: null,
   paymentPhone: null,
   paymentHolderName: null,
   paymentQrKey: null,
@@ -30,6 +31,7 @@ const empty = {
 };
 const input = {
   clubSlug: "voley-miraflores",
+  paymentApp: "plin" as const,
   paymentPhone: "+51987654321",
   paymentHolderName: "Ana Paz",
   qr: null,
@@ -63,10 +65,14 @@ describe("HU-13 criterio 1: subir la imagen del QR", () => {
 });
 
 describe("HU-13 criterio 2: número y titular visibles para el jugador", () => {
-  it("HU-13: guarda número y titular", async () => {
+  it("HU-13: guarda app, número y titular", async () => {
     const { settings, current } = fakeSettings(empty);
     await makeUpdatePaymentSettings({ settings, images: fakeLogoStorage().storage })(input);
-    expect(current()).toMatchObject({ paymentPhone: "+51987654321", paymentHolderName: "Ana Paz" });
+    expect(current()).toMatchObject({
+      paymentApp: "plin",
+      paymentPhone: "+51987654321",
+      paymentHolderName: "Ana Paz",
+    });
   });
 
   it("HU-13: falla si el club no existe", async () => {

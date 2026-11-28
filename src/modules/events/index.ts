@@ -12,6 +12,8 @@ import {
 } from "./application/recurring-events";
 import { makeSetCourtCost } from "./application/set-court-cost";
 import { makeUpdateEvent } from "./application/update-event";
+import { makeListClubVenues, makeRemoveClubVenue } from "./application/venues";
+import { prismaVenueBook } from "./infrastructure/prisma-venue-book";
 import { prismaRecurringEventRepository } from "./infrastructure/prisma-recurring-event-repository";
 import { isClubWritable } from "./infrastructure/billing-adapter";
 import { prismaCourtCostWriter } from "./infrastructure/prisma-event-summaries";
@@ -26,13 +28,14 @@ const events = new PrismaEventRepository(db);
 const transactions = prismaTransactions(db);
 const now = () => new Date();
 const recurring = prismaRecurringEventRepository(db);
+const venues = prismaVenueBook(db);
 const publishDue = makePublishDueOccurrences({ recurring, now });
 // HU-35: a read-only club keeps its published dates but gets no new recurring ones.
 const publishDueOccurrences = async (clubId: string) => {
   if (await isClubWritable(clubId)) await publishDue(clubId);
 };
 
-export const createEvent = makeCreateEvent({ clubs: clubsAdapter, events, now });
+export const createEvent = makeCreateEvent({ clubs: clubsAdapter, events, venues, now });
 export const getPublicEvent = makeGetPublicEvent({ clubs: clubsAdapter, events });
 export const listOpenEvents = makeListOpenEvents({
   clubs: clubsAdapter,
@@ -58,6 +61,7 @@ export const updateEvent = makeUpdateEvent({
   events,
   registrations: registrationsAdapter,
   transactions,
+  venues,
   now,
 });
 export const cancelEvent = makeCancelEvent({
@@ -71,7 +75,7 @@ export const cancelEvent = makeCancelEvent({
 });
 
 // HU-28: weekly events.
-const recurringDeps = { clubs: clubsAdapter, recurring, now };
+const recurringDeps = { clubs: clubsAdapter, recurring, venues, now };
 export const createRecurringEvent = makeCreateRecurringEvent(recurringDeps);
 export const listRecurringEvents = makeListRecurringEvents(recurringDeps);
 export const setRecurringEventPaused = makeSetRecurringEventPaused(recurringDeps);
@@ -98,8 +102,10 @@ export type { UpdateEventInput } from "./application/update-event";
 export type { CancelEventInput } from "./application/cancel-event";
 export {
   CANCELLATION_OUTCOMES,
+  EVENT_CATEGORIES,
   EVENT_STATUSES,
   type CancellationOutcome,
+  type EventCategory,
   type EventStatus,
   type InitialEventStatus,
   spotsLevel,
@@ -121,3 +127,8 @@ export {
   InvalidRecurrenceError,
   RecurringEventNotFoundError,
 } from "./domain/errors";
+
+// The club's own list of courts.
+export const listClubVenues = makeListClubVenues({ clubs: clubsAdapter, venues });
+export const removeClubVenue = makeRemoveClubVenue({ clubs: clubsAdapter, venues });
+export type { SavedVenue } from "./application/ports";

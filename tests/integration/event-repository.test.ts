@@ -58,7 +58,7 @@ const baseEvent = () => ({
   mapsUrl: null,
   priceCents: 1250,
   capacity: 18,
-  isMixed: true,
+  category: "mixed" as const,
   rules: null,
   status: "published" as const,
 });

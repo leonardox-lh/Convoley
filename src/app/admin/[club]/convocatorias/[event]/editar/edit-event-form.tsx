@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import type { SavedVenue } from "@/components/location-picker";
 import { Button } from "@/components/ui/button";
 import type { EventStatus } from "@/modules/events";
 import {
@@ -19,6 +20,7 @@ export function EditEventForm(props: {
   minDate: string;
   confirmedCount: number;
   defaults: EventFieldValues;
+  savedVenues: SavedVenue[];
 }) {
   const [state, formAction, pending] = useActionState<UpdateEventState, FormData>(
     updateEventAction,
@@ -35,6 +37,7 @@ export function EditEventForm(props: {
         minDate={props.minDate}
         minCapacity={Math.max(1, props.confirmedCount)}
         defaults={props.defaults}
+        savedVenues={props.savedVenues}
       />
       {props.confirmedCount > 0 && (
         <p className="-mt-2 text-sm text-zinc-500">

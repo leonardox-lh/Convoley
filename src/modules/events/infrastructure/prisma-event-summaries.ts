@@ -15,6 +15,7 @@ export async function listEventSummaries(eventIds: string[]) {
       priceCents: true,
       clubId: true,
       communityId: true,
+      category: true,
     },
   });
   const clubs = new Map(

@@ -63,7 +63,14 @@ export function fakeCommunityRepository(
   const repository: CommunityRepository = {
     findClubId: async (slug) => (slug === "club-1" ? "club-1" : null),
     list: async (clubId) =>
-      rows.filter((row) => row.clubId === clubId).map(({ id, name }) => ({ id, name })),
+      rows
+        .filter((row) => row.clubId === clubId)
+        .map(({ id, name }) => ({
+          id,
+          name,
+          eventCount: inUse.includes(id) ? 1 : 0,
+          recurringEventCount: 0,
+        })),
     async create(clubId, name) {
       if (rows.some((row) => row.clubId === clubId && row.name === name)) {
         throw new CommunityNameTakenError(name);

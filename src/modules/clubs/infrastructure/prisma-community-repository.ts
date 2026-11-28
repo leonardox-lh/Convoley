@@ -16,12 +16,22 @@ export function prismaCommunityRepository(db: PrismaClient): CommunityRepository
       return club?.id ?? null;
     },
 
-    list: (clubId) =>
-      db.community.findMany({
+    async list(clubId) {
+      const rows = await db.community.findMany({
         where: { clubId },
-        select: { id: true, name: true },
+        select: {
+          id: true,
+          name: true,
+          _count: { select: { events: true, recurringEvents: true } },
+        },
         orderBy: { createdAt: "asc" },
-      }),
+      });
+      return rows.map(({ _count, ...community }) => ({
+        ...community,
+        eventCount: _count.events,
+        recurringEventCount: _count.recurringEvents,
+      }));
+    },
 
     async create(clubId, name) {
       try {

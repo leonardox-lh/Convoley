@@ -12,6 +12,10 @@ import {
 
 export const EVENT_STATUSES = ["draft", "published", "full", "closed", "cancelled"] as const;
 export type EventStatus = (typeof EVENT_STATUSES)[number];
+// Who plays; mixed events ask each player's gender (minimum of women per team).
+export const EVENT_CATEGORIES = ["mixed", "men", "women"] as const;
+export type EventCategory = (typeof EVENT_CATEGORIES)[number];
+
 /** A new event is either saved as a draft or published right away. */
 export type InitialEventStatus = Extract<EventStatus, "draft" | "published">;
 
@@ -41,7 +45,7 @@ export interface EventDetailsProps {
   mapsUrl: string | null;
   priceCents: number;
   capacity: number;
-  isMixed: boolean;
+  category: EventCategory;
   /** Players' names are public on the event page; false when left out. */
   showRoster?: boolean;
   rules: string | null;

@@ -8,7 +8,13 @@ import { requireOrganizerToEdit } from "../../require-organizer";
 export type CreateEventState =
   | { status: "idle" }
   | { status: "error"; message: string }
-  | { status: "created"; sharePath: string; editPath: string; published: boolean };
+  | {
+      status: "created";
+      sharePath: string;
+      editPath: string;
+      flyerPath: string;
+      published: boolean;
+    };
 
 const intentSchema = z.object({ intent: z.enum(["draft", "published"]) });
 
@@ -31,6 +37,7 @@ export async function createEventAction(
       status: "created",
       sharePath,
       editPath: `/admin/${details.data.clubSlug}/convocatorias/${id}/editar`,
+      flyerPath: `/admin/${details.data.clubSlug}/convocatorias/${id}/flyer`,
       published: intent.data.intent === "published",
     };
   } catch (error) {

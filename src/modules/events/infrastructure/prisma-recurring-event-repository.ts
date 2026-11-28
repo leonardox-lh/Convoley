@@ -39,7 +39,7 @@ export function prismaRecurringEventRepository(db: PrismaClient): RecurringEvent
           mapsUrl: template.mapsUrl,
           priceCents: template.priceCents,
           capacity: template.capacity,
-          isMixed: template.isMixed,
+          category: template.category,
           showRoster: template.showRoster,
           rules: template.rules,
           startsAt: slot,

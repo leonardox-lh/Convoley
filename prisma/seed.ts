@@ -76,7 +76,7 @@ async function seed(db: PrismaClient) {
         mapsUrl: "https://maps.google.com/?q=Coliseo+Manuel+Bonilla",
         priceCents: EVENT_PRICE_CENTS,
         capacity: EVENT_CAPACITY,
-        isMixed: true,
+        category: "mixed" as const,
         status: "published",
       },
     });

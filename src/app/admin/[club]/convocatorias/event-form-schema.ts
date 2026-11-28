@@ -2,6 +2,7 @@ import { z } from "zod";
 import { limaDateTimeToUtc } from "@/lib/lima-time";
 import { solesToCents } from "@/lib/money";
 import {
+  EVENT_CATEGORIES,
   CapacityBelowConfirmedError,
   ClubNotFoundError,
   CommunityNotInClubError,
@@ -57,10 +58,7 @@ const eventFieldsObject = z.object({
   capacity: z.coerce
     .number("Escribe cuántos cupos hay.")
     .max(MAX_CAPACITY, `Puedes abrir hasta ${MAX_CAPACITY} cupos.`),
-  isMixed: z
-    .literal("on")
-    .optional()
-    .transform((value) => value === "on"),
+  category: z.enum(EVENT_CATEGORIES, "Elige la categoría."),
   showRoster: z
     .literal("on")
     .optional()

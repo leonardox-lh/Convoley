@@ -1,4 +1,11 @@
-import type { EventDetails, EventRepository, TransactionContext, TransactionRunner } from "./ports";
+import type {
+  EventDetails,
+  EventRepository,
+  SavedVenue,
+  TransactionContext,
+  TransactionRunner,
+  VenueBook,
+} from "./ports";
 
 // Shared by the application tests: fakes of the ports with the same contract as the real ones.
 export const FAKE_TX = { fake: true } as unknown as TransactionContext;
@@ -16,6 +23,34 @@ export function fakeEventRepository(overrides: Partial<EventRepository> = {}): E
     markCancelled: async () => undefined,
     ...overrides,
   };
+}
+
+/** In memory, same rules as the Prisma one: one entry per club and name, newest first. */
+export function fakeVenueBook() {
+  const rows: (SavedVenue & { clubId: string; usedAt: number })[] = [];
+  let clock = 0;
+  const book: VenueBook = {
+    remember: async (clubId, { name, mapsUrl }) => {
+      clock += 1;
+      const existing = rows.find((row) => row.clubId === clubId && row.name === name.trim());
+      if (!existing) {
+        rows.push({ id: `venue-${clock}`, clubId, name: name.trim(), mapsUrl, usedAt: clock });
+        return;
+      }
+      existing.usedAt = clock;
+      if (mapsUrl) existing.mapsUrl = mapsUrl;
+    },
+    listInClub: async (clubId) =>
+      rows
+        .filter((row) => row.clubId === clubId)
+        .sort((a, b) => b.usedAt - a.usedAt)
+        .map(({ id, name, mapsUrl }) => ({ id, name, mapsUrl })),
+    remove: async (clubId, venueId) => {
+      const index = rows.findIndex((row) => row.id === venueId && row.clubId === clubId);
+      if (index >= 0) rows.splice(index, 1);
+    },
+  };
+  return book;
 }
 
 export const CLUB = {
@@ -37,7 +72,7 @@ export function eventDetails(overrides: Partial<EventDetails> = {}): EventDetail
     mapsUrl: null,
     priceCents: 1500,
     capacity: 18,
-    isMixed: false,
+    category: "men" as const,
     rules: null,
     status: "published",
     cancellationOutcome: null,

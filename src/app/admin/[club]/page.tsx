@@ -1,5 +1,4 @@
 import {
-  BadgeCheck,
   ChartColumn,
   ChevronRight,
   Clock,
@@ -59,7 +58,6 @@ const ADMIN_LINKS: [string, string, LucideIcon][] = [
   ["tienda", "Tienda", ShoppingBag],
   ["planes", "Planes", Ticket],
   ["finanzas", "Finanzas", ChartColumn],
-  ["suscripcion", "Suscripción", BadgeCheck],
   ["organizadores", "Organizadores", UserCog],
 ];
 

@@ -1,17 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useActionState } from "react";
+import { CopyButton } from "@/components/copy-button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import type { SavedVenue } from "@/components/location-picker";
 import { EventFields, fieldClass, FormMessage, submitKeepingValues } from "../event-fields";
+import { canShareImages, useShareImage } from "../[event]/share-image";
+import { ShareButtonContent } from "../[event]/share-image-section";
 import { createEventAction, type CreateEventState } from "./actions";
-
-const COPIED_FEEDBACK_MS = 2000;
 
 export function CreateEventForm(props: {
   clubSlug: string;
   communities: { id: string; name: string }[];
   minDate: string;
+  defaultDate: string;
+  savedVenues: SavedVenue[];
 }) {
   const [state, formAction, pending] = useActionState<CreateEventState, FormData>(
     createEventAction,
@@ -54,20 +59,18 @@ export function CreateEventForm(props: {
 function ShareLink({
   sharePath,
   editPath,
+  flyerPath,
   published,
 }: {
   sharePath: string;
   editPath: string;
+  flyerPath: string;
   published: boolean;
 }) {
-  const [copied, setCopied] = useState(false);
   const url = `${window.location.origin}${sharePath}`;
-
-  async function copy() {
-    await navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), COPIED_FEEDBACK_MS);
-  }
+  // Phones share the flyer plus the link; elsewhere WhatsApp only takes text.
+  const withFlyer = canShareImages();
+  const { status, failed, share } = useShareImage(flyerPath, "convocatoria.png", url);
 
   return (
     <section className="flex flex-col gap-3">
@@ -79,25 +82,46 @@ function ShareLink({
           ? "Comparte este link en tu grupo de WhatsApp para abrir las inscripciones:"
           : "Este será el link para compartir. Los jugadores podrán abrirlo cuando la publiques."}
       </p>
-      <input
-        readOnly
-        value={url}
-        aria-label="Link para compartir"
-        className={fieldClass}
-        onFocus={(e) => e.target.select()}
-      />
-      <Button type="button" size="lg" className="h-11" onClick={copy}>
-        {copied ? "¡Copiado!" : "Copiar link"}
-      </Button>
-      {published && (
-        <a
-          href={`https://wa.me/?text=${encodeURIComponent(url)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-center text-sm font-medium text-green-700 underline-offset-4 hover:underline dark:text-green-400"
-        >
-          Compartir por WhatsApp
-        </a>
+      <div className="relative">
+        <input
+          readOnly
+          value={url}
+          aria-label="Link para compartir"
+          className={`${fieldClass} pr-12`}
+          onFocus={(e) => e.target.select()}
+        />
+        <CopyButton
+          text={url}
+          label="Copiar link"
+          className="absolute top-1/2 right-1.5 -translate-y-1/2"
+        />
+      </div>
+      {published &&
+        (withFlyer ? (
+          <Button
+            type="button"
+            size="lg"
+            className="h-11 bg-green-600 text-white hover:bg-green-700"
+            disabled={status === "generating"}
+            onClick={share}
+          >
+            <ShareButtonContent status={status}>Compartir por WhatsApp</ShareButtonContent>
+          </Button>
+        ) : (
+          <a
+            href={`https://wa.me/?text=${encodeURIComponent(url)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(
+              buttonVariants({ size: "lg" }),
+              "h-11 bg-green-600 text-white hover:bg-green-700",
+            )}
+          >
+            Compartir por WhatsApp
+          </a>
+        ))}
+      {failed && (
+        <FormMessage tone="error">No pudimos compartir el flyer. Inténtalo otra vez.</FormMessage>
       )}
       <Link
         href={editPath}

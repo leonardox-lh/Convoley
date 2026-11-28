@@ -5,7 +5,7 @@ import { PageHeading, SectionCard } from "@/components/page-heading";
 import { formatSoles } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import { findClubBySlug } from "@/modules/clubs";
-import { listRecurringEvents, MAX_PUBLISH_DAYS_BEFORE } from "@/modules/events";
+import { listRecurringEvents, MAX_PUBLISH_DAYS_BEFORE, listClubVenues } from "@/modules/events";
 import { requireOrganizer } from "../require-organizer";
 import { NewRecurringEventForm, PauseForm } from "./recurring-forms";
 import { startMinuteToTime, WEEKDAY_LABELS } from "./weekdays";
@@ -101,6 +101,7 @@ async function RecurringEventsContent({ params }: Pick<Props, "params">) {
         <NewRecurringEventForm
           clubSlug={clubSlug}
           communities={club.communities}
+          savedVenues={await listClubVenues(club.slug)}
           maxPublishDaysBefore={MAX_PUBLISH_DAYS_BEFORE}
         />
       </SectionCard>

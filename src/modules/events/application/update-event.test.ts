@@ -8,7 +8,14 @@ import {
   EventNotFoundError,
 } from "../domain/errors";
 import type { EventDetails } from "./ports";
-import { CLUB, FAKE_TX, eventDetails, fakeEventRepository, fakeTransactions } from "./fakes";
+import {
+  CLUB,
+  FAKE_TX,
+  eventDetails,
+  fakeEventRepository,
+  fakeTransactions,
+  fakeVenueBook,
+} from "./fakes";
 import { makeUpdateEvent, type UpdateEventInput } from "./update-event";
 
 const NOW = new Date("2026-12-01T12:00:00.000Z");
@@ -16,6 +23,7 @@ const NOW = new Date("2026-12-01T12:00:00.000Z");
 function setup(stored: EventDetails | null, confirmed: number, waiting = 0) {
   const updates: unknown[] = [];
   const updateEvent = makeUpdateEvent({
+    venues: fakeVenueBook(),
     clubs: { findBySlug: async (slug) => (slug === CLUB.slug ? CLUB : null) },
     events: fakeEventRepository({
       lockInClub: async (clubId, id, tx) =>
@@ -46,7 +54,7 @@ const input = (overrides: Partial<UpdateEventInput> = {}): UpdateEventInput => (
   mapsUrl: null,
   priceCents: 1500,
   capacity: 18,
-  isMixed: false,
+  category: "men" as const,
   rules: null,
   publish: false,
   ...overrides,

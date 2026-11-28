@@ -11,6 +11,8 @@ const { seatsText, shareDescription } = await import("./event-preview");
 
 const event = {
   startsAt: new Date("2026-12-06T01:00:00Z"),
+  category: "women" as const,
+  communityName: "Intermedio",
   venueName: "Coliseo Miraflores",
   priceCents: 1500,
   status: "published" as const,
@@ -24,6 +26,10 @@ describe("HU-11 criterio 2: descripción dinámica del link", () => {
     expect(text).toContain("Coliseo Miraflores");
     expect(text).toMatch(/S\/\s15\.00/);
     expect(text).toContain("6 cupos libres");
+  });
+
+  it("incluye la categoría y el nivel", () => {
+    expect(shareDescription(event)).toContain("· Solo mujeres · Intermedio ·");
   });
 
   it.each([

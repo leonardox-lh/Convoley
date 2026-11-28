@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { listEventSummaries } from "@/modules/events";
 import { currentUserId, signIn } from "@/modules/identity";
 import {
   InvalidSecurityCodeError,
@@ -15,6 +16,7 @@ import {
   CancellationNotAllowedError,
   cancelOwnRegistration,
   EventNotOpenError,
+  findRegistrationOverview,
   MercadoPagoUnavailableError,
   NoBalanceError,
   NoCreditError,
@@ -228,7 +230,11 @@ export async function cancelOwnRegistrationAction(
     if (known) return { status: "error", message: known[1] };
     throw error;
   }
-  redirect(`/inscripcion/${encodeURIComponent(parsed.data.registrationId)}?cancelado=${result}`);
+  // Back to the event they left, where the toast says what happened to their payment.
+  const registration = await findRegistrationOverview(parsed.data.registrationId);
+  const [event] = registration ? await listEventSummaries([registration.eventId]) : [];
+  if (!event) redirect(`/inscripcion/${encodeURIComponent(parsed.data.registrationId)}`);
+  redirect(`/c/${event.clubSlug}/${event.id}?cancelado=${result}`);
 }
 
 /** HU-27/HU-30: plan and balance need the sign-up's Google account; come back here after. */

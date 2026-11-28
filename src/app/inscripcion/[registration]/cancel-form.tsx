@@ -14,7 +14,11 @@ export function CancelRegistrationForm(props: { registrationId: string; outcome:
   );
   if (!confirming) {
     return (
-      <Button variant="outline" className="h-11" onClick={() => setConfirming(true)}>
+      <Button
+        variant="outline"
+        className="h-11 border-primary text-primary hover:bg-primary/10 hover:text-primary"
+        onClick={() => setConfirming(true)}
+      >
         Cancelar mi inscripción
       </Button>
     );

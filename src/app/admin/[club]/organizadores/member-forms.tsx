@@ -1,7 +1,9 @@
 "use client";
 
 import { SelectPicker } from "@/components/date-time-pickers";
-import { useActionState, useState } from "react";
+import { Trash2 } from "lucide-react";
+import { useActionState, useRef, useState } from "react";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { fieldClass, FormMessage } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import {
@@ -60,18 +62,40 @@ export function InviteForm({ clubSlug }: { clubSlug: string }) {
   );
 }
 
-export function RemoveMemberForm({ clubSlug, userId }: { clubSlug: string; userId: string }) {
+export function RemoveMemberForm(props: { clubSlug: string; userId: string; name: string }) {
   const [state, action, pending] = useActionState<RemoveMemberState, FormData>(removeMemberAction, {
     status: "idle",
   });
+  const form = useRef<HTMLFormElement>(null);
+  const [confirming, setConfirming] = useState(false);
   return (
-    <form action={action} className="flex flex-col items-end gap-1">
-      <input type="hidden" name="clubSlug" value={clubSlug} />
-      <input type="hidden" name="userId" value={userId} />
-      <Button type="submit" variant="outline" size="sm" disabled={pending}>
-        Quitar
+    <form ref={form} action={action} className="flex flex-col items-end gap-1">
+      <input type="hidden" name="clubSlug" value={props.clubSlug} />
+      <input type="hidden" name="userId" value={props.userId} />
+      <Button
+        type="button"
+        variant="outline"
+        size="icon"
+        className="size-9 border-destructive text-destructive hover:bg-destructive/10 hover:text-destructive"
+        disabled={pending}
+        aria-label={`Quitar a ${props.name} del club`}
+        onClick={() => setConfirming(true)}
+      >
+        <Trash2 aria-hidden />
       </Button>
       {state.status === "error" && <FormMessage tone="error">{state.message}</FormMessage>}
+      {confirming && (
+        <ConfirmDialog
+          title="¿Quitar a este organizador?"
+          description={`${props.name} ya no podrá entrar al panel del club. Puedes volver a invitarlo cuando quieras.`}
+          confirmLabel="Quitar"
+          onConfirm={() => {
+            setConfirming(false);
+            form.current?.requestSubmit();
+          }}
+          onCancel={() => setConfirming(false)}
+        />
+      )}
     </form>
   );
 }

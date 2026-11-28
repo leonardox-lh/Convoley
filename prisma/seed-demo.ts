@@ -156,7 +156,8 @@ function qrSvg() {
   for (let y = 0; y < 25; y++)
     for (let x = 0; x < 25; x++) {
       const finder = (x < 7 && y < 7) || (x > 17 && y < 7) || (x < 7 && y > 17);
-      if (!finder && random() > 0.5) cells.push(`<rect x="${x * 8}" y="${y * 8}" width="8" height="8"/>`);
+      if (!finder && random() > 0.5)
+        cells.push(`<rect x="${x * 8}" y="${y * 8}" width="8" height="8"/>`);
     }
   const finder = (x: number, y: number) =>
     `<rect x="${x}" y="${y}" width="56" height="56" fill="#000"/><rect x="${x + 8}" y="${y + 8}" width="40" height="40" fill="#fff"/><rect x="${x + 16}" y="${y + 16}" width="24" height="24" fill="#000"/>`;
@@ -164,8 +165,13 @@ function qrSvg() {
 }
 
 async function uploadImages() {
-  const { BUCKET_NAME, BUCKET_ENDPOINT, BUCKET_REGION, BUCKET_ACCESS_KEY_ID, BUCKET_SECRET_ACCESS_KEY } =
-    process.env;
+  const {
+    BUCKET_NAME,
+    BUCKET_ENDPOINT,
+    BUCKET_REGION,
+    BUCKET_ACCESS_KEY_ID,
+    BUCKET_SECRET_ACCESS_KEY,
+  } = process.env;
   if (!BUCKET_NAME || !BUCKET_ENDPOINT || !BUCKET_ACCESS_KEY_ID || !BUCKET_SECRET_ACCESS_KEY) {
     throw new Error("Bucket is not configured: set the BUCKET_* variables (see .env.example).");
   }
@@ -176,7 +182,9 @@ async function uploadImages() {
     credentials: { accessKeyId: BUCKET_ACCESS_KEY_ID, secretAccessKey: BUCKET_SECRET_ACCESS_KEY },
   });
   const put = async (key: string, body: Buffer) =>
-    s3.send(new PutObjectCommand({ Bucket: BUCKET_NAME, Key: key, Body: body, ContentType: "image/png" }));
+    s3.send(
+      new PutObjectCommand({ Bucket: BUCKET_NAME, Key: key, Body: body, ContentType: "image/png" }),
+    );
 
   // Same prefixes as the app's storage adapters: logos/ (public images) and vouchers/ (private).
   const keys = {
@@ -233,15 +241,28 @@ async function seed(db: PrismaClient) {
   const images = await uploadImages();
   const now = new Date();
   const random = rng(42);
-  const limaDay = (offsetDays: number) => todayInLima(new Date(now.getTime() + offsetDays * DAY_MS));
+  const limaDay = (offsetDays: number) =>
+    todayInLima(new Date(now.getTime() + offsetDays * DAY_MS));
   const weekdayOf = (date: string) => new Date(`${date}T12:00:00-05:00`).getUTCDay();
 
   const passwordHash = await scryptPasswordHasher.hash(DEMO_PASSWORD);
   const organizer = await db.user.create({
-    data: { name: "Carlos Ramírez", firstName: "Carlos", lastName: "Ramírez", email: `carlos${DEMO_EMAIL_DOMAIN}`, passwordHash },
+    data: {
+      name: "Carlos Ramírez",
+      firstName: "Carlos",
+      lastName: "Ramírez",
+      email: `carlos${DEMO_EMAIL_DOMAIN}`,
+      passwordHash,
+    },
   });
   const helper = await db.user.create({
-    data: { name: "Mafer Torres", firstName: "Mafer", lastName: "Torres", email: `mafer${DEMO_EMAIL_DOMAIN}`, passwordHash },
+    data: {
+      name: "Mafer Torres",
+      firstName: "Mafer",
+      lastName: "Torres",
+      email: `mafer${DEMO_EMAIL_DOMAIN}`,
+      passwordHash,
+    },
   });
 
   const club = await db.club.create({
@@ -257,6 +278,7 @@ async function seed(db: PrismaClient) {
       tiktokUrl: "https://tiktok.com/@voleycostaverde",
       whatsappUrl: "https://chat.whatsapp.com/demo",
       contactPhone: "+51987123456",
+      paymentApp: "yape",
       paymentPhone: "+51987123456",
       paymentHolderName: "Carlos Ramírez",
       paymentQrKey: images.qr,
@@ -276,15 +298,26 @@ async function seed(db: PrismaClient) {
         },
       },
       communities: { create: defaultLevelRows(now) },
-      subscription: { create: { trialEndsAt: new Date(now.getTime() - 10 * DAY_MS), paidUntil: new Date(now.getTime() + 40 * DAY_MS) } },
+      subscription: {
+        create: {
+          trialEndsAt: new Date(now.getTime() - 10 * DAY_MS),
+          paidUntil: new Date(now.getTime() + 40 * DAY_MS),
+        },
+      },
     },
     include: { communities: { orderBy: { createdAt: "asc" } } },
   });
   const [general, , intermediate, competitive] = club.communities;
 
   const venue = {
-    bonilla: { venueName: "Coliseo Manuel Bonilla", mapsUrl: "https://maps.google.com/?q=Coliseo+Manuel+Bonilla+Miraflores" },
-    barranco: { venueName: "Polideportivo de Barranco", mapsUrl: "https://maps.google.com/?q=Polideportivo+Barranco" },
+    bonilla: {
+      venueName: "Coliseo Manuel Bonilla",
+      mapsUrl: "https://maps.google.com/?q=Coliseo+Manuel+Bonilla+Miraflores",
+    },
+    barranco: {
+      venueName: "Polideportivo de Barranco",
+      mapsUrl: "https://maps.google.com/?q=Polideportivo+Barranco",
+    },
   };
 
   // Weekly templates linked to the upcoming dates, so lazy publishing doesn't duplicate them.
@@ -292,17 +325,35 @@ async function seed(db: PrismaClient) {
   const generalDate = limaDay(4);
   const mixedTemplate = await db.recurringEvent.create({
     data: {
-      clubId: club.id, communityId: intermediate.id, title: "Mixto intermedio", weekday: weekdayOf(mixedDate),
-      startMinute: 20 * 60, endMinute: 22 * 60, ...venue.bonilla, priceCents: 1500, capacity: 16,
-      isMixed: true, showRoster: true, publishDaysBefore: 3,
+      clubId: club.id,
+      communityId: intermediate.id,
+      title: "Mixto intermedio",
+      weekday: weekdayOf(mixedDate),
+      startMinute: 20 * 60,
+      endMinute: 22 * 60,
+      ...venue.bonilla,
+      priceCents: 1500,
+      capacity: 16,
+      category: "mixed" as const,
+      showRoster: true,
+      publishDaysBefore: 3,
       rules: "Mínimo 2 chicas por equipo. Llega 10 minutos antes para calentar.",
     },
   });
   const generalTemplate = await db.recurringEvent.create({
     data: {
-      clubId: club.id, communityId: general.id, title: "General · todos los niveles", weekday: weekdayOf(generalDate),
-      startMinute: 10 * 60, endMinute: 12 * 60, ...venue.barranco, priceCents: 1200, capacity: 24,
-      isMixed: true, showRoster: true, publishDaysBefore: 5,
+      clubId: club.id,
+      communityId: general.id,
+      title: "General · todos los niveles",
+      weekday: weekdayOf(generalDate),
+      startMinute: 10 * 60,
+      endMinute: 12 * 60,
+      ...venue.barranco,
+      priceCents: 1200,
+      capacity: 24,
+      category: "mixed" as const,
+      showRoster: true,
+      publishDaysBefore: 5,
     },
   });
 
@@ -315,7 +366,12 @@ async function seed(db: PrismaClient) {
     checkedIn?: boolean;
     method?: "voucher" | "manual";
   };
-  async function addRegistrations(eventId: string, priceCents: number, startsAt: Date, regs: Reg[]) {
+  async function addRegistrations(
+    eventId: string,
+    priceCents: number,
+    startsAt: Date,
+    regs: Reg[],
+  ) {
     for (const [order, reg] of regs.entries()) {
       // Sign-ups trickle in over the days before the event, oldest first.
       const createdAt = new Date(startsAt.getTime() - (3 * DAY_MS - order * 37 * MINUTE_MS));
@@ -331,7 +387,9 @@ async function seed(db: PrismaClient) {
           gender: reg.player.gender,
           status: reg.status,
           teamNumber: reg.teamNumber ?? null,
-          checkedInAt: reg.checkedIn ? new Date(startsAt.getTime() - 10 * MINUTE_MS + order * MINUTE_MS) : null,
+          checkedInAt: reg.checkedIn
+            ? new Date(startsAt.getTime() - 10 * MINUTE_MS + order * MINUTE_MS)
+            : null,
           createdAt,
           ...((paid || reg.status === "in_review") && {
             payments: {
@@ -362,41 +420,84 @@ async function seed(db: PrismaClient) {
   const mixedStart = limaDateTimeToUtc(mixedDate, "20:00");
   const mixed = await db.event.create({
     data: {
-      clubId: club.id, communityId: intermediate.id, title: "Mixto intermedio", startsAt: mixedStart,
-      endsAt: limaDateTimeToUtc(mixedDate, "22:00"), ...venue.bonilla, priceCents: 1500, capacity: 16,
-      isMixed: true, showRoster: true, status: "published", rules: mixedTemplate.rules,
-      recurringEventId: mixedTemplate.id, recurringSlot: mixedStart, courtCostCents: 12000,
+      clubId: club.id,
+      communityId: intermediate.id,
+      title: "Mixto intermedio",
+      startsAt: mixedStart,
+      endsAt: limaDateTimeToUtc(mixedDate, "22:00"),
+      ...venue.bonilla,
+      priceCents: 1500,
+      capacity: 16,
+      category: "mixed" as const,
+      showRoster: true,
+      status: "published",
+      rules: mixedTemplate.rules,
+      recurringEventId: mixedTemplate.id,
+      recurringSlot: mixedStart,
+      courtCostCents: 12000,
     },
   });
   // Andrea Quispe (index 21) is the in-review voucher of the payment scene.
   const mixedPlayers = pick(14, 0).filter((p) => p.playerIndex !== 21);
   await addRegistrations(mixed.id, 1500, mixedStart, [
-    ...mixedPlayers.slice(0, 12).map((p, i) => ({ ...p, status: "paid" as const, method: i === 5 ? ("manual" as const) : undefined })),
+    ...mixedPlayers.slice(0, 12).map((p, i) => ({
+      ...p,
+      status: "paid" as const,
+      method: i === 5 ? ("manual" as const) : undefined,
+    })),
     { player: PLAYERS[21], playerIndex: 21, status: "in_review" },
     { ...mixedPlayers[12], status: "in_review" },
-    { ...mixedPlayers[13] ?? pick(1, 30)[0], status: "pending_payment" },
+    { ...(mixedPlayers[13] ?? pick(1, 30)[0]), status: "pending_payment" },
   ]);
 
   // 2. Saturday general event, half full.
   const generalStart = limaDateTimeToUtc(generalDate, "10:00");
   const generalEvent = await db.event.create({
     data: {
-      clubId: club.id, communityId: general.id, title: "General · todos los niveles", startsAt: generalStart,
-      endsAt: limaDateTimeToUtc(generalDate, "12:00"), ...venue.barranco, priceCents: 1200, capacity: 24,
-      isMixed: true, showRoster: true, status: "published",
-      recurringEventId: generalTemplate.id, recurringSlot: generalStart, courtCostCents: 15000,
+      clubId: club.id,
+      communityId: general.id,
+      title: "General · todos los niveles",
+      startsAt: generalStart,
+      endsAt: limaDateTimeToUtc(generalDate, "12:00"),
+      ...venue.barranco,
+      priceCents: 1200,
+      capacity: 24,
+      category: "mixed" as const,
+      showRoster: true,
+      status: "published",
+      recurringEventId: generalTemplate.id,
+      recurringSlot: generalStart,
+      courtCostCents: 15000,
     },
   });
-  await addRegistrations(generalEvent.id, 1200, generalStart,
-    pick(14, 22).map((p, i) => ({ ...p, status: i < 11 ? ("paid" as const) : ("pending_payment" as const) })));
+  await addRegistrations(
+    generalEvent.id,
+    1200,
+    generalStart,
+    pick(14, 22).map((p, i) => ({
+      ...p,
+      status: i < 11 ? ("paid" as const) : ("pending_payment" as const),
+    })),
+  );
 
   // 3. Game day happening right now: check-in, 3 teams and matches with scores.
-  const liveStart = new Date(Math.floor((now.getTime() - 40 * MINUTE_MS) / (15 * MINUTE_MS)) * 15 * MINUTE_MS);
+  const liveStart = new Date(
+    Math.floor((now.getTime() - 40 * MINUTE_MS) / (15 * MINUTE_MS)) * 15 * MINUTE_MS,
+  );
   const live = await db.event.create({
     data: {
-      clubId: club.id, communityId: competitive.id, title: "Competitivo", startsAt: liveStart,
-      endsAt: new Date(liveStart.getTime() + 2 * 60 * MINUTE_MS), ...venue.bonilla, priceCents: 2000,
-      capacity: 18, isMixed: true, showRoster: true, status: "full", courtCostCents: 14000,
+      clubId: club.id,
+      communityId: competitive.id,
+      title: "Competitivo",
+      startsAt: liveStart,
+      endsAt: new Date(liveStart.getTime() + 2 * 60 * MINUTE_MS),
+      ...venue.bonilla,
+      priceCents: 2000,
+      capacity: 18,
+      category: "mixed" as const,
+      showRoster: true,
+      status: "full",
+      courtCostCents: 14000,
       teamNames: {
         create: [
           { teamNumber: 1, name: "Los Bloqueadores" },
@@ -415,11 +516,24 @@ async function seed(db: PrismaClient) {
     },
   });
   // Teams balanced by hand: 2 women each at least, mixed levels.
-  await addRegistrations(live.id, 2000, liveStart,
-    pick(18, 0).map((p, i) => ({ ...p, status: "paid" as const, teamNumber: (i % 3) + 1, checkedIn: i !== 7 && i !== 16 })));
+  await addRegistrations(
+    live.id,
+    2000,
+    liveStart,
+    pick(18, 0).map((p, i) => ({
+      ...p,
+      status: "paid" as const,
+      teamNumber: (i % 3) + 1,
+      checkedIn: i !== 7 && i !== 16,
+    })),
+  );
   // The live event is full, so a few wait for a seat (the mixed one keeps "1 cupo libre").
-  await addRegistrations(live.id, 2000, liveStart,
-    pick(3, 33).map((p) => ({ ...p, status: "waitlisted" as const })));
+  await addRegistrations(
+    live.id,
+    2000,
+    liveStart,
+    pick(3, 33).map((p) => ({ ...p, status: "waitlisted" as const })),
+  );
 
   // 4. Past dates for the finance panel: two a week for PAST_WEEKS weeks.
   for (let week = 1; week <= PAST_WEEKS; week++) {
@@ -430,53 +544,124 @@ async function seed(db: PrismaClient) {
       const startsAt = limaDateTimeToUtc(date, time);
       const event = await db.event.create({
         data: {
-          clubId: club.id, communityId: template.communityId, title: template.title, startsAt,
-          endsAt: new Date(startsAt.getTime() + 2 * 60 * MINUTE_MS), venueName: template.venueName,
-          mapsUrl: template.mapsUrl, priceCents: price, capacity, isMixed: true, showRoster: true,
-          status: "closed", recurringEventId: template.id, recurringSlot: startsAt, courtCostCents: cost,
+          clubId: club.id,
+          communityId: template.communityId,
+          title: template.title,
+          startsAt,
+          endsAt: new Date(startsAt.getTime() + 2 * 60 * MINUTE_MS),
+          venueName: template.venueName,
+          mapsUrl: template.mapsUrl,
+          priceCents: price,
+          capacity,
+          category: "mixed" as const,
+          showRoster: true,
+          status: "closed",
+          recurringEventId: template.id,
+          recurringSlot: startsAt,
+          courtCostCents: cost,
         },
       });
       // Older weeks a bit emptier: the club has been growing.
-      const filled = Math.min(capacity, Math.round(capacity * (0.62 + (PAST_WEEKS - week) * 0.03 + random() * 0.12)));
-      await addRegistrations(event.id, price, startsAt,
-        pick(filled, week * 5).map((p, i) => ({ ...p, status: "paid" as const, checkedIn: i % 9 !== 4 })));
+      const filled = Math.min(
+        capacity,
+        Math.round(capacity * (0.62 + (PAST_WEEKS - week) * 0.03 + random() * 0.12)),
+      );
+      await addRegistrations(
+        event.id,
+        price,
+        startsAt,
+        pick(filled, week * 5).map((p, i) => ({
+          ...p,
+          status: "paid" as const,
+          checkedIn: i % 9 !== 4,
+        })),
+      );
     }
   }
 
   // ─── store and plans ─────────────────────────────────────────────────────
-  const product = (name: string, description: string, priceCents: number, image: string, sizes: (string | null)[]) =>
+  const product = (
+    name: string,
+    description: string,
+    priceCents: number,
+    image: string,
+    sizes: (string | null)[],
+  ) =>
     db.product.create({
       data: {
-        clubId: club.id, name, description, priceCents, imageKeys: [image],
+        clubId: club.id,
+        name,
+        description,
+        priceCents,
+        imageKeys: [image],
         variants: { create: sizes.map((size, i) => ({ size, stock: 4 + ((i * 5) % 9) })) },
       },
       include: { variants: true },
     });
-  const polo = await product("Polo oficial", "Dry-fit, con el logo del club al pecho.", 4500, images.products.polo, ["S", "M", "L", "XL"]);
-  const kneePads = await product("Rodilleras", "Acolchadas, par. Talla única.", 6000, images.products.kneePads, [null]);
-  await product("Tomatodo", "750 ml, mantiene el agua fría todo el partido.", 2500, images.products.bottle, [null]);
+  const polo = await product(
+    "Polo oficial",
+    "Dry-fit, con el logo del club al pecho.",
+    4500,
+    images.products.polo,
+    ["S", "M", "L", "XL"],
+  );
+  const kneePads = await product(
+    "Rodilleras",
+    "Acolchadas, par. Talla única.",
+    6000,
+    images.products.kneePads,
+    [null],
+  );
+  await product(
+    "Tomatodo",
+    "750 ml, mantiene el agua fría todo el partido.",
+    2500,
+    images.products.bottle,
+    [null],
+  );
   await product("Gorra", "Para el vóley playa de verano.", 3500, images.products.cap, [null]);
 
   const orders = [
     { playerIndex: 3, items: [[polo.variants[1], 1]], status: "paid" },
-    { playerIndex: 7, items: [[kneePads.variants[0], 1], [polo.variants[0], 1]], status: "in_review" },
+    {
+      playerIndex: 7,
+      items: [
+        [kneePads.variants[0], 1],
+        [polo.variants[0], 1],
+      ],
+      status: "in_review",
+    },
     { playerIndex: 14, items: [[polo.variants[2], 2]], status: "delivered" },
   ] as const;
   for (const order of orders) {
     const player = PLAYERS[order.playerIndex];
-    const totalCents = order.items.reduce((sum, [variant, quantity]) => sum + quantity * (variant === kneePads.variants[0] ? 6000 : 4500), 0);
+    const totalCents = order.items.reduce(
+      (sum, [variant, quantity]) =>
+        sum + quantity * (variant === kneePads.variants[0] ? 6000 : 4500),
+      0,
+    );
     await db.order.create({
       data: {
-        clubId: club.id, firstName: player.firstName, lastName: player.lastName, phone: phoneOf(order.playerIndex),
-        pickupEventId: mixed.id, status: order.status, totalCents,
+        clubId: club.id,
+        firstName: player.firstName,
+        lastName: player.lastName,
+        phone: phoneOf(order.playerIndex),
+        pickupEventId: mixed.id,
+        status: order.status,
+        totalCents,
         items: {
           create: order.items.map(([variant, quantity]) => ({
-            variantId: variant.id, quantity, unitPriceCents: variant === kneePads.variants[0] ? 6000 : 4500,
+            variantId: variant.id,
+            quantity,
+            unitPriceCents: variant === kneePads.variants[0] ? 6000 : 4500,
           })),
         },
         payments: {
           create: {
-            clubId: club.id, amountCents: totalCents, method: "voucher", proofFileKey: images.voucher,
+            clubId: club.id,
+            amountCents: totalCents,
+            method: "voucher",
+            proofFileKey: images.voucher,
             status: order.status === "in_review" ? "in_review" : "approved",
           },
         },
@@ -486,23 +671,57 @@ async function seed(db: PrismaClient) {
 
   const communityIds = club.communities.map((c) => c.id);
   const fourDates = await db.plan.create({
-    data: { clubId: club.id, name: "Paquete 4 fechas", priceCents: 5000, creditCount: 4, validityDays: 30, communityIds },
+    data: {
+      clubId: club.id,
+      name: "Paquete 4 fechas",
+      priceCents: 5000,
+      creditCount: 4,
+      validityDays: 30,
+      communityIds,
+    },
   });
   await db.plan.create({
-    data: { clubId: club.id, name: "Mensualidad ilimitada", priceCents: 9000, validityDays: 30, communityIds },
+    data: {
+      clubId: club.id,
+      name: "Mensualidad ilimitada",
+      priceCents: 9000,
+      validityDays: 30,
+      communityIds,
+    },
   });
   await db.plan.create({
-    data: { clubId: club.id, name: "Paquete 8 fechas", priceCents: 9500, creditCount: 8, validityDays: 60, communityIds },
+    data: {
+      clubId: club.id,
+      name: "Paquete 8 fechas",
+      priceCents: 9500,
+      creditCount: 8,
+      validityDays: 60,
+      communityIds,
+    },
   });
   for (const playerIndex of [1, 4, 10]) {
     const player = PLAYERS[playerIndex];
     const paidAt = new Date(now.getTime() - (5 + playerIndex) * DAY_MS);
     await db.planPurchase.create({
       data: {
-        clubId: club.id, planId: fourDates.id, firstName: player.firstName, lastName: player.lastName,
-        phone: phoneOf(playerIndex), status: "active", creditsRemaining: 2, paidAt,
+        clubId: club.id,
+        planId: fourDates.id,
+        firstName: player.firstName,
+        lastName: player.lastName,
+        phone: phoneOf(playerIndex),
+        status: "active",
+        creditsRemaining: 2,
+        paidAt,
         expiresAt: new Date(paidAt.getTime() + 30 * DAY_MS),
-        payments: { create: { clubId: club.id, amountCents: 5000, method: "voucher", status: "approved", proofFileKey: images.voucher } },
+        payments: {
+          create: {
+            clubId: club.id,
+            amountCents: 5000,
+            method: "voucher",
+            status: "approved",
+            proofFileKey: images.voucher,
+          },
+        },
       },
     });
   }
@@ -513,7 +732,8 @@ async function seed(db: PrismaClient) {
 }
 
 async function main() {
-  if (process.env.NODE_ENV === "production") throw new Error("Refusing to seed a production database.");
+  if (process.env.NODE_ENV === "production")
+    throw new Error("Refusing to seed a production database.");
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) throw new Error("DATABASE_URL is not set.");
   // Demo data must never reach a hosted database, only the docker-compose one.

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { FormMessage } from "@/components/form";
-import { formatTimeInLima, formatEventTimeInLima } from "@/lib/lima-time";
+import { formatTimeInLima, formatTimeRangeInLima, formatWeekdayDateInLima } from "@/lib/lima-time";
 import { formatSoles } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import { listEventSummaries } from "@/modules/events";
@@ -23,6 +23,7 @@ import {
   CancellationNotAllowedError,
   type CancellationResult,
   findRegistrationOverview,
+  getEditableOwnDetails,
   getCancellationPreview,
 } from "@/modules/registrations";
 import { PaymentInstructions } from "../../c/[club]/[event]/payment-instructions";
@@ -41,6 +42,7 @@ import {
 import { CancelRegistrationForm, CopyLinkButton } from "./cancel-form";
 import { CheckInQr } from "./check-in-qr";
 import { PAYER_NOTE_MAX_LENGTH } from "./payer-note";
+import { EditDetailsButton } from "./edit-details";
 import { PayWithCreditForm } from "./pay-with-credit-form";
 import { MercadoPagoCheckout } from "./mercado-pago-checkout";
 import { VoucherForm } from "./voucher-form";
@@ -67,9 +69,12 @@ export default function RegistrationPage(props: Props) {
 async function RegistrationContent({ params, searchParams }: Props) {
   const registration = await findRegistrationOverview((await params).registration);
   if (!registration) notFound();
-  const [event] = await listEventSummaries([registration.eventId]);
+  const [[event], editableDetails] = await Promise.all([
+    listEventSummaries([registration.eventId]),
+    getEditableOwnDetails(registration.id),
+  ]);
   if (!event) notFound();
-  const { enviado, pagado, cancelado } = await searchParams;
+  const { enviado, pagado } = await searchParams;
   // HU-21: an ended reservation no longer holds the seat, even before a sign-up releases it.
   const reservationEnded =
     registration.status === "pending_payment" &&
@@ -117,7 +122,10 @@ async function RegistrationContent({ params, searchParams }: Props) {
           </Link>
         }
       >
-        <span className="first-letter:uppercase">{formatEventTimeInLima(event)}</span>
+        <span className="flex flex-col">
+          <span>{formatWeekdayDateInLima(event.startsAt)}</span>
+          <span>{formatTimeRangeInLima(event)}</span>
+        </span>
       </PageHeading>
       <p className="text-sm">
         {registration.firstName} {registration.lastName} ·{" "}
@@ -130,11 +138,6 @@ async function RegistrationContent({ params, searchParams }: Props) {
           {REGISTRATION_STATUS_LABELS[registration.status]}
         </span>
       </p>
-      {registration.status === "cancelled" &&
-        typeof cancelado === "string" &&
-        cancelado in CANCELLED_MESSAGES && (
-          <FormMessage tone="ok">{CANCELLED_MESSAGES[cancelado as CancellationResult]}</FormMessage>
-        )}
       {registration.status !== "cancelled" && (
         <div className="flex items-center justify-between gap-3 text-sm text-zinc-500">
           <span>Guarda este link: con él pagas o cancelas.</span>
@@ -166,6 +169,13 @@ async function RegistrationContent({ params, searchParams }: Props) {
       )}
       {registration.status === "in_review" && (
         <p className="text-sm text-zinc-500">El organizador está revisando tu pago.</p>
+      )}
+      {editableDetails && (
+        <EditDetailsButton
+          registrationId={registration.id}
+          details={editableDetails}
+          isMixed={event.category === "mixed"}
+        />
       )}
       {registration.status !== "waitlisted" &&
         registration.status !== "cancelled" &&
@@ -278,15 +288,6 @@ async function RegistrationContent({ params, searchParams }: Props) {
     </>
   );
 }
-
-const CANCELLED_MESSAGES: Record<CancellationResult, string> = {
-  nothing_paid: "Cancelaste tu inscripción. Tu cupo quedó libre.",
-  balance: "Cancelaste tu inscripción. Lo que pagaste quedó como saldo a favor en el club.",
-  returned: "Cancelaste tu inscripción. Te devolvimos tu fecha o tu saldo.",
-  forfeited: "Cancelaste tu inscripción. Como fue después del límite, el pago se pierde.",
-  guest_forfeited:
-    "Cancelaste tu inscripción. Como te inscribiste sin cuenta de Google, el pago no quedó como saldo.",
-};
 
 /** HU-29: "¿No puedes ir?", with what the player keeps under the club's policy (HU-30). */
 async function CancelSection(props: { registrationId: string; priceCents: number }) {

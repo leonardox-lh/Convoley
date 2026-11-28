@@ -21,7 +21,13 @@ const LONG_TITLE_CHARS = 14;
  * The flyer's look in a ~310px band: club, title with the last word in the accent, date, and an
  * optional yellow badge on the right ("18 INSCRITOS").
  */
-export function ImageHeader(props: ImageBrand & { badge?: { value: string; label: string } }) {
+export function ImageHeader(
+  props: ImageBrand & {
+    badge?: { value: string; label: string };
+    /** Drawn at the right end of the club row, like the champion's trophy. */
+    clubRowEnd?: React.ReactNode;
+  },
+) {
   const words = props.title.toUpperCase().split(/\s+/).filter(Boolean);
   const lastWord = words.pop() ?? "";
   const titlePx = props.title.length <= LONG_TITLE_CHARS ? 64 : 50;
@@ -47,6 +53,9 @@ export function ImageHeader(props: ImageBrand & { badge?: { value: string; label
           <span
             style={{
               display: "flex",
+              // Satori crashes on an undefined `flex`, so it is only set when needed.
+              ...(props.clubRowEnd ? { flex: 1 } : {}),
+              minWidth: 0,
               maxWidth: 620,
               fontSize: CLUB_NAME_PX,
               lineHeight: 1.05,
@@ -56,6 +65,7 @@ export function ImageHeader(props: ImageBrand & { badge?: { value: string; label
           >
             {props.clubName.toUpperCase()}
           </span>
+          {props.clubRowEnd}
         </div>
         <div
           style={{

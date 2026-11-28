@@ -318,6 +318,11 @@ export interface TeamNames {
 
 export type StoredMatch = Match & { id: string };
 
+/** Public photos, stored like the club's logo (owned by `clubs`); returns the stored key. */
+export interface ChampionPhotos {
+  save(clubSlug: string, image: { bytes: Uint8Array; contentType: string }): Promise<string>;
+}
+
 /** Game day: the round robin and its final. */
 export interface TeamMatches {
   list(eventId: string): Promise<StoredMatch[]>;
@@ -330,6 +335,13 @@ export interface TeamMatches {
     homeScore: number;
     awayScore: number;
   }): Promise<boolean>;
-  /** Creates the final, or changes its teams while it hasn't been played. */
-  setFinal(eventId: string, pairing: Pairing): Promise<void>;
+  /** A group match goes before the final (if any); the final goes last. */
+  add(eventId: string, pairing: Pairing, isFinal: boolean): Promise<void>;
+  setTeams(matchId: string, pairing: Pairing): Promise<void>;
+  remove(matchId: string): Promise<void>;
+  /** Swaps the play order of two matches of the event. */
+  swapPositions(first: StoredMatch, second: StoredMatch): Promise<void>;
+  /** The champion's photo, kept on the final (so restarting the game day drops it). */
+  championPhotoKey(eventId: string): Promise<string | null>;
+  setChampionPhotoKey(eventId: string, key: string): Promise<void>;
 }

@@ -1,4 +1,4 @@
-import { InvalidMatchScoreError, InvalidTeamNameError } from "./errors";
+import { InvalidMatchScoreError, InvalidPairingError, InvalidTeamNameError } from "./errors";
 
 export const TEAM_NAME_MAX_LENGTH = 30;
 export const MAX_MATCH_SCORE = 99;
@@ -74,8 +74,23 @@ export interface Standing {
 
 export const pointDifference = (row: Standing) => row.pointsFor - row.pointsAgainst;
 
-/** Group table: most wins, then point difference, then points scored. The final doesn't count. */
+/**
+ * Table: most wins, then point difference, then points scored. The final counts like any match,
+ * and once it's played its winner ranks first and its loser second.
+ */
 export function standings(teamNumbers: number[], matches: Match[]): Standing[] {
+  const table = tally(teamNumbers, matches);
+  const winner = champion(matches);
+  const final = matches.find((match) => match.isFinal);
+  if (winner === null || !final) return table;
+  const runnerUp = winner === final.homeTeam ? final.awayTeam : final.homeTeam;
+  const rank = (teamNumber: number) =>
+    teamNumber === winner ? 0 : teamNumber === runnerUp ? 1 : 2;
+  // Array sort is stable: the rest keep their group order.
+  return table.sort((a, b) => rank(a.teamNumber) - rank(b.teamNumber));
+}
+
+function tally(teamNumbers: number[], matches: Match[]): Standing[] {
   const rows = new Map<number, Standing>(
     teamNumbers.map((teamNumber) => [
       teamNumber,
@@ -83,7 +98,7 @@ export function standings(teamNumbers: number[], matches: Match[]): Standing[] {
     ]),
   );
   for (const match of matches) {
-    if (match.isFinal || !isPlayed(match)) continue;
+    if (!isPlayed(match)) continue;
     const home = rows.get(match.homeTeam);
     const away = rows.get(match.awayTeam);
     if (!home || !away) continue;
@@ -109,13 +124,37 @@ export function standings(teamNumbers: number[], matches: Match[]): Standing[] {
   );
 }
 
-/** The final is due once every group match has a score: first against second. */
-export function finalPairing(teamNumbers: number[], matches: Match[]): Pairing | null {
-  const group = matches.filter((match) => !match.isFinal);
-  if (group.length === 0 || !group.every(isPlayed)) return null;
-  const [first, second] = standings(teamNumbers, matches);
+/** What the organizer is offered for the final: first against second of the table so far. */
+export function suggestedFinal(teamNumbers: number[], matches: Match[]): Pairing | null {
+  const [first, second] = tally(
+    teamNumbers,
+    matches.filter((match) => !match.isFinal),
+  );
   if (!first || !second) return null;
   return { homeTeam: first.teamNumber, awayTeam: second.teamNumber };
+}
+
+/** Two different teams, both of this event. */
+export function validatePairing(pairing: Pairing, teamNumbers: number[]): void {
+  const { homeTeam, awayTeam } = pairing;
+  if (homeTeam === awayTeam || !teamNumbers.includes(homeTeam) || !teamNumbers.includes(awayTeam)) {
+    throw new InvalidPairingError(homeTeam, awayTeam);
+  }
+}
+
+/**
+ * The group match to swap places with when moving one up or down; null at either end. The final
+ * isn't part of the group: it always closes the day.
+ */
+export function neighborToSwap<T extends Match>(
+  matches: T[],
+  moving: T,
+  direction: "up" | "down",
+): T | null {
+  const group = matches.filter((match) => !match.isFinal).sort((a, b) => a.position - b.position);
+  const index = group.indexOf(moving);
+  if (index === -1) return null;
+  return group[direction === "up" ? index - 1 : index + 1] ?? null;
 }
 
 export function champion(matches: Match[]): number | null {

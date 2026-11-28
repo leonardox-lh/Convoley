@@ -2,8 +2,9 @@ import { PageHeading } from "@/components/page-heading";
 import { CalendarPlus } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { todayInLima } from "@/lib/lima-time";
+import { defaultEventDateInLima, todayInLima } from "@/lib/lima-time";
 import { findClubBySlug } from "@/modules/clubs";
+import { listClubVenues } from "@/modules/events";
 import { CreateEventForm } from "./create-event-form";
 import { requireOrganizer } from "../../require-organizer";
 
@@ -32,6 +33,8 @@ async function NewEventContent({ params }: { params: Params }) {
         clubSlug={club.slug}
         communities={club.communities}
         minDate={todayInLima()}
+        defaultDate={defaultEventDateInLima()}
+        savedVenues={await listClubVenues(club.slug)}
       />
     </div>
   );

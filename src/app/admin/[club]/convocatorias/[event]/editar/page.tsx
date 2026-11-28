@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { limaDateAndTime, todayInLima } from "@/lib/lima-time";
 import { centsToSolesText } from "@/lib/money";
-import { getOrganizerEvent, type CancellationOutcome } from "@/modules/events";
+import { getOrganizerEvent, listClubVenues, type CancellationOutcome } from "@/modules/events";
 import { requireOrganizer } from "../../../require-organizer";
 import { CancelEventForm } from "./cancel-event-form";
 import { EditEventForm } from "./edit-event-form";
@@ -30,7 +30,10 @@ export default function EditEventPage({ params }: Props) {
 async function EditEventContent({ params }: { params: Props["params"] }) {
   const { club: clubSlug, event: eventId } = await params;
   if (!(await requireOrganizer(clubSlug, "manage_club"))) notFound();
-  const event = await getOrganizerEvent({ clubSlug, eventId });
+  const [event, savedVenues] = await Promise.all([
+    getOrganizerEvent({ clubSlug, eventId }),
+    listClubVenues(clubSlug),
+  ]);
   if (!event) notFound();
   const { date, time } = limaDateAndTime(event.startsAt);
   const endTime = event.endsAt ? limaDateAndTime(event.endsAt).time : "";
@@ -84,6 +87,7 @@ async function EditEventContent({ params }: { params: Props["params"] }) {
           communities={event.club.communities}
           minDate={todayInLima()}
           confirmedCount={event.confirmedCount}
+          savedVenues={savedVenues}
           defaults={{
             communityId: event.communityId,
             title: event.title,
@@ -94,7 +98,7 @@ async function EditEventContent({ params }: { params: Props["params"] }) {
             mapsUrl: event.mapsUrl ?? "",
             price: centsToSolesText(event.priceCents),
             capacity: String(event.capacity),
-            isMixed: event.isMixed,
+            category: event.category,
             showRoster: event.showRoster ?? false,
             rules: event.rules ?? "",
           }}

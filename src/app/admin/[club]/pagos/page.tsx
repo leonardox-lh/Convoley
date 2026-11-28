@@ -46,18 +46,10 @@ async function PaymentSettingsContent({ params, searchParams }: Props) {
         }}
       />
       {guardado && <FormMessage tone="ok">Cambios guardados.</FormMessage>}
-      {settings.paymentQrKey && (
-        // eslint-disable-next-line @next/next/no-img-element -- served by our own route, already sized
-        <img
-          src={clubLogoPath(settings.paymentQrKey)}
-          alt="QR de Yape o Plin"
-          className="size-48 self-center rounded-lg border border-zinc-200 object-contain dark:border-zinc-800"
-        />
-      )}
       <PaymentSettingsForm
         clubSlug={clubSlug}
         defaults={settings}
-        hasQr={settings.paymentQrKey !== null}
+        qrUrl={settings.paymentQrKey ? clubLogoPath(settings.paymentQrKey) : null}
       />
       <CancellationPolicyForm
         clubSlug={clubSlug}

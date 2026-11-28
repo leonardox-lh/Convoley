@@ -1,15 +1,20 @@
 import { RecurringEventNotFoundError } from "../domain/errors";
 import { dueOccurrences, type RecurrenceProps, validateRecurrence } from "../domain/recurrence";
-import type { ClubReader, RecurringEventRepository } from "./ports";
+import type { ClubReader, RecurringEventRepository, VenueBook } from "./ports";
 import { assertCommunityInClub, requireClub } from "./require-club";
 
-type Deps = { clubs: ClubReader; recurring: RecurringEventRepository; now: () => Date };
+type Deps = {
+  clubs: ClubReader;
+  recurring: RecurringEventRepository;
+  venues: VenueBook;
+  now: () => Date;
+};
 
 /**
  * HU-28: publishes the dates of the club's active templates whose window has opened. Runs when
  * the club's pages are opened instead of on a cron: a date nobody looks at can wait to exist.
  */
-export function makePublishDueOccurrences(deps: Omit<Deps, "clubs">) {
+export function makePublishDueOccurrences(deps: Pick<Deps, "recurring" | "now">) {
   return async function publishDueOccurrences(clubId: string): Promise<void> {
     const now = deps.now();
     const templates = await deps.recurring.listInClub(clubId);
@@ -30,6 +35,7 @@ export function makeCreateRecurringEvent(deps: Deps) {
     assertCommunityInClub(club, props.communityId);
     validateRecurrence(props, deps.now());
     const { id } = await deps.recurring.create({ ...props, clubId: club.id });
+    await deps.venues.remember(club.id, { name: props.venueName, mapsUrl: props.mapsUrl });
     await publishDue(club.id);
     return { id };
   };

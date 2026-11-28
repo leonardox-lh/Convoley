@@ -61,6 +61,22 @@ export interface EventRepository {
   ): Promise<void>;
 }
 
+export interface SavedVenue {
+  id: string;
+  name: string;
+  mapsUrl: string | null;
+}
+
+/** The club's own list of courts: every saved event adds its place, organizers delete. */
+export interface VenueBook {
+  /** Adds the place, or marks it as just used (and takes its link when it brings one). */
+  remember(clubId: string, venue: { name: string; mapsUrl: string | null }): Promise<void>;
+  /** Most recently used first. */
+  listInClub(clubId: string): Promise<SavedVenue[]>;
+  /** Only within that club: an id from another club deletes nothing. */
+  remove(clubId: string, venueId: string): Promise<void>;
+}
+
 /** Registrations owned by the `registrations` module. */
 export interface RegistrationsReader {
   countConfirmed(eventId: string, tx?: TransactionContext): Promise<number>;

@@ -36,7 +36,11 @@ async function OrganizersContent({ params }: Pick<Props, "params">) {
               <span className="font-medium">{member.name ?? member.email}</span>
               <span className="text-sm text-zinc-500">{CLUB_ROLE_LABELS[member.role]}</span>
             </div>
-            <RemoveMemberForm clubSlug={clubSlug} userId={member.userId} />
+            <RemoveMemberForm
+              clubSlug={clubSlug}
+              userId={member.userId}
+              name={member.name ?? member.email ?? "Este organizador"}
+            />
           </li>
         ))}
       </ul>

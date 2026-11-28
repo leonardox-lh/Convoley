@@ -79,6 +79,18 @@ enum CancellationOutcome {
   balance
 }
 
+// Who plays: mixed teams, men only or women only.
+enum PaymentApp {
+  yape
+  plin
+}
+
+enum EventCategory {
+  mixed
+  men
+  women
+}
+
 // HU-27: a plan bought by a player; credits are usable only once it's active (paid).
 enum PlanPurchaseStatus {
   pending_payment
@@ -187,6 +199,8 @@ model Club {
   contactPhone              String?
   // Where players pay the organizer directly (HU-13): Yape/Plin number, holder and QR image.
   paymentPhone              String?
+  // Which app the number takes payments with; null for clubs set up before the choice existed.
+  paymentApp                PaymentApp?
   paymentHolderName         String?
   paymentQrKey              String?
   // HU-22: optional fee the player pays on Mercado Pago charges; at most one of the two is set.
@@ -202,6 +216,7 @@ model Club {
   invitations     ClubInvitation[]
   communities     Community[]
   events          Event[]
+  venues          Venue[]
   recurringEvents RecurringEvent[]
   payments        Payment[]
   products        Product[]
@@ -288,7 +303,7 @@ model Event {
   mapsUrl             String?
   priceCents          Int
   capacity            Int
-  isMixed             Boolean              @default(false)
+  category            EventCategory        @default(mixed)
   // Anyone with the link sees who signed up (names only).
   showRoster          Boolean              @default(false)
   rules               String?
@@ -318,6 +333,21 @@ model Event {
   @@index([communityId])
 }
 
+// The club's own list of courts, filled as events are saved so organizers don't search the
+// same place every week. Deleting one only takes it off the list; events keep their venue.
+model Venue {
+  id         String   @id @default(cuid())
+  clubId     String
+  name       String
+  mapsUrl    String?
+  lastUsedAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+
+  club Club @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+  @@unique([clubId, name])
+}
+
 // HU-28: weekly template ("todos los martes 8 p. m."). Dates are published `publishDaysBefore`
 // days ahead, lazily when the club's pages are opened. Templates aren't edited, only paused.
 model RecurringEvent {
@@ -335,7 +365,7 @@ model RecurringEvent {
   mapsUrl           String?
   priceCents        Int
   capacity          Int
-  isMixed           Boolean  @default(false)
+  category          EventCategory @default(mixed)
   showRoster        Boolean  @default(false)
   rules             String?
   publishDaysBefore Int
@@ -414,6 +444,8 @@ model TeamMatch {
   awayTeam  Int
   homeScore Int?
   awayScore Int?
+  // Only on the final: the winning team's photo, for the champion banner. Restarting drops it.
+  championPhotoKey String?
 
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 

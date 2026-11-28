@@ -10,7 +10,7 @@ export function Logo({ className, size = "md" }: { className?: string; size?: "m
     <span
       className={cn(
         "inline-flex items-baseline font-bold tracking-[-0.045em] leading-none whitespace-nowrap",
-        size === "lg" ? "text-4xl" : "text-[1.4rem]",
+        size === "lg" ? "text-4xl" : "text-[1.85rem]",
         className,
       )}
     >

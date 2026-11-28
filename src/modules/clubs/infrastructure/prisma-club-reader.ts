@@ -35,7 +35,7 @@ export async function findFirstClubSlugForMember(userId: string): Promise<string
 export async function findClubNamesByIds(ids: string[]) {
   return db.club.findMany({
     where: { id: { in: ids } },
-    select: { id: true, slug: true, name: true },
+    select: { id: true, slug: true, name: true, logoKey: true },
   });
 }
 

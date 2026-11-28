@@ -4,16 +4,17 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Info } from "lucide-react";
 import { AutoRefresh } from "@/components/auto-refresh";
-import { formatInLima } from "@/lib/lima-time";
+import { CopyButton } from "@/components/copy-button";
+
+import { appUrl } from "@/lib/app-url";
 import { clubLogoPath, getClubProfile } from "@/modules/clubs";
 import { type CancellationOutcome, type EventStatus } from "@/modules/events";
-import { getPaymentSettings } from "@/modules/clubs";
 import { currentUserId, getPlayerProfile, isGoogleSignInEnabled } from "@/modules/identity";
 import {
   acceptsWaitlist,
   buildRoster,
-  cancellationDeadline,
   findLastPlayerChoices,
+  getEditableOwnDetails,
   isOpenForRegistration,
   listEventRegistrations,
   listPlayerRegistrations,
@@ -24,9 +25,12 @@ import { MyRegistration } from "./my-registration";
 import { RegistrationForm } from "./registration-form";
 import { SpotsBadge } from "../../../spots-badge";
 import { EventHero } from "../../../event-hero";
+import { PlayerDetailsTrigger, type PlayerDetails } from "../../../player-details";
+import { CANCELLED_MESSAGES, isCancellationResult } from "./cancellation-messages";
+import { CancelledToast } from "./cancelled-toast";
 
+// No notice for "full": the seats badge already says so.
 const STATUS_NOTICES: Partial<Record<EventStatus, string>> = {
-  full: "Convocatoria llena",
   closed: "Inscripciones cerradas",
   cancelled: "Convocatoria cancelada",
 };
@@ -50,23 +54,40 @@ export async function generateMetadata({
   return { title, description, openGraph: { title, description, type: "website" } };
 }
 
-export default function PublicEventPage({ params }: PageProps<"/c/[club]/[event]">) {
+export default function PublicEventPage({ params, searchParams }: PageProps<"/c/[club]/[event]">) {
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-4 pb-10">
       {/* Other players' sign-ups and payments show up without reloading. */}
       <AutoRefresh />
       <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
         <PublicEventContent params={params} />
+        <CancelledNotice searchParams={searchParams} />
       </Suspense>
     </main>
   );
 }
 
+/** HU-29: after the player cancels from their sign-up page, they land back here. */
+async function CancelledNotice({
+  searchParams,
+}: {
+  searchParams: PageProps<"/c/[club]/[event]">["searchParams"];
+}) {
+  const { cancelado } = await searchParams;
+  // Always rendered, so the toast keeps its message when a refresh drops the param.
+  return (
+    <CancelledToast
+      message={isCancellationResult(cancelado) ? CANCELLED_MESSAGES[cancelado] : null}
+    />
+  );
+}
+
 async function PublicEventContent({ params }: { params: Params }) {
   const { club, event: eventId } = await params;
-  const [event, clubProfile] = await Promise.all([
+  const [event, clubProfile, origin] = await Promise.all([
     loadEventPreview(club, eventId),
     getClubProfile(club),
+    appUrl(),
   ]);
   if (!event) notFound();
   const now = new Date();
@@ -100,6 +121,15 @@ async function PublicEventContent({ params }: { params: Params }) {
     <>
       <EventHero
         clubHref={`/${club}`}
+        clubSuffix="Convocatoria"
+        action={
+          <CopyButton
+            text={`${origin}/c/${club}/${event.id}`}
+            label="Link convocatoria"
+            showLabel
+            className="border-white/30 bg-white/15 text-white hover:bg-white/25 hover:text-white"
+          />
+        }
         event={{
           ...event,
           logoSrc: clubProfile?.logoKey ? clubLogoPath(clubProfile.logoKey) : null,
@@ -138,13 +168,12 @@ async function PublicEventContent({ params }: { params: Params }) {
       {event.showRoster && event.status !== "cancelled" && (
         <PublicRoster eventId={event.id} capacity={event.capacity} />
       )}
-      {event.status !== "cancelled" && event.priceCents > 0 && (
-        <CancellationPolicyNote clubSlug={club} startsAt={event.startsAt} />
-      )}
       {myRegistration ? (
         <MyRegistration
           registration={myRegistration}
           paymentInfo={await loadPaymentInfo(club, event.priceCents)}
+          editableDetails={await getEditableOwnDetails(myRegistration.id)}
+          isMixed={event.category === "mixed"}
         />
       ) : (
         (isOpenForRegistration(event, now) || waitlistOnly) && (
@@ -156,7 +185,7 @@ async function PublicEventContent({ params }: { params: Params }) {
             profile={profile}
             lastChoices={lastChoices}
             googleEnabled={isGoogleSignInEnabled}
-            isMixed={event.isMixed}
+            isMixed={event.category === "mixed"}
           />
         )
       )}
@@ -200,51 +229,34 @@ async function PublicRoster({ eventId, capacity }: { eventId: string; capacity: 
 
 /** Two-column tiles: number badge and short name. The waitlist is numbered E1, E2… in amber. */
 function RosterGrid(props: {
-  players: { number: number; name: string; gender: string | null }[];
+  players: (PlayerDetails & { number: number })[];
   waitlist?: boolean;
   "aria-labelledby"?: string;
 }) {
   return (
     <ol aria-labelledby={props["aria-labelledby"]} className="grid grid-cols-2 gap-2">
       {props.players.map((player) => (
-        <li
-          key={player.number}
-          className="flex min-w-0 items-center gap-2 rounded-xl border bg-card px-2.5 py-2 text-sm"
-        >
-          <span
-            className={
-              props.waitlist
-                ? "flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full bg-amber-100 px-1 text-xs font-semibold text-amber-800 dark:bg-amber-950 dark:text-amber-300"
-                : "flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary"
-            }
+        <li key={player.number} className="min-w-0">
+          <PlayerDetailsTrigger
+            player={player}
+            className="flex w-full min-w-0 items-center gap-2 rounded-xl border bg-card px-2.5 py-2 text-sm transition-colors hover:border-primary/40"
           >
-            {props.waitlist ? `E${player.number}` : player.number}
-          </span>
-          <span className="min-w-0 flex-1 truncate" title={player.name}>
-            {player.name}
-          </span>
-          <GenderIcon gender={player.gender} />
+            <span
+              className={
+                props.waitlist
+                  ? "flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full bg-amber-100 px-1 text-xs font-semibold text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                  : "flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary"
+              }
+            >
+              {props.waitlist ? `E${player.number}` : player.number}
+            </span>
+            <span className="min-w-0 flex-1 truncate" title={player.name}>
+              {player.name}
+            </span>
+            <GenderIcon gender={player.gender} />
+          </PlayerDetailsTrigger>
         </li>
       ))}
     </ol>
-  );
-}
-
-/** HU-30: what happens with the payment if the player cancels. */
-async function CancellationPolicyNote({
-  clubSlug,
-  startsAt,
-}: {
-  clubSlug: string;
-  startsAt: Date;
-}) {
-  const settings = await getPaymentSettings(clubSlug);
-  const deadline = cancellationDeadline(startsAt, settings?.cancellationDeadlineHours ?? null);
-  return (
-    <p className="text-sm text-zinc-500">
-      {deadline
-        ? `Si cancelas hasta el ${formatInLima(deadline)}, lo que pagaste queda como saldo a favor en el club. Después, se pierde.`
-        : "Si cancelas después de pagar, pierdes lo que pagaste."}
-    </p>
   );
 }

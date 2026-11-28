@@ -35,7 +35,7 @@ function titleSize(title: string, width: number) {
 }
 
 /** The hero: a lit volleyball with its seams, a glow behind and speed arcs trailing it. */
-function Ball(props: { size: number; primary: string; secondary: string }) {
+export function Ball(props: { size: number; primary: string; secondary: string }) {
   const { size } = props;
   return (
     <div
@@ -147,8 +147,11 @@ function ClubBadge(props: {
       <span
         style={{
           display: "flex",
-          fontSize: 30 * unit,
-          letterSpacing: 5 * unit,
+          // Long names wrap before reaching the ball on the right.
+          maxWidth: 640 * unit,
+          fontSize: 54 * unit,
+          lineHeight: 1.05,
+          letterSpacing: 3 * unit,
           ...heavy("white", "0 4px 14px rgba(0,0,0,0.6)"),
         }}
       >

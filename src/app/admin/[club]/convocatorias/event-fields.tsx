@@ -2,7 +2,13 @@
 
 import { DatePicker, SelectPicker, TimePicker } from "@/components/date-time-pickers";
 import { Field, floatingFieldClass } from "@/components/form";
-import { LocationPicker } from "@/components/location-picker";
+import { LocationPicker, type SavedVenue } from "@/components/location-picker";
+import { useState } from "react";
+import { suggestedEndTime } from "./event-time";
+import { removeVenueAction } from "./venue-actions";
+// Type only: this is a client component and the module index pulls in server code.
+import type { EventCategory } from "@/modules/events";
+import { EVENT_CATEGORY_LABELS } from "../../../event-category";
 
 export { fieldClass, FormMessage, submitKeepingValues } from "@/components/form";
 
@@ -17,7 +23,7 @@ export interface EventFieldValues {
   mapsUrl: string;
   price: string;
   capacity: string;
-  isMixed: boolean;
+  category: EventCategory;
   showRoster: boolean;
   rules: string;
 }
@@ -26,12 +32,16 @@ export function EventFields(props: {
   clubSlug: string;
   communities: { id: string; name: string }[];
   minDate: string;
+  /** Date preselected on a new event (the edit form uses `defaults.date`). */
+  defaultDate?: string;
+  savedVenues?: SavedVenue[];
   minCapacity?: number;
   defaults?: EventFieldValues;
   /** HU-28: the recurring form asks for a weekday and time instead (`schedule`). */
   schedule?: React.ReactNode;
 }) {
   const { defaults, minCapacity = 1 } = props;
+  const [endTime, setEndTime] = useState(defaults?.endTime);
   return (
     <>
       <input type="hidden" name="clubSlug" value={props.clubSlug} />
@@ -49,18 +59,45 @@ export function EventFields(props: {
         label="Nivel"
         name="communityId"
         defaultValue={defaults?.communityId}
-        options={props.communities.map((community) => ({ value: community.id, label: community.name }))}
+        options={props.communities.map((community) => ({
+          value: community.id,
+          label: community.name,
+        }))}
+      />
+      <SelectPicker
+        label="Categoría"
+        name="category"
+        defaultValue={defaults?.category}
+        options={Object.entries(EVENT_CATEGORY_LABELS).map(([value, label]) => ({ value, label }))}
       />
       {props.schedule ?? (
         <>
-          <DatePicker label="Fecha" name="date" min={props.minDate} defaultValue={defaults?.date} />
+          <DatePicker
+            label="Fecha"
+            name="date"
+            min={props.minDate}
+            defaultValue={defaults?.date ?? props.defaultDate}
+          />
           <div className="grid grid-cols-2 gap-3">
-            <TimePicker label="Hora de inicio" name="time" defaultValue={defaults?.time} />
-            <TimePicker label="Hora de fin" name="endTime" defaultValue={defaults?.endTime} />
+            <TimePicker
+              label="Hora de inicio"
+              name="time"
+              defaultValue={defaults?.time}
+              onChange={(start) => setEndTime(suggestedEndTime(start) ?? endTime)}
+            />
+            {/* Keyed by the suggestion so a new start time refills the end. */}
+            <TimePicker key={endTime} label="Hora de fin" name="endTime" defaultValue={endTime} />
           </div>
         </>
       )}
-      <LocationPicker venueName={defaults?.venueName} mapsUrl={defaults?.mapsUrl} />
+      <LocationPicker
+        venueName={defaults?.venueName}
+        mapsUrl={defaults?.mapsUrl}
+        savedVenues={props.savedVenues}
+        onRemoveVenue={(saved) =>
+          removeVenueAction({ clubSlug: props.clubSlug, venueId: saved.id })
+        }
+      />
       <div className="grid grid-cols-2 gap-3">
         <Field label="Precio (S/)">
           <input
@@ -87,12 +124,6 @@ export function EventFields(props: {
         </Field>
       </div>
       <div className="flex flex-col gap-2">
-        <ToggleField
-          name="isMixed"
-          title="Mixto"
-          text="Juegan hombres y mujeres en el mismo equipo."
-          defaultChecked={defaults?.isMixed}
-        />
         <ToggleField
           name="showRoster"
           title="Lista de inscritos pública"

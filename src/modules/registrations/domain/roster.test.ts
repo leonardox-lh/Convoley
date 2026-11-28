@@ -22,17 +22,30 @@ const registrations = [
 describe("HU-16 criterio 2: lista numerada que marca quién pagó", () => {
   it("HU-16: numera por orden de inscripción, sin cancelados, y marca a los que pagaron", () => {
     expect(buildRoster(registrations).players).toEqual([
-      { number: 1, name: "Ana Paz", paid: false, gender: null },
-      { number: 2, name: "Leo Paz", paid: true, gender: null },
-      { number: 3, name: "Sol Paz", paid: false, gender: null },
+      { number: 1, name: "Ana Paz", paid: false, gender: null, position: null, level: null },
+      { number: 2, name: "Leo Paz", paid: true, gender: null, position: null, level: null },
+      { number: 3, name: "Sol Paz", paid: false, gender: null, position: null, level: null },
     ]);
   });
 
   it("HU-16: la lista de espera va aparte, por orden de llegada", () => {
     expect(buildRoster(registrations).waitlist).toEqual([
-      { number: 1, name: "Ivo Paz", gender: null },
-      { number: 2, name: "Max Paz", gender: null },
+      { number: 1, name: "Ivo Paz", gender: null, position: null, level: null },
+      { number: 2, name: "Max Paz", gender: null, position: null, level: null },
     ]);
+  });
+
+  it("muestra cómo juega cada uno, sin su celular", () => {
+    // Rows from the database carry the phone; the roster must not pass it on.
+    const fromDatabase = {
+      ...row("Ana", "paid", 1),
+      position: "setter" as const,
+      level: "advanced" as const,
+      phone: "+51987654321",
+    };
+    const [player] = buildRoster([fromDatabase]).players;
+    expect(player).toMatchObject({ position: "setter", level: "advanced" });
+    expect(player).not.toHaveProperty("phone");
   });
 });
 

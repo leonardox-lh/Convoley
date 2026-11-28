@@ -1,4 +1,4 @@
-import { Clock, MapPin, Navigation } from "lucide-react";
+import { Clock, MapIcon, MapPin } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ClubLogo } from "@/components/club-logo";
@@ -7,6 +7,8 @@ import { heroBackground } from "@/components/page-heading";
 import { VolleyballIcon } from "@/components/volleyball";
 import { formatTimeInLima, limaDateParts } from "@/lib/lima-time";
 import { formatSoles } from "@/lib/money";
+import type { EventCategory } from "@/modules/events";
+import { EVENT_CATEGORY_LABELS, EventCategoryIcon } from "./event-category";
 
 export interface EventHeroData {
   clubName: string;
@@ -16,7 +18,7 @@ export interface EventHeroData {
   secondaryColor: string | null;
   title: string;
   communityName: string;
-  isMixed: boolean;
+  category: EventCategory;
   startsAt: Date;
   endsAt?: Date | null;
   venueName: string;
@@ -37,7 +39,7 @@ export function EventHero(props: {
   clubHref?: string;
   /** Text after the club name, e.g. "Convocatoria" in the organizer's view. */
   clubSuffix?: string;
-  /** Shown on the right of the title, e.g. "Copiar link". */
+  /** Shown under the title, e.g. the "Link convocatoria" button. */
   action?: ReactNode;
   /** The seats badge or text on the right of the price. */
   seats: ReactNode;
@@ -51,9 +53,9 @@ export function EventHero(props: {
 
   const clubLine = (
     <>
-      <ClubLogo name={event.clubName} src={event.logoSrc} className="size-10 rounded-xl" />
+      <ClubLogo name={event.clubName} src={event.logoSrc} className="size-12 rounded-xl" />
       {/* "/ Convocatoria" never splits: a long club name pushes it whole to the second line. */}
-      <span className="line-clamp-2 min-w-0 text-sm font-semibold tracking-wide uppercase">
+      <span className="line-clamp-2 min-w-0 text-lg leading-tight font-bold tracking-wide uppercase">
         <span style={{ color: event.secondaryColor ?? undefined }}>{event.clubName}</span>
         {props.clubSuffix && (
           <span className="whitespace-nowrap text-white/70"> / {props.clubSuffix}</span>
@@ -83,14 +85,19 @@ export function EventHero(props: {
           <div className="relative flex items-center gap-3">{clubLine}</div>
         )}
         <div className="relative mt-3 flex items-start gap-3">
-          <h1 className="min-w-0 flex-1 text-3xl leading-tight font-extrabold tracking-tight text-balance first-letter:uppercase">
-            {event.title}
-          </h1>
-          {props.action}
-        </div>
-        <div className="relative mt-2 flex flex-wrap gap-2 text-xs font-medium">
-          <span className="rounded-full bg-white/15 px-3 py-1">{event.communityName}</span>
-          {event.isMixed && <span className="rounded-full bg-white/15 px-3 py-1">Mixto</span>}
+          <div className="flex min-w-0 flex-1 flex-col items-start gap-3">
+            <h1 className="text-3xl leading-tight font-extrabold tracking-tight text-balance first-letter:uppercase">
+              {event.title}
+            </h1>
+            {props.action}
+          </div>
+          <div className="mt-2 flex shrink-0 flex-col items-end gap-1.5 text-xs font-medium">
+            <span className="rounded-full bg-white/15 px-3 py-1">{event.communityName}</span>
+            <span className="flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1">
+              <EventCategoryIcon category={event.category} />
+              {EVENT_CATEGORY_LABELS[event.category]}
+            </span>
+          </div>
         </div>
       </header>
 
@@ -128,8 +135,8 @@ export function EventHero(props: {
               rel="noopener noreferrer"
               className={buttonVariants({ variant: "outline", size: "sm", className: "gap-1" })}
             >
-              <Navigation aria-hidden />
-              Cómo llegar
+              <MapIcon aria-hidden />
+              Ver en el mapa
             </a>
           )}
         </div>

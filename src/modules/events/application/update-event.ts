@@ -6,7 +6,13 @@ import {
   type EventDetailsProps,
 } from "../domain/event";
 import { EventNotFoundError } from "../domain/errors";
-import type { ClubReader, EventRepository, RegistrationsReader, TransactionRunner } from "./ports";
+import type {
+  ClubReader,
+  EventRepository,
+  RegistrationsReader,
+  TransactionRunner,
+  VenueBook,
+} from "./ports";
 import { assertCommunityInClub, requireClub } from "./require-club";
 
 export type UpdateEventInput = EventDetailsProps & {
@@ -21,6 +27,7 @@ export function makeUpdateEvent(deps: {
   events: EventRepository;
   registrations: RegistrationsReader;
   transactions: TransactionRunner;
+  venues: VenueBook;
   now: () => Date;
 }) {
   return async function updateEvent(input: UpdateEventInput) {
@@ -30,7 +37,7 @@ export function makeUpdateEvent(deps: {
     validateEventDetails(details, deps.now());
 
     // The row lock keeps a registration from sneaking in between the count and the update.
-    return deps.transactions.run(async (tx) => {
+    const result = await deps.transactions.run(async (tx) => {
       const current = await deps.events.lockInClub(club.id, eventId, tx);
       if (!current) throw new EventNotFoundError(eventId);
       assertEditable(current.status);
@@ -47,5 +54,7 @@ export function makeUpdateEvent(deps: {
       await deps.events.update(eventId, { ...details, status }, tx);
       return { status };
     });
+    await deps.venues.remember(club.id, { name: details.venueName, mapsUrl: details.mapsUrl });
+    return result;
   };
 }

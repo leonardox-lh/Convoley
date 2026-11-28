@@ -148,6 +148,41 @@ export class InvalidMatchScoreError extends Error {
   }
 }
 
+/** Game day: a match needs two different teams of the event. */
+export class InvalidPairingError extends Error {
+  constructor(
+    readonly homeTeam: number,
+    readonly awayTeam: number,
+  ) {
+    super(`Invalid pairing ${homeTeam} vs ${awayTeam}`);
+    this.name = "InvalidPairingError";
+  }
+}
+
+/** Game day: a match with a score keeps its teams; delete it to play it differently. */
+export class MatchAlreadyPlayedError extends Error {
+  constructor(readonly matchId: string) {
+    super(`Match ${matchId} already has a score`);
+    this.name = "MatchAlreadyPlayedError";
+  }
+}
+
+/** Game day: there is one final. */
+export class FinalAlreadyExistsError extends Error {
+  constructor(readonly eventId: string) {
+    super(`Event ${eventId} already has a final`);
+    this.name = "FinalAlreadyExistsError";
+  }
+}
+
+/** Game day: the champion's photo needs the final played first. */
+export class NoChampionYetError extends Error {
+  constructor(readonly eventId: string) {
+    super(`Event ${eventId} has no champion yet`);
+    this.name = "NoChampionYetError";
+  }
+}
+
 /** Game day: the match isn't in the event, or the final isn't due yet. */
 export class MatchNotFoundError extends Error {
   constructor(readonly eventId: string) {

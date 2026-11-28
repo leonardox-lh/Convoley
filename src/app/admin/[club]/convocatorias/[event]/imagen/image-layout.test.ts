@@ -2,12 +2,32 @@ import { describe, expect, it } from "vitest";
 import { listImageLayout } from "./image-layout";
 
 describe("HU-16 criterio 1: formatos cuadrado (1:1) e historia (9:16)", () => {
-  it("HU-16: cuadrado mide 1080×1080", () => {
-    expect(listImageLayout("cuadrado", 12)).toMatchObject({ width: 1080, height: 1080 });
+  // A full list fills the format; rows are whole pixels, so up to one row may be left over.
+  it.each([
+    ["cuadrado", 1080],
+    ["historia", 1920],
+  ] as const)("HU-16: %s llena mide 1080 de ancho y casi %i de alto", (format, height) => {
+    const layout = listImageLayout(format, 80);
+    expect(layout.width).toBe(1080);
+    expect(layout.height).toBeLessThanOrEqual(height);
+    expect(layout.height).toBeGreaterThan(height - layout.rowPx);
   });
+});
 
-  it("HU-16: historia mide 1080×1920", () => {
-    expect(listImageLayout("historia", 12)).toMatchObject({ width: 1080, height: 1920 });
+describe("El alto de la imagen se acomoda a la lista", () => {
+  it.each(["cuadrado", "historia"] as const)(
+    "%s: una lista corta termina después de su última fila, sin espacio vacío",
+    (format) => {
+      const layout = listImageLayout(format, 6);
+      expect(layout.height).toBeLessThan(listImageLayout(format, 40).height);
+      expect(layout.height).toBeGreaterThanOrEqual(6 * layout.rowPx);
+    },
+  );
+
+  it.each(["cuadrado", "historia"] as const)("%s: nunca pasa el alto del formato", (format) => {
+    expect(listImageLayout(format, 80).height).toBeLessThanOrEqual(
+      format === "cuadrado" ? 1080 : 1920,
+    );
   });
 });
 

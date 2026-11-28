@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CommunityNotInClubError, RecurringEventNotFoundError } from "../domain/errors";
-import { CLUB } from "./fakes";
+import { CLUB, fakeVenueBook } from "./fakes";
 import type { RecurringEvent, RecurringEventRepository } from "./ports";
 import {
   makeCreateRecurringEvent,
@@ -46,6 +46,7 @@ function setup() {
   const deps = {
     clubs: { findBySlug: async (slug: string) => (slug === CLUB.slug ? CLUB : null) },
     recurring: fake.repository,
+    venues: fakeVenueBook(),
     now: () => now,
   };
   return {
@@ -65,7 +66,7 @@ const input = {
   mapsUrl: null,
   priceCents: 1500,
   capacity: 18,
-  isMixed: true,
+  category: "mixed" as const,
   rules: null,
   weekday: 2,
   startMinute: 20 * 60,

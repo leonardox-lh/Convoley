@@ -1,4 +1,5 @@
 import type { ClubProfileProps } from "../domain/club-profile";
+import type { PaymentApp } from "../domain/payment-settings";
 import type { ClubRole } from "../domain/permissions";
 import type { LogoContentType } from "../domain/logo";
 
@@ -32,6 +33,9 @@ export interface LogoStorage {
 export interface Community {
   id: string;
   name: string;
+  /** Events and weekly templates that block deleting it. */
+  eventCount: number;
+  recurringEventCount: number;
 }
 
 export interface CommunityRepository {
@@ -47,6 +51,7 @@ export interface CommunityRepository {
 }
 
 export interface ClubPaymentSettings {
+  paymentApp: PaymentApp | null;
   paymentPhone: string | null;
   paymentHolderName: string | null;
   paymentQrKey: string | null;

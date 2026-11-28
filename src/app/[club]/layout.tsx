@@ -52,26 +52,21 @@ async function ClubHeader({ params }: Pick<LayoutProps<"/[club]">, "params">) {
     club.whatsappUrl && {
       href: club.whatsappUrl,
       label: "Comunidad",
-      className: "bg-[#25d366] text-white hover:bg-[#1fbe5b]",
       icon: <BrandIcon path={WHATSAPP_PATH} />,
     },
     club.contactPhone && {
       href: `https://wa.me/${club.contactPhone.replace("+", "")}`,
       label: "Organizador",
-      className: "bg-white text-primary hover:bg-white/90",
       icon: <MessageCircle className="size-4" aria-hidden />,
     },
     club.instagramUrl && {
       href: club.instagramUrl,
       label: "Instagram",
-      className:
-        "bg-gradient-to-r from-[#f58529] via-[#dd2a7b] to-[#8134af] text-white hover:opacity-90",
       icon: <BrandIcon path={INSTAGRAM_PATH} />,
     },
     club.tiktokUrl && {
       href: club.tiktokUrl,
       label: "TikTok",
-      className: "bg-black text-white hover:bg-black/80",
       icon: <BrandIcon path={TIKTOK_PATH} />,
     },
   ].filter((link) => !!link);
@@ -115,10 +110,9 @@ async function ClubHeader({ params }: Pick<LayoutProps<"/[club]">, "params">) {
         )}
       </div>
       {links.length > 0 && (
-        // One row whatever the count; with three or more only the icons fit on a phone.
         <div className="relative flex gap-2">
           {links.map((link) => (
-            <LinkButton key={link.label} {...link} iconOnly={links.length > 2} />
+            <LinkButton key={link.label} {...link} />
           ))}
         </div>
       )}
@@ -141,30 +135,17 @@ function BrandIcon({ path }: { path: string }) {
   );
 }
 
-function LinkButton({
-  href,
-  label,
-  className,
-  icon,
-  iconOnly,
-}: {
-  href: string;
-  label: string;
-  className: string;
-  icon: React.ReactNode;
-  iconOnly: boolean;
-}) {
+function LinkButton({ href, label, icon }: { href: string; label: string; icon: React.ReactNode }) {
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label={iconOnly ? label : undefined}
-      title={label}
-      className={`flex h-11 min-w-0 flex-1 items-center justify-center gap-2 rounded-xl px-3 text-sm font-semibold shadow-sm transition-all hover:-translate-y-0.5 active:translate-y-0 [&_svg]:size-5 ${className}`}
+      // Same glass style for every network: the icon and its name tell them apart.
+      className="flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl bg-white/15 px-2 py-2 text-xs font-medium text-white ring-1 ring-white/20 backdrop-blur-sm transition-colors hover:bg-white/25 [&_svg]:size-5"
     >
       {icon}
-      {!iconOnly && <span className="truncate">{label}</span>}
+      <span className="max-w-full truncate">{label}</span>
     </a>
   );
 }

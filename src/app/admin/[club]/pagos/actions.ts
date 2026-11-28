@@ -10,6 +10,7 @@ import {
   InvalidServiceFeeError,
   LogoTooLargeError,
   MAX_CANCELLATION_DEADLINE_HOURS,
+  PAYMENT_APPS,
   updateCancellationPolicy,
   updatePaymentSettings,
   updateServiceFee,
@@ -27,7 +28,8 @@ export type PaymentSettingsState = { status: "idle" } | { status: "error"; messa
 
 const settingsSchema = z.object({
   clubSlug: z.string().min(1),
-  paymentPhone: z.string().trim().min(1, "Escribe tu número de Yape o Plin."),
+  paymentApp: z.enum(PAYMENT_APPS, "Elige si cobras con Yape o Plin."),
+  paymentPhone: z.string().trim().min(1, "Escribe tu número de celular."),
   paymentHolderName: z
     .string()
     .trim()
@@ -48,7 +50,7 @@ export async function updatePaymentSettingsAction(
 ): Promise<PaymentSettingsState> {
   const parsed = settingsSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { status: "error", message: parsed.error.issues[0].message };
-  const { clubSlug, paymentHolderName } = parsed.data;
+  const { clubSlug, paymentApp, paymentHolderName } = parsed.data;
   // Where the money goes is the admin's call, not a helper's.
   if (!(await requireOrganizerToEdit(clubSlug, "manage_club"))) {
     return { status: "error", message: NOT_ALLOWED_MESSAGE };
@@ -57,6 +59,7 @@ export async function updatePaymentSettingsAction(
   try {
     await updatePaymentSettings({
       clubSlug,
+      paymentApp,
       paymentPhone: PhoneNumber.parse(parsed.data.paymentPhone).value,
       paymentHolderName,
       // Same field handling as the logo: an empty file input keeps the current QR.

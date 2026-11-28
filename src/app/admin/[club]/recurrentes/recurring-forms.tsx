@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import { TimePicker } from "@/components/date-time-pickers";
 import { Button } from "@/components/ui/button";
 import { Field, floatingFieldClass } from "@/components/form";
+import type { SavedVenue } from "@/components/location-picker";
 import { EventFields, FormMessage, submitKeepingValues } from "../convocatorias/event-fields";
 import { WEEKDAY_LABELS } from "./weekdays";
 import { createRecurringEventAction, setPausedAction, type RecurringEventState } from "./actions";
@@ -14,6 +15,7 @@ const DEFAULT_PUBLISH_DAYS_BEFORE = 6;
 export function NewRecurringEventForm(props: {
   clubSlug: string;
   communities: { id: string; name: string }[];
+  savedVenues: SavedVenue[];
   maxPublishDaysBefore: number;
 }) {
   const [state, formAction, pending] = useActionState<RecurringEventState, FormData>(
@@ -53,6 +55,7 @@ export function NewRecurringEventForm(props: {
       <EventFields
         clubSlug={props.clubSlug}
         communities={props.communities}
+        savedVenues={props.savedVenues}
         minDate=""
         schedule={schedule}
       />

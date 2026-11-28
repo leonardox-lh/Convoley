@@ -26,14 +26,19 @@ export async function GET(
 
   const format = formatSchema.parse(new URL(request.url).searchParams.get("formato"));
   const roster = buildRoster(await listEventRegistrations({ eventId: event.id }));
-  const rows = roster.players.length + (roster.waitlist.length ? roster.waitlist.length + 1 : 0);
+  // Open seats show as "Cupo libre" rows, so the list always runs up to the capacity.
+  const seatRows = Math.max(roster.players.length, event.capacity);
+  const rows = seatRows + (roster.waitlist.length ? roster.waitlist.length + 1 : 0);
   const layout = listImageLayout(format, rows);
 
-  const image = new ImageResponse(<ListImage {...brand} roster={roster} layout={layout} />, {
-    fonts: await loadImageFonts(),
-    width: layout.width,
-    height: layout.height,
-  });
+  const image = new ImageResponse(
+    <ListImage {...brand} roster={roster} capacity={event.capacity} layout={layout} />,
+    {
+      fonts: await loadImageFonts(),
+      width: layout.width,
+      height: layout.height,
+    },
+  );
   // The list changes with every sign-up: never serve a stale copy.
   image.headers.set("Cache-Control", "private, no-store");
   return image;

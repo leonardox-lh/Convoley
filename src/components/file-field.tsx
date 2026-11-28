@@ -2,6 +2,7 @@
 
 import { ImageUp } from "lucide-react";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 /**
  * Photo upload drawn like the other fields: a dashed tap area with the chosen file's name and a
@@ -14,8 +15,12 @@ export function FileField(props: {
   required?: boolean;
   multiple?: boolean;
   hint?: React.ReactNode;
+  /** The image already saved, shown until another file is chosen. */
+  currentImage?: string | null;
 }) {
   const [chosen, setChosen] = useState<{ names: string; preview: string | null } | null>(null);
+  const preview = chosen ? chosen.preview : (props.currentImage ?? null);
+  const thumbnailSize = props.currentImage ? "size-16" : "size-11";
 
   function onChange(event: React.ChangeEvent<HTMLInputElement>) {
     const files = [...(event.target.files ?? [])];
@@ -39,11 +44,25 @@ export function FileField(props: {
           onChange={onChange}
           className="peer sr-only"
         />
-        {chosen?.preview ? (
-          // eslint-disable-next-line @next/next/no-img-element -- a local preview of the chosen file
-          <img src={chosen.preview} alt="" className="size-11 shrink-0 rounded-lg object-cover" />
+        {preview ? (
+          // eslint-disable-next-line @next/next/no-img-element -- the chosen file or the saved image
+          <img
+            src={preview}
+            alt=""
+            className={cn(
+              thumbnailSize,
+              "shrink-0 rounded-lg",
+              // A saved QR or logo must show whole; a fresh photo can be cropped.
+              props.currentImage ? "border bg-white object-contain" : "object-cover",
+            )}
+          />
         ) : (
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <span
+            className={cn(
+              thumbnailSize,
+              "flex shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary",
+            )}
+          >
             <ImageUp className="size-5" aria-hidden />
           </span>
         )}
@@ -51,7 +70,11 @@ export function FileField(props: {
           <span className="text-xs font-medium text-muted-foreground">{props.label}</span>
           <span className="truncate text-sm font-semibold text-primary">
             {chosen?.names ??
-              (props.multiple ? "Toca para elegir fotos" : "Toca para elegir una foto")}
+              (props.currentImage
+                ? "Toca para cambiarla"
+                : props.multiple
+                  ? "Toca para elegir fotos"
+                  : "Toca para elegir una foto")}
           </span>
         </span>
       </span>

@@ -12,10 +12,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { ClubLogo } from "@/components/club-logo";
 import { Logo } from "@/components/logo";
 import { VolleyballIcon } from "@/components/volleyball";
 import { heroBackground } from "@/components/page-heading";
 import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { formatTimeRangeInLima } from "@/lib/lima-time";
 import { formatSoles } from "@/lib/money";
 import {
@@ -28,7 +30,7 @@ import { listUpcomingEvents } from "@/modules/events";
 import { currentUserId } from "@/modules/identity";
 
 const UPCOMING_EVENTS_LIMIT = 8;
-const CLUB_LOGO_PX = 96;
+const CLUB_LOGO_PX = 80;
 const SECTIONS: [string, string, LucideIcon][] = [
   ["clubes", "Clubes", Trophy],
   ["convocatorias", "Convocatorias", CalendarDays],
@@ -73,22 +75,19 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-5xl flex-col gap-12 px-4 py-8">
+      <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-8 sm:gap-12">
         {/* data-club-hero: on phones the color runs up under the see-through top bar (globals.css). */}
         <section
           data-club-hero
-          className="relative -mx-4 -mt-8 overflow-hidden rounded-b-[2rem] px-6 pt-14 pb-8 text-white shadow-lg sm:mx-0 sm:mt-0 sm:rounded-3xl sm:pt-10"
+          className="relative -mx-4 -mt-8 overflow-hidden rounded-b-[2rem] px-6 pt-17 pb-8 text-white shadow-lg sm:mx-0 sm:mt-0 sm:rounded-3xl sm:pt-10"
           style={heroBackground(null)}
         >
-          <VolleyballIcon className="pointer-events-none absolute -top-10 -right-12 size-48 opacity-15" />
+          <VolleyballIcon className="pointer-events-none absolute -right-12 -bottom-10 size-48 opacity-15" />
           <div className="relative flex max-w-xl flex-col gap-3">
             <h1 className="text-3xl leading-tight font-extrabold tracking-tight text-balance sm:text-4xl">
               Encuentra tu próximo partido de vóley
             </h1>
-            <p className="text-white/80">
-              Separa tu cupo para las próximas convocatorias, realiza tus pagos desde tu celular y
-              llega a la cancha con tu cupo asegurado.
-            </p>
+            <p className="text-white/80">Reserva tu cupo, paga y juega.</p>
             <div className="flex flex-wrap gap-2">
               <a
                 href="#convocatorias"
@@ -102,12 +101,10 @@ export default function Home() {
               </a>
               <Link
                 href="/registro"
-                className={buttonVariants({
-                  variant: "outline",
-                  size: "lg",
-                  className:
-                    "h-11 border-primary-foreground/40 bg-transparent px-4 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground",
-                })}
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "lg" }),
+                  "h-11 border-2 border-primary-foreground bg-transparent px-4 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground",
+                )}
               >
                 Crea tu club gratis
               </Link>
@@ -115,7 +112,7 @@ export default function Home() {
           </div>
         </section>
 
-        <HomeSection id="clubes" title="Clubes" subtitle="Elige un club y mira sus convocatorias.">
+        <HomeSection id="clubes" title="Clubes">
           <Suspense
             fallback={<CardSkeletons className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" />}
           >
@@ -123,11 +120,7 @@ export default function Home() {
           </Suspense>
         </HomeSection>
 
-        <HomeSection
-          id="convocatorias"
-          title="Próximas convocatorias"
-          subtitle="Los próximos partidos de todos los clubes."
-        >
+        <HomeSection id="convocatorias" title="Próximas convocatorias">
           <Suspense fallback={<CardSkeletons className="grid gap-3 md:grid-cols-2" />}>
             <UpcomingEvents />
           </Suspense>
@@ -163,22 +156,17 @@ async function MyClubLink() {
 function HomeSection({
   id,
   title,
-  subtitle,
   children,
 }: {
   id: string;
   title: string;
-  subtitle?: string;
   children: React.ReactNode;
 }) {
   return (
     <section id={id} aria-labelledby={`${id}-heading`} className="flex scroll-mt-20 flex-col gap-4">
-      <div>
-        <h2 id={`${id}-heading`} className="text-2xl font-semibold tracking-tight">
-          {title}
-        </h2>
-        {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
-      </div>
+      <h2 id={`${id}-heading`} className="text-2xl font-semibold tracking-tight">
+        {title}
+      </h2>
       {children}
     </section>
   );
@@ -207,12 +195,12 @@ async function ClubGrid() {
   if (clubs.length === 0) return <EmptyState>Todavía no hay clubes. ¡Crea el primero!</EmptyState>;
 
   return (
-    <ul className="grid grid-cols-2 gap-x-3 gap-y-8 pt-2 sm:grid-cols-3 lg:grid-cols-4">
+    <ul className="grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-3 sm:gap-y-6 lg:grid-cols-4">
       {clubs.map((club) => (
         <li key={club.id}>
           <Link
             href={`/${club.slug}`}
-            className="group flex flex-col items-center gap-2 rounded-2xl p-2 text-center"
+            className="group flex flex-col items-center gap-1.5 rounded-2xl p-1 text-center"
           >
             <span className="relative">
               {club.logoKey ? (
@@ -222,22 +210,19 @@ async function ClubGrid() {
                   width={CLUB_LOGO_PX}
                   height={CLUB_LOGO_PX}
                   unoptimized
-                  className="size-24 rounded-full bg-card object-cover shadow-[0_10px_20px_-6px_rgb(0_0_0/0.35),inset_0_-4px_8px_rgb(0_0_0/0.15)] ring-4 ring-white transition-transform duration-300 group-hover:scale-110"
+                  className="size-20 rounded-full bg-card object-cover shadow-[0_10px_20px_-6px_rgb(0_0_0/0.35),inset_0_-4px_8px_rgb(0_0_0/0.15)] ring-4 ring-white transition-transform duration-300 group-hover:scale-110"
                 />
               ) : (
                 <span
                   aria-hidden
-                  className="flex size-24 items-center justify-center rounded-full text-4xl font-bold text-white shadow-[0_10px_20px_-6px_rgb(0_0_0/0.35),inset_0_-4px_8px_rgb(0_0_0/0.15)] ring-4 ring-white transition-transform duration-300 group-hover:scale-110"
+                  className="flex size-20 items-center justify-center rounded-full text-4xl font-bold text-white shadow-[0_10px_20px_-6px_rgb(0_0_0/0.35),inset_0_-4px_8px_rgb(0_0_0/0.15)] ring-4 ring-white transition-transform duration-300 group-hover:scale-110"
                   style={heroBackground(club.primaryColor)}
                 >
                   {club.name.charAt(0).toUpperCase()}
                 </span>
               )}
             </span>
-            <span
-              aria-hidden
-              className="-mt-1 h-2 w-16 rounded-full bg-black/20 blur-[3px]"
-            />
+            <span aria-hidden className="-mt-1 h-2 w-16 rounded-full bg-black/20 blur-[3px]" />
             <span className="line-clamp-2 text-sm leading-snug font-semibold group-hover:text-primary">
               {club.name}
             </span>
@@ -267,12 +252,19 @@ async function UpcomingEvents() {
         return (
           <li key={event.id} className="min-w-0">
             <Link href={`/c/${club.slug}/${event.id}`} className="card-interactive flex gap-3 p-3">
-              <span className="flex w-12 shrink-0 flex-col items-center justify-center rounded-xl bg-secondary py-1.5 text-secondary-foreground">
-                <span className="text-xl leading-none font-semibold">
-                  {limaDay.format(event.startsAt)}
-                </span>
-                <span className="text-xs font-medium uppercase">
-                  {limaMonth.format(event.startsAt).replace(".", "")}
+              <span className="flex w-12 shrink-0 flex-col items-center gap-1.5">
+                <ClubLogo
+                  name={club.name}
+                  src={club.logoKey ? clubLogoPath(club.logoKey) : null}
+                  className="size-12 rounded-full bg-primary text-lg shadow-sm ring-0"
+                />
+                <span className="flex w-full flex-col items-center rounded-lg bg-secondary py-1 text-secondary-foreground">
+                  <span className="text-base leading-none font-semibold">
+                    {limaDay.format(event.startsAt)}
+                  </span>
+                  <span className="text-xs font-medium uppercase">
+                    {limaMonth.format(event.startsAt).replace(".", "")}
+                  </span>
                 </span>
               </span>
               <span className="flex min-w-0 flex-1 flex-col gap-0.5">
@@ -288,9 +280,8 @@ async function UpcomingEvents() {
                     {isFull ? "Llena" : `${event.remainingSpots} cupos`}
                   </span>
                 </span>
-                <span className="truncate text-sm text-muted-foreground">
-                  <span className="font-medium text-primary">{club.name}</span>
-                  {" · "}
+                <span className="truncate text-sm font-medium text-primary">{club.name}</span>
+                <span className="text-sm text-muted-foreground first-letter:uppercase">
                   {limaWeekday.format(event.startsAt)} · {formatTimeRangeInLima(event)}
                 </span>
                 <span className="flex items-center justify-between gap-2 text-sm">

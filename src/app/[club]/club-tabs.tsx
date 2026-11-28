@@ -6,7 +6,10 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-/** Folder tabs whose active one joins the panel below; on phones, a full-width underlined bar. */
+/**
+ * Folder tabs whose active one joins the panel below. Phones have no panel box, so a line under
+ * the tabs stands in for its top edge and the active tab opens into the content.
+ */
 export function ClubTabs({ slug }: { slug: string }) {
   const pathname = usePathname();
   // The tapped tab lights up at once, before the new section finishes loading.
@@ -21,7 +24,7 @@ export function ClubTabs({ slug }: { slug: string }) {
   return (
     <nav
       aria-label="Secciones del club"
-      className="relative z-[1] -mb-px flex gap-1 max-sm:-mx-4 max-sm:mb-0 max-sm:gap-0 max-sm:border-b"
+      className="relative z-[1] -mb-px flex gap-1 max-sm:mb-0 max-sm:border-b"
     >
       {tabs.map(({ href, label, icon: Icon }) => {
         const active = activeHref === href;
@@ -32,10 +35,10 @@ export function ClubTabs({ slug }: { slug: string }) {
             aria-current={active ? "page" : undefined}
             onClick={() => href !== pathname && setTapped({ from: pathname, href })}
             className={cn(
-              "flex items-center gap-1.5 rounded-t-2xl border border-b-0 px-3.5 py-2.5 text-sm font-medium transition-colors max-sm:flex-1 max-sm:justify-center max-sm:rounded-none max-sm:border-0 max-sm:border-b-2 max-sm:bg-transparent max-sm:-mb-px",
+              "flex items-center gap-1.5 rounded-t-2xl border border-b-0 px-3.5 py-2.5 text-sm font-medium transition-colors max-sm:flex-1 max-sm:justify-center max-sm:px-2",
               active
-                ? "border-border bg-card text-primary max-sm:border-primary"
-                : "border-transparent bg-secondary/70 text-muted-foreground hover:bg-secondary hover:text-foreground max-sm:hover:bg-transparent",
+                ? "border-border bg-card text-primary max-sm:-mb-px max-sm:bg-background"
+                : "border-transparent bg-secondary/70 text-muted-foreground hover:bg-secondary hover:text-foreground",
             )}
           >
             <Icon className="size-4" aria-hidden />

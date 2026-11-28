@@ -8,6 +8,7 @@ export function prismaPaymentSettingsRepository(db: PrismaClient): PaymentSettin
       db.club.findUnique({
         where: { slug: clubSlug },
         select: {
+          paymentApp: true,
           paymentPhone: true,
           paymentHolderName: true,
           paymentQrKey: true,

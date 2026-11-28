@@ -21,7 +21,7 @@ const registrations = Array.from({ length: 22 }, (_, index) => ({
 
 async function render(format: ListImageFormat) {
   const roster = buildRoster(registrations);
-  const layout = listImageLayout(format, roster.players.length + roster.waitlist.length + 1);
+  const layout = listImageLayout(format, 18 + roster.waitlist.length + 1);
   const response = new ImageResponse(
     createElement(ListImage, {
       clubName: "Vóley Miraflores",
@@ -31,6 +31,7 @@ async function render(format: ListImageFormat) {
       secondary: "#facc15",
       logo: null,
       roster,
+      capacity: 18,
       layout,
     }),
     { width: layout.width, height: layout.height },

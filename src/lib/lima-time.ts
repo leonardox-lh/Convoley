@@ -12,6 +12,18 @@ export function todayInLima(now = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: LIMA_TIME_ZONE }).format(now);
 }
 
+const LATE_HOUR = 21;
+const MS_PER_HOUR = 60 * 60 * 1000;
+
+/**
+ * Date a new event starts on by default: today in Lima, or tomorrow from 9 p. m. on, when
+ * nobody is setting up a game for the same night. Adding the hours left until midnight
+ * moves "now" into tomorrow exactly when it's 21:00 or later.
+ */
+export function defaultEventDateInLima(now = new Date()): string {
+  return todayInLima(new Date(now.getTime() + (24 - LATE_HOUR) * MS_PER_HOUR));
+}
+
 const limaFormatter = new Intl.DateTimeFormat("es-PE", {
   timeZone: LIMA_TIME_ZONE,
   dateStyle: "full",

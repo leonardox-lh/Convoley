@@ -66,15 +66,6 @@ export function VoucherForm(props: {
           />
         </Field>
       )}
-      <Field label="Código de seguridad de Yape (opcional)">
-        <input
-          name="yapeSecurityCode"
-          inputMode="numeric"
-          autoComplete="off"
-          placeholder="123"
-          className={floatingFieldClass}
-        />
-      </Field>
       {error && <FormMessage tone="error">{error}</FormMessage>}
       <Button type="submit" size="lg" disabled={pending}>
         {pending ? "Enviando…" : "Enviar captura"}

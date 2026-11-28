@@ -1,6 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+import { Trash2 } from "lucide-react";
+import { useActionState, useRef, useState } from "react";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import {
   Field,
   fieldClass,
@@ -134,15 +136,37 @@ export function RemovePhotoButton(props: {
   photoKey: string;
 }) {
   const [state, action, pending] = useActionState(removePhotoAction, IDLE);
+  const form = useRef<HTMLFormElement>(null);
+  const [confirming, setConfirming] = useState(false);
   return (
-    <form action={action}>
+    <form ref={form} action={action}>
       <input type="hidden" name="clubSlug" value={props.clubSlug} />
       <input type="hidden" name="productId" value={props.productId} />
       <input type="hidden" name="key" value={props.photoKey} />
-      <Button type="submit" variant="ghost" size="sm" disabled={pending}>
-        Quitar
+      <Button
+        type="button"
+        variant="outline"
+        size="icon"
+        className="size-9 border-destructive text-destructive hover:bg-destructive/10 hover:text-destructive"
+        disabled={pending}
+        aria-label="Quitar esta foto"
+        onClick={() => setConfirming(true)}
+      >
+        <Trash2 aria-hidden />
       </Button>
       {state.status === "error" && <FormMessage tone="error">{state.message}</FormMessage>}
+      {confirming && (
+        <ConfirmDialog
+          title="¿Quitar esta foto?"
+          description="La foto dejará de verse en el producto. Esto no se puede deshacer."
+          confirmLabel="Quitar"
+          onConfirm={() => {
+            setConfirming(false);
+            form.current?.requestSubmit();
+          }}
+          onCancel={() => setConfirming(false)}
+        />
+      )}
     </form>
   );
 }

@@ -54,16 +54,53 @@ export const prismaTeamMatches: TeamMatches = {
     return count === 1;
   },
 
-  setFinal: (eventId, pairing) =>
+  add: (eventId, pairing, isFinal) =>
     db.$transaction(async (tx) => {
-      const final = await tx.teamMatch.findFirst({ where: { eventId, isFinal: true } });
-      if (final) {
-        await tx.teamMatch.update({ where: { id: final.id }, data: pairing });
+      const last = await tx.teamMatch.aggregate({ where: { eventId }, _max: { position: true } });
+      const next = (last._max.position ?? 0) + 1;
+      const final = isFinal
+        ? null
+        : await tx.teamMatch.findFirst({ where: { eventId, isFinal: true } });
+      if (!final) {
+        await tx.teamMatch.create({ data: { eventId, isFinal, position: next, ...pairing } });
         return;
       }
-      const last = await tx.teamMatch.aggregate({ where: { eventId }, _max: { position: true } });
+      // The final moves one place down and the new match takes its spot.
+      await tx.teamMatch.update({ where: { id: final.id }, data: { position: next } });
       await tx.teamMatch.create({
-        data: { eventId, isFinal: true, position: (last._max.position ?? 0) + 1, ...pairing },
+        data: { eventId, isFinal: false, position: final.position, ...pairing },
       });
     }),
+
+  async setTeams(matchId, pairing) {
+    await db.teamMatch.update({ where: { id: matchId }, data: pairing });
+  },
+
+  async remove(matchId) {
+    await db.teamMatch.delete({ where: { id: matchId } });
+  },
+
+  swapPositions: (first, second) =>
+    db.$transaction(async (tx) => {
+      // (eventId, position) is unique: park the first match on a free spot while swapping.
+      const parked = -first.position;
+      await tx.teamMatch.update({ where: { id: first.id }, data: { position: parked } });
+      await tx.teamMatch.update({ where: { id: second.id }, data: { position: first.position } });
+      await tx.teamMatch.update({ where: { id: first.id }, data: { position: second.position } });
+    }),
+
+  async championPhotoKey(eventId) {
+    const final = await db.teamMatch.findFirst({
+      where: { eventId, isFinal: true },
+      select: { championPhotoKey: true },
+    });
+    return final?.championPhotoKey ?? null;
+  },
+
+  async setChampionPhotoKey(eventId, key) {
+    await db.teamMatch.updateMany({
+      where: { eventId, isFinal: true },
+      data: { championPhotoKey: key },
+    });
+  },
 };

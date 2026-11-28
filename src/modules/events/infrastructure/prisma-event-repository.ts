@@ -108,7 +108,7 @@ function toEventDetails(
     mapsUrl: row.mapsUrl,
     priceCents: row.priceCents,
     capacity: row.capacity,
-    isMixed: row.isMixed,
+    category: row.category,
     showRoster: row.showRoster,
     rules: row.rules,
     status: row.status,

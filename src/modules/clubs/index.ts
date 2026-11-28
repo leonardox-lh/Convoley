@@ -120,4 +120,5 @@ export const updateCancellationPolicy = makeUpdateCancellationPolicy({ settings:
 export const cancellationDeadlineHoursFor = (clubId: string) =>
   findCancellationDeadlineHours(db, clubId);
 export { MAX_CANCELLATION_DEADLINE_HOURS } from "./domain/cancellation-policy";
+export { PAYMENT_APPS, type PaymentApp } from "./domain/payment-settings";
 export { InvalidCancellationPolicyError } from "./domain/errors";

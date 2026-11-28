@@ -35,7 +35,7 @@ const valid = (overrides: Partial<NewEventProps> = {}): NewEventProps => ({
   mapsUrl: null,
   priceCents: 1500,
   capacity: 18,
-  isMixed: true,
+  category: "mixed" as const,
   rules: null,
   status: "published",
   ...overrides,

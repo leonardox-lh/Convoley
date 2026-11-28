@@ -207,7 +207,12 @@ const timeText = (value: string) => {
 };
 
 /** Time chosen on a clock face in a modal: hour first, then minutes, with a.m./p.m. */
-export function TimePicker(props: { label: string; name: string; defaultValue?: string }) {
+export function TimePicker(props: {
+  label: string;
+  name: string;
+  defaultValue?: string;
+  onChange?: (value: string) => void;
+}) {
   const id = useId();
   const [value, setValue] = useState(props.defaultValue ?? "");
   const [open, setOpen] = useState(false);
@@ -344,7 +349,9 @@ export function TimePicker(props: { label: string; name: string; defaultValue?: 
               <button
                 type="button"
                 onClick={() => {
-                  setValue(`${pad(draft.hour)}:${pad(draft.minute)}`);
+                  const time = `${pad(draft.hour)}:${pad(draft.minute)}`;
+                  setValue(time);
+                  props.onChange?.(time);
                   setOpen(false);
                 }}
                 className="h-11 flex-1 rounded-xl bg-primary text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"

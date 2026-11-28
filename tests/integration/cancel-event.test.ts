@@ -8,6 +8,7 @@ import { makeUpdateEvent } from "@/modules/events/application/update-event";
 import type { ClubReader, PaymentsMarker } from "@/modules/events/application/ports";
 import { CapacityBelowConfirmedError } from "@/modules/events/domain/errors";
 import { PrismaEventRepository } from "@/modules/events/infrastructure/prisma-event-repository";
+import { prismaVenueBook } from "@/modules/events/infrastructure/prisma-venue-book";
 import {
   prismaTransactions,
   toPrismaTx,
@@ -234,6 +235,7 @@ describe("HU-05 criterio 1: cupos y confirmados (Postgres)", () => {
         promoteWaitlisted: async () => 0,
       },
       transactions: prismaTransactions(db),
+      venues: prismaVenueBook(db),
       now: () => new Date("2030-12-01T12:00:00.000Z"),
     });
     const input = {
@@ -245,7 +247,7 @@ describe("HU-05 criterio 1: cupos y confirmados (Postgres)", () => {
       venueName: "Coliseo",
       mapsUrl: null,
       priceCents: 1250,
-      isMixed: false,
+      category: "men" as const,
       rules: null,
       publish: false,
     };

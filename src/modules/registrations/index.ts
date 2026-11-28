@@ -18,6 +18,12 @@ import {
   makeGetGameDay,
   makeRecordMatchScore,
   makeRenameTeam,
+  makeAddMatch,
+  makeChangeMatchTeams,
+  makeCreateFinal,
+  makeDeleteMatch,
+  makeMoveMatch,
+  makeSetChampionPhoto,
   makeStartGameDay,
 } from "./application/game-day";
 import { prismaTeamMatches, prismaTeamNames } from "./infrastructure/prisma-game-day";
@@ -36,7 +42,11 @@ import { makeEditOwnDetails, makeGetEditableOwnDetails } from "./application/edi
 import { makeRegisterGuest } from "./application/register-guest";
 import { makeRemoveRegistration } from "./application/remove-registration";
 import { makeRevertToPending } from "./application/revert-to-pending";
-import { cancellationPoliciesAdapter, serviceFeesAdapter } from "./infrastructure/clubs-adapter";
+import {
+  cancellationPoliciesAdapter,
+  championPhotosAdapter,
+  serviceFeesAdapter,
+} from "./infrastructure/clubs-adapter";
 import { eventsAdapter } from "./infrastructure/events-adapter";
 import { creditsAdapter } from "./infrastructure/plans-adapter";
 import {
@@ -235,6 +245,15 @@ export const renameTeam = makeRenameTeam(gameDayDeps);
 export const startGameDay = makeStartGameDay(gameDayDeps);
 export const recordMatchScore = makeRecordMatchScore(gameDayDeps);
 export const getGameDay = makeGetGameDay(gameDayDeps);
+export const addMatch = makeAddMatch(gameDayDeps);
+export const createFinal = makeCreateFinal(gameDayDeps);
+export const changeMatchTeams = makeChangeMatchTeams(gameDayDeps);
+export const deleteMatch = makeDeleteMatch(gameDayDeps);
+export const moveMatch = makeMoveMatch(gameDayDeps);
+export const setChampionPhoto = makeSetChampionPhoto({
+  matches: prismaTeamMatches,
+  photos: championPhotosAdapter,
+});
 export type { GameDay, GameDayTeam } from "./application/game-day";
 export type { StoredMatch } from "./application/ports";
 export {
@@ -244,7 +263,15 @@ export {
   TEAM_NAME_MAX_LENGTH,
   type Standing,
 } from "./domain/game-day";
-export { InvalidMatchScoreError, InvalidTeamNameError, MatchNotFoundError } from "./domain/errors";
+export {
+  FinalAlreadyExistsError,
+  InvalidMatchScoreError,
+  InvalidPairingError,
+  InvalidTeamNameError,
+  MatchAlreadyPlayedError,
+  MatchNotFoundError,
+  NoChampionYetError,
+} from "./domain/errors";
 
 // HU-38: check-in.
 export const setCheckIn = makeSetCheckIn({ checkIns: prismaCheckIns, now: () => new Date() });

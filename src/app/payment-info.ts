@@ -7,6 +7,7 @@ export async function loadPaymentInfo(clubSlug: string, priceCents: number): Pro
   const settings = await getPaymentSettings(clubSlug);
   return {
     priceText: formatSoles(priceCents),
+    app: settings?.paymentApp ?? null,
     phone: settings?.paymentPhone?.replace(/^\+51/, "") ?? null,
     holderName: settings?.paymentHolderName ?? null,
     qrUrl: settings?.paymentQrKey ? clubLogoPath(settings.paymentQrKey) : null,

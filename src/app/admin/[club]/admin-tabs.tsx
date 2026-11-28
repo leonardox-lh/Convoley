@@ -1,6 +1,6 @@
 "use client";
 
-import { type LucideIcon, Plus, ShoppingBag, Ticket, Wallet } from "lucide-react";
+import { type LucideIcon, Plus, ShoppingBag, Ticket } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
@@ -10,7 +10,6 @@ import { cn } from "@/lib/utils";
 const TABS: [path: string, label: string, Icon: LucideIcon][] = [
   ["convocatorias/nueva", "Nueva convocatoria", Plus],
   ["tienda", "Tienda", ShoppingBag],
-  ["pagos", "Cobros", Wallet],
   ["planes", "Planes", Ticket],
 ];
 
@@ -20,7 +19,9 @@ export function AdminTabs({ clubSlug }: { clubSlug: string }) {
   const navRef = useRef<HTMLElement>(null);
   // On a narrow phone the active tab may sit past the edge: bring it into view.
   useEffect(() => {
-    navRef.current?.querySelector("[aria-current=page]")?.scrollIntoView({ block: "nearest", inline: "nearest" });
+    navRef.current
+      ?.querySelector("[aria-current=page]")
+      ?.scrollIntoView({ block: "nearest", inline: "nearest" });
   }, [pathname]);
   return (
     <nav

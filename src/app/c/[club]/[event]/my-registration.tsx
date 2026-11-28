@@ -2,7 +2,8 @@ import { CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { RegistrationStatus } from "@/modules/registrations";
+import type { EditablePlayerDetails, RegistrationStatus } from "@/modules/registrations";
+import { EditDetailsButton } from "../../../inscripcion/[registration]/edit-details";
 import {
   REGISTRATION_STATUS_BADGE_CLASSES,
   REGISTRATION_STATUS_LABELS,
@@ -19,6 +20,9 @@ const STATUS_NOTES: Partial<Record<RegistrationStatus, string>> = {
 export function MyRegistration(props: {
   registration: { id: string; status: RegistrationStatus; waitlistPosition: number | null };
   paymentInfo: PaymentInfo;
+  /** Null once the teams are built: the details can't change anymore. */
+  editableDetails: EditablePlayerDetails | null;
+  isMixed: boolean;
 }) {
   const { registration } = props;
   const path = `/inscripcion/${registration.id}`;
@@ -50,22 +54,23 @@ export function MyRegistration(props: {
         </p>
       )}
       {note && <p className="text-sm text-muted-foreground">{note}</p>}
-      {pendingPayment && (
-        <>
-          <PaymentInstructions info={props.paymentInfo} />
-          <Link href={path} className={buttonVariants({ size: "lg", className: "h-11" })}>
-            Pagar o subir mi captura
-          </Link>
-        </>
+      {pendingPayment && <PaymentInstructions info={props.paymentInfo} />}
+      {props.editableDetails && (
+        <EditDetailsButton
+          registrationId={registration.id}
+          details={props.editableDetails}
+          isMixed={props.isMixed}
+        />
       )}
+      {/* One button: paying and cancelling both happen on the sign-up page. */}
       <Link
         href={path}
-        className={buttonVariants({
-          variant: pendingPayment ? "ghost" : "outline",
-          className: "h-10",
-        })}
+        className={cn(
+          buttonVariants({ variant: "outline", size: "lg" }),
+          "h-11 border-primary text-primary hover:bg-primary/10 hover:text-primary",
+        )}
       >
-        Ver mi inscripción o cancelar
+        {pendingPayment ? "Pagar o cancelar" : "Ver mi inscripción o cancelar"}
       </Link>
     </section>
   );
