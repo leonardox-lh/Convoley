@@ -4,7 +4,7 @@ import { Share2 } from "lucide-react";
 import type { ReactNode } from "react";
 import { FormMessage } from "@/components/form";
 import { Button } from "@/components/ui/button";
-import { VolleyballIcon } from "@/components/volleyball";
+import { Ball } from "@/components/logo";
 import { type ShareImageStatus, useShareImage } from "./share-image";
 
 /** A section title with one "Compartir" button that opens the phone's share sheet. */
@@ -48,7 +48,7 @@ export function ShareButtonContent(props: {
   if (props.status === "generating") {
     return (
       <span role="status" className="flex items-center gap-1.5">
-        <VolleyballIcon className="size-4 animate-spin [animation-duration:1.2s] motion-reduce:animate-none" />
+        <Ball className="size-4 animate-spin [animation-duration:1.2s] motion-reduce:animate-none" />
         Generando…
       </span>
     );

@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { Ball } from "./logo";
 
 /** A volleyball: three curved panels meeting near the center, each with its two seams. */
 export function VolleyballIcon({ className }: { className?: string }) {
@@ -33,7 +34,8 @@ export function VolleyballLoader({
       className={cn("flex flex-col items-center justify-center gap-3 py-12", className)}
     >
       <span className="animate-bounce [animation-duration:900ms]">
-        <VolleyballIcon className="size-12 animate-spin [animation-duration:1.2s] motion-reduce:animate-none" />
+        {/* The glossy ball of the wordmark, so loading looks like the brand. */}
+        <Ball className="size-12 animate-spin drop-shadow-md [animation-duration:1.2s] motion-reduce:animate-none" />
       </span>
       <span aria-hidden className="h-1.5 w-8 animate-pulse rounded-full bg-foreground/10" />
       <span className="text-sm text-muted-foreground">{label}</span>
