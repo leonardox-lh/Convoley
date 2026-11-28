@@ -1,4 +1,4 @@
-// Screenshots of the demo club for the promo video. Needs `npm run dev` and `npm run seed:demo`.
+// Screenshots of the demo club for the promo video. Needs `npm run dev` and `DEMO_PROMO=1 npm run seed:demo`.
 // Run: npx tsx scripts/promo-screenshots.ts [outputDir]. Re-seed afterwards: it signs up a player.
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -110,6 +110,12 @@ async function main() {
     page,
     "image-matches-story",
     `${event(ids.live)}/partidos/imagen?formato=historia`,
+  );
+  // Only with DEMO_PROMO=1, which plays the final.
+  await saveImage(
+    page,
+    "image-champion-story",
+    `${event(ids.live)}/partidos/imagen?formato=historia&tipo=campeon`,
   );
 
   // The live event's list (check-in marks) and the check-in page of one player.

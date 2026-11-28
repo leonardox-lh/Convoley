@@ -25,7 +25,10 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const MINUTE_MS = 60 * 1000;
 const BRAND = "#1F4FD1";
 const BALL = "#F2A32C";
-const PAST_WEEKS = 12;
+// DEMO_PROMO=1 is the promo video's take: no past weeks (finance in the hundreds) and the
+// game day's final played, with a team photo for the champion image.
+const PROMO = process.env.DEMO_PROMO === "1";
+const PAST_WEEKS = PROMO ? 0 : 12;
 
 type Player = {
   firstName: string;
@@ -101,6 +104,20 @@ function rng(seed: number) {
 
 const svgToPng = (svg: string, size = 800) =>
   sharp(Buffer.from(svg)).resize(size, size).png().toBuffer();
+
+// Stand-in team photo for the champion image: six players in the club's jersey and the cup.
+function teamPhotoSvg() {
+  const player = (x: number, number: number, raised: boolean) => {
+    const arms = raised
+      ? `<path d="M${x - 34} 470 L${x - 70} 360 M${x + 34} 470 L${x + 70} 360" stroke="#c98d63" stroke-width="22" stroke-linecap="round"/>`
+      : `<path d="M${x - 36} 470 L${x - 52} 580 M${x + 36} 470 L${x + 52} 580" stroke="#c98d63" stroke-width="22" stroke-linecap="round"/>`;
+    return `<g>${arms}<rect x="${x - 26}" y="600" width="22" height="150" rx="10" fill="#0a1a4a"/><rect x="${x + 4}" y="600" width="22" height="150" rx="10" fill="#0a1a4a"/><rect x="${x - 48}" y="450" width="96" height="170" rx="30" fill="${BRAND}"/><text x="${x}" y="555" font-family="Arial" font-weight="700" font-size="56" fill="#fff" text-anchor="middle">${number}</text><circle cx="${x}" cy="405" r="40" fill="#c98d63"/><path d="M${x - 40} 400 a40 40 0 0 1 80 0 q-40 -22 -80 0z" fill="#2b1d14"/></g>`;
+  };
+  const players = [150, 330, 510, 690, 870, 1050].map((x, i) =>
+    player(x, [7, 3, 11, 5, 9, 1][i], i % 2 === 0),
+  );
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#25407f"/><stop offset="1" stop-color="#0d1838"/></linearGradient></defs><rect width="1200" height="800" fill="url(#g)"/><rect y="640" width="1200" height="160" fill="#c58b4e"/><path d="M0 700 H1200" stroke="#fff" stroke-width="6" opacity=".6"/><g opacity=".25" fill="#fff"><circle cx="200" cy="120" r="70"/><circle cx="600" cy="90" r="90"/><circle cx="1000" cy="130" r="70"/></g>${players.join("")}<g transform="translate(600 610)"><path d="M-55 -120 h110 v40 a55 55 0 0 1 -110 0z" fill="${BALL}"/><rect x="-12" y="-28" width="24" height="40" fill="${BALL}"/><rect x="-40" y="10" width="80" height="22" rx="4" fill="#7a4d10"/></g></svg>`;
+}
 
 // A club crest (shield + monogram), so it reads as a club and not as Convoley's own ball.
 const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
@@ -202,6 +219,12 @@ async function uploadImages() {
     `vouchers/${keys.voucher}`,
     await sharp(Buffer.from(VOUCHER_SVG)).resize(720, 1280).png().toBuffer(),
   );
+  if (PROMO) {
+    await put(
+      `logos/${DEMO_SLUG}-champion.png`,
+      await sharp(Buffer.from(teamPhotoSvg())).resize(1200, 800).png().toBuffer(),
+    );
+  }
   for (const [name, svg] of Object.entries(PRODUCT_IMAGES)) {
     // Image keys only allow lowercase letters, digits and dashes.
     const key = `${DEMO_SLUG}-product-${name.toLowerCase()}.png`;
@@ -512,7 +535,12 @@ async function seed(db: PrismaClient) {
           { position: 1, homeTeam: 1, awayTeam: 2, homeScore: 25, awayScore: 21 },
           { position: 2, homeTeam: 1, awayTeam: 3, homeScore: 23, awayScore: 25 },
           { position: 3, homeTeam: 2, awayTeam: 3, homeScore: 25, awayScore: 19 },
-          { position: 4, homeTeam: 1, awayTeam: 2, isFinal: true },
+          PROMO
+            ? {
+                ...{ position: 4, homeTeam: 1, awayTeam: 2, isFinal: true },
+                ...{ homeScore: 25, awayScore: 22, championPhotoKey: `${DEMO_SLUG}-champion.png` },
+              }
+            : { position: 4, homeTeam: 1, awayTeam: 2, isFinal: true },
         ],
       },
     },
