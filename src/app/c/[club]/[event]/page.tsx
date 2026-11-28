@@ -6,7 +6,13 @@ import { Info } from "lucide-react";
 import { VolleyballLoader } from "@/components/volleyball";
 
 import { type CancellationOutcome, type EventStatus } from "@/modules/events";
-import { currentUserId, getPlayerProfile, isGoogleSignInEnabled } from "@/modules/identity";
+import {
+  currentUserId,
+  getPlayerProfile,
+  isGoogleSignInEnabled,
+  SIGN_IN_PATH,
+} from "@/modules/identity";
+import { RETURN_PATH_PARAM } from "../../../ingresar/sign-in-with-password";
 import {
   acceptsWaitlist,
   buildRoster,
@@ -145,6 +151,7 @@ async function PublicEventContent({ params }: { params: Params }) {
             profile={profile}
             lastChoices={lastChoices}
             googleEnabled={isGoogleSignInEnabled}
+            signInHref={`${SIGN_IN_PATH}?${new URLSearchParams({ [RETURN_PATH_PARAM]: `/c/${club}/${event.id}` })}`}
             isMixed={event.category === "mixed"}
           />
         )

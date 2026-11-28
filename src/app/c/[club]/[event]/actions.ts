@@ -68,7 +68,10 @@ export async function registerAction(
   if (!parsed.success) return { status: "error", message: parsed.error.issues[0].message };
 
   const userId = await currentUserId();
-  const profile = userId ? await getPlayerProfile(userId) : null;
+  // Players need an account to sign up; the organizer's "Agregar jugador" covers everyone else.
+  if (!userId)
+    return { status: "error", message: "Inicia sesión para unirte a esta convocatoria." };
+  const profile = await getPlayerProfile(userId);
   // A Google player's names and phone come from their account, not from the form (HU-48).
   const player = {
     ...parsed.data,

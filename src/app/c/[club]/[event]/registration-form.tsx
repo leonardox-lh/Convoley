@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Toast } from "@/components/toast";
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import { FormMessage, OptionalSelect, submitKeepingValues, TextField } from "@/components/form";
 import { Button, buttonVariants } from "@/components/ui/button";
 import type { PlayerProfile } from "@/modules/identity";
@@ -16,6 +16,7 @@ export function RegistrationForm({
   eventId,
   profile,
   googleEnabled,
+  signInHref,
   waitlistOnly,
   paymentInfo,
   isMixed,
@@ -28,16 +29,17 @@ export function RegistrationForm({
   eventId: string;
   /** The event is full: signing up joins the waitlist (HU-12). */
   waitlistOnly: boolean;
-  /** The Google player's account; null for guests. */
+  /** The player's account; null when signed out, and then they must sign in to sign up. */
   profile: PlayerProfile | null;
   googleEnabled: boolean;
+  /** Sign-in page that brings the player back to this event. */
+  signInHref: string;
   /** Position and level from the player's last sign-up, to prefill the form. */
   lastChoices: { position: string | null; level: string | null; gender: string | null } | null;
 }) {
   const [state, formAction, pending] = useActionState<RegisterState, FormData>(registerAction, {
     status: "idle",
   });
-  const [asGuest, setAsGuest] = useState(false);
   const heading = waitlistOnly ? "Entra a la lista de espera" : "Inscríbete";
 
   if (state.status === "registered" && state.waitlistPosition !== null) {
@@ -99,13 +101,17 @@ export function RegistrationForm({
     );
   }
 
-  if (!profile && !asGuest) {
+  // Players sign up with their account; only the organizer adds people without one.
+  if (!profile) {
     return (
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-semibold">{heading}</h2>
-        <Button size="lg" onClick={() => setAsGuest(true)}>
-          Continuar como invitado
-        </Button>
+        <p className="text-sm text-muted-foreground">
+          Inicia sesión para unirte a esta convocatoria.
+        </p>
+        <Link href={signInHref} className={buttonVariants({ size: "lg", className: "h-11" })}>
+          Iniciar sesión
+        </Link>
         {googleEnabled && (
           <form action={continueWithGoogleAction} className="flex flex-col">
             <input type="hidden" name="club" value={club} />

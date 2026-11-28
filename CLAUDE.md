@@ -79,7 +79,7 @@ Aplícalos siempre, con criterio y sin sobreingeniería:
 - Convoley **nunca retiene dinero**: el pago va directo a la cuenta de Mercado Pago del organizador.
 - Webhooks de pago: verificar firma, ser idempotentes, nunca confiar en datos del cliente para marcar "pagado".
 - Los vouchers (capturas de pago) no son públicos: solo URLs firmadas para el organizador.
-- Un jugador puede inscribirse **sin cuenta** (invitado) o con Google. No pedir códigos de verificación.
+- Un jugador se inscribe **con su cuenta** (Google o correo): sin sesión, la convocatoria le pide iniciar sesión. Solo el organizador agrega jugadores sin cuenta ("Agregar jugador"). No pedir códigos de verificación.
 - Nunca subir secretos al repo: todo en variables de entorno (`.env.local`, no versionado).
 
 ## Flujo de trabajo por historia

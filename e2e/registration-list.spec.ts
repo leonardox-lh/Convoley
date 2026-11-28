@@ -17,14 +17,15 @@ function randomPhone() {
   return `9${String(Math.floor(Math.random() * 1e8)).padStart(8, "0")}`;
 }
 
+// Players need an account to sign up themselves, so the organizer adds these two from the panel.
 async function register(page: Page, firstName: string, phone: string) {
-  await page.goto(eventUrl);
-  await page.getByRole("button", { name: "Continuar como invitado" }).click();
+  const panel = page.locator("details", { hasText: "Agregar jugador" });
+  if ((await panel.getAttribute("open")) === null) await page.getByText("Agregar jugador").click();
   await page.getByLabel("Nombre").fill(firstName);
   await page.getByLabel("Apellido").fill("Lista");
   await page.getByLabel("Celular").fill(phone);
-  await page.getByRole("button", { name: "Inscribirme" }).click();
-  await expect(page.getByText("Pendiente de pago")).toBeVisible();
+  await page.getByRole("button", { name: "Agregar" }).click();
+  await expect(page.getByText(`${firstName} quedó inscrito.`)).toBeVisible();
 }
 
 test.beforeAll(async ({ browser }) => {
@@ -43,11 +44,8 @@ test.beforeAll(async ({ browser }) => {
   const [, club, eventId] = new URL(eventUrl).pathname.match(/^\/c\/([^/]+)\/([^/]+)/)!;
   listUrl = `/admin/${club}/convocatorias/${eventId}`;
 
-  for (const [index, phone] of phones.entries()) {
-    const guest = await browser.newContext({ viewport: { width: MOBILE_WIDTH, height: 812 } });
-    await register(await guest.newPage(), names[index], phone);
-    await guest.close();
-  }
+  await page.goto(listUrl);
+  for (const [index, phone] of phones.entries()) await register(page, names[index], phone);
   await context.close();
 });
 

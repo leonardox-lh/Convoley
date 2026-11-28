@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import { AuthLink, AuthShell } from "@/components/auth-shell";
 import { PASSWORD_MIN_LENGTH } from "@/modules/identity";
-import { ContinueAsGuest } from "../ingresar/continue-as-guest";
 import { GoogleSignInButton } from "../ingresar/google-sign-in-button";
 import { RETURN_PATH_PARAM, safeReturnPath } from "../ingresar/sign-in-with-password";
 import { SignUpForm } from "./sign-up-form";
@@ -33,7 +32,6 @@ async function SignUpWithReturn({
       <p className="border-t pt-4 text-center text-sm text-muted-foreground">
         ¿Ya tienes cuenta? <AuthLink href="/ingresar">Ingresa</AuthLink>
       </p>
-      <ContinueAsGuest returnParam={returnParam} />
     </>
   );
 }

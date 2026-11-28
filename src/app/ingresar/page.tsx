@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import { AuthLink, AuthShell } from "@/components/auth-shell";
-import { ContinueAsGuest } from "./continue-as-guest";
 import { GoogleSignInButton } from "./google-sign-in-button";
 import { SignInForm } from "./sign-in-form";
 import { RETURN_PATH_PARAM, safeReturnPath } from "./sign-in-with-password";
@@ -47,7 +46,6 @@ async function SignInOptions({ searchParams }: { searchParams: SearchParams }) {
       <p className="border-t pt-4 text-center text-sm text-muted-foreground">
         ¿No tienes cuenta? <AuthLink href={signUpHref}>Regístrate</AuthLink>
       </p>
-      <ContinueAsGuest returnParam={returnParam} />
     </>
   );
 }
