@@ -40,8 +40,10 @@ export async function removeMemberAction(
 ): Promise<RemoveMemberState> {
   const parsed = removeSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { status: "error", message: NOT_ALLOWED_MESSAGE };
-  if (!(await requireOrganizerToEdit(parsed.data.clubSlug, "manage_club"))) {
-    return { status: "error", message: NOT_ALLOWED_MESSAGE };
+  const organizer = await requireOrganizerToEdit(parsed.data.clubSlug, "manage_club");
+  if (!organizer) return { status: "error", message: NOT_ALLOWED_MESSAGE };
+  if (organizer.userId === parsed.data.userId) {
+    return { status: "error", message: "No puedes quitarte a ti mismo del club." };
   }
   try {
     await removeClubMember(parsed.data);

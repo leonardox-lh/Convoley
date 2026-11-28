@@ -21,7 +21,8 @@ export default function OrganizersPage({ params }: Props) {
 
 async function OrganizersContent({ params }: Pick<Props, "params">) {
   const clubSlug = (await params).club;
-  if (!(await requireOrganizer(clubSlug, "manage_club"))) notFound();
+  const organizer = await requireOrganizer(clubSlug, "manage_club");
+  if (!organizer) notFound();
   const members = await listClubMembers(clubSlug);
 
   return (
@@ -33,14 +34,24 @@ async function OrganizersContent({ params }: Pick<Props, "params">) {
         {members.map((member) => (
           <li key={member.userId} className="flex items-start justify-between gap-3 py-3">
             <div className="flex flex-col">
-              <span className="font-medium">{member.name ?? member.email}</span>
+              <span className="flex items-center gap-2 font-medium">
+                {member.name ?? member.email}
+                {member.userId === organizer.userId && (
+                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+                    Tú
+                  </span>
+                )}
+              </span>
               <span className="text-sm text-zinc-500">{CLUB_ROLE_LABELS[member.role]}</span>
             </div>
-            <RemoveMemberForm
-              clubSlug={clubSlug}
-              userId={member.userId}
-              name={member.name ?? member.email ?? "Este organizador"}
-            />
+            {/* Nobody removes themselves from here: another admin does it. */}
+            {member.userId !== organizer.userId && (
+              <RemoveMemberForm
+                clubSlug={clubSlug}
+                userId={member.userId}
+                name={member.name ?? member.email ?? "Este organizador"}
+              />
+            )}
           </li>
         ))}
       </ul>
