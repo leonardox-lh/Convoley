@@ -1,4 +1,4 @@
-import { PageHeading } from "@/components/page-heading";
+import { PageHeading, PageHeadingLoading } from "@/components/page-heading";
 import { ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -16,7 +16,7 @@ type Props = PageProps<"/admin/[club]/tienda">;
 export default function StorePage({ params }: Props) {
   return (
     <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
-      <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
+      <Suspense fallback={<PageHeadingLoading />}>
         <StoreContent params={params} />
       </Suspense>
     </main>

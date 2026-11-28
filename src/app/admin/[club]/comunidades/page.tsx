@@ -1,4 +1,4 @@
-import { PageHeading } from "@/components/page-heading";
+import { PageHeading, PageHeadingLoading } from "@/components/page-heading";
 import { Users } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -11,7 +11,7 @@ type Props = PageProps<"/admin/[club]/comunidades">;
 export default function CommunitiesPage({ params }: Props) {
   return (
     <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
-      <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
+      <Suspense fallback={<PageHeadingLoading />}>
         <CommunitiesContent params={params} />
       </Suspense>
     </main>

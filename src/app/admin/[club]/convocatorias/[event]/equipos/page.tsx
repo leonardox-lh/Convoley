@@ -1,5 +1,5 @@
 import { Users } from "lucide-react";
-import { PageHeading } from "@/components/page-heading";
+import { PageHeading, PageHeadingLoading } from "@/components/page-heading";
 import Link from "next/link";
 import { GenderIcon } from "@/components/gender-icon";
 import { notFound } from "next/navigation";
@@ -25,7 +25,7 @@ type Props = PageProps<"/admin/[club]/convocatorias/[event]/equipos">;
 export default function TeamsPage({ params }: Props) {
   return (
     <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
-      <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
+      <Suspense fallback={<PageHeadingLoading />}>
         <TeamsContent params={params} />
       </Suspense>
     </main>

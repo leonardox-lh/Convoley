@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { UserRound } from "lucide-react";
-import { PageHeading } from "@/components/page-heading";
+import { PageHeading, PageHeadingLoading } from "@/components/page-heading";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { currentUserId, getPlayerProfile, SIGN_IN_PATH } from "@/modules/identity";
@@ -17,7 +17,7 @@ export default function ProfilePage() {
       <PageHeading icon={UserRound} eyebrow="Convoley" title="Mi perfil">
         Con estos datos te inscribes a las convocatorias.
       </PageHeading>
-      <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
+      <Suspense fallback={<PageHeadingLoading />}>
         <Profile />
       </Suspense>
     </main>

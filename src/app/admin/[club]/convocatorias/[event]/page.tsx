@@ -1,3 +1,4 @@
+import { PageHeadingLoading } from "@/components/page-heading";
 import { Pencil, Users } from "lucide-react";
 import Link from "next/link";
 import { AutoRefresh } from "@/components/auto-refresh";
@@ -47,7 +48,7 @@ const statusFilterSchema = z
 export default function EventRegistrationsPage({ params, searchParams }: Props) {
   return (
     <main className="mx-auto w-full max-w-md flex-1 px-4 pb-8">
-      <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
+      <Suspense fallback={<PageHeadingLoading />}>
         <EventRegistrationsContent params={params} searchParams={searchParams} />
       </Suspense>
     </main>

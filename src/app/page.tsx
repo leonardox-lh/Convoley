@@ -99,15 +99,9 @@ export default function Home() {
               >
                 Ver convocatorias
               </a>
-              <Link
-                href="/registro"
-                className={cn(
-                  buttonVariants({ variant: "outline", size: "lg" }),
-                  "h-11 border-2 border-primary-foreground bg-transparent px-4 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground",
-                )}
-              >
-                Crea tu club gratis
-              </Link>
+              <Suspense fallback={<ClubCta href="/registro" label="Crea tu club gratis" />}>
+                <CreateOrOpenClubCta />
+              </Suspense>
             </div>
           </div>
         </section>
@@ -149,6 +143,31 @@ async function MyClubLink() {
     >
       <LayoutGrid className="size-4" aria-hidden />
       <span className="sr-only sm:not-sr-only">Mi club</span>
+    </Link>
+  );
+}
+
+/** Members of a club go straight to its panel; everyone else is invited to create one. */
+async function CreateOrOpenClubCta() {
+  const userId = await currentUserId();
+  const clubSlug = userId ? await findFirstClubSlugForMember(userId) : null;
+  return clubSlug ? (
+    <ClubCta href={`/admin/${clubSlug}`} label="Ver mi club" />
+  ) : (
+    <ClubCta href="/registro" label="Crea tu club gratis" />
+  );
+}
+
+function ClubCta({ href, label }: { href: string; label: string }) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        buttonVariants({ variant: "outline", size: "lg" }),
+        "h-11 border-2 border-primary-foreground bg-transparent px-4 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground",
+      )}
+    >
+      {label}
     </Link>
   );
 }

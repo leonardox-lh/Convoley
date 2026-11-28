@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
-import { VolleyballIcon } from "./volleyball";
+import { VolleyballIcon, VolleyballLoader } from "./volleyball";
 
 // The app's blue when the club has no color of its own; the hero fades into night blue.
 const DEFAULT_BRAND_COLOR = "#1d4ed8";
@@ -100,5 +100,23 @@ export function SectionCard({
       )}
       {children}
     </section>
+  );
+}
+
+/**
+ * Suspense fallback for pages with a hero: a blank one in its place keeps the see-through top bar
+ * on phones (it only turns see-through over a data-club-hero), so it doesn't flash white and back.
+ */
+export function PageHeadingLoading() {
+  return (
+    <>
+      <div
+        data-club-hero
+        aria-hidden
+        className="-mx-4 -mt-4 h-40 rounded-b-[2rem] shadow-lg sm:mx-0 sm:mt-0 sm:h-28 sm:rounded-3xl"
+        style={heroBackground(null)}
+      />
+      <VolleyballLoader />
+    </>
   );
 }

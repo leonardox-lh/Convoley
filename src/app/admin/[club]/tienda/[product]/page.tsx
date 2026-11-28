@@ -1,5 +1,5 @@
 import { ShoppingBag } from "lucide-react";
-import { PageHeading } from "@/components/page-heading";
+import { PageHeading, PageHeadingLoading } from "@/components/page-heading";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { centsToSolesText } from "@/lib/money";
@@ -15,7 +15,7 @@ type Props = PageProps<"/admin/[club]/tienda/[product]">;
 export default function ProductPage({ params }: Props) {
   return (
     <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
-      <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
+      <Suspense fallback={<PageHeadingLoading />}>
         <ProductContent params={params} />
       </Suspense>
     </main>

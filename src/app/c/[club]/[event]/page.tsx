@@ -1,3 +1,4 @@
+import { PageHeadingLoading } from "@/components/page-heading";
 import type { Metadata } from "next";
 import { GenderIcon } from "@/components/gender-icon";
 import { notFound } from "next/navigation";
@@ -59,7 +60,7 @@ export default function PublicEventPage({ params, searchParams }: PageProps<"/c/
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-4 pb-10">
       {/* Other players' sign-ups and payments show up without reloading. */}
       <AutoRefresh />
-      <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
+      <Suspense fallback={<PageHeadingLoading />}>
         <PublicEventContent params={params} />
         <CancelledNotice searchParams={searchParams} />
       </Suspense>

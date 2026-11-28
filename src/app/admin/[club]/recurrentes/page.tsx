@@ -1,7 +1,7 @@
 import { Repeat } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { PageHeading, SectionCard } from "@/components/page-heading";
+import { PageHeading, SectionCard, PageHeadingLoading } from "@/components/page-heading";
 import { formatSoles } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import { findClubBySlug } from "@/modules/clubs";
@@ -15,7 +15,7 @@ type Props = PageProps<"/admin/[club]/recurrentes">;
 export default function RecurringEventsPage({ params }: Props) {
   return (
     <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
-      <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
+      <Suspense fallback={<PageHeadingLoading />}>
         <RecurringEventsContent params={params} />
       </Suspense>
     </main>
