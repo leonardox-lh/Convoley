@@ -1,5 +1,6 @@
 import { Users } from "lucide-react";
-import { PageHeading, PageHeadingLoading } from "@/components/page-heading";
+import { PageHeadingLoading } from "@/components/page-heading";
+import { PanelHeading } from "../../../panel-hero";
 import Link from "next/link";
 import { GenderIcon } from "@/components/gender-icon";
 import { notFound } from "next/navigation";
@@ -76,9 +77,15 @@ async function TeamsContent({ params }: Pick<Props, "params">) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeading icon={Users} eyebrow={event.title} eyebrowHref={basePath} title="Equipos">
+      <PanelHeading
+        clubSlug={clubSlug}
+        icon={Users}
+        eyebrow={event.title}
+        eyebrowHref={basePath}
+        title="Equipos"
+      >
         Se arman con los inscritos que tienen cupo, parejos por nivel y posición.
-      </PageHeading>
+      </PanelHeading>
       <BuildTeamsForm
         clubSlug={clubSlug}
         eventId={event.id}

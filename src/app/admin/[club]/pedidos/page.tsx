@@ -1,4 +1,5 @@
-import { PageHeading, PageHeadingLoading } from "@/components/page-heading";
+import { PageHeadingLoading } from "@/components/page-heading";
+import { PanelHeading } from "../panel-hero";
 import { Package } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -58,7 +59,8 @@ async function OrdersContent({ params, searchParams }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeading
+      <PanelHeading
+        clubSlug={clubSlug}
         footer={
           <>
             <Link
@@ -70,7 +72,6 @@ async function OrdersContent({ params, searchParams }: Props) {
           </>
         }
         icon={Package}
-        eyebrow="Gestiona tu club"
         title="Pedidos"
       />
       <nav aria-label="Filtrar por estado" className="flex flex-wrap gap-2">

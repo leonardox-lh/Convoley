@@ -1,5 +1,6 @@
-import { ClubLogo } from "@/components/club-logo";
-import { PageHeading, PageHeadingLoading } from "@/components/page-heading";
+import { Store } from "lucide-react";
+import { PageHeadingLoading } from "@/components/page-heading";
+import { PanelHeading } from "../panel-hero";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { CopyButton } from "@/components/copy-button";
@@ -32,17 +33,7 @@ async function ClubProfileContent({ params, searchParams }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeading
-        eyebrow={club.name}
-        title="Perfil del club"
-        media={
-          <ClubLogo
-            name={club.name}
-            src={club.logoKey ? clubLogoPath(club.logoKey) : null}
-            className="size-11 rounded-xl"
-          />
-        }
-      />
+      <PanelHeading clubSlug={clubSlug} title="Perfil del club" icon={Store} />
       {query.creado && <FormMessage tone="ok">¡Tu club está listo!</FormMessage>}
       {query.guardado && <FormMessage tone="ok">Cambios guardados.</FormMessage>}
       <div className="flex flex-col gap-0.5">

@@ -1,4 +1,5 @@
-import { PageHeading, PageHeadingLoading } from "@/components/page-heading";
+import { PageHeadingLoading } from "@/components/page-heading";
+import { PanelHeading } from "../panel-hero";
 import { BadgeCheck } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -30,7 +31,7 @@ async function SubscriptionContent({ params }: Props) {
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHeading icon={BadgeCheck} eyebrow="Gestiona tu club" title="Suscripción a Convoley" />
+      <PanelHeading clubSlug={clubSlug} icon={BadgeCheck} title="Suscripción a Convoley" />
       <SubscriptionBanner clubSlug={clubSlug} access={access} />
       <p className="text-sm">
         {formatSoles(MONTHLY_PRICE_CENTS)} al mes, con {TRIAL_DAYS} días de prueba gratis. Puedes

@@ -1,4 +1,5 @@
-import { PageHeading, PageHeadingLoading } from "@/components/page-heading";
+import { PageHeadingLoading } from "@/components/page-heading";
+import { PanelHeading } from "../../../panel-hero";
 import { Trophy, Swords } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -179,7 +180,8 @@ async function GameDayContent({ params }: Pick<Props, "params">) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeading
+      <PanelHeading
+        clubSlug={clubSlug}
         icon={Swords}
         eyebrow={event.title}
         eyebrowHref={`${basePath}/equipos`}
@@ -187,7 +189,7 @@ async function GameDayContent({ params }: Pick<Props, "params">) {
       >
         Te armamos todos contra todos. Agrega, cambia u ordena los partidos, y arma la final cuando
         quieras.
-      </PageHeading>
+      </PanelHeading>
 
       {gameDay.champion && (
         <section className="flex flex-col gap-3">

@@ -1,5 +1,6 @@
 import { ShoppingBag } from "lucide-react";
-import { PageHeading, PageHeadingLoading } from "@/components/page-heading";
+import { PageHeadingLoading } from "@/components/page-heading";
+import { PanelHeading } from "../../panel-hero";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { centsToSolesText } from "@/lib/money";
@@ -31,7 +32,8 @@ async function ProductContent({ params }: Pick<Props, "params">) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeading
+      <PanelHeading
+        clubSlug={clubSlug}
         icon={ShoppingBag}
         eyebrow="Tienda"
         eyebrowHref={`/admin/${clubSlug}/tienda`}

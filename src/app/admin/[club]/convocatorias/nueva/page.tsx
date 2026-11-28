@@ -1,4 +1,5 @@
-import { PageHeading, PageHeadingLoading } from "@/components/page-heading";
+import { PageHeadingLoading } from "@/components/page-heading";
+import { PanelHeading } from "../../panel-hero";
 import { CalendarPlus } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -28,7 +29,7 @@ async function NewEventContent({ params }: { params: Params }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeading icon={CalendarPlus} eyebrow="Gestiona tu club" title="Nueva convocatoria" />
+      <PanelHeading clubSlug={clubSlug} icon={CalendarPlus} title="Nueva convocatoria" />
       <CreateEventForm
         clubSlug={club.slug}
         communities={club.communities}

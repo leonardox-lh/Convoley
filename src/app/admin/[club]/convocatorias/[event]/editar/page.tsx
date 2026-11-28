@@ -1,5 +1,6 @@
 import { Pencil } from "lucide-react";
-import { PageHeading, PageHeadingLoading } from "@/components/page-heading";
+import { PageHeadingLoading } from "@/components/page-heading";
+import { PanelHeading } from "../../../panel-hero";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -40,9 +41,9 @@ async function EditEventContent({ params }: { params: Props["params"] }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeading
+      <PanelHeading
+        clubSlug={clubSlug}
         icon={Pencil}
-        eyebrow={event.club.name}
         title="Editar convocatoria"
         footer={
           <div className="flex gap-4">

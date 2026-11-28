@@ -1,7 +1,8 @@
 import { Repeat } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { PageHeading, SectionCard, PageHeadingLoading } from "@/components/page-heading";
+import { PageHeadingLoading, SectionCard } from "@/components/page-heading";
+import { PanelHeading } from "../panel-hero";
 import { formatSoles } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import { findClubBySlug } from "@/modules/clubs";
@@ -35,10 +36,10 @@ async function RecurringEventsContent({ params }: Pick<Props, "params">) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeading icon={Repeat} title="Convocatorias recurrentes" eyebrow={club.name}>
+      <PanelHeading clubSlug={clubSlug} icon={Repeat} title="Convocatorias recurrentes">
         Cada semana se publica una fecha nueva, los días antes que elijas. Para cambiar algo, pausa
         la recurrente y crea otra.
-      </PageHeading>
+      </PanelHeading>
       {templates.length > 0 && (
         <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
           <div className="flex items-center justify-between border-b bg-secondary/40 px-4 py-3">

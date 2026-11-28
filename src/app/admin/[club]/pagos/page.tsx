@@ -1,4 +1,5 @@
-import { PageHeading, PageHeadingLoading } from "@/components/page-heading";
+import { PageHeadingLoading } from "@/components/page-heading";
+import { PanelHeading } from "../panel-hero";
 import { Wallet } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -33,9 +34,9 @@ async function PaymentSettingsContent({ params, searchParams }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeading icon={Wallet} eyebrow="Gestiona tu club" title="Cobros por Yape o Plin">
+      <PanelHeading clubSlug={clubSlug} icon={Wallet} title="Cobros por Yape o Plin">
         Los jugadores te pagan directo a ti y suben su captura. Convoley nunca toca tu dinero.
-      </PageHeading>
+      </PanelHeading>
       <MercadoPagoSection
         clubSlug={clubSlug}
         clubId={club.id}

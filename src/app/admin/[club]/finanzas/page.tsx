@@ -1,4 +1,5 @@
-import { PageHeading, PageHeadingLoading } from "@/components/page-heading";
+import { PageHeadingLoading } from "@/components/page-heading";
+import { PanelHeading } from "../panel-hero";
 import { ChartColumn } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -32,7 +33,7 @@ async function FinanceContent({ params, searchParams }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeading icon={ChartColumn} eyebrow="Gestiona tu club" title="Finanzas" />
+      <PanelHeading clubSlug={clubSlug} icon={ChartColumn} title="Finanzas" />
       <form className="flex items-end gap-2">
         <Field label="Mes" float="always" className="flex-1">
           <input type="month" name="mes" defaultValue={month} className={fieldClass} />

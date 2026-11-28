@@ -1,5 +1,6 @@
 import { ScanLine } from "lucide-react";
-import { PageHeading, PageHeadingLoading } from "@/components/page-heading";
+import { PageHeadingLoading } from "@/components/page-heading";
+import { PanelHeading } from "../../../../panel-hero";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -45,9 +46,11 @@ async function AttendanceContent({ params }: Props) {
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHeading
+      <PanelHeading
+        clubSlug={clubSlug}
         icon={ScanLine}
         eyebrow={event.title}
+        eyebrowHref={`/admin/${clubSlug}/convocatorias/${eventId}`}
         title={
           <>
             {registration.firstName} {registration.lastName}

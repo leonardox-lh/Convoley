@@ -1,4 +1,5 @@
-import { PageHeading, PageHeadingLoading } from "@/components/page-heading";
+import { PageHeadingLoading } from "@/components/page-heading";
+import { PanelHeading } from "../panel-hero";
 import { Users } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -25,9 +26,9 @@ async function CommunitiesContent({ params }: Pick<Props, "params">) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeading icon={Users} eyebrow="Gestiona tu club" title="Comunidades">
+      <PanelHeading clubSlug={clubSlug} icon={Users} title="Comunidades">
         Configura los niveles que ofrece tu club: Básico, Intermedio, Avanzado…
-      </PageHeading>
+      </PanelHeading>
       <NewCommunityForm clubSlug={clubSlug} />
       <ul
         aria-label="Comunidades"
