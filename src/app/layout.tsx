@@ -29,7 +29,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="es-PE"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      // In-page links ("Ver convocatorias") glide; Next turns it off for route changes.
+      data-scroll-behavior="smooth"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased motion-safe:scroll-smooth`}
       suppressHydrationWarning
     >
       <head>
