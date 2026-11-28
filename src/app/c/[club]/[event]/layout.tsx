@@ -18,7 +18,8 @@ export default function PublicEventLayout({ children, params }: Props) {
       <ScrollToTop />
       {/* Sign-ups, payments and scores show up without reloading. */}
       <AutoRefresh />
-      <Suspense fallback={<PageHeadingLoading />}>
+      {/* No ball here: the page below shows its own, and two would load at once. */}
+      <Suspense fallback={<PageHeadingLoading loader={false} />}>
         <EventHeader params={params} />
       </Suspense>
       {children}

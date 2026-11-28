@@ -107,7 +107,7 @@ export function SectionCard({
  * Suspense fallback for pages with a hero: a blank one in its place keeps the see-through top bar
  * on phones (it only turns see-through over a data-club-hero), so it doesn't flash white and back.
  */
-export function PageHeadingLoading() {
+export function PageHeadingLoading({ loader = true }: { loader?: boolean }) {
   return (
     <>
       <div
@@ -116,7 +116,7 @@ export function PageHeadingLoading() {
         className="-mx-4 -mt-4 h-40 rounded-b-[2rem] shadow-lg sm:mx-0 sm:mt-0 sm:h-28 sm:rounded-3xl"
         style={heroBackground(null)}
       />
-      <VolleyballLoader />
+      {loader && <VolleyballLoader />}
     </>
   );
 }
