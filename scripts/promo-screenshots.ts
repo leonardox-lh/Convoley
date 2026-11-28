@@ -159,7 +159,17 @@ async function main() {
   await p.locator("input[name=firstName]").fill("Rafael");
   await p.locator("input[name=lastName]").fill("Pérez");
   await p.locator("input[name=phone]").fill("987654321");
+  // Every optional field filled, so the video shows all of them can be.
+  for (const [field, choice] of [
+    ["Posición", "Armador"],
+    ["Nivel", "Intermedio"],
+  ]) {
+    await p.getByRole("button", { name: new RegExp(`^${field}`) }).click();
+    await p.getByRole("listbox").getByRole("button", { name: choice }).click();
+  }
   await p.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  // Lets the floating labels finish moving onto the border.
+  await p.waitForTimeout(600);
   await capture(p, "event-form");
   await p.getByRole("button", { name: "Inscribirme" }).click();
   await p.waitForTimeout(4000);
