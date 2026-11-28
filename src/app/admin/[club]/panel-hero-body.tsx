@@ -2,6 +2,7 @@
 
 import {
   BadgeCheck,
+  CalendarDays,
   CalendarPlus,
   ChartColumn,
   type LucideIcon,
@@ -31,6 +32,7 @@ const SECTIONS: [RegExp, LucideIcon, string][] = [
   [/^\/pedidos$/, Package, "Pedidos"],
   [/^\/suscripcion$/, BadgeCheck, "Suscripción a Convoley"],
   [/^\/convocatorias\/nueva$/, CalendarPlus, "Nueva convocatoria"],
+  [/^\/convocatorias\/[^/]+$/, CalendarDays, "Convocatoria"],
   [/^\/convocatorias\/[^/]+\/editar$/, Pencil, "Editar convocatoria"],
   [/^\/convocatorias\/[^/]+\/equipos$/, Users, "Equipos"],
   [/^\/convocatorias\/[^/]+\/partidos$/, Swords, "Partidos"],
@@ -38,17 +40,9 @@ const SECTIONS: [RegExp, LucideIcon, string][] = [
   [/^\/tienda\/[^/]+$/, ShoppingBag, "Editar producto"],
 ];
 
-// The event page has a hero of its own (date, venue, spots).
-const OWN_HERO = /^\/convocatorias\/(?!nueva$)[^/]+$/;
-
 /** The path after /admin/<club>. */
 function useSectionPath() {
   return usePathname().replace(/^\/admin\/[^/]+/, "");
-}
-
-/** The shared hero lives in the layout; it hides only on pages that bring their own. */
-export function PanelHeroGate({ children }: { children: React.ReactNode }) {
-  return OWN_HERO.test(useSectionPath()) ? null : children;
 }
 
 /**

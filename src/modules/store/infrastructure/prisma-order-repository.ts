@@ -86,7 +86,7 @@ export interface OrderListItem {
 /** An order with what it contains, for the player's page and the organizer's list. */
 export async function findOrders(
   db: PrismaClient,
-  where: { id?: string; clubId?: string; status?: { in: OrderStatus[] } },
+  where: { id?: string; clubId?: string; userId?: string; status?: { in: OrderStatus[] } },
 ): Promise<(OrderListItem & { clubId: string })[]> {
   const rows = await db.order.findMany({
     where,

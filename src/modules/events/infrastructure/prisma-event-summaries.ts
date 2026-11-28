@@ -59,6 +59,13 @@ export function listClubEventsForFinance(input: { clubId: string; from: Date; to
       status: { not: "draft" },
     },
     orderBy: { startsAt: "asc" },
-    select: { id: true, title: true, startsAt: true, status: true, courtCostCents: true },
+    select: {
+      id: true,
+      title: true,
+      startsAt: true,
+      endsAt: true,
+      status: true,
+      courtCostCents: true,
+    },
   });
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { UserRound } from "lucide-react";
-import { PageHeading, PageHeadingLoading } from "@/components/page-heading";
+import { PageHeading } from "@/components/page-heading";
+import { VolleyballLoader } from "@/components/volleyball";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { currentUserId, getPlayerProfile, SIGN_IN_PATH } from "@/modules/identity";
@@ -17,7 +18,7 @@ export default function ProfilePage() {
       <PageHeading icon={UserRound} eyebrow="Convoley" title="Mi perfil">
         Con estos datos te inscribes a las convocatorias.
       </PageHeading>
-      <Suspense fallback={<PageHeadingLoading />}>
+      <Suspense fallback={<VolleyballLoader />}>
         <Profile />
       </Suspense>
     </main>

@@ -33,11 +33,12 @@ export function makeListUpcomingEvents(deps: {
   registrations: ConfirmedCountsReader;
   now: () => Date;
 }) {
-  return async function listUpcomingEvents(limit: number) {
+  return async function listUpcomingEvents(limit: number, offset = 0) {
     const events = await deps.events.listUpcoming({
       statuses: LISTED_STATUSES,
       from: deps.now(),
       limit,
+      offset,
     });
     if (events.length === 0) return [];
     const confirmed = await deps.registrations.countConfirmedByEvent(events.map((e) => e.id));

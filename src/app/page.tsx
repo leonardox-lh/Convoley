@@ -1,46 +1,22 @@
-import {
-  CalendarDays,
-  LayoutGrid,
-  ChevronRight,
-  type LucideIcon,
-  MapPin,
-  Ticket,
-  Trophy,
-  UserRound,
-} from "lucide-react";
-import Image from "next/image";
+import { ChevronRight, type LucideIcon, Package, Ticket, Trophy, UserRound } from "lucide-react";
 import Link from "next/link";
-import { connection } from "next/server";
 import { Suspense } from "react";
-import { ClubLogo } from "@/components/club-logo";
-import { Logo } from "@/components/logo";
 import { VolleyballIcon } from "@/components/volleyball";
 import { heroBackground } from "@/components/page-heading";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { formatTimeRangeInLima } from "@/lib/lima-time";
-import { formatSoles } from "@/lib/money";
-import {
-  clubLogoPath,
-  findClubNamesByIds,
-  findFirstClubSlugForMember,
-  listAllClubs,
-} from "@/modules/clubs";
-import { listUpcomingEvents } from "@/modules/events";
+import { findFirstClubSlugForMember } from "@/modules/clubs";
 import { currentUserId } from "@/modules/identity";
+import {
+  CardSkeletons,
+  ClubsSection,
+  HomeSection,
+  SiteHeader,
+  UpcomingEventsSection,
+} from "./home-sections";
 
-const UPCOMING_EVENTS_LIMIT = 8;
-const CLUB_LOGO_PX = 80;
-const SECTIONS: [string, string, LucideIcon][] = [
-  ["clubes", "Clubes", Trophy],
-  ["convocatorias", "Convocatorias", CalendarDays],
-  ["perfil", "Mi perfil", UserRound],
-];
-
-const LIMA = "America/Lima";
-const limaDay = new Intl.DateTimeFormat("es-PE", { timeZone: LIMA, day: "numeric" });
-const limaMonth = new Intl.DateTimeFormat("es-PE", { timeZone: LIMA, month: "short" });
-const limaWeekday = new Intl.DateTimeFormat("es-PE", { timeZone: LIMA, weekday: "long" });
+const HOME_CLUBS_LIMIT = 6;
+const HOME_EVENTS_LIMIT = 7;
 
 type ProfileLink = { href: string; title: string; text: string; icon: LucideIcon };
 
@@ -48,32 +24,7 @@ type ProfileLink = { href: string; title: string; text: string; icon: LucideIcon
 export default function Home() {
   return (
     <div className="flex flex-1 flex-col">
-      <header
-        data-site-header
-        className="sticky top-0 z-10 border-b bg-background/85 backdrop-blur"
-      >
-        <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-3">
-          <Link href="/" aria-label="Convoley, inicio">
-            <Logo />
-          </Link>
-          <nav aria-label="Secciones" className="flex gap-1">
-            {SECTIONS.map(([id, label, Icon]) => (
-              <a
-                key={id}
-                href={`#${id}`}
-                data-header-pill
-                className="flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground"
-              >
-                <Icon className="size-4" aria-hidden />
-                <span className="sr-only sm:not-sr-only">{label}</span>
-              </a>
-            ))}
-            <Suspense>
-              <MyClubLink />
-            </Suspense>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-8 sm:gap-12">
         {/* data-club-hero: on phones the color runs up under the see-through top bar (globals.css). */}
@@ -106,19 +57,9 @@ export default function Home() {
           </div>
         </section>
 
-        <HomeSection id="clubes" title="Clubes">
-          <Suspense
-            fallback={<CardSkeletons className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" />}
-          >
-            <ClubGrid />
-          </Suspense>
-        </HomeSection>
+        <ClubsSection title="Clubes" limit={HOME_CLUBS_LIMIT} />
 
-        <HomeSection id="convocatorias" title="Próximas convocatorias">
-          <Suspense fallback={<CardSkeletons className="grid gap-3 md:grid-cols-2" />}>
-            <UpcomingEvents />
-          </Suspense>
-        </HomeSection>
+        <UpcomingEventsSection title="Próximas convocatorias" limit={HOME_EVENTS_LIMIT} />
 
         <HomeSection id="perfil" title="Mi perfil">
           <Suspense fallback={<CardSkeletons className="grid gap-3 sm:grid-cols-2" />}>
@@ -127,23 +68,6 @@ export default function Home() {
         </HomeSection>
       </main>
     </div>
-  );
-}
-
-/** Shown only to members of a club (admin or organizer): straight to its panel. */
-async function MyClubLink() {
-  const userId = await currentUserId();
-  const clubSlug = userId ? await findFirstClubSlugForMember(userId) : null;
-  if (!clubSlug) return null;
-  return (
-    <Link
-      href={`/admin/${clubSlug}`}
-      data-header-pill
-      className="flex items-center gap-1.5 rounded-full bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/85"
-    >
-      <LayoutGrid className="size-4" aria-hidden />
-      <span className="sr-only sm:not-sr-only">Mi club</span>
-    </Link>
   );
 }
 
@@ -172,153 +96,6 @@ function ClubCta({ href, label }: { href: string; label: string }) {
   );
 }
 
-function HomeSection({
-  id,
-  title,
-  children,
-}: {
-  id: string;
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section id={id} aria-labelledby={`${id}-heading`} className="flex scroll-mt-20 flex-col gap-4">
-      <h2 id={`${id}-heading`} className="text-2xl font-semibold tracking-tight">
-        {title}
-      </h2>
-      {children}
-    </section>
-  );
-}
-
-function CardSkeletons({ className }: { className: string }) {
-  return (
-    <div className={className} aria-hidden>
-      {[0, 1, 2].map((key) => (
-        <div key={key} className="h-24 animate-pulse rounded-2xl bg-secondary" />
-      ))}
-    </div>
-  );
-}
-
-function EmptyState({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="rounded-2xl border border-dashed p-6 text-center text-sm text-muted-foreground">
-      {children}
-    </p>
-  );
-}
-
-async function ClubGrid() {
-  const clubs = await listAllClubs();
-  if (clubs.length === 0) return <EmptyState>Todavía no hay clubes. ¡Crea el primero!</EmptyState>;
-
-  return (
-    <ul className="grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-3 sm:gap-y-6 lg:grid-cols-4">
-      {clubs.map((club) => (
-        <li key={club.id}>
-          <Link
-            href={`/${club.slug}`}
-            className="group flex flex-col items-center gap-1.5 rounded-2xl p-1 text-center"
-          >
-            <span className="relative">
-              {club.logoKey ? (
-                <Image
-                  src={clubLogoPath(club.logoKey)}
-                  alt=""
-                  width={CLUB_LOGO_PX}
-                  height={CLUB_LOGO_PX}
-                  unoptimized
-                  className="size-20 rounded-full bg-card object-cover shadow-[0_10px_20px_-6px_rgb(0_0_0/0.35),inset_0_-4px_8px_rgb(0_0_0/0.15)] ring-4 ring-white transition-transform duration-300 group-hover:scale-110"
-                />
-              ) : (
-                <span
-                  aria-hidden
-                  className="flex size-20 items-center justify-center rounded-full text-4xl font-bold text-white shadow-[0_10px_20px_-6px_rgb(0_0_0/0.35),inset_0_-4px_8px_rgb(0_0_0/0.15)] ring-4 ring-white transition-transform duration-300 group-hover:scale-110"
-                  style={heroBackground(club.primaryColor)}
-                >
-                  {club.name.charAt(0).toUpperCase()}
-                </span>
-              )}
-            </span>
-            <span aria-hidden className="-mt-1 h-2 w-16 rounded-full bg-black/20 blur-[3px]" />
-            <span className="line-clamp-2 text-sm leading-snug font-semibold group-hover:text-primary">
-              {club.name}
-            </span>
-          </Link>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-async function UpcomingEvents() {
-  await connection(); // "upcoming" depends on the request time, never on build time.
-  const events = await listUpcomingEvents(UPCOMING_EVENTS_LIMIT);
-  if (events.length === 0) {
-    return <EmptyState>No hay convocatorias abiertas por ahora. Vuelve pronto.</EmptyState>;
-  }
-  const clubs = new Map(
-    (await findClubNamesByIds([...new Set(events.map((e) => e.clubId))])).map((c) => [c.id, c]),
-  );
-
-  return (
-    <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
-      {events.map((event) => {
-        const club = clubs.get(event.clubId);
-        if (!club) return null;
-        const isFull = event.remainingSpots === 0;
-        return (
-          <li key={event.id} className="min-w-0">
-            <Link href={`/c/${club.slug}/${event.id}`} className="card-interactive flex gap-3 p-3">
-              <span className="flex w-12 shrink-0 flex-col items-center gap-1.5">
-                <ClubLogo
-                  name={club.name}
-                  src={club.logoKey ? clubLogoPath(club.logoKey) : null}
-                  className="size-12 rounded-full bg-primary text-lg shadow-sm ring-0"
-                />
-                <span className="flex w-full flex-col items-center rounded-lg bg-secondary py-1 text-secondary-foreground">
-                  <span className="text-base leading-none font-semibold">
-                    {limaDay.format(event.startsAt)}
-                  </span>
-                  <span className="text-xs font-medium uppercase">
-                    {limaMonth.format(event.startsAt).replace(".", "")}
-                  </span>
-                </span>
-              </span>
-              <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <span className="flex items-start justify-between gap-2">
-                  <span className="truncate font-medium">{event.title}</span>
-                  <span
-                    className={
-                      isFull
-                        ? "shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground"
-                        : "shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700"
-                    }
-                  >
-                    {isFull ? "Llena" : `${event.remainingSpots} cupos`}
-                  </span>
-                </span>
-                <span className="truncate text-sm font-medium text-primary">{club.name}</span>
-                <span className="text-sm text-muted-foreground first-letter:uppercase">
-                  {limaWeekday.format(event.startsAt)} · {formatTimeRangeInLima(event)}
-                </span>
-                <span className="flex items-center justify-between gap-2 text-sm">
-                  <span className="flex min-w-0 items-center gap-1 text-muted-foreground">
-                    <MapPin className="size-3.5 shrink-0" aria-hidden />
-                    <span className="truncate">{event.venueName}</span>
-                  </span>
-                  <span className="shrink-0 font-semibold">{formatSoles(event.priceCents)}</span>
-                </span>
-              </span>
-            </Link>
-          </li>
-        );
-      })}
-    </ul>
-  );
-}
-
 const SIGNED_IN_LINKS: ProfileLink[] = [
   { href: "/perfil", title: "Mis datos", text: "Tu nombre y tu celular.", icon: UserRound },
   {
@@ -326,6 +103,12 @@ const SIGNED_IN_LINKS: ProfileLink[] = [
     title: "Mis inscripciones",
     text: "Tus partidos y el estado de tus pagos.",
     icon: Ticket,
+  },
+  {
+    href: "/mis-pedidos",
+    title: "Mis pedidos",
+    text: "Lo que compraste en la tienda y lo que falta pagar.",
+    icon: Package,
   },
   {
     href: "/admin",

@@ -1,6 +1,5 @@
 import { VolleyballLoader } from "@/components/volleyball";
 import { PanelIntro } from "../../../panel-hero";
-import Link from "next/link";
 import { GenderIcon } from "@/components/gender-icon";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -8,12 +7,9 @@ import { getOrganizerEvent } from "@/modules/events";
 import {
   listEventTeams,
   MAX_TEAMS,
-  MIN_TEAMS_TO_PLAY,
   TEAM_NAME_MAX_LENGTH,
   type EventTeam,
 } from "@/modules/registrations";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { LEVEL_LABELS, POSITION_LABELS } from "../../../../../player-labels";
 import { requireOrganizer } from "../../../require-organizer";
 import { ShareImageSection } from "../share-image-section";
@@ -76,7 +72,7 @@ async function TeamsContent({ params }: Pick<Props, "params">) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PanelIntro eyebrow={event.title} eyebrowHref={basePath}>
+      <PanelIntro>
         Se arman con los inscritos que tienen cupo, parejos por nivel y posición.
       </PanelIntro>
       <BuildTeamsForm
@@ -85,17 +81,6 @@ async function TeamsContent({ params }: Pick<Props, "params">) {
         maxTeams={MAX_TEAMS}
         hasTeams={teams.length > 0}
       />
-      {teams.length >= MIN_TEAMS_TO_PLAY && (
-        <Link
-          href={`${basePath}/partidos`}
-          className={cn(
-            buttonVariants({ variant: "outline", size: "lg" }),
-            "h-11 border-primary text-primary hover:bg-primary/10 hover:text-primary",
-          )}
-        >
-          Gestionar el partido
-        </Link>
-      )}
       {teams.length > 0 && (
         <ShareImageSection
           id="teams-image"

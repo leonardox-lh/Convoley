@@ -64,6 +64,9 @@ export async function placeOrderAction(
   const parsed = orderSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { status: "error", message: parsed.error.issues[0].message };
   const { clubSlug, pickupEventId, firstName, lastName, phone, cart } = parsed.data;
+  // Orders need an account so the buyer can find them again in Mis pedidos.
+  const userId = await currentUserId();
+  if (!userId) return { status: "error", message: "Debes iniciar sesión para comprar." };
   const club = await findClubBySlug(clubSlug);
   if (!club) return { status: "error", message: "No encontramos este club." };
 
@@ -76,7 +79,7 @@ export async function placeOrderAction(
         firstName,
         lastName,
         phone: PhoneNumber.parse(phone).value,
-        userId: await currentUserId(),
+        userId,
       },
       lines: cart,
     }));

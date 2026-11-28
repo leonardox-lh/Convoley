@@ -1,5 +1,4 @@
-import { PageHeadingLoading } from "@/components/page-heading";
-import { Pencil, Users } from "lucide-react";
+import { VolleyballLoader } from "@/components/volleyball";
 import Link from "next/link";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { CopyButton } from "@/components/copy-button";
@@ -8,7 +7,6 @@ import { appUrl } from "@/lib/app-url";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { z } from "zod";
-import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { can, clubLogoPath, getClubProfile } from "@/modules/clubs";
 import { getOrganizerEvent } from "@/modules/events";
@@ -47,8 +45,8 @@ const statusFilterSchema = z
 
 export default function EventRegistrationsPage({ params, searchParams }: Props) {
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-4 pb-8">
-      <Suspense fallback={<PageHeadingLoading />}>
+    <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-8">
+      <Suspense fallback={<VolleyballLoader />}>
         <EventRegistrationsContent params={params} searchParams={searchParams} />
       </Suspense>
     </main>
@@ -117,16 +115,16 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
           secondaryColor: clubProfile?.secondaryColor ?? null,
           taken: seats.taken,
         }}
-        clubSuffix="Convocatoria"
+        variant="card"
         action={
           <CopyButton
             text={`${origin}/c/${clubSlug}/${event.id}`}
             label="Link convocatoria"
             showLabel
-            className="border-white/30 bg-white/15 text-white hover:bg-white/25 hover:text-white"
           />
         }
         showSeatsBar
+        editHref={canManage ? `${basePath}/editar` : undefined}
         seats={
           <>
             <p role="status" aria-label="Cupos" className="mt-1 text-sm font-semibold">
@@ -140,31 +138,6 @@ async function EventRegistrationsContent({ params, searchParams }: Omit<Props, "
           </>
         }
       />
-
-      <div className="flex gap-2">
-        {canManage && (
-          <Link
-            href={`${basePath}/editar`}
-            className={cn(
-              buttonVariants({ variant: "outline" }),
-              "h-10 flex-1 gap-1.5 border-primary text-primary hover:bg-primary/10 hover:text-primary",
-            )}
-          >
-            <Pencil aria-hidden />
-            Editar convocatoria
-          </Link>
-        )}
-        <Link
-          href={`${basePath}/equipos`}
-          className={cn(
-            buttonVariants({ variant: "outline" }),
-            "h-10 flex-1 gap-1.5 border-primary text-primary hover:bg-primary/10 hover:text-primary",
-          )}
-        >
-          <Users aria-hidden />
-          Armar equipos
-        </Link>
-      </div>
 
       {event.status === "published" && (
         <AddPlayerForm

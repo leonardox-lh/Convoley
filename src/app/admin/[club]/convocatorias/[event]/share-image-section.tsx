@@ -56,7 +56,7 @@ export function ShareButtonContent(props: {
   return (
     <>
       {props.icon}
-      {props.status === "ready" ? "¡Lista! Toca para compartir" : props.children}
+      {props.status === "ready" ? "¡Lista!" : props.children}
     </>
   );
 }

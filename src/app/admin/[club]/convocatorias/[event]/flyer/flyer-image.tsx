@@ -1,3 +1,4 @@
+import { ConvoleyWordmark } from "../imagen/convoley-wordmark";
 import { heavy, NAVY, NIGHT, posterBackground, SOFT_BLUE } from "../imagen/poster-style";
 
 export interface FlyerDetails {
@@ -304,6 +305,19 @@ export function FlyerImage(props: FlyerDetails) {
             {props.spots}
           </div>
         </div>
+      </div>
+
+      {/* In the bottom padding, under the price row: the flyer travels, so it carries the brand. */}
+      <div
+        style={{
+          display: "flex",
+          position: "absolute",
+          right: padding,
+          bottom: 16 * unit,
+          opacity: 0.85,
+        }}
+      >
+        <ConvoleyWordmark height={44 * unit} />
       </div>
     </div>
   );

@@ -1,13 +1,16 @@
 "use client";
 
-import { Minus, Plus, ShoppingBag, ShoppingCart } from "lucide-react";
+import { Images, LogIn, Minus, Plus, ShoppingBag, ShoppingCart } from "lucide-react";
+import Link from "next/link";
 import { useActionState, useState } from "react";
 import { SelectPicker } from "@/components/date-time-pickers";
 import { FormMessage, submitKeepingValues, TextField } from "@/components/form";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { formatSoles } from "@/lib/money";
 import { cn } from "@/lib/utils";
+import type { PlayerProfile } from "@/modules/identity";
 import { placeOrderAction, type OrderState } from "./actions";
+import { ProductDetail, VariantButtons } from "./product-detail";
 
 export interface CatalogProduct {
   id: string;
@@ -31,8 +34,14 @@ export function StoreCart(props: {
   products: CatalogProduct[];
   pickupEvents: { id: string; label: string }[];
   maxQuantity: number;
+  profile: PlayerProfile | null;
+  /** Set when nobody is signed in: buying needs an account, so the order shows in Mis pedidos. */
+  signInHref: string | null;
 }) {
   const [cart, setCart] = useState<Cart>({});
+  const [askSignIn, setAskSignIn] = useState(false);
+  const [openProductId, setOpenProductId] = useState<string | null>(null);
+  const openProduct = props.products.find((product) => product.id === openProductId);
   const [state, action, pending] = useActionState<OrderState, FormData>(placeOrderAction, {
     status: "idle",
   });
@@ -48,7 +57,12 @@ export function StoreCart(props: {
   const itemCount = lines.reduce((total, [, quantity]) => total + quantity, 0);
   const inCart = (product: CatalogProduct) =>
     product.variants.reduce((total, variant) => total + (cart[variant.id] ?? 0), 0);
-  const add = (variantId: string, stock: number | null) =>
+  const add = (variantId: string, stock: number | null) => {
+    if (props.signInHref) {
+      setOpenProductId(null);
+      setAskSignIn(true);
+      return;
+    }
     setCart((current) => ({
       ...current,
       [variantId]: Math.min(
@@ -57,6 +71,7 @@ export function StoreCart(props: {
         props.maxQuantity,
       ),
     }));
+  };
   const remove = (variantId: string) =>
     setCart((current) => ({ ...current, [variantId]: Math.max((current[variantId] ?? 0) - 1, 0) }));
 
@@ -68,23 +83,25 @@ export function StoreCart(props: {
             key={product.id}
             className="relative flex flex-col overflow-hidden rounded-2xl border bg-card shadow-sm"
           >
-            {product.photoUrls.length > 0 ? (
-              <div className="flex aspect-square snap-x snap-mandatory overflow-x-auto [scrollbar-width:none]">
-                {product.photoUrls.map((url) => (
-                  // eslint-disable-next-line @next/next/no-img-element -- served by our own route
-                  <img
-                    key={url}
-                    src={url}
-                    alt={product.name}
-                    className="size-full shrink-0 snap-start object-cover"
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="flex aspect-square items-center justify-center bg-primary/10 text-primary">
+            <button
+              type="button"
+              aria-label={`Ver ${product.name}`}
+              onClick={() => setOpenProductId(product.id)}
+              className="relative flex aspect-square items-center justify-center bg-primary/10 text-primary"
+            >
+              {product.photoUrls[0] ? (
+                // eslint-disable-next-line @next/next/no-img-element -- served by our own route
+                <img src={product.photoUrls[0]} alt="" className="size-full object-cover" />
+              ) : (
                 <ShoppingBag className="size-10" aria-hidden />
-              </div>
-            )}
+              )}
+              {product.photoUrls.length > 1 && (
+                <span className="absolute bottom-2 left-2 flex items-center gap-1 rounded-full bg-black/55 px-2 py-0.5 text-xs font-semibold text-white">
+                  <Images className="size-3.5" aria-hidden />
+                  {product.photoUrls.length}
+                </span>
+              )}
+            </button>
             {inCart(product) > 0 && (
               <span className="absolute top-2 right-2 flex h-6 min-w-6 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-bold text-primary-foreground shadow">
                 {inCart(product)}
@@ -92,7 +109,13 @@ export function StoreCart(props: {
             )}
             <div className="flex flex-1 flex-col gap-2 p-3">
               <div className="flex flex-col gap-0.5">
-                <p className="leading-tight font-semibold first-letter:uppercase">{product.name}</p>
+                <button
+                  type="button"
+                  onClick={() => setOpenProductId(product.id)}
+                  className="text-left leading-tight font-semibold first-letter:uppercase hover:underline"
+                >
+                  {product.name}
+                </button>
                 <p className="text-lg font-extrabold tracking-tight text-primary">
                   {formatSoles(product.priceCents)}
                 </p>
@@ -100,43 +123,29 @@ export function StoreCart(props: {
                   <p className="text-xs font-medium text-muted-foreground">{product.stockNote}</p>
                 )}
                 {product.description && (
-                  <p className="line-clamp-2 text-xs text-muted-foreground">
-                    {product.description}
-                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setOpenProductId(product.id)}
+                    className="text-left text-xs text-muted-foreground"
+                  >
+                    <span className="line-clamp-2">{product.description}</span>
+                    <span className="font-semibold text-primary">Ver más</span>
+                  </button>
                 )}
               </div>
-              <div className="mt-auto flex flex-wrap gap-1.5">
-                {product.variants.map((variant) => {
-                  const soldOut = variant.stock === 0;
-                  return (
-                    <button
-                      key={variant.id}
-                      type="button"
-                      disabled={soldOut}
-                      aria-label={
-                        soldOut
-                          ? `${variant.size ?? product.name} agotado`
-                          : `Agregar${variant.size ? ` ${variant.size}` : ""}`
-                      }
-                      onClick={() => add(variant.id, variant.stock)}
-                      className={cn(
-                        "flex h-9 items-center justify-center gap-1 rounded-full px-3 text-sm font-semibold transition",
-                        variant.size ? "min-w-12" : "flex-1",
-                        soldOut
-                          ? "bg-muted text-muted-foreground line-through"
-                          : "bg-primary text-primary-foreground hover:bg-primary/85 active:scale-95",
-                      )}
-                    >
-                      {!soldOut && <Plus className="size-3.5" aria-hidden />}
-                      {variant.size ?? (soldOut ? "Agotado" : "Agregar")}
-                    </button>
-                  );
-                })}
-              </div>
+              <VariantButtons product={product} onAdd={add} className="mt-auto" />
             </div>
           </li>
         ))}
       </ul>
+      {openProduct && (
+        <ProductDetail
+          product={openProduct}
+          inCart={inCart(openProduct)}
+          onAdd={add}
+          onClose={() => setOpenProductId(null)}
+        />
+      )}
 
       <section
         id="carrito"
@@ -217,8 +226,18 @@ export function StoreCart(props: {
               name="pickupEventId"
               options={props.pickupEvents.map((event) => ({ value: event.id, label: event.label }))}
             />
-            <TextField label="Nombre" name="firstName" autoComplete="given-name" />
-            <TextField label="Apellido" name="lastName" autoComplete="family-name" />
+            <TextField
+              label="Nombre"
+              name="firstName"
+              autoComplete="given-name"
+              defaultValue={props.profile?.firstName}
+            />
+            <TextField
+              label="Apellido"
+              name="lastName"
+              autoComplete="family-name"
+              defaultValue={props.profile?.lastName}
+            />
             <TextField
               label="Celular"
               name="phone"
@@ -226,14 +245,34 @@ export function StoreCart(props: {
               inputMode="numeric"
               autoComplete="tel-national"
               placeholder="987654321"
+              defaultValue={props.profile?.phone?.replace(/^\+51/, "")}
             />
             {state.status === "error" && <FormMessage tone="error">{state.message}</FormMessage>}
-            <Button type="submit" size="lg" className="h-12 text-base" disabled={pending}>
+            <Button
+              type="submit"
+              variant="outline"
+              size="lg"
+              className="h-12 border-primary bg-transparent text-base text-primary hover:bg-primary/10 hover:text-primary"
+              disabled={pending}
+            >
               {pending ? "Creando tu pedido…" : `Hacer pedido y pagar · ${formatSoles(totalCents)}`}
             </Button>
           </form>
         )}
       </section>
+
+      {askSignIn && props.signInHref && (
+        <div
+          role="alert"
+          className="sticky bottom-4 z-10 flex items-center gap-3 rounded-2xl border bg-card p-3 shadow-lg animate-in fade-in slide-in-from-bottom-2"
+        >
+          <LogIn className="size-5 shrink-0 text-primary" aria-hidden />
+          <p className="flex-1 text-sm font-medium">Debes iniciar sesión para comprar.</p>
+          <Link href={props.signInHref} className={cn(buttonVariants(), "shrink-0")}>
+            Iniciar sesión
+          </Link>
+        </div>
+      )}
 
       {itemCount > 0 && (
         // Keeps the cart one tap away while the player scrolls the catalog.

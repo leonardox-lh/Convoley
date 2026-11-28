@@ -1,3 +1,4 @@
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { ClubLogo } from "@/components/club-logo";
 import { heroBackground } from "@/components/page-heading";
@@ -64,9 +65,15 @@ export function PanelIntro({
       {eyebrowHref && eyebrow && (
         <Link
           href={eyebrowHref}
-          className="w-fit text-sm font-semibold text-primary underline-offset-4 hover:underline"
+          className="group flex w-fit items-center gap-2 py-1 text-sm font-semibold text-primary"
         >
-          ← {eyebrow}
+          <span className="flex size-7 items-center justify-center rounded-full bg-primary/10 transition-colors group-hover:bg-primary/15">
+            <ArrowLeft
+              className="size-4 transition-transform group-hover:-translate-x-0.5"
+              aria-hidden
+            />
+          </span>
+          {eyebrow}
         </Link>
       )}
       {title && <h2 className="text-lg font-semibold first-letter:uppercase">{title}</h2>}

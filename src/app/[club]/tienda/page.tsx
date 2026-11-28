@@ -6,7 +6,9 @@ import { VolleyballLoader } from "@/components/volleyball";
 import { formatInLima } from "@/lib/lima-time";
 import { clubLogoPath, findClubBySlug } from "@/modules/clubs";
 import { listOpenEvents } from "@/modules/events";
+import { currentUserId, getPlayerProfile } from "@/modules/identity";
 import { listProducts, MAX_QUANTITY_PER_ITEM } from "@/modules/store";
+import { RETURN_PATH_PARAM } from "../../ingresar/sign-in-with-password";
 import { EmptyTab } from "../empty-tab";
 import { StoreCart } from "./store-cart";
 
@@ -33,6 +35,9 @@ async function StoreContent({ params }: Pick<Props, "params">) {
     listProducts(club.id, { onlyActive: true }),
     listOpenEvents(slug),
   ]);
+  // Signed-in buyers get their name and phone already filled in from Mi perfil.
+  const userId = await currentUserId();
+  const profile = userId ? await getPlayerProfile(userId) : null;
 
   return (
     <>
@@ -46,6 +51,12 @@ async function StoreContent({ params }: Pick<Props, "params">) {
       ) : (
         <StoreCart
           clubSlug={slug}
+          profile={profile}
+          signInHref={
+            userId
+              ? null
+              : `/ingresar?${RETURN_PATH_PARAM}=${encodeURIComponent(`/${slug}/tienda`)}`
+          }
           maxQuantity={MAX_QUANTITY_PER_ITEM}
           pickupEvents={events.map((event) => ({
             id: event.id,

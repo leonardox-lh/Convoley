@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Package } from "lucide-react";
+import { MapPin, Package, ShoppingBag } from "lucide-react";
 import { PageHeading, PageHeadingLoading } from "@/components/page-heading";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { FormMessage } from "@/components/form";
-import { formatInLima } from "@/lib/lima-time";
+import { formatTimeRangeInLima, formatWeekdayDateInLima } from "@/lib/lima-time";
 import { formatSoles } from "@/lib/money";
+import { cn } from "@/lib/utils";
 import { findClubBySlug, findClubNamesByIds, serviceFeeFor } from "@/modules/clubs";
 import { listEventSummaries } from "@/modules/events";
 import {
@@ -18,7 +19,7 @@ import { findOrder } from "@/modules/store";
 import { PaymentInstructions } from "../../c/[club]/[event]/payment-instructions";
 import { MercadoPagoCheckout } from "../../inscripcion/[registration]/mercado-pago-checkout";
 import { VoucherForm } from "../../inscripcion/[registration]/voucher-form";
-import { ORDER_STATUS_LABELS } from "../../order-status";
+import { ORDER_STATUS_BADGE_CLASSES, ORDER_STATUS_LABELS } from "../../order-status";
 import { loadPaymentInfo } from "../../payment-info";
 import { payOrderWithMercadoPagoAction, submitOrderVoucherAction } from "./actions";
 
@@ -77,23 +78,53 @@ async function OrderContent({ params, searchParams }: Props) {
         eyebrowHref={`/${club.slug}/tienda`}
         title="Tu pedido"
       >
-        {order.firstName} {order.lastName} · {ORDER_STATUS_LABELS[order.status]}
+        <span className="flex flex-wrap items-center gap-2">
+          <span className="first-letter:uppercase">
+            {order.firstName} {order.lastName}
+          </span>
+          <span
+            className={cn(
+              "rounded-full px-2.5 py-0.5 text-xs font-semibold",
+              ORDER_STATUS_BADGE_CLASSES[order.status],
+            )}
+          >
+            {ORDER_STATUS_LABELS[order.status]}
+          </span>
+        </span>
       </PageHeading>
-      <ul className="flex flex-col gap-1 text-sm">
-        {order.items.map((item, index) => (
-          <li key={index}>
-            {item.quantity} × {item.productName}
-            {item.size && ` (${item.size})`}
-          </li>
-        ))}
-        <li className="font-semibold">Total: {formatSoles(order.totalCents)}</li>
-      </ul>
-      {pickup && (
-        <p className="text-sm">
-          Lo recoges en <span className="font-semibold">{pickup.title}</span>,{" "}
-          {formatInLima(pickup.startsAt)}.
-        </p>
-      )}
+      <section
+        aria-label="Resumen del pedido"
+        className="flex flex-col gap-3 rounded-2xl border bg-card p-4 shadow-sm"
+      >
+        <ul className="flex flex-col gap-2 text-sm">
+          {order.items.map((item, index) => (
+            <li key={index} className="flex items-center gap-2">
+              <ShoppingBag className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+              <span className="min-w-0 flex-1">
+                {item.productName}
+                {item.size && <span className="text-muted-foreground"> · talla {item.size}</span>}
+              </span>
+              <span className="shrink-0 font-medium">× {item.quantity}</span>
+            </li>
+          ))}
+        </ul>
+        <div className="flex items-center justify-between border-t pt-3">
+          <span className="text-sm text-muted-foreground">Total</span>
+          <span className="text-lg font-extrabold">{formatSoles(order.totalCents)}</span>
+        </div>
+        {pickup && (
+          <p className="flex items-start gap-2 rounded-xl bg-secondary/60 px-3 py-2.5 text-sm">
+            <MapPin className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+            <span>
+              Lo recoges en <span className="font-semibold">{pickup.title}</span>
+              <span className="block text-muted-foreground">
+                {formatWeekdayDateInLima(pickup.startsAt)}
+              </span>
+              <span className="block text-muted-foreground">{formatTimeRangeInLima(pickup)}</span>
+            </span>
+          </p>
+        )}
+      </section>
       {pagado && order.status === "paid" && (
         <FormMessage tone="ok">¡Pago confirmado! Recoge tu pedido en la convocatoria.</FormMessage>
       )}
@@ -103,10 +134,12 @@ async function OrderContent({ params, searchParams }: Props) {
         </FormMessage>
       )}
       {order.status === "in_review" && (
-        <p className="text-sm text-zinc-500">El organizador está revisando tu pago.</p>
+        <p className="rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900 dark:border-sky-900 dark:bg-sky-950/40 dark:text-sky-200">
+          El organizador está revisando tu pago.
+        </p>
       )}
       {awaitingPayment && mercadoPago && (
-        <section className="flex flex-col gap-4">
+        <section className="flex flex-col gap-4 rounded-2xl border bg-card p-4 shadow-sm">
           <h2 className="text-lg font-semibold">Paga con Yape o tarjeta</h2>
           {mercadoPago.serviceFeeCents > 0 && (
             <p className="text-sm">
@@ -131,7 +164,7 @@ async function OrderContent({ params, searchParams }: Props) {
         </section>
       )}
       {awaitingPayment && !mercadoPago && (
-        <section className="flex flex-col gap-4">
+        <section className="flex flex-col gap-4 rounded-2xl border bg-card p-4 shadow-sm">
           <h2 className="text-lg font-semibold">Paga y sube tu captura</h2>
           {voucher}
         </section>

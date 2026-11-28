@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import { fieldClass, FormMessage } from "@/components/form";
+import { X } from "lucide-react";
+import { useActionState, useEffect, useState } from "react";
+import { Field, floatingFieldClass, FormMessage } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import {
   approveOrderVoucherAction,
@@ -16,10 +17,20 @@ const IDLE: OrderActionState = { status: "idle" };
 export function OrderActions(props: {
   clubSlug: string;
   orderId: string;
+  playerName: string;
   canDeliver: boolean;
-  voucher: { imageUrl: string | null; securityCode: string | null } | null;
+  voucher: { imageUrl: string | null; securityCode: string | null; note: string | null } | null;
+  reasonMaxLength: number;
 }) {
   const [rejecting, setRejecting] = useState(false);
+  const [enlarged, setEnlarged] = useState(false);
+
+  useEffect(() => {
+    if (!enlarged) return;
+    const closeOnEscape = (event: KeyboardEvent) => event.key === "Escape" && setEnlarged(false);
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [enlarged]);
   const [approveState, approve, approving] = useActionState(approveOrderVoucherAction, IDLE);
   const [rejectState, reject, rejectingNow] = useActionState(rejectOrderVoucherAction, IDLE);
   const [deliverState, deliver, delivering] = useActionState(markOrderDeliveredAction, IDLE);
@@ -35,48 +46,114 @@ export function OrderActions(props: {
   return (
     <div className="flex w-full flex-col gap-2">
       {props.voucher && (
-        <div className="flex flex-col gap-2 rounded-lg bg-sky-50 p-3 text-sm dark:bg-sky-950/40">
-          <p className="font-medium">Captura por revisar</p>
-          {props.voucher.imageUrl && (
-            <a
-              href={props.voucher.imageUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline underline-offset-4"
+        <div className="flex flex-col gap-2 rounded-lg bg-sky-50 p-3 dark:bg-sky-950/40">
+          <div className="flex items-start gap-3">
+            {props.voucher.imageUrl && (
+              <button
+                type="button"
+                onClick={() => setEnlarged(true)}
+                aria-label={`Ver captura ampliada de ${props.playerName}`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element -- private signed URL, can't go through next/image */}
+                <img
+                  src={props.voucher.imageUrl}
+                  alt={`Captura de pago de ${props.playerName}`}
+                  className="h-24 w-16 rounded border border-zinc-200 object-cover dark:border-zinc-800"
+                />
+              </button>
+            )}
+            <div className="flex flex-col items-start gap-1 text-sm">
+              <p className="font-medium">Captura por revisar</p>
+              {props.voucher.imageUrl && (
+                <button
+                  type="button"
+                  onClick={() => setEnlarged(true)}
+                  className="underline underline-offset-4"
+                >
+                  Ver captura ampliada
+                </button>
+              )}
+              {props.voucher.securityCode && (
+                <p>Código de seguridad: {props.voucher.securityCode}</p>
+              )}
+              {props.voucher.note && (
+                <p className="rounded-md bg-white px-2 py-1 italic break-words dark:bg-zinc-900">
+                  “{props.voucher.note}”
+                </p>
+              )}
+            </div>
+          </div>
+
+          {enlarged && props.voucher.imageUrl && (
+            // Any click on the backdrop or the image closes it; Escape too.
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4"
+              onClick={() => setEnlarged(false)}
             >
-              Ver captura
-            </a>
+              <button
+                type="button"
+                aria-label="Cerrar"
+                className="absolute top-3 right-3 flex size-10 items-center justify-center rounded-full bg-white/15 text-white"
+              >
+                <X className="size-6" aria-hidden />
+              </button>
+              {/* eslint-disable-next-line @next/next/no-img-element -- private signed URL, can't go through next/image */}
+              <img
+                src={props.voucher.imageUrl}
+                alt={`Captura de pago de ${props.playerName}`}
+                className="max-h-full max-w-full rounded-lg object-contain"
+              />
+            </div>
           )}
-          {props.voucher.securityCode && <p>Código de seguridad: {props.voucher.securityCode}</p>}
+
           {rejecting ? (
             <form action={reject} className="flex flex-col gap-2">
               {hidden}
-              <input
-                name="reason"
-                required
-                aria-label="Motivo del rechazo"
-                placeholder="El monto no coincide"
-                className={fieldClass}
-              />
-              <Button type="submit" variant="outline" className="h-11" disabled={pending}>
-                Rechazar captura
-              </Button>
+              <Field label="Motivo del rechazo (lo verá el jugador)">
+                <input
+                  name="reason"
+                  required
+                  maxLength={props.reasonMaxLength}
+                  placeholder="El monto no coincide"
+                  className={floatingFieldClass}
+                />
+              </Field>
+              <div className="flex gap-2">
+                <Button
+                  type="submit"
+                  variant="destructive"
+                  className="h-10 flex-1"
+                  disabled={pending}
+                >
+                  Rechazar
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="h-10 flex-1"
+                  onClick={() => setRejecting(false)}
+                  disabled={pending}
+                >
+                  Cancelar
+                </Button>
+              </div>
             </form>
           ) : (
             <div className="flex gap-2">
               <form action={approve} className="flex-1">
                 {hidden}
-                <Button type="submit" className="h-11 w-full" disabled={pending}>
-                  Aprobar pago
+                <Button type="submit" className="h-10 w-full" disabled={pending}>
+                  Aprobar
                 </Button>
               </form>
               <Button
                 type="button"
                 variant="outline"
-                className="h-11"
+                className="h-10 flex-1"
                 onClick={() => setRejecting(true)}
+                disabled={pending}
               >
-                Rechazar
+                Rechazar…
               </Button>
             </div>
           )}

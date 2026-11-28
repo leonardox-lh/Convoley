@@ -80,6 +80,8 @@ export const settleOrderNotification = makeSettleOrderNotification(
 export const submitOrderVoucher = makeSubmitOrderVoucher(orderPaymentDeps);
 export const findOrder = async (orderId: string) =>
   (await findOrders(db, { id: orderId }))[0] ?? null;
+/** "Mis pedidos": the signed-in player's orders, newest first. */
+export const listPlayerOrders = (userId: string) => findOrders(db, { userId });
 export type { OrderListItem } from "./infrastructure/prisma-order-repository";
 export { listOrderPickupEventIds } from "./infrastructure/prisma-order-events";
 export { MAX_QUANTITY_PER_ITEM } from "./domain/cart";

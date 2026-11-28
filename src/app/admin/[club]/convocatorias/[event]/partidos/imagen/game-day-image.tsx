@@ -17,7 +17,7 @@ const CARD_BORDER = "rgba(255,255,255,0.12)";
 const LONG_NAME_CHARS = 14;
 const IMAGE_WIDTH_PX = 1080;
 const PHOTO_SIDE_MARGIN_PX = 56;
-const PHOTO_BORDER_PX = 6;
+const PHOTO_BORDER_PX = 2;
 const LINE_HEIGHT = 1.2;
 /** Geist's average glyph width in em: to guess where long text wraps. */
 const CHAR_EM = 0.56;
@@ -312,7 +312,10 @@ const BANNER_NAME_PX = 72;
 const BANNER_LONG_NAME_PX = 54;
 const BANNER_PADDING_Y_PX = 22;
 const BANNER_HEIGHT_PX = BANNER_NAME_PX * LINE_HEIGHT + 2 * BANNER_PADDING_Y_PX;
-const BANNER_DIAMOND_PX = 18;
+// The champion's glass plate: navy that lets the photo show through, with a soft white edge.
+const GLASS_PLATE = "rgba(10,26,74,0.72)";
+const GLASS_EDGE = "rgba(255,255,255,0.3)";
+const PHOTO_EDGE = "rgba(255,255,255,0.25)";
 const BODY_GAP_PX = 28;
 const BODY_PADDING_TOP_PX = 12;
 const BODY_PADDING_BOTTOM_PX = 36;
@@ -370,7 +373,7 @@ function ChampionLabel(props: { color: string }) {
           display: "flex",
           fontSize: CHAMPION_LABEL_PX,
           letterSpacing: 1,
-          ...heavy(props.color, "0 0 24px rgba(250,204,21,0.45)"),
+          ...heavy(props.color),
         }}
       >
         CAMPEÓN
@@ -379,37 +382,22 @@ function ChampionLabel(props: { color: string }) {
   );
 }
 
-/** The team's name on a gold award ribbon with diamonds at both ends. */
-function ChampionBanner(props: { name: string; primary: string; secondary: string }) {
+/** The team's name on a quiet glass plate; the same with or without the team's photo. */
+function ChampionBanner(props: { name: string }) {
   const namePx = props.name.length > LONG_NAME_CHARS ? BANNER_LONG_NAME_PX : BANNER_NAME_PX;
-  const diamond = (
-    <div
-      style={{
-        display: "flex",
-        width: BANNER_DIAMOND_PX,
-        height: BANNER_DIAMOND_PX,
-        transform: "rotate(45deg)",
-        background: NIGHT,
-        flexShrink: 0,
-      }}
-    />
-  );
   return (
     <div
       style={{
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        gap: 28,
         height: BANNER_HEIGHT_PX,
-        padding: `0 40px`,
+        padding: `0 48px`,
         borderRadius: 22,
-        backgroundImage: `linear-gradient(180deg, #fde68a 0%, ${props.secondary} 45%, #d97706 100%)`,
-        border: "3px solid #fff7d6",
-        boxShadow: `0 14px 40px rgba(0,0,0,0.55), 0 0 50px ${props.secondary}`,
+        background: GLASS_PLATE,
+        border: `2px solid ${GLASS_EDGE}`,
       }}
     >
-      {diamond}
       <span
         style={{
           display: "block",
@@ -418,19 +406,18 @@ function ChampionBanner(props: { name: string; primary: string; secondary: strin
           textOverflow: "ellipsis",
           fontSize: namePx,
           lineHeight: `${BANNER_NAME_PX * LINE_HEIGHT}px`,
-          ...heavy(NIGHT),
+          ...heavy("white"),
         }}
       >
-        {props.name.toUpperCase()}
+        {props.name}
       </span>
-      {diamond}
     </div>
   );
 }
 
 /**
  * The champion: trophy and "CAMPEÓN" next to the club, then the team's photo with its name on a
- * gold ribbon across the top. Without a photo, the ribbon, the players and the final's score.
+ * glass plate across the top. Without a photo, the ribbon, the players and the final's score.
  */
 export function ChampionImage(
   props: Props & { players: string[]; photo: StoredImage | null; photoSize: PhotoSize | null },
@@ -439,7 +426,7 @@ export function ChampionImage(
   const name = gameDay.champion?.name ?? "";
   const final = gameDay.matches.find((match) => match.isFinal);
   const nameOf = new Map(gameDay.teams.map((team) => [team.number, team.name]));
-  const banner = <ChampionBanner name={name} primary={props.primary} secondary={props.secondary} />;
+  const banner = <ChampionBanner name={name} />;
   return (
     <Frame {...props} clubRowEnd={<ChampionLabel color={props.secondary} />}>
       <div
@@ -467,8 +454,7 @@ export function ChampionImage(
                 display: "flex",
                 borderRadius: 40,
                 overflow: "hidden",
-                border: `${PHOTO_BORDER_PX}px solid ${props.secondary}`,
-                boxShadow: `0 0 60px ${props.primary}`,
+                border: `${PHOTO_BORDER_PX}px solid ${PHOTO_EDGE}`,
               }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element -- rendered by Satori, not the browser */}
@@ -515,8 +501,8 @@ export function ChampionImage(
               padding: "14px 36px",
               borderRadius: 999,
               fontSize: 32,
-              background: "rgba(255,255,255,0.12)",
-              border: `2px solid ${props.secondary}`,
+              background: GLASS_PLATE,
+              border: `2px solid ${GLASS_EDGE}`,
             }}
           >
             Final · {nameOf.get(final.homeTeam)} {final.homeScore} – {final.awayScore}{" "}

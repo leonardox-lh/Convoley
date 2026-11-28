@@ -24,7 +24,12 @@ export function CourtCostForm(props: { clubSlug: string; eventId: string; defaul
             className={floatingFieldClass}
           />
         </Field>
-        <Button type="submit" variant="outline" className="h-11" disabled={pending}>
+        <Button
+          type="submit"
+          variant="outline"
+          className="h-11 border-primary bg-transparent text-primary hover:bg-primary/10 hover:text-primary"
+          disabled={pending}
+        >
           Guardar
         </Button>
       </div>

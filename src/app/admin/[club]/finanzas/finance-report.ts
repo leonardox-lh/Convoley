@@ -8,6 +8,7 @@ export interface FinanceRow {
   eventId: string;
   title: string;
   startsAt: Date;
+  endsAt: Date | null;
   cancelled: boolean;
   registrationsCents: number;
   storeCents: number;
@@ -63,6 +64,7 @@ export async function buildFinanceReport(clubId: string, month: string): Promise
       eventId: event.id,
       title: event.title,
       startsAt: event.startsAt,
+      endsAt: event.endsAt,
       cancelled: event.status === "cancelled",
       registrationsCents,
       storeCents,

@@ -35,11 +35,14 @@ export class PrismaEventRepository implements EventRepository {
     statuses: readonly EventStatus[];
     from: Date;
     limit: number;
+    offset: number;
   }): Promise<EventDetails[]> {
     const rows = await this.db.event.findMany({
       where: { status: { in: [...filter.statuses] }, startsAt: { gte: filter.from } },
       include: EVENT_INCLUDE,
-      orderBy: { startsAt: "asc" },
+      // The id breaks ties so pages never repeat or skip events that start at the same time.
+      orderBy: [{ startsAt: "asc" }, { id: "asc" }],
+      skip: filter.offset,
       take: filter.limit,
     });
     return rows.map(toEventDetails);

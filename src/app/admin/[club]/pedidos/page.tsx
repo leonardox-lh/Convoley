@@ -1,19 +1,22 @@
 import { VolleyballLoader } from "@/components/volleyball";
 import { PanelIntro } from "../panel-hero";
+import { MapPin, Package, Phone, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { z } from "zod";
-import { formatInLima } from "@/lib/lima-time";
+import { formatTimeRangeInLima, formatWeekdayDateInLima } from "@/lib/lima-time";
 import { formatSoles } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import { findClubBySlug } from "@/modules/clubs";
 import { listEventSummaries } from "@/modules/events";
 import { listVouchersInReview, signVoucherPath } from "@/modules/payments";
+import { REJECTION_REASON_MAX_LENGTH } from "@/modules/registrations";
 import { listOrders, type OrderFilter } from "@/modules/store";
-import { ORDER_STATUS_LABELS } from "../../../order-status";
+import { ORDER_STATUS_BADGE_CLASSES, ORDER_STATUS_LABELS } from "../../../order-status";
 import { requireOrganizer } from "../require-organizer";
 import { OrderActions } from "./order-actions";
+import { StatusFilter } from "./status-filter";
 
 type Props = PageProps<"/admin/[club]/pedidos">;
 
@@ -57,7 +60,7 @@ async function OrdersContent({ params, searchParams }: Props) {
   const basePath = `/admin/${clubSlug}/pedidos`;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       <PanelIntro
         footer={
           <>
@@ -70,92 +73,105 @@ async function OrdersContent({ params, searchParams }: Props) {
           </>
         }
       />
-      <nav aria-label="Filtrar por estado" className="flex flex-wrap gap-2">
-        <FilterLink href={basePath} active={!estado} label="Todos" />
-        {Object.entries(FILTERS).map(([value, { label }]) => (
-          <FilterLink
-            key={value}
-            href={`${basePath}?estado=${value}`}
-            active={estado === value}
-            label={label}
-          />
-        ))}
-      </nav>
+      <StatusFilter
+        basePath={basePath}
+        value={estado}
+        options={Object.entries(FILTERS).map(([value, { label }]) => ({ value, label }))}
+      />
       {orders.length === 0 ? (
-        <p className="text-sm text-zinc-500">No hay pedidos.</p>
+        <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">
+          <Package className="size-8 opacity-60" aria-hidden />
+          No hay pedidos{estado ? ` ${FILTERS[estado]!.label.toLowerCase()}` : ""}.
+        </div>
       ) : (
-        <ul
-          aria-label="Pedidos"
-          className="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-800"
-        >
+        <ul aria-label="Pedidos" className="flex flex-col gap-3">
           {orders.map((order) => {
             const voucher = vouchers.get(order.id);
             const pickup = pickups.find((event) => event.id === order.pickupEventId);
+            const canDeliver = order.status === "paid";
             return (
-              <li key={order.id} className="flex flex-col gap-2 py-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <p className="font-medium">
+              <li
+                key={order.id}
+                className="flex flex-col gap-3 rounded-2xl border bg-card p-4 shadow-sm"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 flex-col gap-0.5">
+                    <p className="truncate font-semibold first-letter:uppercase">
                       {order.firstName} {order.lastName}
                     </p>
-                    <p className="text-sm text-zinc-500">
-                      {order.phone.replace(/^\+51/, "")} · {formatSoles(order.totalCents)}
-                    </p>
+                    <a
+                      href={`tel:${order.phone}`}
+                      className="flex w-fit items-center gap-1.5 text-sm text-primary underline-offset-4 hover:underline"
+                    >
+                      <Phone className="size-3.5 shrink-0" aria-hidden />
+                      {order.phone.replace(/^\+51/, "")}
+                    </a>
                   </div>
-                  <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium dark:bg-zinc-800">
+                  <span
+                    className={cn(
+                      "shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold",
+                      ORDER_STATUS_BADGE_CLASSES[order.status],
+                    )}
+                  >
                     {ORDER_STATUS_LABELS[order.status]}
                   </span>
                 </div>
-                <p className="text-sm">
-                  {order.items
-                    .map(
-                      (item) =>
-                        `${item.quantity} × ${item.productName}${item.size ? ` (${item.size})` : ""}`,
-                    )
-                    .join(", ")}
-                </p>
-                {pickup && (
-                  <p className="text-sm text-zinc-500">
-                    Recoge en {pickup.title} · {formatInLima(pickup.startsAt)}
-                  </p>
+                <ul className="flex flex-col gap-1 rounded-xl bg-secondary/60 px-3 py-2.5 text-sm">
+                  {order.items.map((item, index) => (
+                    <li key={index} className="flex items-center gap-2">
+                      <ShoppingBag className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+                      <span className="min-w-0 flex-1">
+                        {item.productName}
+                        {item.size && (
+                          <span className="text-muted-foreground"> · talla {item.size}</span>
+                        )}
+                      </span>
+                      <span className="shrink-0 font-medium">× {item.quantity}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="flex items-end justify-between gap-3">
+                  {pickup ? (
+                    <p className="flex min-w-0 items-start gap-1.5 text-sm text-muted-foreground">
+                      <MapPin className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+                      <span>
+                        Recoge en {pickup.title}
+                        <span className="block">{formatWeekdayDateInLima(pickup.startsAt)}</span>
+                        <span className="block">{formatTimeRangeInLima(pickup)}</span>
+                      </span>
+                    </p>
+                  ) : (
+                    <span />
+                  )}
+                  <p className="shrink-0 text-lg font-extrabold">{formatSoles(order.totalCents)}</p>
+                </div>
+                {(voucher || canDeliver) && (
+                  <div className="border-t pt-3">
+                    <OrderActions
+                      clubSlug={clubSlug}
+                      orderId={order.id}
+                      playerName={order.firstName}
+                      reasonMaxLength={REJECTION_REASON_MAX_LENGTH}
+                      canDeliver={canDeliver}
+                      voucher={
+                        voucher
+                          ? {
+                              imageUrl: voucher.proofFileKey
+                                ? signVoucherPath(voucher.proofFileKey)
+                                : null,
+                              securityCode: voucher.yapeSecurityCode,
+                              note: voucher.payerNote,
+                            }
+                          : null
+                      }
+                    />
+                  </div>
                 )}
-                <OrderActions
-                  clubSlug={clubSlug}
-                  orderId={order.id}
-                  canDeliver={order.status === "paid"}
-                  voucher={
-                    voucher
-                      ? {
-                          imageUrl: voucher.proofFileKey
-                            ? signVoucherPath(voucher.proofFileKey)
-                            : null,
-                          securityCode: voucher.yapeSecurityCode,
-                        }
-                      : null
-                  }
-                />
               </li>
             );
           })}
         </ul>
       )}
     </div>
-  );
-}
-
-function FilterLink({ href, active, label }: { href: string; active: boolean; label: string }) {
-  return (
-    <Link
-      href={href}
-      aria-current={active ? "page" : undefined}
-      className={cn(
-        "rounded-full border px-3 py-1.5 text-sm",
-        active
-          ? "border-zinc-900 bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-zinc-900"
-          : "border-zinc-300 dark:border-zinc-700",
-      )}
-    >
-      {label}
-    </Link>
   );
 }

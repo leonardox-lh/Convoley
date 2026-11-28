@@ -1,14 +1,22 @@
-import { ShoppingBag } from "lucide-react";
+import { ExternalLink, Package, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { buttonVariants } from "@/components/ui/button";
 import { formatSoles } from "@/lib/money";
+import { cn } from "@/lib/utils";
 import { clubLogoPath, findClubBySlug } from "@/modules/clubs";
 import { listProducts } from "@/modules/store";
 import { VolleyballLoader } from "@/components/volleyball";
 import { requireOrganizer } from "../../require-organizer";
 import { ProductForm } from "../../tienda/product-forms";
 import { stockInputText } from "../../tienda/stock-input";
+
+// cn, not buttonVariants' className: only a merge lets the blue border beat the variant's.
+const BLUE_OUTLINE_BUTTON = cn(
+  buttonVariants({ variant: "outline", size: "lg" }),
+  "h-11 gap-1.5 border-primary bg-transparent text-primary hover:bg-primary/10 hover:text-primary",
+);
 
 type Props = PageProps<"/admin/[club]/tienda">;
 
@@ -30,21 +38,16 @@ async function StoreContent({ params }: Pick<Props, "params">) {
 
   return (
     <div className="flex flex-col gap-6">
-      <p className="text-sm text-muted-foreground">
-        <Link
-          href={`/admin/${clubSlug}/pedidos`}
-          className="font-semibold text-primary underline-offset-4 hover:underline"
-        >
+      <div className="grid grid-cols-2 gap-2">
+        <Link href={`/admin/${clubSlug}/pedidos`} className={BLUE_OUTLINE_BUTTON}>
+          <Package aria-hidden />
           Pedidos
         </Link>
-        {" · "}
-        <Link
-          href={`/${clubSlug}/tienda`}
-          className="font-semibold text-primary underline-offset-4 hover:underline"
-        >
+        <Link href={`/${clubSlug}/tienda`} className={BLUE_OUTLINE_BUTTON}>
+          <ExternalLink aria-hidden />
           Ver tienda pública
         </Link>
-      </p>
+      </div>
       <ul aria-label="Productos" className="flex flex-col gap-2">
         {products.map((product) => (
           <li key={product.id}>

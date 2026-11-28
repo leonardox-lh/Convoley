@@ -52,7 +52,7 @@ function deleteBlockedReason(props: {
   }
   if (props.eventCount > 0) {
     const events = props.eventCount === 1 ? "1 convocatoria" : `${props.eventCount} convocatorias`;
-    return `Tiene ${events}. Para eliminarla, entra a cada convocatoria, tócale Editar convocatoria y elige otra comunidad.`;
+    return `Tiene ${events}. Para eliminarla, entra a cada convocatoria, tócale Editar (el lápiz junto a la fecha) y elige otra comunidad.`;
   }
   return null;
 }

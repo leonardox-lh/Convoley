@@ -31,7 +31,11 @@ async function ProductContent({ params }: Pick<Props, "params">) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PanelIntro eyebrow="Tienda" eyebrowHref={`/admin/${clubSlug}/tienda`} title={product.name} />
+      <PanelIntro
+        eyebrow="Volver a la tienda"
+        eyebrowHref={`/admin/${clubSlug}/tienda`}
+        title={product.name}
+      />
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-semibold">
           Fotos ({product.imageKeys.length}/{MAX_PRODUCT_PHOTOS})

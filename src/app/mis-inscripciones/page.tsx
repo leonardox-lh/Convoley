@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { CalendarCheck, CalendarDays, Clock } from "lucide-react";
-import { PageHeading, PageHeadingLoading } from "@/components/page-heading";
+import { PageHeading } from "@/components/page-heading";
+import { VolleyballLoader } from "@/components/volleyball";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
@@ -23,7 +24,7 @@ export default function MyRegistrationsPage() {
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pt-4 pb-8">
       <PageHeading icon={CalendarCheck} eyebrow="Convoley" title="Mis inscripciones" />
-      <Suspense fallback={<PageHeadingLoading />}>
+      <Suspense fallback={<VolleyballLoader />}>
         <MyRegistrations />
       </Suspense>
     </main>

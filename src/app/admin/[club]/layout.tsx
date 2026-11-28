@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { clubLogoPath, getClubProfile } from "@/modules/clubs";
 import { listOpenEvents } from "@/modules/events";
 import { HERO_TILE_CLASS, PanelHero } from "./panel-hero";
-import { PanelHeroBody, PanelHeroGate } from "./panel-hero-body";
+import { PanelHeroBody } from "./panel-hero-body";
 import { requireOrganizer } from "./require-organizer";
 
 const HERO_MARGINS = "-mx-4 -mt-4 sm:mx-0 sm:mt-0";
@@ -36,13 +36,11 @@ export default function ClubAdminLayout({ children, params }: LayoutProps<"/admi
       </header>
       <div className="admin-shell contents">
         {/* Outside the pages, so moving between them never reloads it: only its tile changes. */}
-        <PanelHeroGate>
-          <div className="mx-auto w-full max-w-md px-4 pt-4 pb-2">
-            <Suspense fallback={<PanelHeroPlaceholder />}>
-              <SharedPanelHero params={params} />
-            </Suspense>
-          </div>
-        </PanelHeroGate>
+        <div className="mx-auto w-full max-w-md px-4 pt-4 pb-2">
+          <Suspense fallback={<PanelHeroPlaceholder />}>
+            <SharedPanelHero params={params} />
+          </Suspense>
+        </div>
         {children}
       </div>
     </>

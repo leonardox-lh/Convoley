@@ -1,3 +1,4 @@
+import { ConvoleyWordmark } from "./convoley-wordmark";
 import { heavy, NIGHT, SOFT_BLUE } from "./poster-style";
 
 /** Club header and footer shared by the list, teams and game-day images, for Satori. */
@@ -117,8 +118,10 @@ const HEADER_LOGO_PX = CLUB_LOGO_PX + 10;
 const HEADER_CLUB_PX = Math.ceil(CLUB_NAME_PX * 1.05);
 const HEADER_WHEN_PX = 32;
 const TITLE_LINE_CHARS = 23;
-/** ImageFooter: its text line and bottom padding. */
-export const IMAGE_FOOTER_PX = 56;
+const FOOTER_WORDMARK_PX = 44;
+const FOOTER_BOTTOM_PX = 28;
+/** ImageFooter: the wordmark's line and its bottom padding. */
+export const IMAGE_FOOTER_PX = FOOTER_WORDMARK_PX + FOOTER_BOTTOM_PX;
 
 /** How tall ImageHeader draws, so an image can end right after its content. */
 export function imageHeaderHeight(brand: Pick<ImageBrand, "title" | "logo">) {
@@ -139,14 +142,11 @@ export function ImageFooter() {
       style={{
         display: "flex",
         justifyContent: "flex-end",
-        padding: "0 56px 28px",
-        fontSize: 22,
-        letterSpacing: 4,
-        color: SOFT_BLUE,
-        opacity: 0.6,
+        padding: `0 56px ${FOOTER_BOTTOM_PX}px`,
+        opacity: 0.85,
       }}
     >
-      CONVOLEY
+      <ConvoleyWordmark height={FOOTER_WORDMARK_PX} />
     </div>
   );
 }

@@ -1,12 +1,14 @@
 import { VolleyballLoader } from "@/components/volleyball";
 import { PanelIntro } from "../../../panel-hero";
 import { Trophy } from "lucide-react";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { clubLogoPath } from "@/modules/clubs";
 import { getOrganizerEvent } from "@/modules/events";
 import {
   getGameDay,
+  listEventTeams,
+  MIN_TEAMS_TO_PLAY,
   MAX_MATCH_SCORE,
   pointDifference,
   type GameDay,
@@ -16,7 +18,9 @@ import { VolleyballIcon } from "@/components/volleyball";
 import { requireOrganizer } from "../../../require-organizer";
 import { ShareImageSection } from "../share-image-section";
 import { ChampionPhotoForm, MatchScoreForm, StartGameDayForm } from "./game-day-forms";
+import { POSITION_LABELS } from "../../../../../player-labels";
 import { AddMatchButtons, MatchActions } from "./match-editing";
+import { type TeamPlayer, TeamPlayersButton } from "./team-players-button";
 
 type Props = PageProps<"/admin/[club]/convocatorias/[event]/partidos">;
 
@@ -39,7 +43,15 @@ const STAT_COLUMNS = [
 ] as const;
 
 /** Cards instead of a dense table: the leader stands out, the top two head for the final. */
-function StandingsTable({ gameDay, hasFinal }: { gameDay: GameDay; hasFinal: boolean }) {
+function StandingsTable({
+  gameDay,
+  hasFinal,
+  playersOf,
+}: {
+  gameDay: GameDay;
+  hasFinal: boolean;
+  playersOf: Map<number, TeamPlayer[]>;
+}) {
   const nameOf = new Map(gameDay.teams.map((team) => [team.number, team.name]));
   return (
     <div className="flex flex-col gap-2">
@@ -86,9 +98,10 @@ function StandingsTable({ gameDay, hasFinal }: { gameDay: GameDay; hasFinal: boo
                 )}
               </span>
               <span className="flex min-w-0 flex-1 flex-col">
-                <span className="flex items-center gap-1.5 truncate font-semibold">
-                  <span className="truncate">{nameOf.get(row.teamNumber)}</span>
-                </span>
+                <TeamPlayersButton
+                  name={nameOf.get(row.teamNumber) ?? `Equipo ${row.teamNumber}`}
+                  players={playersOf.get(row.teamNumber) ?? []}
+                />
                 {headsToFinal && <span className="text-xs text-primary">Va a la final</span>}
               </span>
               <span className="grid w-40 shrink-0 grid-cols-4 text-center text-sm tabular-nums">
@@ -170,8 +183,21 @@ async function GameDayContent({ params }: Pick<Props, "params">) {
   if (!(await requireOrganizer(clubSlug, "run_game_day"))) notFound();
   const event = await getOrganizerEvent({ clubSlug, eventId });
   if (!event) notFound();
-  const gameDay = await getGameDay(event.id);
+  const [gameDay, { teams }] = await Promise.all([getGameDay(event.id), listEventTeams(event.id)]);
   const basePath = `/admin/${clubSlug}/convocatorias/${event.id}`;
+  // The matches come after the teams: without them there is nothing to play yet.
+  if (teams.length < MIN_TEAMS_TO_PLAY) redirect(`${basePath}/equipos`);
+  const playersOf = new Map(
+    teams.map((team) => [
+      team.number,
+      team.players.map((player) => ({
+        id: player.id,
+        name: `${player.firstName} ${player.lastName}`,
+        gender: player.gender,
+        position: player.position && POSITION_LABELS[player.position],
+      })),
+    ]),
+  );
   const nameOf = new Map(gameDay.teams.map((team) => [team.number, team.name]));
   const target = { clubSlug, eventId: event.id };
   const hasMatches = gameDay.matches.length > 0;
@@ -180,7 +206,7 @@ async function GameDayContent({ params }: Pick<Props, "params">) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PanelIntro eyebrow={event.title} eyebrowHref={`${basePath}/equipos`}>
+      <PanelIntro>
         Te armamos todos contra todos. Agrega, cambia u ordena los partidos, y arma la final cuando
         quieras.
       </PanelIntro>
@@ -198,7 +224,7 @@ async function GameDayContent({ params }: Pick<Props, "params">) {
         <>
           <section className="flex flex-col gap-2">
             <h2 className="font-semibold">Tabla de posiciones</h2>
-            <StandingsTable gameDay={gameDay} hasFinal={hasFinal} />
+            <StandingsTable gameDay={gameDay} hasFinal={hasFinal} playersOf={playersOf} />
           </section>
 
           <ShareImageSection

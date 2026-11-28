@@ -89,7 +89,23 @@ describe("inicio: próximas convocatorias de todos los clubes", () => {
       now: () => NOW,
     });
     const [event] = await listUpcomingEvents(6);
-    expect(listUpcoming).toHaveBeenCalledWith({ statuses: LISTED_STATUSES, from: NOW, limit: 6 });
+    expect(listUpcoming).toHaveBeenCalledWith({
+      statuses: LISTED_STATUSES,
+      from: NOW,
+      limit: 6,
+      offset: 0,
+    });
     expect(event.remainingSpots).toBe(7);
+  });
+
+  it("pagina: la siguiente página salta las que ya se mostraron", async () => {
+    const listUpcoming = vi.fn(async () => []);
+    const listUpcomingEvents = makeListUpcomingEvents({
+      events: fakeEventRepository({ listUpcoming }),
+      registrations: { countConfirmedByEvent: async () => new Map() },
+      now: () => NOW,
+    });
+    await listUpcomingEvents(12, 24);
+    expect(listUpcoming).toHaveBeenCalledWith(expect.objectContaining({ limit: 12, offset: 24 }));
   });
 });
