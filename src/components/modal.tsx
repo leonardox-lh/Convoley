@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 
 /** Sheet from the bottom on phones, centered card on wider screens; Escape or a tap outside closes. */
@@ -21,7 +22,8 @@ export function Modal(props: {
     return () => document.removeEventListener("keydown", closeOnEscape);
   }, [onClose]);
 
-  return (
+  // In <body>: inside a header with backdrop-blur, "fixed" would be relative to the header, not the screen.
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 animate-in fade-in duration-150 sm:items-center"
       onClick={(event) => event.target === event.currentTarget && onClose()}
@@ -40,6 +42,7 @@ export function Modal(props: {
         </h2>
         {props.children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
