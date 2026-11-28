@@ -17,7 +17,7 @@ import { scryptPasswordHasher } from "../src/modules/identity/infrastructure/scr
 
 config({ path: ".env.local", quiet: true });
 
-const DEMO_SLUG = "costa-verde";
+const DEMO_SLUG = "club-mania";
 const DEMO_EMAIL_DOMAIN = "@demo.convoley.test";
 // Test-only password for the demo organizer (local screenshots). Never a real one.
 const DEMO_PASSWORD = "convoley-demo-1234";
@@ -102,12 +102,14 @@ function rng(seed: number) {
 const svgToPng = (svg: string, size = 800) =>
   sharp(Buffer.from(svg)).resize(size, size).png().toBuffer();
 
+// A club crest (shield + monogram), so it reads as a club and not as Convoley's own ball.
 const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-  <circle cx="100" cy="100" r="96" fill="${BRAND}"/>
-  <circle cx="100" cy="100" r="64" fill="#fff"/>
-  <g stroke="${BALL}" stroke-width="8" fill="none" stroke-linecap="round">
-    <path d="M100 36c-22 26-22 102 0 128"/><path d="M45 68c32 4 82 28 108 64"/><path d="M45 132c32-4 82-28 108-64"/>
-  </g>
+  <rect width="200" height="200" fill="#fff"/>
+  <path d="M100 12L172 34V94C172 142 140 172 100 190C60 172 28 142 28 94V34Z" fill="#0F1F5C" stroke="${BALL}" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M28 70H172V92H28Z" fill="#C8102E"/>
+  <polygon points="100,30 105,44 120,44 108,53 112,67 100,58 88,67 92,53 80,44 95,44" fill="${BALL}"/>
+  <text x="100" y="138" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="58" text-anchor="middle" fill="#fff">CM</text>
+  <text x="100" y="164" font-family="Arial, sans-serif" font-weight="700" font-size="15" letter-spacing="3" text-anchor="middle" fill="${BALL}">VÓLEY</text>
 </svg>`;
 
 const productSvg = (bg: string, body: string) =>
@@ -268,14 +270,14 @@ async function seed(db: PrismaClient) {
   const club = await db.club.create({
     data: {
       slug: DEMO_SLUG,
-      name: "Vóley Costa Verde",
+      name: "Club Manía",
       description:
         "Pichangas de vóley en Miraflores y Barranco. Todos los niveles, buena onda y mucho juego.",
       logoKey: images.logo,
       primaryColor: BRAND,
       secondaryColor: BALL,
-      instagramUrl: "https://instagram.com/voleycostaverde",
-      tiktokUrl: "https://tiktok.com/@voleycostaverde",
+      instagramUrl: "https://instagram.com/clubmania.voley",
+      tiktokUrl: "https://tiktok.com/@clubmania.voley",
       whatsappUrl: "https://chat.whatsapp.com/demo",
       contactPhone: "+51987123456",
       paymentApp: "yape",

@@ -10,7 +10,7 @@ import { PrismaClient } from "../src/generated/prisma/client";
 config({ path: ".env.local", quiet: true });
 
 const BASE = "http://localhost:3000";
-const CLUB = "costa-verde";
+const CLUB = "club-mania";
 const OUT = process.argv[2] ?? "D:/convoley-promo/public/shots";
 // Test-only credentials of the demo organizer, created by prisma/seed-demo.ts.
 const ORGANIZER = { email: "carlos@demo.convoley.test", password: "convoley-demo-1234" };
@@ -33,8 +33,9 @@ async function capture(page: Page, name: string, fullPage = true) {
 }
 
 async function saveImage(page: Page, name: string, path: string) {
-  const response = await page.request.get(BASE + path);
-  if (!response.ok()) throw new Error(`${path} → ${response.status()}`);
+  // A dev server in a bad state can drop image responses; scripts/promo-images.tsx renders them anyway.
+  const response = await page.request.get(BASE + path).catch(() => null);
+  if (!response?.ok()) return console.warn(`! ${name}: ${path} failed, use scripts/promo-images.tsx`);
   writeFileSync(join(OUT, `${name}.png`), await response.body());
   console.info("✓", name);
 }
@@ -58,7 +59,10 @@ async function eventIds() {
 
 async function main() {
   const browser = await chromium.launch();
+  // Skips the first-visit intro animation, which would cover the page.
+  const skipIntro = "localStorage.setItem('convoley:intro-seen', '1')";
   const phone = await browser.newContext({ viewport: PHONE, deviceScaleFactor: 3, isMobile: true, hasTouch: true, locale: "es-PE" });
+  await phone.addInitScript(skipIntro);
   const page = await phone.newPage();
 
   // Organizer first, to learn the event ids from the admin home.
@@ -102,6 +106,7 @@ async function main() {
 
   // Desktop: the same panel on a computer.
   const desktop = await browser.newContext({ viewport: DESKTOP, deviceScaleFactor: 2, locale: "es-PE", storageState: await phone.storageState() });
+  await desktop.addInitScript(skipIntro);
   const desk = await desktop.newPage();
   await shot(desk, "desktop-admin-home", admin, false);
   await shot(desk, "desktop-admin-event", event(ids.mixed), false);
@@ -110,6 +115,7 @@ async function main() {
 
   // Player side, signed out.
   const player = await browser.newContext({ viewport: PHONE, deviceScaleFactor: 3, isMobile: true, hasTouch: true, locale: "es-PE" });
+  await player.addInitScript(skipIntro);
   const p = await player.newPage();
   await shot(p, "club-home", `/${CLUB}`);
   await shot(p, "club-store", `/${CLUB}/tienda`);
