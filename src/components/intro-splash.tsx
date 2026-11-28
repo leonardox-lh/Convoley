@@ -155,7 +155,7 @@ export function IntroSplash() {
       />
       <div
         ref={wordRef}
-        className="relative z-[2] text-white [&_[data-logo-accent]]:text-[oklch(0.86_0.08_240)] [&_svg:has(circle)]:opacity-0"
+        className="relative z-[2] text-white [&_[data-logo-accent]]:text-brand-ball [&_svg:has(circle)]:opacity-0"
       >
         <Logo className="text-[52px]" />
       </div>

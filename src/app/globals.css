@@ -171,7 +171,7 @@ select.peer {
   body:has([data-club-hero]:not([style*="display: none"], [style*="display: none"] *))
     [data-app-bar]
     [data-logo-accent] {
-    @apply text-white/80;
+    @apply text-brand-ball;
   }
   body:has([data-club-hero]:not([style*="display: none"], [style*="display: none"] *))
     [data-header-pill] {
@@ -200,6 +200,12 @@ select.peer {
 [data-ball-on-dark] {
   --ball-seam: white;
   --logo-ball-outline: transparent;
+}
+
+/* "voley" in the ball's gold on any dark background, so the wordmark reads the same everywhere. */
+[data-club-hero] [data-logo-accent],
+[data-ball-on-dark] [data-logo-accent] {
+  @apply text-brand-ball;
 }
 
 @keyframes toast-timer {
