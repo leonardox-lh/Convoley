@@ -40,9 +40,9 @@ async function StoreContent({ params }: Pick<Props, "params">) {
       {products.length === 0 ? (
         <EmptyTab icon={ShoppingBag}>Este club aún no tiene productos a la venta.</EmptyTab>
       ) : !events?.length ? (
-        <p className="text-sm text-zinc-500">
+        <EmptyTab icon={ShoppingBag}>
           Los pedidos se recogen en una convocatoria y ahora no hay ninguna abierta. Vuelve pronto.
-        </p>
+        </EmptyTab>
       ) : (
         <StoreCart
           clubSlug={slug}
