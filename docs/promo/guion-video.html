@@ -94,6 +94,40 @@ section{display:flex;flex-direction:column;gap:16px}
 .mini{width:46px;height:90px;border-radius:9px;border:4px solid #0b0e18;background:#f4f6fb}
 .fake-l{height:6px;border-radius:3px;background:#dde3f3;margin:6px}
 .fake-h{height:22px;background:#1f4fd1}
+/* Phase bar: one overlay over the phone, so moving between phases slides instead of cutting. */
+.steps{position:absolute;top:38px;left:12px;right:12px;z-index:7;background:rgba(255,255,255,.96);border-radius:14px;padding:8px 4px 6px;box-shadow:0 6px 18px rgba(10,20,60,.18);opacity:0;transform:translateY(-12px);transition:opacity .4s,transform .4s;pointer-events:none}
+.steps.on{opacity:1;transform:none}
+.steps ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);position:relative}
+.steps .track{position:absolute;top:11px;left:16.667%;right:16.667%;height:3px;border-radius:2px;background:#e2e5ef;overflow:hidden}
+.steps .fill{display:block;height:100%;width:0;background:#1f4fd1;transition:width .7s cubic-bezier(.4,0,.2,1)}
+.steps li{display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;font-size:10px;font-weight:600;color:#8a91ab}
+.steps .dot{width:22px;height:22px;border-radius:50%;background:#fff;border:2px solid #d5dbec;display:grid;place-items:center;font-size:11px;font-weight:800;color:#8a91ab;transition:all .45s}
+.steps li.done .dot{background:#1f4fd1;border-color:#1f4fd1;color:#fff}
+.steps li.cur{color:#1f4fd1}
+.steps li.cur .dot{background:#1f4fd1;border-color:#1f4fd1;color:#fff;box-shadow:0 0 0 4px rgba(31,79,209,.2);transform:scale(1.12)}
+.m-top.ph{padding-top:104px}
+/* The app's intro: shadow player spikes, the ball flies into the wordmark's "o" and bounces to the other. */
+.intro{position:relative;background:radial-gradient(70% 45% at 50% 30%,#4f7fe8,#2140b8 55%,#0f1d5c);color:#fff;overflow:hidden}
+.intro .sil{position:absolute;width:120px;left:30px;top:150px;fill:#0b1640;opacity:0;filter:blur(2px)}
+.on .intro .sil{animation:rise 1.6s ease-out both}
+.intro .wm{position:relative;z-index:2;font:800 40px var(--display);letter-spacing:-.03em;display:flex;align-items:center}
+.intro .wm b{color:#f2a32c;font-weight:800}
+.intro .wm i{display:inline-block;width:.56em;height:.56em;margin:0 .02em;border-radius:50%;background:radial-gradient(circle at 36% 30%,#fff,#e6ecff 55%,#8ea6e8);opacity:0}
+.on .intro .wm i{animation:fill .35s 1.3s both}.on .intro .wm i.o2{animation-delay:1.85s}
+.intro .wm i.o2{box-shadow:inset -5px -4px 0 rgba(242,163,44,.8)}
+.intro .fly{position:absolute;z-index:3;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 36% 30%,#fff,#e6ecff 55%,#8ea6e8);opacity:0;left:96px;top:160px}
+.on .intro .fly{animation:spike 1.9s .9s both}
+.intro .link-card{opacity:0;color:#141a2e}
+.on .intro .link-card{animation:slide .5s 2.6s both}
+@keyframes rise{0%{opacity:0;transform:translateY(120px)}45%{opacity:.8;transform:translateY(0)}75%{opacity:.8;transform:translateY(-10px)}100%{opacity:0;transform:translateY(160px)}}
+@keyframes spike{0%{opacity:1;transform:none}25%{opacity:1;transform:translate(60px,90px) scale(1.8)}35%{opacity:1;transform:translate(118px,115px)}55%{opacity:1;transform:translate(45px,65px)}65%{opacity:0;transform:translate(14px,115px)}100%{opacity:0}}
+@keyframes fill{from{opacity:0;transform:scale(1.4,.6)}to{opacity:1;transform:none}}
+.flyer{width:78px;aspect-ratio:9/16;border-radius:8px;flex:none;color:#fff;padding:6px;display:flex;flex-direction:column;justify-content:space-between;font-size:8px;font-weight:800;line-height:1.15;box-shadow:0 8px 18px rgba(10,20,60,.3);background:linear-gradient(160deg,#1f4fd1,#0a1a4a)}
+.flyer i{font-style:normal;font-size:7px;opacity:.8;font-weight:600}
+.flyer .tag2{align-self:flex-start;background:#f2a32c;color:#141a2e;border-radius:4px;padding:1px 4px}
+.with-flyer{display:flex;gap:8px;align-items:flex-start}
+.with-flyer>div:first-child{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0}
+.lvl{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:3px}
 @keyframes pop{to{opacity:1;transform:none}}
 @keyframes zoom{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:none}}
 @keyframes slide{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
@@ -123,11 +157,12 @@ code{font-family:var(--mono);font-size:13px}
 
 <div class="wrap">
 <header>
-  <span class="eyebrow">Video promocional · borrador v3 del guion</span>
+  <span class="eyebrow">Video promocional · borrador v5 del guion</span>
   <h1>Tu vóley, organizado.</h1>
   <p class="lede">Un video vertical de unos 60 segundos para Reels, TikTok y estados de WhatsApp. Le habla al organizador que hoy arma la lista a mano. Abajo tienes una vista previa animada, el guion escena por escena, lo que puedes cambiar y el plan de trabajo.</p>
+  <p class="lede"><b>Nuevo en v5:</b> el partido completo en tres fases, Convocatoria → Equipos → Partidos, cada una con su flyer. Arriba de la pantalla aparece una barra de fases que avanza con una animación suave.</p>
   <div class="specs">
-    <span class="chip">1080 × 1920 · 9:16</span><span class="chip">~60 s · 13 escenas</span><span class="chip">Voz: Camila (es-PE), gratis</span><span class="chip">Subtítulos palabra por palabra</span><span class="chip">Música de fondo suave</span>
+    <span class="chip">1080 × 1920 · 9:16</span><span class="chip">~65 s · 14 escenas</span><span class="chip">Voz: Camila (es-PE), gratis</span><span class="chip">Subtítulos palabra por palabra</span><span class="chip">Música de fondo suave</span>
   </div>
 </header>
 
@@ -137,7 +172,7 @@ code{font-family:var(--mono);font-size:13px}
   <p class="note">Es un boceto: las pantallas de aquí son dibujos simples. En el video real van capturas de tu app con datos de demo, con zoom suave y la voz leyendo los subtítulos.</p>
   <div class="preview">
     <div class="stage">
-      <div class="phone"><div class="screen" id="screen"><div class="notch"></div><div class="cap" id="cap"></div></div></div>
+      <div class="phone"><div class="screen" id="screen"><div class="notch"></div><div class="steps" id="steps" aria-hidden="true"><ol><span class="track"><span class="fill" id="fill"></span></span><li><span class="dot">1</span>Convocatoria</li><li><span class="dot">2</span>Equipos</li><li><span class="dot">3</span>Partidos</li></ol></div><div class="cap" id="cap"></div></div></div>
       <div class="controls">
         <button class="btn" id="play" type="button">Pausa</button>
         <div class="bar"><i id="prog"></i></div>
@@ -163,10 +198,10 @@ code{font-family:var(--mono);font-size:13px}
       <li><b>Frase de cierre.</b> «Tu vóley, organizado.» Otras opciones: «Menos chat, más vóley» o «Arma tu pichanga en un link».</li>
       <li><b>Precio en pantalla.</b> Mostrar «30 días gratis» y «S/49 al mes», o solo «Pruébalo gratis».</li>
       <li><b>Link final.</b> ¿Qué dominio sale al cierre? Hoy no lo sé.</li>
-      <li><b>Duración.</b> Una versión de 60 s y otra corta de 25 s (gancho, inscripción, pago, imagen, cierre).</li>
+      <li><b>Duración.</b> Una versión de 60 s y otra corta de 25 s (gancho, inscripción, pago, las tres fases, cierre).</li>
       <li><b>Precio de fundador.</b> En la escena «Da el paso» se puede agregar «precio de fundador congelado para los primeros clubes», si lo vas a mantener.</li>
-      <li><b>Voz.</b> Camila (mujer) o Alex (hombre), las dos con acento peruano.</li>
-      <li><b>Qué se queda fuera.</b> El check-in con QR, la tienda o las finanzas se pueden quitar si quieres un video más corto.</li>
+      <li><b>Voz.</b> Camila (es-PE), con «Convoley» dicho con-VÓ-ley.</li>
+      <li><b>Qué se queda fuera.</b> Los coorganizadores, la tienda o las finanzas se pueden quitar si quieres un video más corto.</li>
     </ul>
   </div>
   <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
@@ -204,19 +239,21 @@ const S=[
   m:`<div class="wa"><div class="bub"><small>Organizador</small>LISTA JUEVES 8PM 🏐<br>1. Diego<br>2. Valeria</div><div class="bub d1"><small>Renzo</small>yo voy +1</div><div class="bub d2"><small>Lucía</small>me anotas porfa</div><div class="bub d3"><small>Kevin</small>¿quién ya pagó?</div><div class="bub me d4">ya somos 19 😩</div></div>`},
  {t:4,d:4,n:"El problema",vo:"Capturas de Yape por todos lados, cupos que se pasan y faltones.",ost:"18 / 16 cupos",vis:"Capturas de Yape que caen y se amontonan. Un contador de cupos se pone en rojo.",tags:["animación"],
   m:`<div class="shot"><div class="vouch zoom" style="left:20px;top:80px;transform:rotate(-8deg)"><b>¡Yapeaste!</b>S/ 15.00<br>a Carlos R.</div><div class="vouch zoom d1" style="left:110px;top:130px"><b>¡Yapeaste!</b>S/ 15.00<br>a Carlos R.</div><div class="vouch zoom d2" style="left:40px;top:230px;transform:rotate(6deg)"><b>¡Yapeaste!</b>S/ 10.00<br>¿a quién?</div><div class="center" style="justify-content:flex-end"><span class="pill bad zoom d3" style="font-size:16px;padding:6px 14px">18 / 16 cupos</span></div></div>`},
- {t:8,d:3,n:"La solución",vo:"Con Convoley, todo eso se ordena con un solo link.",ost:"convoley.pe/c/club-mania",vis:"Las capturas se barren. Aparece el logo y luego el link pegado en el grupo.",tags:["logo","transición"],
-  m:`<div class="center"><div class="logo zoom">convoley<span>.</span></div><div class="m-card slide d2" style="width:90%;text-align:left">🔗 <b>Club Manía</b><br><span style="color:#5b6380">Jueves 8:00 p. m. · inscríbete aquí</span></div></div>`},
+ {t:8,d:4,n:"La solución",vo:"Con Convoley, todo eso se ordena con un solo link.",ost:"Convoley · un solo link",vis:"La animación de entrada de la app, tal cual: sobre el fondo azul sube la sombra del jugador, salta y remata; la pelota sale de su mano, entra en una «o» de «Convoley», rebota a la otra y el logo queda armado, con «voley» en amarillo. Debajo aparece el link pegado en el grupo.",tags:["animación de entrada","logo"],
+  m:`<div class="center intro"><svg class="sil" viewBox="0 0 60 100" aria-hidden="true"><circle cx="34" cy="12" r="7"/><path d="M30 20c-6 4-9 14-8 26l2 22-6 26h8l7-24 6 24h8l-6-28 1-20c4-6 8-16 10-30l-5-2c-2 10-5 17-9 21z"/></svg><span class="fly" aria-hidden="true"></span><div class="wm">C<i></i>nv<i class="o2"></i><b>ley</b></div><div class="m-card link-card" style="width:90%;text-align:left">🔗 <b>Club Manía</b><br><span style="color:#5b6380">Jueves 8:00 p. m. · inscríbete aquí</span></div></div>`},
  {t:11,d:6,n:"Inscripción",vo:"Tus jugadores se anotan en segundos desde su celular.",ost:"En segundos",vis:"Captura real: página de la convocatoria, luego el formulario con nombre y celular, luego la confirmación.",tags:["captura 375 px","jugador"],
   m:`<div class="m-top"><small>Club Manía</small><b>Jueves 8:00 p. m.</b><small>Polideportivo · S/ 15 · Mixto</small></div><div class="m-body"><div class="m-card slide"><div class="m-row"><span>Cupos</span><b>12 / 16</b></div></div><div class="m-card slide d1">Nombre<br><b>Andrea Quispe</b></div><div class="m-card slide d2">Celular<br><b>987 654 321</b></div><div class="m-btn slide d3">Inscribirme</div></div>`},
  {t:17,d:5,n:"Pago",vo:"Pagan con Yape o Plin, o envían su captura, y tú la apruebas con un toque.",ost:"Yape · Plin · captura",vis:"Captura real: el voucher de Yape que subió un jugador y el botón «Aprobar». Aparece un check verde con «Pagado». No prometemos pago automático hasta que esté activo.",tags:["captura 375 px","organizador"],
   m:`<div class="m-top"><small>Vouchers por revisar</small><b>Andrea Quispe · S/ 15</b></div><div class="m-body"><div class="m-card slide" style="display:flex;gap:10px;align-items:center"><div style="width:44px;height:60px;border-radius:6px;background:#742284;color:#fff;font-size:9px;display:grid;place-items:center">Yape</div><span>Subido hace 2 min<br><b>S/ 15.00</b></span></div><div class="m-btn slide d1">Aprobar</div><div class="center zoom d3" style="flex:0;padding:10px"><div style="width:56px;height:56px;border-radius:50%;background:#178a4c;color:#fff;font-size:30px;display:grid;place-items:center">✓</div><b>Pagado</b></div></div>`},
- {t:22,d:5,n:"Lista e imagen",vo:"La lista se actualiza sola y con un toque generas los banners para tus redes sociales.",ost:"Banners para tus redes",vis:"Captura real de la lista con estados. Luego la imagen 9:16 con el logo del club, que crece hasta llenar la pantalla.",tags:["captura 375 px","imagen generada"],
-  m:`<div class="m-top"><small>Inscritos</small><b>16 / 16 · lleno</b></div><div class="m-body"><div class="m-card slide"><div class="m-row">1. Diego Salazar <span class="pill ok">Pagado</span></div></div><div class="m-card slide d1"><div class="m-row">2. Valeria Ríos <span class="pill ok">Pagado</span></div></div><div class="m-card slide d2"><div class="m-row">3. Andrea Quispe <span class="pill ok">Pagado</span></div></div><div class="m-card slide d3"><div class="m-row">17. Renzo Paz <span class="pill wait">En espera</span></div></div><div class="m-btn zoom d4">Generar imagen</div></div>`},
+ {t:0,d:6,phase:0,n:"Fase 1 · Convocatoria",vo:"Y gestionas todo tu partido en tres fases. Primero, la convocatoria: la lista se llena sola y con un toque generas su flyer.",ost:"1 · Convocatoria",vis:"Entra la barra de fases arriba con «Convocatoria» encendida. Debajo, captura real de la lista con estados; a un lado aparece el flyer 9:16 de la convocatoria y crece un poco.",tags:["barra de fases","captura 375 px","flyer"],
+  m:`<div class="m-top ph"><small>Club Manía · Mixto intermedio</small><b>Jueves 8:00 p. m.</b></div><div class="m-body"><div class="with-flyer"><div><div class="m-card slide"><div class="m-row">1. Diego S. <span class="pill ok">Pagado</span></div></div><div class="m-card slide d1"><div class="m-row">2. Valeria R. <span class="pill ok">Pagado</span></div></div><div class="m-card slide d2"><div class="m-row">17. Renzo P. <span class="pill wait">Espera</span></div></div></div><div class="flyer zoom d3"><span class="tag2">JUEVES 8PM</span><span>MIXTO<br>INTERMEDIO<br><i>Polideportivo · S/ 15</i></span><span>¡Quedan 2 cupos!</span></div></div><div class="m-btn zoom d4">Compartir flyer</div></div>`},
+ {t:0,d:5,phase:1,n:"Fase 2 · Equipos",vo:"Después, los equipos: tomas asistencia con QR y los armas parejos por nivel, también con su flyer.",ost:"2 · Equipos",vis:"La barra avanza suave a «Equipos» (el 1 queda con check). Captura real de los equipos armados por nivel y el flyer de equipos para mandarlo al grupo.",tags:["barra de fases","captura 375 px","flyer"],
+  m:`<div class="m-top ph"><small>Asistencia · 16 presentes</small><b>Equipos parejos</b></div><div class="m-body"><div class="with-flyer"><div><div class="m-card slide"><b>Equipo Azul</b><br><span class="lvl" style="background:#178a4c"></span>Diego · <span class="lvl" style="background:#f2a32c"></span>Valeria · Andrea…</div><div class="m-card slide d1"><b>Equipo Naranja</b><br><span class="lvl" style="background:#178a4c"></span>Kevin · <span class="lvl" style="background:#f2a32c"></span>Lucía · Renzo…</div><div class="m-card slide d2"><div class="m-row">Asistencia con QR <span class="pill ok">16 ✓</span></div></div></div><div class="flyer zoom d3" style="background:linear-gradient(160deg,#f2a32c,#c7741a)"><span class="tag2" style="background:#fff">EQUIPOS</span><span>AZUL<br><i>Diego · Valeria</i><br>NARANJA<br><i>Kevin · Lucía</i></span><span>Club Manía</span></div></div><div class="m-btn zoom d4">Compartir equipos</div></div>`},
+ {t:0,d:6,phase:2,n:"Fase 3 · Partidos",vo:"Y en la cancha, los partidos: marcador, tabla y campeón, con su flyer para tus redes.",ost:"3 · Partidos",vis:"La barra llega a «Partidos». Captura real del marcador y la tabla; al final aparece la placa del campeón y el flyer de la jornada.",tags:["barra de fases","captura 375 px","flyer"],
+  m:`<div class="m-top ph"><small>Partidos · Cancha 1</small><b>Azul vs Naranja</b></div><div class="m-body"><div class="with-flyer"><div><div class="m-card zoom" style="text-align:center;font-size:24px;font-weight:800">25 <span style="color:#5b6380">–</span> 21</div><div class="m-card slide d1"><div class="m-row"><span>1. Azul</span><b>6 pts</b></div><div class="m-row"><span>2. Naranja</span><b>3 pts</b></div></div><div class="m-card slide d2" style="background:#fff7e6"><b>🏆 Campeón: Equipo Azul</b></div></div><div class="flyer zoom d3" style="background:linear-gradient(160deg,#141a2e,#1f4fd1)"><span class="tag2">JORNADA</span><span>AZUL 25<br>NARANJA 21<br><i>Tabla y campeón</i></span><span>🏆 Azul</span></div></div><div class="m-btn zoom d4">Compartir jornada</div></div>`},
  {t:0,d:4,n:"Coorganizadores",vo:"Y suma coorganizadores que te ayuden con tu lista.",ost:"Coorganizadores",vis:"Captura real de la pantalla de organizadores con una invitación enviada.",tags:["captura 375 px","organizador"],
   m:`<div class="m-top"><small>Club Manía</small><b>Organizadores</b></div><div class="m-body"><div class="m-card slide"><div class="m-row"><span><b>Carlos Ramírez</b><br>Organizador</span><span class="pill ok">Dueño</span></div></div><div class="m-card slide d1"><div class="m-row"><span><b>Mafer Torres</b><br>Coorganizadora</span><span class="pill ok">Activa</span></div></div><div class="m-card slide d2"><div class="m-row"><span><b>Jorge Lima</b><br>Coorganizador</span><span class="pill wait">Invitado</span></div></div><div class="m-btn zoom d3">Invitar organizador</div></div>`},
- {t:27,d:6,n:"Día de juego",vo:"En la cancha: asistencia con QR, equipos parejos al toque y la tabla de partidos.",ost:"Equipos parejos",vis:"Tres capturas rápidas: asistencia, equipos armados por nivel y la tabla de partidos con marcador.",tags:["capturas 375 px","organizador"],
-  m:`<div class="m-top"><small>Partidos en vivo</small><b>Cancha 1</b></div><div class="m-body"><div class="grid2"><div class="m-card slide"><b>Equipo Azul</b><br>Diego · Valeria · Andrea…</div><div class="m-card slide d1"><b>Equipo Naranja</b><br>Kevin · Lucía · Renzo…</div></div><div class="m-card zoom d2" style="text-align:center;font-size:26px;font-weight:800">25 <span style="color:#5b6380">–</span> 21</div><div class="m-card slide d3"><div class="m-row">Ganador se queda <span class="pill ok">Azul</span></div></div></div>`},
- {t:33,d:5,n:"Control del organizador",vo:"Y tú controlas todo: lo recaudado, la cancha y tu ganancia del mes. Y programa convocatorias para que se publiquen solas.",ost:"Ganancia de noviembre: S/ 1,840",vis:"Captura real del panel de finanzas con barras por semana, y luego la vista de convocatorias recurrentes.",tags:["captura 375 px","finanzas"],
+ {t:33,d:5,n:"Control del organizador",vo:"Y desde tu panel controlas todo: lo recaudado, la cancha y tu ganancia del mes. Y programa convocatorias para que se publiquen solas.",ost:"Ganancia de noviembre: S/ 1,840",vis:"Captura real del panel de finanzas con barras por semana, y luego la vista de convocatorias recurrentes.",tags:["captura 375 px","finanzas"],
   m:`<div class="m-top"><small>Finanzas · noviembre</small><b>S/ 1,840 de ganancia</b></div><div class="m-body"><div class="m-card"><div class="bars"><i style="height:45%"></i><i class="d1" style="height:62%"></i><i class="d2" style="height:58%"></i><i class="d3" style="height:85%"></i></div></div><div class="m-card slide d3"><div class="m-row"><span>Recaudado</span><b>S/ 3,240</b></div><div class="m-row"><span>Canchas</span><b>S/ 1,400</b></div></div></div>`},
  {t:38,d:4,n:"Tienda y planes",vo:"Y muestra todo lo que ofrece tu club, en un solo vistazo.",ost:"Productos y planes de tu club",vis:"Captura real de la tienda en dos columnas (polos, rodilleras, planes), con un producto que se agrega al carrito.",tags:["captura 375 px","tienda"],
   m:`<div class="m-top"><small>Club Manía</small><b>Tienda</b></div><div class="m-body"><div class="grid2"><div class="prod slide"><div style="background:#1f4fd1"></div>Polo oficial<br><b>S/ 45</b></div><div class="prod slide d1"><div style="background:#f2a32c"></div>Rodilleras<br><b>S/ 60</b></div><div class="prod slide d2"><div style="background:#dfe6f7"></div>Plan 4 fechas<br><b>S/ 50</b></div><div class="prod slide d3"><div style="background:#141a2e"></div>Tomatodo<br><b>S/ 25</b></div></div></div>`},
@@ -242,12 +279,17 @@ S.forEach((s,i)=>{
 let now=0,cur=-1,playing=true,last=performance.now();
 const btn=document.getElementById('play');
 btn.onclick=()=>{playing=!playing;btn.textContent=playing?'Pausa':'Reproducir'};
+const steps=document.getElementById('steps'),fill=document.getElementById('fill'),stepLis=steps.querySelectorAll('li');
 function show(i){
   S.forEach((s,j)=>{s.el.classList.toggle('on',j===i);s.btn.classList.toggle('cur',j===i)});
+  // The phase bar stays on across the three phase scenes and only its fill moves.
+  const ph=S[i].phase;steps.classList.toggle('on',ph!==undefined);
+  if(ph!==undefined){fill.style.width=(ph*50)+'%';stepLis.forEach((li,k)=>{li.classList.toggle('done',k<ph);li.classList.toggle('cur',k===ph);li.querySelector('.dot').textContent=k<ph?'✓':k+1})}
   cap.innerHTML=S[i].vo.split(' ').map(w=>`<span class="w">${w}</span>`).join(' ');
 }
 function tick(t){
-  const dt=(t-last)/1000;last=t;
+  // The first frame's timestamp can be earlier than `last`; a negative step would leave no scene.
+  const dt=Math.max(0,(t-last)/1000);last=t;
   if(playing){now+=dt;if(now>=TOTAL)now=0}
   const i=S.findIndex(s=>now>=s.t&&now<s.t+s.d);
   if(i!==cur){cur=i;show(i)}
