@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createEvent } from "@/modules/events";
 import { domainErrorMessage, eventDetailsSchema, NOT_ALLOWED_MESSAGE } from "../event-form-schema";
@@ -33,6 +34,8 @@ export async function createEventAction(
 
   try {
     const { id, sharePath } = await createEvent({ ...details.data, status: intent.data.intent });
+    // The panel's hero counts open events and free spots: refetch it and the list on the way back.
+    revalidatePath(`/admin/${details.data.clubSlug}`, "layout");
     return {
       status: "created",
       sharePath,

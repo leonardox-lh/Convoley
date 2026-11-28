@@ -90,7 +90,7 @@ async function PlansContent({ params, searchParams }: Props) {
         </section>
       )}
       {plans.length > 0 && !signedIn && (
-        <section className="flex flex-col gap-2 rounded-lg border border-zinc-200 p-3 text-sm dark:border-zinc-800">
+        <section className="flex flex-col gap-3 rounded-2xl border bg-card p-4 text-sm shadow-sm">
           <p>
             Para comprar un plan entra con tu cuenta de Google: así solo tú puedes usar tus fechas.
           </p>
@@ -105,34 +105,41 @@ async function PlansContent({ params, searchParams }: Props) {
         </section>
       )}
       {plans.length === 0 && <EmptyTab icon={Ticket}>Este club aún no ofrece planes.</EmptyTab>}
-      <ul className="flex flex-col gap-4">
+      <ul className="flex flex-col gap-2">
         {plans.map((plan) => (
           <li
             key={plan.id}
-            className="flex flex-col gap-2 rounded-lg border border-zinc-200 p-3 dark:border-zinc-800"
+            className="flex flex-col gap-3 rounded-2xl border bg-card p-4 shadow-sm"
           >
-            <div className="flex items-start justify-between gap-2">
-              <p className="font-medium">
-                {plan.name} · {formatSoles(plan.priceCents)}
-              </p>
-              {inReview.has(plan.id) && (
-                <span
-                  className={cn(
-                    "shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold",
-                    REGISTRATION_STATUS_BADGE_CLASSES.in_review,
-                  )}
-                >
-                  En revisión
-                </span>
-              )}
+            <div className="flex items-start gap-3">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-secondary-foreground">
+                <Ticket className="size-5" aria-hidden />
+              </span>
+              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <p className="font-medium">{plan.name}</p>
+                <p className="text-sm text-muted-foreground">{planTermsText(plan)}</p>
+                <p className="text-sm text-muted-foreground">
+                  Vale para:{" "}
+                  {plan.communityIds.flatMap((id) => communityName.get(id) ?? []).join(", ")}
+                </p>
+                {inReview.has(plan.id) && (
+                  <span
+                    className={cn(
+                      "mt-1 w-fit rounded-full px-2.5 py-0.5 text-xs font-semibold",
+                      REGISTRATION_STATUS_BADGE_CLASSES.in_review,
+                    )}
+                  >
+                    En revisión
+                  </span>
+                )}
+              </div>
+              <p className="shrink-0 text-lg font-extrabold">{formatSoles(plan.priceCents)}</p>
             </div>
-            <p className="text-sm text-zinc-500">{planTermsText(plan)}</p>
-            <p className="text-sm text-zinc-500">
-              Vale para: {plan.communityIds.flatMap((id) => communityName.get(id) ?? []).join(", ")}
-            </p>
             {signedIn && !inReview.has(plan.id) && (
-              <details className="text-sm">
-                <summary className="cursor-pointer font-medium">Comprar este plan</summary>
+              <details className="border-t pt-3 text-sm">
+                <summary className="cursor-pointer font-semibold text-primary">
+                  Comprar este plan
+                </summary>
                 <div className="mt-3">
                   <BuyPlanForm clubSlug={slug} planId={plan.id} profile={profile} />
                 </div>

@@ -1,4 +1,4 @@
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, Clock, MapPin } from "lucide-react";
 import type { Metadata } from "next";
 import { EmptyTab } from "./empty-tab";
 import Image from "next/image";
@@ -7,7 +7,7 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { cache, Suspense } from "react";
 import { VolleyballLoader } from "@/components/volleyball";
-import { formatEventTimeInLima } from "@/lib/lima-time";
+import { formatDayInLima, formatTimeRangeInLima } from "@/lib/lima-time";
 import { formatSoles } from "@/lib/money";
 import { clubLogoPath, getClubProfile as readClubProfile } from "@/modules/clubs";
 import { listOpenEvents } from "@/modules/events";
@@ -111,12 +111,19 @@ function EventCard({
         )}
         <span className="flex min-w-0 flex-col">
           <span className="font-semibold leading-tight">{event.title}</span>
-          <span className="text-sm text-zinc-600 first-letter:uppercase dark:text-zinc-400">
-            {formatEventTimeInLima(event)}
+          <span className="text-sm text-muted-foreground first-letter:uppercase">
+            {formatDayInLima(event.startsAt)}
+          </span>
+          <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+            <Clock className="size-3.5 shrink-0" aria-hidden />
+            {formatTimeRangeInLima(event)}
           </span>
         </span>
       </span>
-      <span className="text-sm text-zinc-600 dark:text-zinc-400">{event.venueName}</span>
+      <span className="flex min-w-0 items-center gap-1.5 text-sm text-primary">
+        <MapPin className="size-3.5 shrink-0" aria-hidden />
+        <span className="truncate">{event.venueName}</span>
+      </span>
       <span className="flex items-center justify-between gap-3">
         <span className="text-sm font-semibold">{formatSoles(event.priceCents)}</span>
         <SpotsBadge free={event.remainingSpots} capacity={event.capacity} />

@@ -45,12 +45,12 @@ export function EventFields(props: {
   return (
     <>
       <input type="hidden" name="clubSlug" value={props.clubSlug} />
-      <Field label="Nombre">
+      <Field label="Nombre de la convocatoria">
         <input
           name="title"
           required
           maxLength={80}
-          placeholder="Mixto intermedio"
+          placeholder=" "
           defaultValue={defaults?.title}
           className={floatingFieldClass}
         />

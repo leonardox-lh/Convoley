@@ -1,8 +1,10 @@
+import { Ticket } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { formatInLima } from "@/lib/lima-time";
 import { formatSoles } from "@/lib/money";
+import { cn } from "@/lib/utils";
 import { findClubBySlug } from "@/modules/clubs";
 import { listVouchersInReview, signVoucherPath } from "@/modules/payments";
 import { listPlanPurchases, listPlans } from "@/modules/plans";
@@ -49,30 +51,48 @@ async function PlansContent({ params }: Pick<Props, "params">) {
           Ver planes públicos
         </Link>
       </p>
-      <ul
-        aria-label="Planes"
-        className="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-800"
-      >
+      <ul aria-label="Planes" className="flex flex-col gap-2">
         {plans.map((plan) => (
-          <li key={plan.id} className="flex items-start justify-between gap-3 py-3">
-            <div className="min-w-0">
-              <p className="font-medium">
-                {plan.name} · {formatSoles(plan.priceCents)}
-                {!plan.isActive && <span className="text-sm text-zinc-500"> · no se ofrece</span>}
-              </p>
-              <p className="text-sm text-zinc-500">{planTermsText(plan)}</p>
-              <p className="text-sm text-zinc-500">
-                Vale para:{" "}
-                {plan.communityIds
-                  .map((id) => communityName.get(id) ?? "comunidad eliminada")
-                  .join(", ")}
-              </p>
+          <li
+            key={plan.id}
+            className={cn(
+              "flex flex-col gap-3 rounded-2xl border bg-card p-4 shadow-sm",
+              !plan.isActive && "opacity-70",
+            )}
+          >
+            <div className="flex items-start gap-3">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-secondary-foreground">
+                <Ticket className="size-5" aria-hidden />
+              </span>
+              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <p className="font-medium">
+                  {plan.name}
+                  {!plan.isActive && (
+                    <span className="text-sm font-normal text-muted-foreground">
+                      {" "}
+                      · no se ofrece
+                    </span>
+                  )}
+                </p>
+                <p className="text-sm text-muted-foreground">{planTermsText(plan)}</p>
+                <p className="text-sm text-muted-foreground">
+                  Vale para:{" "}
+                  {plan.communityIds
+                    .map((id) => communityName.get(id) ?? "comunidad eliminada")
+                    .join(", ")}
+                </p>
+              </div>
+              <p className="shrink-0 text-lg font-extrabold">{formatSoles(plan.priceCents)}</p>
             </div>
-            <TogglePlanForm clubSlug={clubSlug} planId={plan.id} isActive={plan.isActive} />
+            <div className="flex justify-end border-t pt-3">
+              <TogglePlanForm clubSlug={clubSlug} planId={plan.id} isActive={plan.isActive} />
+            </div>
           </li>
         ))}
         {plans.length === 0 && (
-          <li className="py-3 text-sm text-zinc-500">Aún no tienes planes.</li>
+          <li className="rounded-2xl border border-dashed p-6 text-center text-sm text-muted-foreground">
+            Aún no tienes planes.
+          </li>
         )}
       </ul>
       <section className="flex flex-col gap-3">
