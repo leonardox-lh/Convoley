@@ -22,7 +22,11 @@ export function EventSteps(props: {
   basePath: string;
   /** Enough teams to play: until then "Partidos" is locked. */
   teamsReady: boolean;
+  /** Why "Partidos" is locked; players read that the organizer hasn't built the teams yet. */
+  lockedHint?: string;
+  className?: string;
 }) {
+  const lockedHint = props.lockedHint ?? "Arma los equipos primero";
   const pathname = usePathname();
   const pathIndex = STEPS.findIndex(({ path }) => pathname === `${props.basePath}${path}`);
   // The step just tapped, so the bar moves before the next page arrives.
@@ -32,7 +36,10 @@ export function EventSteps(props: {
   if (pathIndex === -1) return null;
 
   return (
-    <nav aria-label="Pasos de la convocatoria" className="mx-auto w-full max-w-md px-4 pt-4">
+    <nav
+      aria-label="Pasos de la convocatoria"
+      className={cn("mx-auto w-full max-w-md px-4 pt-4", props.className)}
+    >
       <ol className="relative grid grid-cols-3">
         {/* One track from the first circle to the last; its fill slides to the active step. */}
         <span
@@ -84,11 +91,11 @@ export function EventSteps(props: {
               {locked ? (
                 <span
                   aria-disabled
-                  title="Arma los equipos primero"
+                  title={lockedHint}
                   className={cn(itemClass, "cursor-not-allowed opacity-60")}
                 >
                   {content}
-                  <span className="sr-only">(arma los equipos primero)</span>
+                  <span className="sr-only">({lockedHint})</span>
                 </span>
               ) : (
                 <Link
@@ -104,7 +111,8 @@ export function EventSteps(props: {
           );
         })}
       </ol>
-      {!props.teamsReady && pathIndex === 1 && (
+      {/* Players already read it on the empty teams page below. */}
+      {!props.teamsReady && pathIndex === 1 && !props.lockedHint && (
         <p className="mt-2 text-center text-xs text-muted-foreground">
           Arma los equipos para pasar a los partidos.
         </p>

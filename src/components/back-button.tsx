@@ -40,7 +40,7 @@ export function BackButton({ className }: { className?: string }) {
  * have one mark it with data-has-back, which hides this bar (globals.css). Mounted in the root
  * layout, so it also records whether the player navigated inside the app.
  */
-export function AppBar() {
+export function AppBar({ profile }: { profile?: React.ReactNode }) {
   const pathname = usePathname();
   useEffect(() => {
     firstPath ??= pathname;
@@ -55,6 +55,7 @@ export function AppBar() {
         <Link href="/" aria-label="Convoley, inicio">
           <Logo />
         </Link>
+        <div className="ml-auto pr-2">{profile}</div>
       </div>
     </header>
   );

@@ -8,6 +8,11 @@ import type {
 } from "../domain/event";
 import { toPrismaTx } from "./prisma-transactions";
 
+// Older events may have no end time: then their start counts as the end.
+const endingAfter = (moment: Date) => ({
+  OR: [{ endsAt: { gte: moment } }, { endsAt: null, startsAt: { gte: moment } }],
+});
+
 export class PrismaEventRepository implements EventRepository {
   constructor(private readonly db: PrismaClient) {}
 
@@ -21,10 +26,10 @@ export class PrismaEventRepository implements EventRepository {
 
   async listInClub(
     clubId: string,
-    filter: { statuses: readonly EventStatus[]; from: Date },
+    filter: { statuses: readonly EventStatus[]; endingAfter: Date },
   ): Promise<EventDetails[]> {
     const rows = await this.db.event.findMany({
-      where: { clubId, status: { in: [...filter.statuses] }, startsAt: { gte: filter.from } },
+      where: { clubId, status: { in: [...filter.statuses] }, ...endingAfter(filter.endingAfter) },
       include: EVENT_INCLUDE,
       orderBy: { startsAt: "asc" },
     });
@@ -33,12 +38,12 @@ export class PrismaEventRepository implements EventRepository {
 
   async listUpcoming(filter: {
     statuses: readonly EventStatus[];
-    from: Date;
+    endingAfter: Date;
     limit: number;
     offset: number;
   }): Promise<EventDetails[]> {
     const rows = await this.db.event.findMany({
-      where: { status: { in: [...filter.statuses] }, startsAt: { gte: filter.from } },
+      where: { status: { in: [...filter.statuses] }, ...endingAfter(filter.endingAfter) },
       include: EVENT_INCLUDE,
       // The id breaks ties so pages never repeat or skip events that start at the same time.
       orderBy: [{ startsAt: "asc" }, { id: "asc" }],

@@ -1,4 +1,4 @@
-import { ChevronRight, LayoutGrid } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { connection } from "next/server";
@@ -6,8 +6,8 @@ import { Suspense } from "react";
 import { BackButton } from "@/components/back-button";
 import { Logo } from "@/components/logo";
 import { heroBackground } from "@/components/page-heading";
-import { clubLogoPath, findFirstClubSlugForMember, listAllClubs } from "@/modules/clubs";
-import { currentUserId } from "@/modules/identity";
+import { clubLogoPath, listAllClubs } from "@/modules/clubs";
+import { ProfileButton } from "./profile-button";
 import { InfiniteEventList } from "./convocatorias/infinite-event-list";
 import { UPCOMING_PAGE_SIZE } from "./convocatorias/page-size";
 import { loadUpcomingEventCards } from "./convocatorias/upcoming-event-cards";
@@ -15,7 +15,7 @@ import { EVENT_LIST_CLASS, UpcomingEventCard } from "./upcoming-event-card";
 
 const CLUB_LOGO_PX = 80;
 
-/** The site's top bar: the logo and, for club members, "Mi club". Inner pages get a back arrow. */
+/** The site's top bar: the logo, "Mi club" for club members and the profile icon. Inner pages get a back arrow. */
 export function SiteHeader({ back = false }: { back?: boolean }) {
   return (
     <header
@@ -31,27 +31,10 @@ export function SiteHeader({ back = false }: { back?: boolean }) {
           </Link>
         </div>
         <Suspense>
-          <MyClubLink />
+          <ProfileButton />
         </Suspense>
       </div>
     </header>
-  );
-}
-
-/** Shown only to members of a club (admin or organizer): straight to its panel. */
-async function MyClubLink() {
-  const userId = await currentUserId();
-  const clubSlug = userId ? await findFirstClubSlugForMember(userId) : null;
-  if (!clubSlug) return null;
-  return (
-    <Link
-      href={`/admin/${clubSlug}`}
-      data-header-pill
-      className="flex items-center gap-1.5 rounded-full bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/85"
-    >
-      <LayoutGrid className="size-4" aria-hidden />
-      Mi club
-    </Link>
   );
 }
 

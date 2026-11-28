@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {
+  ClubAlreadyOwnedError,
   ClubNotFoundError,
   ClubSlugTakenError,
   InvalidClubSlugError,
@@ -85,6 +86,7 @@ const DOMAIN_ERROR_MESSAGES: [new (...args: never[]) => Error, string][] = [
   ],
   [LogoTooLargeError, "El logo debe pesar hasta 2 MB."],
   [InvalidLogoTypeError, "El logo debe ser una imagen JPG, PNG o WEBP."],
+  [ClubAlreadyOwnedError, "Ya tienes un club. Cada cuenta puede crear solo uno."],
   [ClubNotFoundError, "No encontramos el club."],
 ];
 

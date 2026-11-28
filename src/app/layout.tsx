@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
 import { AppBar } from "@/components/back-button";
 import { IntroSplash } from "@/components/intro-splash";
+import { ProfileButton } from "./profile-button";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -36,7 +37,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="min-h-full flex flex-col">
         <Suspense>
-          <AppBar />
+          <AppBar
+            profile={
+              <Suspense>
+                <ProfileButton />
+              </Suspense>
+            }
+          />
         </Suspense>
         {children}
         <IntroSplash />

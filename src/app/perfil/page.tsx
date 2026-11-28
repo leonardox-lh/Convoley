@@ -4,9 +4,10 @@ import { PageHeading } from "@/components/page-heading";
 import { VolleyballLoader } from "@/components/volleyball";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { currentUserId, getPlayerProfile, SIGN_IN_PATH } from "@/modules/identity";
+import { currentUserId, getPlayerProfile, SIGN_IN_PATH, signOut } from "@/modules/identity";
 import { RETURN_PATH_PARAM } from "../ingresar/sign-in-with-password";
 import { ProfileForm } from "./profile-form";
+import { SignOutButton } from "./sign-out-button";
 
 export const metadata: Metadata = { title: "Mi perfil · Convoley" };
 
@@ -32,5 +33,15 @@ async function Profile() {
   }
   const profile = await getPlayerProfile(userId);
   if (!profile) redirect(SIGN_IN_PATH);
-  return <ProfileForm profile={profile} />;
+  return (
+    <>
+      <ProfileForm profile={profile} />
+      <SignOutButton
+        signOutAction={async () => {
+          "use server";
+          await signOut({ redirectTo: "/" });
+        }}
+      />
+    </>
+  );
 }

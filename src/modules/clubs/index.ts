@@ -31,6 +31,7 @@ import { s3LogoStorage } from "./infrastructure/s3-logo-storage";
 
 export { ClubSlug } from "./domain/club-slug";
 export {
+  ClubAlreadyOwnedError,
   ClubNotFoundError,
   ClubSlugTakenError,
   CommunityInUseError,

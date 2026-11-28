@@ -7,6 +7,7 @@ import { heroBackground } from "@/components/page-heading";
 import { cn } from "@/lib/utils";
 import { clubLogoPath, getClubProfile } from "@/modules/clubs";
 import { listOpenEvents } from "@/modules/events";
+import { ProfileButton } from "../../profile-button";
 import { HERO_TILE_CLASS, PanelHero } from "./panel-hero";
 import { PanelHeroBody } from "./panel-hero-body";
 import { requireOrganizer } from "./require-organizer";
@@ -29,9 +30,14 @@ export default function ClubAdminLayout({ children, params }: LayoutProps<"/admi
               <Logo />
             </Link>
           </div>
-          <Suspense>
-            <PanelLink params={params} />
-          </Suspense>
+          <div className="flex items-center gap-2">
+            <Suspense>
+              <PanelLink params={params} />
+            </Suspense>
+            <Suspense>
+              <ProfileButton myClub={false} />
+            </Suspense>
+          </div>
         </div>
       </header>
       <div className="admin-shell contents">

@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { listEventTeams, MIN_TEAMS_TO_PLAY } from "@/modules/registrations";
 import { requireOrganizer } from "../../require-organizer";
-import { EventSteps } from "./event-steps";
+import { EventSteps } from "../../../../event-steps";
 
 type Props = LayoutProps<"/admin/[club]/convocatorias/[event]">;
 

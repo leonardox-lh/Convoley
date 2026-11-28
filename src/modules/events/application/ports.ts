@@ -36,15 +36,15 @@ export interface TransactionRunner {
 export interface EventRepository {
   create(event: NewEvent): Promise<{ id: string }>;
   findInClub(clubId: string, eventId: string): Promise<EventDetails | null>;
-  /** Events of the club in these statuses starting at or after `from`, soonest first. */
+  /** Events of the club in these statuses ending (or, with no end, starting) at or after `endingAfter`, soonest first. */
   listInClub(
     clubId: string,
-    filter: { statuses: readonly EventStatus[]; from: Date },
+    filter: { statuses: readonly EventStatus[]; endingAfter: Date },
   ): Promise<EventDetails[]>;
-  /** Events of any club in these statuses starting at or after `from`, soonest first; `offset` skips the first ones (paging). */
+  /** Like listInClub but for every club; `offset` skips the first ones (paging). */
   listUpcoming(filter: {
     statuses: readonly EventStatus[];
-    from: Date;
+    endingAfter: Date;
     limit: number;
     offset: number;
   }): Promise<EventDetails[]>;

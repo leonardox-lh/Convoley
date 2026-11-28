@@ -1,4 +1,9 @@
-import { ClubSlugTakenError, CommunityInUseError, CommunityNameTakenError } from "../domain/errors";
+import {
+  ClubAlreadyOwnedError,
+  ClubSlugTakenError,
+  CommunityInUseError,
+  CommunityNameTakenError,
+} from "../domain/errors";
 import type { ClubProfileProps } from "../domain/club-profile";
 import type { LogoContentType } from "../domain/logo";
 import type { ClubProfile, ClubRepository, CommunityRepository, LogoStorage } from "./ports";
@@ -21,9 +26,13 @@ export function fakeClubRepository(existing: ClubProfile[] = []) {
   const admins = new Map<string, string>();
   const repository: ClubRepository = {
     async createWithAdmin({ slug, profile, logoKey, adminUserId }) {
+      if ([...admins.values()].includes(adminUserId)) throw new ClubAlreadyOwnedError(adminUserId);
       if (clubs.has(slug)) throw new ClubSlugTakenError(slug);
       clubs.set(slug, { slug, logoKey, ...profile });
       admins.set(slug, adminUserId);
+    },
+    async ownsClub(userId) {
+      return [...admins.values()].includes(userId);
     },
     async findProfile(slug) {
       return clubs.get(slug) ?? null;

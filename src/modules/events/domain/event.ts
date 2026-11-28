@@ -26,6 +26,12 @@ const SHARED_HOSTS = ["google.com", "www.google.com", "goo.gl"];
 /** Statuses shown on the club's public page: players can still sign up or see it is full. */
 export const LISTED_STATUSES: readonly EventStatus[] = ["published", "full"];
 
+/** An event stays listed this long after it ends, so players follow the teams and scores. */
+export const LISTED_AFTER_END_MS = 60 * 60 * 1000;
+
+/** Listed events are those ending (or starting, when they have no end) at or after this moment. */
+export const listedEndingAfter = (now: Date) => new Date(now.getTime() - LISTED_AFTER_END_MS);
+
 /** Statuses whose details the organizer can still change. */
 const EDITABLE_STATUSES: readonly EventStatus[] = ["draft", "published", "full"];
 

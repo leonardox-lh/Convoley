@@ -8,6 +8,7 @@ import { Logo } from "@/components/logo";
 import { VolleyballIcon } from "@/components/volleyball";
 import { heroBackground } from "@/components/page-heading";
 import { clubLogoPath, getClubProfile } from "@/modules/clubs";
+import { ProfileButton } from "../profile-button";
 import { ClubDescription } from "./club-description";
 import { ClubTabs } from "./club-tabs";
 
@@ -18,11 +19,16 @@ export default function PublicClubLayout({ children, params }: LayoutProps<"/[cl
   return (
     <div className="flex flex-1 flex-col">
       <header data-site-header data-has-back className="border-b bg-background/85 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-md items-center gap-1 px-2 py-3">
+        <div className="mx-auto flex w-full max-w-md items-center gap-1 py-3 pr-4 pl-2">
           <BackButton />
           <Link href="/" aria-label="Convoley, inicio">
             <Logo />
           </Link>
+          <div className="ml-auto">
+            <Suspense>
+              <ProfileButton />
+            </Suspense>
+          </div>
         </div>
       </header>
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 py-6">

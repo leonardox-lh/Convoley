@@ -186,6 +186,8 @@ model VerificationToken {
 model Club {
   id                        String   @id @default(cuid())
   slug                      String   @unique
+  // The user who created it; unique so nobody owns two clubs. Null for clubs whose creator left.
+  ownerUserId               String?  @unique
   name                      String
   description               String?
   logoKey                   String?

@@ -9,13 +9,17 @@ export interface ClubProfile extends ClubProfileProps {
 }
 
 export interface ClubRepository {
-  /** Creates the club with the user as admin and a "General" community. Throws ClubSlugTakenError. */
+  /**
+   * Creates the club with the user as owner and admin and a "General" community.
+   * Throws ClubSlugTakenError, or ClubAlreadyOwnedError if the user already owns one (also under races).
+   */
   createWithAdmin(input: {
     slug: string;
     profile: ClubProfileProps;
     logoKey: string | null;
     adminUserId: string;
   }): Promise<void>;
+  ownsClub(userId: string): Promise<boolean>;
   findProfile(slug: string): Promise<ClubProfile | null>;
   updateProfile(
     slug: string,

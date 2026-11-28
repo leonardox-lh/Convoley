@@ -3,7 +3,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { config } from "dotenv";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { PrismaClient } from "@/generated/prisma/client";
-import { LISTED_STATUSES } from "@/modules/events/domain/event";
+import { LISTED_STATUSES, listedEndingAfter } from "@/modules/events/domain/event";
 import { PrismaEventRepository } from "@/modules/events/infrastructure/prisma-event-repository";
 
 config({ path: ".env.local", quiet: true });
@@ -60,13 +60,19 @@ afterAll(async () => {
 
 type EventStatus = "draft" | "published" | "full" | "closed" | "cancelled";
 
-function createEvent(title: string, startsAt: string, status: EventStatus = "published") {
+function createEvent(
+  title: string,
+  startsAt: string,
+  status: EventStatus = "published",
+  endsAt?: string,
+) {
   return db.event.create({
     data: {
       clubId,
       communityId,
       title,
       startsAt: new Date(startsAt),
+      endsAt: endsAt ? new Date(endsAt) : null,
       venueName: "Coliseo",
       priceCents: 1500,
       capacity: 18,
@@ -103,10 +109,41 @@ describe("HU-03: PrismaEventRepository.listInClub (Postgres)", () => {
 
     const listed = await new PrismaEventRepository(db).listInClub(clubId, {
       statuses: LISTED_STATUSES,
-      from: NOW,
+      endingAfter: listedEndingAfter(NOW),
     });
 
     expect(listed.map((e) => e.title)).toEqual(["temprana", "llena", "tarde"]);
+  });
+
+  it("sigue mostrando la convocatoria hasta 1 hora después de que termina", async () => {
+    // NOW is 12:00. Each one is checked against the others already created, so filter by title.
+    await createEvent("en juego", "2030-12-01T11:00:00Z", "full", "2030-12-01T13:00:00Z");
+    await createEvent(
+      "terminó hace 30 min",
+      "2030-12-01T09:30:00Z",
+      "published",
+      "2030-12-01T11:30:00Z",
+    );
+    await createEvent(
+      "terminó hace 2 horas",
+      "2030-12-01T08:00:00Z",
+      "published",
+      "2030-12-01T10:00:00Z",
+    );
+    await createEvent("sin fin, empezó hace 30 min", "2030-12-01T11:30:00Z");
+    await createEvent("sin fin, empezó hace 2 horas", "2030-12-01T10:00:00Z");
+
+    const listed = await new PrismaEventRepository(db).listInClub(clubId, {
+      statuses: LISTED_STATUSES,
+      endingAfter: listedEndingAfter(NOW),
+    });
+    const titles = listed.map((e) => e.title);
+
+    expect(titles).toContain("en juego");
+    expect(titles).toContain("terminó hace 30 min");
+    expect(titles).toContain("sin fin, empezó hace 30 min");
+    expect(titles).not.toContain("terminó hace 2 horas");
+    expect(titles).not.toContain("sin fin, empezó hace 2 horas");
   });
 
   it("HU-03: no mezcla convocatorias de otro club", async () => {
@@ -133,7 +170,7 @@ describe("HU-03: PrismaEventRepository.listInClub (Postgres)", () => {
       });
       const listed = await new PrismaEventRepository(db).listInClub(clubId, {
         statuses: LISTED_STATUSES,
-        from: NOW,
+        endingAfter: listedEndingAfter(NOW),
       });
       expect(listed.map((e) => e.title)).not.toContain("ajena");
     } finally {

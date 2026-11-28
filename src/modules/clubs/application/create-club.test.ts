@@ -1,5 +1,10 @@
 import { describe, expect, test } from "vitest";
-import { ClubSlugTakenError, InvalidColorError, LogoTooLargeError } from "../domain/errors";
+import {
+  ClubAlreadyOwnedError,
+  ClubSlugTakenError,
+  InvalidColorError,
+  LogoTooLargeError,
+} from "../domain/errors";
 import { MAX_LOGO_BYTES } from "../domain/logo";
 import { makeCreateClub } from "./create-club";
 import { fakeClubRepository, fakeLogoStorage, profileProps } from "./fakes";
@@ -79,5 +84,40 @@ describe("HU-02: createClub", () => {
       }),
     ).rejects.toThrow(InvalidColorError);
     expect(repo.clubs.size).toBe(0);
+  });
+
+  test("un usuario no puede crear un segundo club", async () => {
+    const { createClub, repo } = setup();
+    await createClub({ adminUserId: "u1", slug: "club-uno", profile: profileProps(), logo: null });
+    await expect(
+      createClub({ adminUserId: "u1", slug: "club-dos", profile: profileProps(), logo: null }),
+    ).rejects.toThrow(ClubAlreadyOwnedError);
+    expect(repo.clubs.has("club-dos")).toBe(false);
+  });
+
+  test("el segundo club se rechaza antes de subir su logo", async () => {
+    const { createClub, logos } = setup();
+    await createClub({ adminUserId: "u1", slug: "club-uno", profile: profileProps(), logo: null });
+    await expect(
+      createClub({ adminUserId: "u1", slug: "club-dos", profile: profileProps(), logo: png }),
+    ).rejects.toThrow(ClubAlreadyOwnedError);
+    expect(logos.saved.size).toBe(0);
+  });
+
+  test("dos pedidos a la vez del mismo usuario crean un solo club", async () => {
+    const { createClub, repo } = setup();
+    const results = await Promise.allSettled([
+      createClub({ adminUserId: "u1", slug: "club-uno", profile: profileProps(), logo: null }),
+      createClub({ adminUserId: "u1", slug: "club-dos", profile: profileProps(), logo: null }),
+    ]);
+    expect(results.filter((result) => result.status === "fulfilled")).toHaveLength(1);
+    expect(repo.clubs.size).toBe(1);
+  });
+
+  test("otro usuario sí puede crear su propio club", async () => {
+    const { createClub, repo } = setup();
+    await createClub({ adminUserId: "u1", slug: "club-uno", profile: profileProps(), logo: null });
+    await createClub({ adminUserId: "u2", slug: "club-dos", profile: profileProps(), logo: null });
+    expect(repo.clubs.size).toBe(2);
   });
 });

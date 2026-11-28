@@ -1,11 +1,14 @@
 import { Prisma, type PrismaClient } from "@/generated/prisma/client";
 import type { ClubRepository } from "../application/ports";
 import { defaultLevelRows } from "../domain/community";
-import { ClubSlugTakenError } from "../domain/errors";
+import { ClubAlreadyOwnedError, ClubSlugTakenError } from "../domain/errors";
 
 const UNIQUE_VIOLATION = "P2002";
 
 export function prismaClubRepository(db: PrismaClient): ClubRepository {
+  const ownsClub = async (userId: string) =>
+    (await db.club.count({ where: { ownerUserId: userId } })) > 0;
+
   return {
     async createWithAdmin({ slug, profile, logoKey, adminUserId }) {
       try {
@@ -13,6 +16,7 @@ export function prismaClubRepository(db: PrismaClient): ClubRepository {
         await db.club.create({
           data: {
             slug,
+            ownerUserId: adminUserId,
             logoKey,
             ...profile,
             members: { create: { userId: adminUserId, role: "admin" } },
@@ -20,12 +24,16 @@ export function prismaClubRepository(db: PrismaClient): ClubRepository {
           },
         });
       } catch (error) {
-        const isSlugTaken =
+        const isUniqueViolation =
           error instanceof Prisma.PrismaClientKnownRequestError && error.code === UNIQUE_VIOLATION;
-        if (isSlugTaken) throw new ClubSlugTakenError(slug);
-        throw error;
+        if (!isUniqueViolation) throw error;
+        // Two unique columns: the owner one wins when this user's other club got there first.
+        if (await ownsClub(adminUserId)) throw new ClubAlreadyOwnedError(adminUserId);
+        throw new ClubSlugTakenError(slug);
       }
     },
+
+    ownsClub,
 
     async findProfile(slug) {
       return db.club.findUnique({

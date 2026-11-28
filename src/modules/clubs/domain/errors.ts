@@ -19,6 +19,14 @@ export class ClubSlugTakenError extends Error {
   }
 }
 
+/** A user owns at most one club: the one they created. */
+export class ClubAlreadyOwnedError extends Error {
+  constructor(readonly userId: string) {
+    super(`User "${userId}" already owns a club`);
+    this.name = "ClubAlreadyOwnedError";
+  }
+}
+
 export class ClubNotFoundError extends Error {
   constructor(readonly slug: string) {
     super(`Club "${slug}" not found`);

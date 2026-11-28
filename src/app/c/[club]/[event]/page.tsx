@@ -1,14 +1,10 @@
-import { PageHeadingLoading } from "@/components/page-heading";
 import type { Metadata } from "next";
 import { GenderIcon } from "@/components/gender-icon";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Info } from "lucide-react";
-import { AutoRefresh } from "@/components/auto-refresh";
-import { CopyButton } from "@/components/copy-button";
+import { VolleyballLoader } from "@/components/volleyball";
 
-import { appUrl } from "@/lib/app-url";
-import { clubLogoPath, getClubProfile } from "@/modules/clubs";
 import { type CancellationOutcome, type EventStatus } from "@/modules/events";
 import { currentUserId, getPlayerProfile, isGoogleSignInEnabled } from "@/modules/identity";
 import {
@@ -20,12 +16,10 @@ import {
   listEventRegistrations,
   listPlayerRegistrations,
 } from "@/modules/registrations";
-import { loadEventPreview, seatsText, shareDescription } from "./event-preview";
+import { loadEventPreview, shareDescription } from "./event-preview";
 import { loadPaymentInfo } from "../../../payment-info";
 import { MyRegistration } from "./my-registration";
 import { RegistrationForm } from "./registration-form";
-import { SpotsBadge } from "../../../spots-badge";
-import { EventHero } from "../../../event-hero";
 import { PlayerDetailsTrigger, type PlayerDetails } from "../../../player-details";
 import { CANCELLED_MESSAGES, isCancellationResult } from "./cancellation-messages";
 import { CancelledToast } from "./cancelled-toast";
@@ -57,10 +51,8 @@ export async function generateMetadata({
 
 export default function PublicEventPage({ params, searchParams }: PageProps<"/c/[club]/[event]">) {
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-4 pb-10">
-      {/* Other players' sign-ups and payments show up without reloading. */}
-      <AutoRefresh />
-      <Suspense fallback={<PageHeadingLoading />}>
+    <main className="flex flex-col gap-5">
+      <Suspense fallback={<VolleyballLoader />}>
         <PublicEventContent params={params} />
         <CancelledNotice searchParams={searchParams} />
       </Suspense>
@@ -85,11 +77,7 @@ async function CancelledNotice({
 
 async function PublicEventContent({ params }: { params: Params }) {
   const { club, event: eventId } = await params;
-  const [event, clubProfile, origin] = await Promise.all([
-    loadEventPreview(club, eventId),
-    getClubProfile(club),
-    appUrl(),
-  ]);
+  const event = await loadEventPreview(club, eventId);
   if (!event) notFound();
   const now = new Date();
   const waitlistOnly = acceptsWaitlist(event, now);
@@ -111,7 +99,6 @@ async function PublicEventContent({ params }: { params: Params }) {
         gender: profile.gender ?? lastSignUp?.gender ?? null,
       }
     : lastSignUp;
-  const seatsAreOpen = event.status === "published" || event.status === "full";
   const notice = STATUS_NOTICES[event.status];
   const cancellationNote =
     event.status === "cancelled" && event.cancellationOutcome
@@ -120,34 +107,6 @@ async function PublicEventContent({ params }: { params: Params }) {
 
   return (
     <>
-      <EventHero
-        clubHref={`/${club}`}
-        clubSuffix="Convocatoria"
-        action={
-          <CopyButton
-            text={`${origin}/c/${club}/${event.id}`}
-            label="Link convocatoria"
-            showLabel
-            className="border-white/30 bg-white/15 text-white hover:bg-white/25 hover:text-white"
-          />
-        }
-        event={{
-          ...event,
-          logoSrc: clubProfile?.logoKey ? clubLogoPath(clubProfile.logoKey) : null,
-          primaryColor: clubProfile?.primaryColor ?? null,
-          secondaryColor: clubProfile?.secondaryColor ?? null,
-          taken: event.capacity - event.freeSeats,
-        }}
-        showSeatsBar={seatsAreOpen}
-        seats={
-          seatsAreOpen ? (
-            <SpotsBadge free={event.freeSeats} capacity={event.capacity} className="mt-1.5" />
-          ) : (
-            <span className="mt-1 text-sm font-medium">{seatsText(event)}</span>
-          )
-        }
-      />
-
       {notice && (
         <div
           role="status"

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { LISTED_STATUSES } from "../domain/event";
+import { LISTED_AFTER_END_MS, LISTED_STATUSES } from "../domain/event";
 import { CLUB, eventDetails, fakeEventRepository } from "./fakes";
 import { makeListOpenEvents, makeListUpcomingEvents } from "./list-open-events";
 
@@ -30,7 +30,10 @@ describe("HU-03: listar convocatorias abiertas del club", () => {
   it("HU-03: pide al repositorio solo published y full desde ahora", async () => {
     const { listOpenEvents, listInClub } = build();
     await listOpenEvents(CLUB.slug);
-    expect(listInClub).toHaveBeenCalledWith(CLUB.id, { statuses: LISTED_STATUSES, from: NOW });
+    expect(listInClub).toHaveBeenCalledWith(CLUB.id, {
+      statuses: LISTED_STATUSES,
+      endingAfter: new Date(NOW.getTime() - LISTED_AFTER_END_MS),
+    });
     expect(LISTED_STATUSES).toEqual(["published", "full"]);
   });
 
@@ -81,7 +84,7 @@ describe("HU-03: listar convocatorias abiertas del club", () => {
 });
 
 describe("inicio: próximas convocatorias de todos los clubes", () => {
-  it("pide published y full desde ahora con límite, y calcula los cupos", async () => {
+  it("pide published y full hasta 1 hora después de que terminan, con límite, y calcula los cupos", async () => {
     const listUpcoming = vi.fn(async () => [eventDetails({ id: "a", capacity: 12 })]);
     const listUpcomingEvents = makeListUpcomingEvents({
       events: fakeEventRepository({ listUpcoming }),
@@ -91,7 +94,7 @@ describe("inicio: próximas convocatorias de todos los clubes", () => {
     const [event] = await listUpcomingEvents(6);
     expect(listUpcoming).toHaveBeenCalledWith({
       statuses: LISTED_STATUSES,
-      from: NOW,
+      endingAfter: new Date(NOW.getTime() - LISTED_AFTER_END_MS),
       limit: 6,
       offset: 0,
     });
