@@ -175,23 +175,7 @@ select.peer {
   }
   body:has([data-club-hero]:not([style*="display: none"], [style*="display: none"] *))
     [data-header-pill] {
-    /* Solid white so "Mi club" stands apart from the see-through quick tabs below it. */
     @apply bg-white font-semibold text-primary shadow-md;
-  }
-  body:has([data-club-hero]:not([style*="display: none"], [style*="display: none"] *))
-    [data-admin-tabs]
-    a {
-    @apply bg-white/15 text-white;
-  }
-  body:has([data-club-hero]:not([style*="display: none"], [style*="display: none"] *))
-    [data-admin-tabs]
-    a[data-active] {
-    @apply bg-white/35 text-white ring-1 ring-white/70;
-  }
-  /* The quick tabs make the see-through header taller; keep the hero's content below them. */
-  body:has([data-admin-tabs]:not([style*="display: none"], [style*="display: none"] *))
-    [data-club-hero]:not([style*="display: none"], [style*="display: none"] *) {
-    @apply pt-28;
   }
 }
 

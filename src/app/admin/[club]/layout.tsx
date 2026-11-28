@@ -3,9 +3,6 @@ import Link from "next/link";
 import { BackButton } from "@/components/back-button";
 import { Suspense } from "react";
 import { Logo } from "@/components/logo";
-import { can } from "@/modules/clubs";
-import { AdminTabs } from "./admin-tabs";
-import { requireOrganizer } from "./require-organizer";
 
 /** Header shared by every admin page: home on the left, back to the club panel on the right. */
 export default function ClubAdminLayout({ children, params }: LayoutProps<"/admin/[club]">) {
@@ -27,21 +24,10 @@ export default function ClubAdminLayout({ children, params }: LayoutProps<"/admi
             <PanelLink params={params} />
           </Suspense>
         </div>
-        <Suspense>
-          <AdminTabsFor params={params} />
-        </Suspense>
       </header>
       <div className="admin-shell contents">{children}</div>
     </>
   );
-}
-
-/** Only members who manage the club get the tabs: helpers can't open those pages. */
-async function AdminTabsFor({ params }: Pick<LayoutProps<"/admin/[club]">, "params">) {
-  const clubSlug = (await params).club;
-  const organizer = await requireOrganizer(clubSlug, "run_game_day");
-  if (!organizer || !can(organizer.role, "manage_club")) return null;
-  return <AdminTabs clubSlug={clubSlug} />;
 }
 
 async function PanelLink({ params }: Pick<LayoutProps<"/admin/[club]">, "params">) {
