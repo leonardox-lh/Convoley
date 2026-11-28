@@ -27,7 +27,11 @@ export function orderTotalCents(items: { quantity: number; unitPriceCents: numbe
   return items.reduce((total, item) => total + item.quantity * item.unitPriceCents, 0);
 }
 
-/** Whether every line can be served with the current stock (by variant id). */
-export function inStock(lines: CartLine[], stock: Map<string, number>): boolean {
-  return lines.every((line) => (stock.get(line.variantId) ?? 0) >= line.quantity);
+/** Whether every line can be served with the current stock (by variant id; null = not tracked). */
+export function inStock(lines: CartLine[], stock: Map<string, number | null>): boolean {
+  return lines.every((line) => {
+    if (!stock.has(line.variantId)) return false;
+    const available = stock.get(line.variantId);
+    return available === null || available! >= line.quantity;
+  });
 }

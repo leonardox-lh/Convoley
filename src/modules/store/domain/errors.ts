@@ -1,5 +1,12 @@
 export type InvalidProductReason =
-  "name" | "price" | "no_variants" | "mixed_sizes" | "size" | "duplicate_size" | "stock";
+  | "name"
+  | "price"
+  | "no_variants"
+  | "mixed_sizes"
+  | "size"
+  | "duplicate_size"
+  | "stock"
+  | "stock_note";
 
 export class InvalidProductError extends Error {
   constructor(readonly reason: InvalidProductReason) {

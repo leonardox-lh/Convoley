@@ -54,15 +54,16 @@ export function prismaOrderRepository(db: PrismaClient): OrderRepository {
 
     async lockStock(variantIds, tx) {
       // Always in id order: two orders sharing sizes lock them the same way and never deadlock.
-      const rows = await toPrismaTx(tx).$queryRaw<{ id: string; stock: number }[]>`
+      const rows = await toPrismaTx(tx).$queryRaw<{ id: string; stock: number | null }[]>`
         SELECT id, stock FROM "ProductVariant" WHERE id = ANY(${variantIds}) ORDER BY id FOR UPDATE`;
       return new Map(rows.map((row) => [row.id, row.stock]));
     },
 
     async takeStock(items, tx) {
       for (const item of items) {
-        await toPrismaTx(tx).productVariant.update({
-          where: { id: item.variantId },
+        // Untracked stock (null) is left as it is.
+        await toPrismaTx(tx).productVariant.updateMany({
+          where: { id: item.variantId, stock: { not: null } },
           data: { stock: { decrement: item.quantity } },
         });
       }

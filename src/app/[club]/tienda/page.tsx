@@ -56,6 +56,7 @@ async function StoreContent({ params }: Pick<Props, "params">) {
             priceCents: product.priceCents,
             photoUrls: product.imageKeys.map(clubLogoPath),
             variants: product.variants,
+            stockNote: product.stockNote,
           }))}
         />
       )}

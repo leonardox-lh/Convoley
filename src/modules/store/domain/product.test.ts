@@ -10,6 +10,7 @@ const product = (overrides: Partial<ProductInput> = {}): ProductInput => ({
     { size: "s", stock: 3 },
     { size: "M", stock: 0 },
   ],
+  stockNote: null,
   ...overrides,
 });
 
@@ -65,5 +66,13 @@ describe("HU-23: reglas del producto", () => {
     expect(reason(product({ priceCents: 0 }))).toBe("price");
     expect(reason(product({ priceCents: 10.5 }))).toBe("price");
     expect(reason(product({ name: "  " }))).toBe("name");
+  });
+  test("stock sin controlar: vacío (null) o con una nota corta", () => {
+    expect(
+      validateProduct(
+        product({ variants: [{ size: null, stock: null }], stockNote: "  A pedido " }),
+      ),
+    ).toMatchObject({ variants: [{ size: null, stock: null }], stockNote: "A pedido" });
+    expect(reason(product({ stockNote: "x".repeat(41) }))).toBe("stock_note");
   });
 });

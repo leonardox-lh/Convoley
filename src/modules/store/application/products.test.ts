@@ -23,6 +23,7 @@ describe("HU-23: publicar productos", () => {
           { size: "S", stock: 2 },
           { size: "M", stock: 5 },
         ],
+        stockNote: null,
       },
     });
     expect(rows[0]).toMatchObject({
@@ -59,6 +60,7 @@ describe("HU-23: publicar productos", () => {
         description: null,
         priceCents: 5000,
         variants: [{ size: "S", stock: 4 }],
+        stockNote: null,
       },
       loadedVariants: [],
     });
@@ -71,12 +73,18 @@ describe("HU-23: publicar productos", () => {
   test("editar el precio no pisa el stock vendido mientras el formulario estaba abierto", async () => {
     const { products, rows } = fakeProductRepository([storedProduct()]);
     const loadedVariants = rows[0]!.variants.map(({ size, stock }) => ({ size, stock }));
-    rows[0]!.variants[0]!.stock -= 2; // a paid order took 2 units meanwhile
+    rows[0]!.variants[0]!.stock = 1; // a paid order took 2 of the 3 units meanwhile
     const soldDown = rows[0]!.variants[0]!.stock;
     await makeUpdateProduct({ products })({
       clubId: "club-1",
       productId: "prod-1",
-      product: { name: "Polo", description: null, priceCents: 6000, variants: loadedVariants },
+      product: {
+        name: "Polo",
+        description: null,
+        priceCents: 6000,
+        variants: loadedVariants,
+        stockNote: null,
+      },
       loadedVariants,
     });
     expect(rows[0]!.priceCents).toBe(6000);

@@ -12,7 +12,7 @@ export interface TransactionRunner {
 export interface StoredVariant {
   id: string;
   size: string | null;
-  stock: number;
+  stock: number | null;
 }
 
 export interface StoredProduct {
@@ -24,6 +24,7 @@ export interface StoredProduct {
   imageKeys: string[];
   isActive: boolean;
   variants: StoredVariant[];
+  stockNote: string | null;
 }
 
 export interface ProductRepository {
@@ -59,7 +60,7 @@ export interface Buyer {
 export interface SellableVariant {
   variantId: string;
   priceCents: number;
-  stock: number;
+  stock: number | null;
 }
 
 export interface OrderItem {
@@ -89,7 +90,7 @@ export interface OrderRepository {
   lock(orderId: string, tx: TransactionContext): Promise<StoredOrder | null>;
   setStatus(orderId: string, status: OrderStatus, tx: TransactionContext): Promise<void>;
   /** Locks the variants (in id order, so two orders never deadlock) and returns their stock. */
-  lockStock(variantIds: string[], tx: TransactionContext): Promise<Map<string, number>>;
+  lockStock(variantIds: string[], tx: TransactionContext): Promise<Map<string, number | null>>;
   takeStock(items: OrderItem[], tx: TransactionContext): Promise<void>;
 }
 

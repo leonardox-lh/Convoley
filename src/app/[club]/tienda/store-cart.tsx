@@ -15,7 +15,9 @@ export interface CatalogProduct {
   description: string | null;
   priceCents: number;
   photoUrls: string[];
-  variants: { id: string; size: string | null; stock: number }[];
+  /** null = not tracked: it never runs out. */
+  variants: { id: string; size: string | null; stock: number | null }[];
+  stockNote: string | null;
 }
 
 type Cart = Record<string, number>;
@@ -46,10 +48,14 @@ export function StoreCart(props: {
   const itemCount = lines.reduce((total, [, quantity]) => total + quantity, 0);
   const inCart = (product: CatalogProduct) =>
     product.variants.reduce((total, variant) => total + (cart[variant.id] ?? 0), 0);
-  const add = (variantId: string, stock: number) =>
+  const add = (variantId: string, stock: number | null) =>
     setCart((current) => ({
       ...current,
-      [variantId]: Math.min((current[variantId] ?? 0) + 1, stock, props.maxQuantity),
+      [variantId]: Math.min(
+        (current[variantId] ?? 0) + 1,
+        stock ?? props.maxQuantity,
+        props.maxQuantity,
+      ),
     }));
   const remove = (variantId: string) =>
     setCart((current) => ({ ...current, [variantId]: Math.max((current[variantId] ?? 0) - 1, 0) }));
@@ -90,6 +96,9 @@ export function StoreCart(props: {
                 <p className="text-lg font-extrabold tracking-tight text-primary">
                   {formatSoles(product.priceCents)}
                 </p>
+                {product.stockNote && (
+                  <p className="text-xs font-medium text-muted-foreground">{product.stockNote}</p>
+                )}
                 {product.description && (
                   <p className="line-clamp-2 text-xs text-muted-foreground">
                     {product.description}

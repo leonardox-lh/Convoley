@@ -3,11 +3,13 @@ import { InvalidProductError } from "./errors";
 export const MAX_PRODUCT_PHOTOS = 5;
 export const PRODUCT_NAME_MAX_LENGTH = 80;
 export const SIZE_MAX_LENGTH = 10;
+export const STOCK_NOTE_MAX_LENGTH = 40;
 
 export interface VariantInput {
   /** null = the product comes in one size only. */
   size: string | null;
-  stock: number;
+  /** null = not tracked: it never runs out. */
+  stock: number | null;
 }
 
 export interface ProductInput {
@@ -15,6 +17,8 @@ export interface ProductInput {
   description: string | null;
   priceCents: number;
   variants: VariantInput[];
+  /** Shown instead of a count when the stock isn't tracked ("A pedido"). */
+  stockNote: string | null;
 }
 
 /**
@@ -32,7 +36,9 @@ export function validateProduct(input: ProductInput): ProductInput {
     stock: variant.stock,
   }));
   if (variants.length === 0) throw new InvalidProductError("no_variants");
-  if (variants.some((variant) => !Number.isInteger(variant.stock) || variant.stock < 0)) {
+  const validStock = (stock: number | null) =>
+    stock === null || (Number.isInteger(stock) && stock >= 0);
+  if (!variants.every((variant) => validStock(variant.stock))) {
     throw new InvalidProductError("stock");
   }
   const sized = variants.filter((variant) => variant.size !== null);
@@ -46,10 +52,15 @@ export function validateProduct(input: ProductInput): ProductInput {
   if (new Set(sized.map((variant) => variant.size)).size !== sized.length) {
     throw new InvalidProductError("duplicate_size");
   }
+  const stockNote = input.stockNote?.trim() || null;
+  if (stockNote && stockNote.length > STOCK_NOTE_MAX_LENGTH) {
+    throw new InvalidProductError("stock_note");
+  }
   return {
     name,
     description: input.description?.trim() || null,
     priceCents: input.priceCents,
     variants,
+    stockNote,
   };
 }

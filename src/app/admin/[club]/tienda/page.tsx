@@ -69,7 +69,8 @@ async function StoreContent({ params }: Pick<Props, "params">) {
                   )}
                 </span>
                 <span className="text-sm text-muted-foreground">
-                  {formatSoles(product.priceCents)} · Stock {stockInputText(product.variants)}
+                  {formatSoles(product.priceCents)} · Stock{" "}
+                  {stockInputText(product) || "sin límite"}
                 </span>
                 <span className="text-sm text-muted-foreground">
                   {product.imageKeys.length} {product.imageKeys.length === 1 ? "foto" : "fotos"}

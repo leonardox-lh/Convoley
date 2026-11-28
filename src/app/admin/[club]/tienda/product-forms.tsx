@@ -64,11 +64,15 @@ export function ProductForm(props: { clubSlug: string; values?: ProductFormValue
       )}
       <Field
         label="Stock"
-        hint={<>Por talla: &quot;S:3, M:5&quot;. Si no tiene tallas, solo el número.</>}
+        hint={
+          <>
+            Por talla: &quot;S:3, M:5&quot;. Sin tallas, solo el número. Si no quieres controlarlo,
+            déjalo vacío o escribe un texto como &quot;A pedido&quot;.
+          </>
+        }
       >
         <input
           name="stock"
-          required
           defaultValue={values?.stock}
           placeholder="S:3, M:5, L:0  o  10 si es talla única"
           className={floatingFieldClass}

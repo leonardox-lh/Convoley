@@ -29,7 +29,8 @@ import { parseStockInput } from "./stock-input";
 
 export type ProductActionState = { status: "idle" } | { status: "error"; message: string };
 
-const STOCK_FORMAT_MESSAGE = 'Escribe el stock como "10" o por talla: "S:3, M:5, L:0".';
+const STOCK_FORMAT_MESSAGE =
+  'Escribe el stock como "10", por talla ("S:3, M:5, L:0") o un texto como "A pedido".';
 
 const productSchema = z.object({
   clubSlug: z.string().min(1),
@@ -47,12 +48,12 @@ const productSchema = z.object({
   stock: z
     .string()
     .transform(parseStockInput)
-    .refine((variants) => variants !== null, STOCK_FORMAT_MESSAGE),
+    .refine((stock) => stock !== null, STOCK_FORMAT_MESSAGE),
   // The stock the edit form showed; new products have none.
   loadedStock: z
     .string()
     .optional()
-    .transform((raw) => (raw ? (parseStockInput(raw) ?? []) : [])),
+    .transform((raw) => (raw === undefined ? [] : (parseStockInput(raw)?.variants ?? []))),
 });
 
 const PRODUCT_MESSAGES: Record<InvalidProductReason, string> = {
@@ -63,6 +64,7 @@ const PRODUCT_MESSAGES: Record<InvalidProductReason, string> = {
   size: "Cada talla puede tener hasta 10 letras.",
   duplicate_size: "Hay una talla repetida.",
   stock: "El stock debe ser 0 o más.",
+  stock_note: "El texto del stock puede tener hasta 40 letras.",
 };
 
 const ERROR_MESSAGES: [new (...args: never[]) => Error, string][] = [
@@ -106,7 +108,13 @@ export async function saveProductAction(
     return { status: "error", message: "Cada foto puede pesar hasta 2 MB." };
   }
 
-  const product = { name, description: description || null, priceCents: price!, variants: stock! };
+  const product = {
+    name,
+    description: description || null,
+    priceCents: price!,
+    variants: stock!.variants,
+    stockNote: stock!.stockNote,
+  };
   let id = productId;
   try {
     if (id)

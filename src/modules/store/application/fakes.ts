@@ -27,6 +27,7 @@ export function storedProduct(overrides: Partial<StoredProduct> = {}): StoredPro
     priceCents: 4500,
     imageKeys: [],
     isActive: true,
+    stockNote: null,
     variants: [
       { id: "var-s", size: "S", stock: 3 },
       { id: "var-m", size: "M", stock: 1 },
@@ -67,7 +68,7 @@ export function fakeProductRepository(initial: StoredProduct[] = []) {
       const stored = (size: string | null) => row.variants.find((old) => old.size === size)?.stock;
       const variants = product.variants.map((variant) =>
         keepStockOf.includes(variant.size)
-          ? { ...variant, stock: stored(variant.size) ?? 0 }
+          ? { ...variant, stock: stored(variant.size) ?? null }
           : variant,
       );
       Object.assign(row, product, { variants: variantsOf({ ...product, variants }, row.variants) });
@@ -139,8 +140,10 @@ export function fakeOrderRepository(
     lockStock: async (ids) =>
       new Map(variants.filter((v) => ids.includes(v.variantId)).map((v) => [v.variantId, v.stock])),
     takeStock: async (items) => {
-      for (const item of items)
-        variants.find((v) => v.variantId === item.variantId)!.stock -= item.quantity;
+      for (const item of items) {
+        const variant = variants.find((v) => v.variantId === item.variantId)!;
+        if (variant.stock !== null) variant.stock -= item.quantity;
+      }
     },
   };
   return { repository, orders, variants, created };

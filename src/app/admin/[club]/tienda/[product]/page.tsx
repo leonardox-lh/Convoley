@@ -67,7 +67,7 @@ async function ProductContent({ params }: Pick<Props, "params">) {
             name: product.name,
             description: product.description ?? "",
             price: centsToSolesText(product.priceCents),
-            stock: stockInputText(product.variants),
+            stock: stockInputText(product),
           }}
         />
       </section>

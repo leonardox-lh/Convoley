@@ -9,6 +9,7 @@ const PRODUCT_FIELDS = {
   priceCents: true,
   imageKeys: true,
   isActive: true,
+  stockNote: true,
   variants: { select: { id: true, size: true, stock: true }, orderBy: { id: "asc" } },
 } as const;
 

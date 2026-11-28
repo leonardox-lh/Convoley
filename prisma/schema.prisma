@@ -523,6 +523,8 @@ model Product {
   name        String
   description String?
   priceCents  Int
+  // Shown instead of a count when the stock isn't tracked ("A pedido").
+  stockNote   String?
   // Up to 5 bucket keys; the limit is a domain rule.
   imageKeys   String[]
   isActive    Boolean  @default(true)
@@ -540,7 +542,8 @@ model ProductVariant {
   productId String
   // null when the product has no sizes.
   size      String?
-  stock     Int
+  // null = not tracked: it never runs out.
+  stock     Int?
 
   product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
   orderItems OrderItem[]
