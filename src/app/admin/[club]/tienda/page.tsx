@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { formatSoles } from "@/lib/money";
-import { findClubBySlug } from "@/modules/clubs";
+import { clubLogoPath, findClubBySlug } from "@/modules/clubs";
 import { listProducts } from "@/modules/store";
 import { requireOrganizer } from "../require-organizer";
 import { ProductForm } from "./product-forms";
@@ -54,26 +54,46 @@ async function StoreContent({ params }: Pick<Props, "params">) {
         eyebrow="Gestiona tu club"
         title="Tienda"
       />
-      <ul
-        aria-label="Productos"
-        className="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-800"
-      >
+      <ul aria-label="Productos" className="flex flex-col gap-2">
         {products.map((product) => (
-          <li key={product.id} className="py-3">
-            <Link href={`/admin/${clubSlug}/tienda/${product.id}`} className="flex flex-col">
-              <span className="font-medium">
-                {product.name}
-                {!product.isActive && <span className="text-sm text-zinc-500"> · oculto</span>}
+          <li key={product.id}>
+            <Link
+              href={`/admin/${clubSlug}/tienda/${product.id}`}
+              className="card-interactive flex items-center gap-3 p-3"
+            >
+              <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <span className="truncate font-medium">
+                  {product.name}
+                  {!product.isActive && (
+                    <span className="text-sm text-muted-foreground"> · oculto</span>
+                  )}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  {formatSoles(product.priceCents)} · Stock {stockInputText(product.variants)}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  {product.imageKeys.length} {product.imageKeys.length === 1 ? "foto" : "fotos"}
+                </span>
               </span>
-              <span className="text-sm text-zinc-500">
-                {formatSoles(product.priceCents)} · Stock {stockInputText(product.variants)} ·{" "}
-                {product.imageKeys.length} fotos
-              </span>
+              {product.imageKeys[0] ? (
+                // eslint-disable-next-line @next/next/no-img-element -- served by our own route
+                <img
+                  src={clubLogoPath(product.imageKeys[0])}
+                  alt=""
+                  className="size-20 shrink-0 rounded-xl object-cover"
+                />
+              ) : (
+                <span className="flex size-20 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <ShoppingBag className="size-8" aria-hidden />
+                </span>
+              )}
             </Link>
           </li>
         ))}
         {products.length === 0 && (
-          <li className="py-3 text-sm text-zinc-500">Aún no tienes productos.</li>
+          <li className="rounded-2xl border border-dashed p-6 text-center text-sm text-muted-foreground">
+            Aún no tienes productos.
+          </li>
         )}
       </ul>
       <section className="flex flex-col gap-3">
